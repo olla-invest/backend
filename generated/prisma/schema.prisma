@@ -1,0 +1,282 @@
+// Kiwoom Investment System Database Schema
+// Generated from PostgreSQL DDL with Soft Delete support
+// Using UUID for all IDs
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// =============================================
+// Enums
+// =============================================
+
+enum MarketType {
+  KOSPI
+  KOSDAQ
+  OTHER  @map("기타시장")
+
+  @@map("market_type_enum")
+}
+
+enum MarketIndexType {
+  KOSPI
+  KOSDAQ
+
+  @@map("market_index_type")
+}
+
+enum BatchJobType {
+  STOCK_PRICE
+  MARKET_INDEX
+  RS_CALCULATION
+
+  @@map("batch_job_type")
+}
+
+enum BatchJobStatus {
+  RUNNING
+  SUCCESS
+  FAILED
+
+  @@map("batch_job_status")
+}
+
+// =============================================
+// Models
+// =============================================
+
+// 1. 사용자 테이블
+model User {
+  userId    String    @id @default(uuid()) @map("user_id") @db.Uuid
+  username  String    @db.VarChar(50)
+  email     String    @db.VarChar(100)
+  password  String    @db.VarChar(255)
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @default(now()) @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  // Relations
+  watchlist           UserWatchlist[]
+  rsFilterPresets     RsFilterPreset[]
+  searchFilterPresets SearchFilterPreset[]
+  apiCallLogs         KiwoomApiCallLog[]
+
+  @@unique([username, deletedAt], map: "uk_users_username")
+  @@unique([email, deletedAt], map: "uk_users_email")
+  @@index([username], map: "idx_users_username")
+  @@index([email], map: "idx_users_email")
+  @@index([deletedAt], map: "idx_users_deleted_at")
+  @@map("users")
+}
+
+// 2. 기업 기본 정보 테이블
+model Company {
+  companyId   String     @id @default(uuid()) @map("company_id") @db.Uuid
+  companyName String     @map("company_name") @db.VarChar(100)
+  stockCode   String     @map("stock_code") @db.VarChar(20)
+  marketType  MarketType @map("market_type")
+  createdAt   DateTime   @default(now()) @map("created_at")
+  updatedAt   DateTime   @default(now()) @updatedAt @map("updated_at")
+  deletedAt   DateTime?  @map("deleted_at")
+
+  // Relations
+  watchlist    UserWatchlist[]
+  priceHistory StockPriceHistory[]
+
+  @@unique([stockCode, deletedAt], map: "uk_companies_stock_code")
+  @@index([stockCode], map: "idx_companies_stock_code")
+  @@index([marketType], map: "idx_companies_market_type")
+  @@index([companyName], map: "idx_companies_company_name")
+  @@index([deletedAt], map: "idx_companies_deleted_at")
+  @@map("companies")
+}
+
+// 3. 사용자-관심종목 매핑 테이블
+model UserWatchlist {
+  userId    String    @map("user_id") @db.Uuid
+  companyId String    @map("company_id") @db.Uuid
+  addedDate DateTime  @default(now()) @map("added_date")
+  memo      String?   @db.Text
+  deletedAt DateTime? @map("deleted_at")
+
+  // Relations
+  user    User           @relation(fields: [userId], references: [userId])
+  company Company        @relation(fields: [companyId], references: [companyId])
+  tags    WatchlistTag[]
+
+  @@id([userId, companyId])
+  @@index([userId, addedDate], map: "idx_watchlist_user_added_date")
+  @@index([companyId], map: "idx_watchlist_company_id")
+  @@index([deletedAt], map: "idx_watchlist_deleted_at")
+  @@map("user_watchlist")
+}
+
+// 4. 태그 마스터 테이블
+model Tag {
+  tagId     String    @id @default(uuid()) @map("tag_id") @db.Uuid
+  tagName   String    @map("tag_name") @db.VarChar(50)
+  createdAt DateTime  @default(now()) @map("created_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  // Relations
+  watchlistTags WatchlistTag[]
+
+  @@unique([tagName, deletedAt], map: "uk_tags_tag_name")
+  @@index([tagName], map: "idx_tags_tag_name")
+  @@index([deletedAt], map: "idx_tags_deleted_at")
+  @@map("tags")
+}
+
+// 5. 관심종목-태그 매핑 테이블
+model WatchlistTag {
+  userId    String    @map("user_id") @db.Uuid
+  companyId String    @map("company_id") @db.Uuid
+  tagId     String    @map("tag_id") @db.Uuid
+  createdAt DateTime  @default(now()) @map("created_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  // Relations
+  watchlist UserWatchlist @relation(fields: [userId, companyId], references: [userId, companyId])
+  tag       Tag           @relation(fields: [tagId], references: [tagId])
+
+  @@id([userId, companyId, tagId])
+  @@index([tagId], map: "idx_watchlist_tags_tag_id")
+  @@index([userId, companyId], map: "idx_watchlist_tags_user_company")
+  @@index([deletedAt], map: "idx_watchlist_tags_deleted_at")
+  @@map("watchlist_tags")
+}
+
+// 6. RS 필터 프리셋 테이블
+model RsFilterPreset {
+  presetId   String    @id @default(uuid()) @map("preset_id") @db.Uuid
+  userId     String    @map("user_id") @db.Uuid
+  presetName String    @map("preset_name") @db.VarChar(100)
+  createdAt  DateTime  @default(now()) @map("created_at")
+  deletedAt  DateTime? @map("deleted_at")
+
+  // Relations
+  user    User             @relation(fields: [userId], references: [userId])
+  periods RsFilterPeriod[]
+
+  @@unique([userId, presetName, deletedAt], map: "uk_rs_presets_user_name")
+  @@index([userId], map: "idx_rs_presets_user_id")
+  @@index([deletedAt], map: "idx_rs_presets_deleted_at")
+  @@map("rs_filter_presets")
+}
+
+// 7. RS 필터 기간 설정 테이블
+model RsFilterPeriod {
+  periodId    String    @id @default(uuid()) @map("period_id") @db.Uuid
+  presetId    String    @map("preset_id") @db.Uuid
+  startDate   DateTime  @map("start_date") @db.Date
+  endDate     DateTime  @map("end_date") @db.Date
+  weightRatio Decimal   @map("weight_ratio") @db.Decimal(5, 2)
+  createdAt   DateTime  @default(now()) @map("created_at")
+  deletedAt   DateTime? @map("deleted_at")
+
+  // Relations
+  preset RsFilterPreset @relation(fields: [presetId], references: [presetId])
+
+  @@index([presetId], map: "idx_rs_periods_preset_id")
+  @@index([deletedAt], map: "idx_rs_periods_deleted_at")
+  @@map("rs_filter_periods")
+}
+
+// 8. 검색 필터 저장 테이블
+model SearchFilterPreset {
+  filterId     String    @id @default(uuid()) @map("filter_id") @db.Uuid
+  userId       String    @map("user_id") @db.Uuid
+  filterName   String    @map("filter_name") @db.VarChar(100)
+  filterConfig Json      @map("filter_config") @db.JsonB
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @default(now()) @updatedAt @map("updated_at")
+  deletedAt    DateTime? @map("deleted_at")
+
+  // Relations
+  user User @relation(fields: [userId], references: [userId])
+
+  @@unique([userId, filterName, deletedAt], map: "uk_search_presets_user_name")
+  @@index([userId], map: "idx_search_presets_user_id")
+  @@index([deletedAt], map: "idx_search_presets_deleted_at")
+  @@map("search_filter_presets")
+}
+
+// 9. 종목 가격 히스토리 테이블
+model StockPriceHistory {
+  priceId      String   @id @default(uuid()) @map("price_id") @db.Uuid
+  companyId    String   @map("company_id") @db.Uuid
+  tradeDate    DateTime @map("trade_date") @db.Date
+  openPrice    Decimal  @map("open_price") @db.Decimal(15, 2)
+  highPrice    Decimal  @map("high_price") @db.Decimal(15, 2)
+  lowPrice     Decimal  @map("low_price") @db.Decimal(15, 2)
+  closePrice   Decimal  @map("close_price") @db.Decimal(15, 2)
+  volume       BigInt
+  tradingValue BigInt   @map("trading_value")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  // Relations
+  company Company @relation(fields: [companyId], references: [companyId])
+
+  @@unique([companyId, tradeDate], map: "uk_stock_price_company_date")
+  @@index([companyId, tradeDate(sort: Desc)], map: "idx_stock_price_company_date")
+  @@index([tradeDate], map: "idx_stock_price_trade_date")
+  @@map("stock_price_history")
+}
+
+// 10. 시장 지수 히스토리 테이블
+model MarketIndexHistory {
+  indexId    String          @id @default(uuid()) @map("index_id") @db.Uuid
+  marketType MarketIndexType @map("market_type")
+  tradeDate  DateTime        @map("trade_date") @db.Date
+  closeIndex Decimal         @map("close_index") @db.Decimal(10, 2)
+  createdAt  DateTime        @default(now()) @map("created_at")
+
+  @@unique([marketType, tradeDate], map: "uk_market_index_date")
+  @@index([marketType, tradeDate(sort: Desc)], map: "idx_market_index_type_date")
+  @@index([tradeDate], map: "idx_market_index_trade_date")
+  @@map("market_index_history")
+}
+
+// 11. API 호출 이력 테이블 (Optional)
+model KiwoomApiCallLog {
+  logId           String   @id @default(uuid()) @map("log_id") @db.Uuid
+  userId          String?  @map("user_id") @db.Uuid
+  apiName         String   @map("api_name") @db.VarChar(50)
+  stockCode       String?  @map("stock_code") @db.VarChar(20)
+  requestData     Json?    @map("request_data") @db.JsonB
+  responseStatus  String?  @map("response_status") @db.VarChar(20)
+  responseMessage String?  @map("response_message") @db.Text
+  callTimestamp   DateTime @default(now()) @map("call_timestamp")
+  responseTimeMs  Int?     @map("response_time_ms")
+
+  // Relations
+  user User? @relation(fields: [userId], references: [userId])
+
+  @@index([userId], map: "idx_api_log_user_id")
+  @@index([apiName], map: "idx_api_log_api_name")
+  @@index([callTimestamp], map: "idx_api_log_call_timestamp")
+  @@index([stockCode], map: "idx_api_log_stock_code")
+  @@map("kiwoom_api_call_log")
+}
+
+// 12. 데이터 수집 배치 이력 테이블 (Optional)
+model BatchJobHistory {
+  jobId          String         @id @default(uuid()) @map("job_id") @db.Uuid
+  jobType        BatchJobType   @map("job_type")
+  targetDate     DateTime       @map("target_date") @db.Date
+  status         BatchJobStatus
+  startTime      DateTime       @default(now()) @map("start_time")
+  endTime        DateTime?      @map("end_time")
+  processedCount Int            @default(0) @map("processed_count")
+  errorMessage   String?        @map("error_message") @db.Text
+
+  @@index([jobType], map: "idx_batch_job_type")
+  @@index([targetDate], map: "idx_batch_target_date")
+  @@index([status], map: "idx_batch_status")
+  @@map("batch_job_history")
+}

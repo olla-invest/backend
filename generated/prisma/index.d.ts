@@ -1,0 +1,20650 @@
+
+/**
+ * Client
+**/
+
+import * as runtime from './runtime/client.js';
+import $Types = runtime.Types // general types
+import $Public = runtime.Types.Public
+import $Utils = runtime.Types.Utils
+import $Extensions = runtime.Types.Extensions
+import $Result = runtime.Types.Result
+
+export type PrismaPromise<T> = $Public.PrismaPromise<T>
+
+
+/**
+ * Model User
+ * 
+ */
+export type User = $Result.DefaultSelection<Prisma.$UserPayload>
+/**
+ * Model Company
+ * 
+ */
+export type Company = $Result.DefaultSelection<Prisma.$CompanyPayload>
+/**
+ * Model UserWatchlist
+ * 
+ */
+export type UserWatchlist = $Result.DefaultSelection<Prisma.$UserWatchlistPayload>
+/**
+ * Model Tag
+ * 
+ */
+export type Tag = $Result.DefaultSelection<Prisma.$TagPayload>
+/**
+ * Model WatchlistTag
+ * 
+ */
+export type WatchlistTag = $Result.DefaultSelection<Prisma.$WatchlistTagPayload>
+/**
+ * Model RsFilterPreset
+ * 
+ */
+export type RsFilterPreset = $Result.DefaultSelection<Prisma.$RsFilterPresetPayload>
+/**
+ * Model RsFilterPeriod
+ * 
+ */
+export type RsFilterPeriod = $Result.DefaultSelection<Prisma.$RsFilterPeriodPayload>
+/**
+ * Model SearchFilterPreset
+ * 
+ */
+export type SearchFilterPreset = $Result.DefaultSelection<Prisma.$SearchFilterPresetPayload>
+/**
+ * Model StockPriceHistory
+ * 
+ */
+export type StockPriceHistory = $Result.DefaultSelection<Prisma.$StockPriceHistoryPayload>
+/**
+ * Model MarketIndexHistory
+ * 
+ */
+export type MarketIndexHistory = $Result.DefaultSelection<Prisma.$MarketIndexHistoryPayload>
+/**
+ * Model KiwoomApiCallLog
+ * 
+ */
+export type KiwoomApiCallLog = $Result.DefaultSelection<Prisma.$KiwoomApiCallLogPayload>
+/**
+ * Model BatchJobHistory
+ * 
+ */
+export type BatchJobHistory = $Result.DefaultSelection<Prisma.$BatchJobHistoryPayload>
+
+/**
+ * Enums
+ */
+export namespace $Enums {
+  export const MarketType: {
+  KOSPI: 'KOSPI',
+  KOSDAQ: 'KOSDAQ',
+  OTHER: 'OTHER'
+};
+
+export type MarketType = (typeof MarketType)[keyof typeof MarketType]
+
+
+export const MarketIndexType: {
+  KOSPI: 'KOSPI',
+  KOSDAQ: 'KOSDAQ'
+};
+
+export type MarketIndexType = (typeof MarketIndexType)[keyof typeof MarketIndexType]
+
+
+export const BatchJobType: {
+  STOCK_PRICE: 'STOCK_PRICE',
+  MARKET_INDEX: 'MARKET_INDEX',
+  RS_CALCULATION: 'RS_CALCULATION'
+};
+
+export type BatchJobType = (typeof BatchJobType)[keyof typeof BatchJobType]
+
+
+export const BatchJobStatus: {
+  RUNNING: 'RUNNING',
+  SUCCESS: 'SUCCESS',
+  FAILED: 'FAILED'
+};
+
+export type BatchJobStatus = (typeof BatchJobStatus)[keyof typeof BatchJobStatus]
+
+}
+
+export type MarketType = $Enums.MarketType
+
+export const MarketType: typeof $Enums.MarketType
+
+export type MarketIndexType = $Enums.MarketIndexType
+
+export const MarketIndexType: typeof $Enums.MarketIndexType
+
+export type BatchJobType = $Enums.BatchJobType
+
+export const BatchJobType: typeof $Enums.BatchJobType
+
+export type BatchJobStatus = $Enums.BatchJobStatus
+
+export const BatchJobStatus: typeof $Enums.BatchJobStatus
+
+/**
+ * ##  Prisma Client ʲˢ
+ *
+ * Type-safe database client for TypeScript & Node.js
+ * @example
+ * ```
+ * const prisma = new PrismaClient()
+ * // Fetch zero or more Users
+ * const users = await prisma.user.findMany()
+ * ```
+ *
+ *
+ * Read more in our [docs](https://pris.ly/d/client).
+ */
+export class PrismaClient<
+  ClientOptions extends Prisma.PrismaClientOptions = Prisma.PrismaClientOptions,
+  const U = 'log' extends keyof ClientOptions ? ClientOptions['log'] extends Array<Prisma.LogLevel | Prisma.LogDefinition> ? Prisma.GetEvents<ClientOptions['log']> : never : never,
+  ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs
+> {
+  [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['other'] }
+
+    /**
+   * ##  Prisma Client ʲˢ
+   *
+   * Type-safe database client for TypeScript & Node.js
+   * @example
+   * ```
+   * const prisma = new PrismaClient()
+   * // Fetch zero or more Users
+   * const users = await prisma.user.findMany()
+   * ```
+   *
+   *
+   * Read more in our [docs](https://pris.ly/d/client).
+   */
+
+  constructor(optionsArg ?: Prisma.Subset<ClientOptions, Prisma.PrismaClientOptions>);
+  $on<V extends U>(eventType: V, callback: (event: V extends 'query' ? Prisma.QueryEvent : Prisma.LogEvent) => void): PrismaClient;
+
+  /**
+   * Connect with the database
+   */
+  $connect(): $Utils.JsPromise<void>;
+
+  /**
+   * Disconnect from the database
+   */
+  $disconnect(): $Utils.JsPromise<void>;
+
+/**
+   * Executes a prepared raw query and returns the number of affected rows.
+   * @example
+   * ```
+   * const result = await prisma.$executeRaw`UPDATE User SET cool = ${true} WHERE email = ${'user@email.com'};`
+   * ```
+   *
+   * Read more in our [docs](https://pris.ly/d/raw-queries).
+   */
+  $executeRaw<T = unknown>(query: TemplateStringsArray | Prisma.Sql, ...values: any[]): Prisma.PrismaPromise<number>;
+
+  /**
+   * Executes a raw query and returns the number of affected rows.
+   * Susceptible to SQL injections, see documentation.
+   * @example
+   * ```
+   * const result = await prisma.$executeRawUnsafe('UPDATE User SET cool = $1 WHERE email = $2 ;', true, 'user@email.com')
+   * ```
+   *
+   * Read more in our [docs](https://pris.ly/d/raw-queries).
+   */
+  $executeRawUnsafe<T = unknown>(query: string, ...values: any[]): Prisma.PrismaPromise<number>;
+
+  /**
+   * Performs a prepared raw query and returns the `SELECT` data.
+   * @example
+   * ```
+   * const result = await prisma.$queryRaw`SELECT * FROM User WHERE id = ${1} OR email = ${'user@email.com'};`
+   * ```
+   *
+   * Read more in our [docs](https://pris.ly/d/raw-queries).
+   */
+  $queryRaw<T = unknown>(query: TemplateStringsArray | Prisma.Sql, ...values: any[]): Prisma.PrismaPromise<T>;
+
+  /**
+   * Performs a raw query and returns the `SELECT` data.
+   * Susceptible to SQL injections, see documentation.
+   * @example
+   * ```
+   * const result = await prisma.$queryRawUnsafe('SELECT * FROM User WHERE id = $1 OR email = $2;', 1, 'user@email.com')
+   * ```
+   *
+   * Read more in our [docs](https://pris.ly/d/raw-queries).
+   */
+  $queryRawUnsafe<T = unknown>(query: string, ...values: any[]): Prisma.PrismaPromise<T>;
+
+
+  /**
+   * Allows the running of a sequence of read/write operations that are guaranteed to either succeed or fail as a whole.
+   * @example
+   * ```
+   * const [george, bob, alice] = await prisma.$transaction([
+   *   prisma.user.create({ data: { name: 'George' } }),
+   *   prisma.user.create({ data: { name: 'Bob' } }),
+   *   prisma.user.create({ data: { name: 'Alice' } }),
+   * ])
+   * ```
+   * 
+   * Read more in our [docs](https://www.prisma.io/docs/concepts/components/prisma-client/transactions).
+   */
+  $transaction<P extends Prisma.PrismaPromise<any>[]>(arg: [...P], options?: { isolationLevel?: Prisma.TransactionIsolationLevel }): $Utils.JsPromise<runtime.Types.Utils.UnwrapTuple<P>>
+
+  $transaction<R>(fn: (prisma: Omit<PrismaClient, runtime.ITXClientDenyList>) => $Utils.JsPromise<R>, options?: { maxWait?: number, timeout?: number, isolationLevel?: Prisma.TransactionIsolationLevel }): $Utils.JsPromise<R>
+
+  $extends: $Extensions.ExtendsHook<"extends", Prisma.TypeMapCb<ClientOptions>, ExtArgs, $Utils.Call<Prisma.TypeMapCb<ClientOptions>, {
+    extArgs: ExtArgs
+  }>>
+
+      /**
+   * `prisma.user`: Exposes CRUD operations for the **User** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more Users
+    * const users = await prisma.user.findMany()
+    * ```
+    */
+  get user(): Prisma.UserDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.company`: Exposes CRUD operations for the **Company** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more Companies
+    * const companies = await prisma.company.findMany()
+    * ```
+    */
+  get company(): Prisma.CompanyDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.userWatchlist`: Exposes CRUD operations for the **UserWatchlist** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more UserWatchlists
+    * const userWatchlists = await prisma.userWatchlist.findMany()
+    * ```
+    */
+  get userWatchlist(): Prisma.UserWatchlistDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.tag`: Exposes CRUD operations for the **Tag** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more Tags
+    * const tags = await prisma.tag.findMany()
+    * ```
+    */
+  get tag(): Prisma.TagDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.watchlistTag`: Exposes CRUD operations for the **WatchlistTag** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more WatchlistTags
+    * const watchlistTags = await prisma.watchlistTag.findMany()
+    * ```
+    */
+  get watchlistTag(): Prisma.WatchlistTagDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.rsFilterPreset`: Exposes CRUD operations for the **RsFilterPreset** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more RsFilterPresets
+    * const rsFilterPresets = await prisma.rsFilterPreset.findMany()
+    * ```
+    */
+  get rsFilterPreset(): Prisma.RsFilterPresetDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.rsFilterPeriod`: Exposes CRUD operations for the **RsFilterPeriod** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more RsFilterPeriods
+    * const rsFilterPeriods = await prisma.rsFilterPeriod.findMany()
+    * ```
+    */
+  get rsFilterPeriod(): Prisma.RsFilterPeriodDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.searchFilterPreset`: Exposes CRUD operations for the **SearchFilterPreset** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more SearchFilterPresets
+    * const searchFilterPresets = await prisma.searchFilterPreset.findMany()
+    * ```
+    */
+  get searchFilterPreset(): Prisma.SearchFilterPresetDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.stockPriceHistory`: Exposes CRUD operations for the **StockPriceHistory** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more StockPriceHistories
+    * const stockPriceHistories = await prisma.stockPriceHistory.findMany()
+    * ```
+    */
+  get stockPriceHistory(): Prisma.StockPriceHistoryDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.marketIndexHistory`: Exposes CRUD operations for the **MarketIndexHistory** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more MarketIndexHistories
+    * const marketIndexHistories = await prisma.marketIndexHistory.findMany()
+    * ```
+    */
+  get marketIndexHistory(): Prisma.MarketIndexHistoryDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.kiwoomApiCallLog`: Exposes CRUD operations for the **KiwoomApiCallLog** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more KiwoomApiCallLogs
+    * const kiwoomApiCallLogs = await prisma.kiwoomApiCallLog.findMany()
+    * ```
+    */
+  get kiwoomApiCallLog(): Prisma.KiwoomApiCallLogDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.batchJobHistory`: Exposes CRUD operations for the **BatchJobHistory** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more BatchJobHistories
+    * const batchJobHistories = await prisma.batchJobHistory.findMany()
+    * ```
+    */
+  get batchJobHistory(): Prisma.BatchJobHistoryDelegate<ExtArgs, ClientOptions>;
+}
+
+export namespace Prisma {
+  export import DMMF = runtime.DMMF
+
+  export type PrismaPromise<T> = $Public.PrismaPromise<T>
+
+  /**
+   * Validator
+   */
+  export import validator = runtime.Public.validator
+
+  /**
+   * Prisma Errors
+   */
+  export import PrismaClientKnownRequestError = runtime.PrismaClientKnownRequestError
+  export import PrismaClientUnknownRequestError = runtime.PrismaClientUnknownRequestError
+  export import PrismaClientRustPanicError = runtime.PrismaClientRustPanicError
+  export import PrismaClientInitializationError = runtime.PrismaClientInitializationError
+  export import PrismaClientValidationError = runtime.PrismaClientValidationError
+
+  /**
+   * Re-export of sql-template-tag
+   */
+  export import sql = runtime.sqltag
+  export import empty = runtime.empty
+  export import join = runtime.join
+  export import raw = runtime.raw
+  export import Sql = runtime.Sql
+
+
+
+  /**
+   * Decimal.js
+   */
+  export import Decimal = runtime.Decimal
+
+  export type DecimalJsLike = runtime.DecimalJsLike
+
+  /**
+  * Extensions
+  */
+  export import Extension = $Extensions.UserArgs
+  export import getExtensionContext = runtime.Extensions.getExtensionContext
+  export import Args = $Public.Args
+  export import Payload = $Public.Payload
+  export import Result = $Public.Result
+  export import Exact = $Public.Exact
+
+  /**
+   * Prisma Client JS version: 7.3.0
+   * Query Engine version: 9d6ad21cbbceab97458517b147a6a09ff43aa735
+   */
+  export type PrismaVersion = {
+    client: string
+    engine: string
+  }
+
+  export const prismaVersion: PrismaVersion
+
+  /**
+   * Utility Types
+   */
+
+
+  export import Bytes = runtime.Bytes
+  export import JsonObject = runtime.JsonObject
+  export import JsonArray = runtime.JsonArray
+  export import JsonValue = runtime.JsonValue
+  export import InputJsonObject = runtime.InputJsonObject
+  export import InputJsonArray = runtime.InputJsonArray
+  export import InputJsonValue = runtime.InputJsonValue
+
+  /**
+   * Types of the values used to represent different kinds of `null` values when working with JSON fields.
+   *
+   * @see https://www.prisma.io/docs/concepts/components/prisma-client/working-with-fields/working-with-json-fields#filtering-on-a-json-field
+   */
+  namespace NullTypes {
+    /**
+    * Type of `Prisma.DbNull`.
+    *
+    * You cannot use other instances of this class. Please use the `Prisma.DbNull` value.
+    *
+    * @see https://www.prisma.io/docs/concepts/components/prisma-client/working-with-fields/working-with-json-fields#filtering-on-a-json-field
+    */
+    class DbNull {
+      private DbNull: never
+      private constructor()
+    }
+
+    /**
+    * Type of `Prisma.JsonNull`.
+    *
+    * You cannot use other instances of this class. Please use the `Prisma.JsonNull` value.
+    *
+    * @see https://www.prisma.io/docs/concepts/components/prisma-client/working-with-fields/working-with-json-fields#filtering-on-a-json-field
+    */
+    class JsonNull {
+      private JsonNull: never
+      private constructor()
+    }
+
+    /**
+    * Type of `Prisma.AnyNull`.
+    *
+    * You cannot use other instances of this class. Please use the `Prisma.AnyNull` value.
+    *
+    * @see https://www.prisma.io/docs/concepts/components/prisma-client/working-with-fields/working-with-json-fields#filtering-on-a-json-field
+    */
+    class AnyNull {
+      private AnyNull: never
+      private constructor()
+    }
+  }
+
+  /**
+   * Helper for filtering JSON entries that have `null` on the database (empty on the db)
+   *
+   * @see https://www.prisma.io/docs/concepts/components/prisma-client/working-with-fields/working-with-json-fields#filtering-on-a-json-field
+   */
+  export const DbNull: NullTypes.DbNull
+
+  /**
+   * Helper for filtering JSON entries that have JSON `null` values (not empty on the db)
+   *
+   * @see https://www.prisma.io/docs/concepts/components/prisma-client/working-with-fields/working-with-json-fields#filtering-on-a-json-field
+   */
+  export const JsonNull: NullTypes.JsonNull
+
+  /**
+   * Helper for filtering JSON entries that are `Prisma.DbNull` or `Prisma.JsonNull`
+   *
+   * @see https://www.prisma.io/docs/concepts/components/prisma-client/working-with-fields/working-with-json-fields#filtering-on-a-json-field
+   */
+  export const AnyNull: NullTypes.AnyNull
+
+  type SelectAndInclude = {
+    select: any
+    include: any
+  }
+
+  type SelectAndOmit = {
+    select: any
+    omit: any
+  }
+
+  /**
+   * Get the type of the value, that the Promise holds.
+   */
+  export type PromiseType<T extends PromiseLike<any>> = T extends PromiseLike<infer U> ? U : T;
+
+  /**
+   * Get the return type of a function which returns a Promise.
+   */
+  export type PromiseReturnType<T extends (...args: any) => $Utils.JsPromise<any>> = PromiseType<ReturnType<T>>
+
+  /**
+   * From T, pick a set of properties whose keys are in the union K
+   */
+  type Prisma__Pick<T, K extends keyof T> = {
+      [P in K]: T[P];
+  };
+
+
+  export type Enumerable<T> = T | Array<T>;
+
+  export type RequiredKeys<T> = {
+    [K in keyof T]-?: {} extends Prisma__Pick<T, K> ? never : K
+  }[keyof T]
+
+  export type TruthyKeys<T> = keyof {
+    [K in keyof T as T[K] extends false | undefined | null ? never : K]: K
+  }
+
+  export type TrueKeys<T> = TruthyKeys<Prisma__Pick<T, RequiredKeys<T>>>
+
+  /**
+   * Subset
+   * @desc From `T` pick properties that exist in `U`. Simple version of Intersection
+   */
+  export type Subset<T, U> = {
+    [key in keyof T]: key extends keyof U ? T[key] : never;
+  };
+
+  /**
+   * SelectSubset
+   * @desc From `T` pick properties that exist in `U`. Simple version of Intersection.
+   * Additionally, it validates, if both select and include are present. If the case, it errors.
+   */
+  export type SelectSubset<T, U> = {
+    [key in keyof T]: key extends keyof U ? T[key] : never
+  } &
+    (T extends SelectAndInclude
+      ? 'Please either choose `select` or `include`.'
+      : T extends SelectAndOmit
+        ? 'Please either choose `select` or `omit`.'
+        : {})
+
+  /**
+   * Subset + Intersection
+   * @desc From `T` pick properties that exist in `U` and intersect `K`
+   */
+  export type SubsetIntersection<T, U, K> = {
+    [key in keyof T]: key extends keyof U ? T[key] : never
+  } &
+    K
+
+  type Without<T, U> = { [P in Exclude<keyof T, keyof U>]?: never };
+
+  /**
+   * XOR is needed to have a real mutually exclusive union type
+   * https://stackoverflow.com/questions/42123407/does-typescript-support-mutually-exclusive-types
+   */
+  type XOR<T, U> =
+    T extends object ?
+    U extends object ?
+      (Without<T, U> & U) | (Without<U, T> & T)
+    : U : T
+
+
+  /**
+   * Is T a Record?
+   */
+  type IsObject<T extends any> = T extends Array<any>
+  ? False
+  : T extends Date
+  ? False
+  : T extends Uint8Array
+  ? False
+  : T extends BigInt
+  ? False
+  : T extends object
+  ? True
+  : False
+
+
+  /**
+   * If it's T[], return T
+   */
+  export type UnEnumerate<T extends unknown> = T extends Array<infer U> ? U : T
+
+  /**
+   * From ts-toolbelt
+   */
+
+  type __Either<O extends object, K extends Key> = Omit<O, K> &
+    {
+      // Merge all but K
+      [P in K]: Prisma__Pick<O, P & keyof O> // With K possibilities
+    }[K]
+
+  type EitherStrict<O extends object, K extends Key> = Strict<__Either<O, K>>
+
+  type EitherLoose<O extends object, K extends Key> = ComputeRaw<__Either<O, K>>
+
+  type _Either<
+    O extends object,
+    K extends Key,
+    strict extends Boolean
+  > = {
+    1: EitherStrict<O, K>
+    0: EitherLoose<O, K>
+  }[strict]
+
+  type Either<
+    O extends object,
+    K extends Key,
+    strict extends Boolean = 1
+  > = O extends unknown ? _Either<O, K, strict> : never
+
+  export type Union = any
+
+  type PatchUndefined<O extends object, O1 extends object> = {
+    [K in keyof O]: O[K] extends undefined ? At<O1, K> : O[K]
+  } & {}
+
+  /** Helper Types for "Merge" **/
+  export type IntersectOf<U extends Union> = (
+    U extends unknown ? (k: U) => void : never
+  ) extends (k: infer I) => void
+    ? I
+    : never
+
+  export type Overwrite<O extends object, O1 extends object> = {
+      [K in keyof O]: K extends keyof O1 ? O1[K] : O[K];
+  } & {};
+
+  type _Merge<U extends object> = IntersectOf<Overwrite<U, {
+      [K in keyof U]-?: At<U, K>;
+  }>>;
+
+  type Key = string | number | symbol;
+  type AtBasic<O extends object, K extends Key> = K extends keyof O ? O[K] : never;
+  type AtStrict<O extends object, K extends Key> = O[K & keyof O];
+  type AtLoose<O extends object, K extends Key> = O extends unknown ? AtStrict<O, K> : never;
+  export type At<O extends object, K extends Key, strict extends Boolean = 1> = {
+      1: AtStrict<O, K>;
+      0: AtLoose<O, K>;
+  }[strict];
+
+  export type ComputeRaw<A extends any> = A extends Function ? A : {
+    [K in keyof A]: A[K];
+  } & {};
+
+  export type OptionalFlat<O> = {
+    [K in keyof O]?: O[K];
+  } & {};
+
+  type _Record<K extends keyof any, T> = {
+    [P in K]: T;
+  };
+
+  // cause typescript not to expand types and preserve names
+  type NoExpand<T> = T extends unknown ? T : never;
+
+  // this type assumes the passed object is entirely optional
+  type AtLeast<O extends object, K extends string> = NoExpand<
+    O extends unknown
+    ? | (K extends keyof O ? { [P in K]: O[P] } & O : O)
+      | {[P in keyof O as P extends K ? P : never]-?: O[P]} & O
+    : never>;
+
+  type _Strict<U, _U = U> = U extends unknown ? U & OptionalFlat<_Record<Exclude<Keys<_U>, keyof U>, never>> : never;
+
+  export type Strict<U extends object> = ComputeRaw<_Strict<U>>;
+  /** End Helper Types for "Merge" **/
+
+  export type Merge<U extends object> = ComputeRaw<_Merge<Strict<U>>>;
+
+  /**
+  A [[Boolean]]
+  */
+  export type Boolean = True | False
+
+  // /**
+  // 1
+  // */
+  export type True = 1
+
+  /**
+  0
+  */
+  export type False = 0
+
+  export type Not<B extends Boolean> = {
+    0: 1
+    1: 0
+  }[B]
+
+  export type Extends<A1 extends any, A2 extends any> = [A1] extends [never]
+    ? 0 // anything `never` is false
+    : A1 extends A2
+    ? 1
+    : 0
+
+  export type Has<U extends Union, U1 extends Union> = Not<
+    Extends<Exclude<U1, U>, U1>
+  >
+
+  export type Or<B1 extends Boolean, B2 extends Boolean> = {
+    0: {
+      0: 0
+      1: 1
+    }
+    1: {
+      0: 1
+      1: 1
+    }
+  }[B1][B2]
+
+  export type Keys<U extends Union> = U extends unknown ? keyof U : never
+
+  type Cast<A, B> = A extends B ? A : B;
+
+  export const type: unique symbol;
+
+
+
+  /**
+   * Used by group by
+   */
+
+  export type GetScalarType<T, O> = O extends object ? {
+    [P in keyof T]: P extends keyof O
+      ? O[P]
+      : never
+  } : never
+
+  type FieldPaths<
+    T,
+    U = Omit<T, '_avg' | '_sum' | '_count' | '_min' | '_max'>
+  > = IsObject<T> extends True ? U : T
+
+  type GetHavingFields<T> = {
+    [K in keyof T]: Or<
+      Or<Extends<'OR', K>, Extends<'AND', K>>,
+      Extends<'NOT', K>
+    > extends True
+      ? // infer is only needed to not hit TS limit
+        // based on the brilliant idea of Pierre-Antoine Mills
+        // https://github.com/microsoft/TypeScript/issues/30188#issuecomment-478938437
+        T[K] extends infer TK
+        ? GetHavingFields<UnEnumerate<TK> extends object ? Merge<UnEnumerate<TK>> : never>
+        : never
+      : {} extends FieldPaths<T[K]>
+      ? never
+      : K
+  }[keyof T]
+
+  /**
+   * Convert tuple to union
+   */
+  type _TupleToUnion<T> = T extends (infer E)[] ? E : never
+  type TupleToUnion<K extends readonly any[]> = _TupleToUnion<K>
+  type MaybeTupleToUnion<T> = T extends any[] ? TupleToUnion<T> : T
+
+  /**
+   * Like `Pick`, but additionally can also accept an array of keys
+   */
+  type PickEnumerable<T, K extends Enumerable<keyof T> | keyof T> = Prisma__Pick<T, MaybeTupleToUnion<K>>
+
+  /**
+   * Exclude all keys with underscores
+   */
+  type ExcludeUnderscoreKeys<T extends string> = T extends `_${string}` ? never : T
+
+
+  export type FieldRef<Model, FieldType> = runtime.FieldRef<Model, FieldType>
+
+  type FieldRefInputType<Model, FieldType> = Model extends never ? never : FieldRef<Model, FieldType>
+
+
+  export const ModelName: {
+    User: 'User',
+    Company: 'Company',
+    UserWatchlist: 'UserWatchlist',
+    Tag: 'Tag',
+    WatchlistTag: 'WatchlistTag',
+    RsFilterPreset: 'RsFilterPreset',
+    RsFilterPeriod: 'RsFilterPeriod',
+    SearchFilterPreset: 'SearchFilterPreset',
+    StockPriceHistory: 'StockPriceHistory',
+    MarketIndexHistory: 'MarketIndexHistory',
+    KiwoomApiCallLog: 'KiwoomApiCallLog',
+    BatchJobHistory: 'BatchJobHistory'
+  };
+
+  export type ModelName = (typeof ModelName)[keyof typeof ModelName]
+
+
+
+  interface TypeMapCb<ClientOptions = {}> extends $Utils.Fn<{extArgs: $Extensions.InternalArgs }, $Utils.Record<string, any>> {
+    returns: Prisma.TypeMap<this['params']['extArgs'], ClientOptions extends { omit: infer OmitOptions } ? OmitOptions : {}>
+  }
+
+  export type TypeMap<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> = {
+    globalOmitOptions: {
+      omit: GlobalOmitOptions
+    }
+    meta: {
+      modelProps: "user" | "company" | "userWatchlist" | "tag" | "watchlistTag" | "rsFilterPreset" | "rsFilterPeriod" | "searchFilterPreset" | "stockPriceHistory" | "marketIndexHistory" | "kiwoomApiCallLog" | "batchJobHistory"
+      txIsolationLevel: Prisma.TransactionIsolationLevel
+    }
+    model: {
+      User: {
+        payload: Prisma.$UserPayload<ExtArgs>
+        fields: Prisma.UserFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.UserFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$UserPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.UserFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$UserPayload>
+          }
+          findFirst: {
+            args: Prisma.UserFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$UserPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.UserFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$UserPayload>
+          }
+          findMany: {
+            args: Prisma.UserFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$UserPayload>[]
+          }
+          create: {
+            args: Prisma.UserCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$UserPayload>
+          }
+          createMany: {
+            args: Prisma.UserCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.UserCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$UserPayload>[]
+          }
+          delete: {
+            args: Prisma.UserDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$UserPayload>
+          }
+          update: {
+            args: Prisma.UserUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$UserPayload>
+          }
+          deleteMany: {
+            args: Prisma.UserDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.UserUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.UserUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$UserPayload>[]
+          }
+          upsert: {
+            args: Prisma.UserUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$UserPayload>
+          }
+          aggregate: {
+            args: Prisma.UserAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateUser>
+          }
+          groupBy: {
+            args: Prisma.UserGroupByArgs<ExtArgs>
+            result: $Utils.Optional<UserGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.UserCountArgs<ExtArgs>
+            result: $Utils.Optional<UserCountAggregateOutputType> | number
+          }
+        }
+      }
+      Company: {
+        payload: Prisma.$CompanyPayload<ExtArgs>
+        fields: Prisma.CompanyFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.CompanyFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CompanyPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.CompanyFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CompanyPayload>
+          }
+          findFirst: {
+            args: Prisma.CompanyFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CompanyPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.CompanyFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CompanyPayload>
+          }
+          findMany: {
+            args: Prisma.CompanyFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CompanyPayload>[]
+          }
+          create: {
+            args: Prisma.CompanyCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CompanyPayload>
+          }
+          createMany: {
+            args: Prisma.CompanyCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.CompanyCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CompanyPayload>[]
+          }
+          delete: {
+            args: Prisma.CompanyDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CompanyPayload>
+          }
+          update: {
+            args: Prisma.CompanyUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CompanyPayload>
+          }
+          deleteMany: {
+            args: Prisma.CompanyDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.CompanyUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.CompanyUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CompanyPayload>[]
+          }
+          upsert: {
+            args: Prisma.CompanyUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CompanyPayload>
+          }
+          aggregate: {
+            args: Prisma.CompanyAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateCompany>
+          }
+          groupBy: {
+            args: Prisma.CompanyGroupByArgs<ExtArgs>
+            result: $Utils.Optional<CompanyGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.CompanyCountArgs<ExtArgs>
+            result: $Utils.Optional<CompanyCountAggregateOutputType> | number
+          }
+        }
+      }
+      UserWatchlist: {
+        payload: Prisma.$UserWatchlistPayload<ExtArgs>
+        fields: Prisma.UserWatchlistFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.UserWatchlistFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$UserWatchlistPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.UserWatchlistFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$UserWatchlistPayload>
+          }
+          findFirst: {
+            args: Prisma.UserWatchlistFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$UserWatchlistPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.UserWatchlistFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$UserWatchlistPayload>
+          }
+          findMany: {
+            args: Prisma.UserWatchlistFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$UserWatchlistPayload>[]
+          }
+          create: {
+            args: Prisma.UserWatchlistCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$UserWatchlistPayload>
+          }
+          createMany: {
+            args: Prisma.UserWatchlistCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.UserWatchlistCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$UserWatchlistPayload>[]
+          }
+          delete: {
+            args: Prisma.UserWatchlistDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$UserWatchlistPayload>
+          }
+          update: {
+            args: Prisma.UserWatchlistUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$UserWatchlistPayload>
+          }
+          deleteMany: {
+            args: Prisma.UserWatchlistDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.UserWatchlistUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.UserWatchlistUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$UserWatchlistPayload>[]
+          }
+          upsert: {
+            args: Prisma.UserWatchlistUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$UserWatchlistPayload>
+          }
+          aggregate: {
+            args: Prisma.UserWatchlistAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateUserWatchlist>
+          }
+          groupBy: {
+            args: Prisma.UserWatchlistGroupByArgs<ExtArgs>
+            result: $Utils.Optional<UserWatchlistGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.UserWatchlistCountArgs<ExtArgs>
+            result: $Utils.Optional<UserWatchlistCountAggregateOutputType> | number
+          }
+        }
+      }
+      Tag: {
+        payload: Prisma.$TagPayload<ExtArgs>
+        fields: Prisma.TagFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.TagFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TagPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.TagFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TagPayload>
+          }
+          findFirst: {
+            args: Prisma.TagFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TagPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.TagFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TagPayload>
+          }
+          findMany: {
+            args: Prisma.TagFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TagPayload>[]
+          }
+          create: {
+            args: Prisma.TagCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TagPayload>
+          }
+          createMany: {
+            args: Prisma.TagCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.TagCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TagPayload>[]
+          }
+          delete: {
+            args: Prisma.TagDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TagPayload>
+          }
+          update: {
+            args: Prisma.TagUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TagPayload>
+          }
+          deleteMany: {
+            args: Prisma.TagDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.TagUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.TagUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TagPayload>[]
+          }
+          upsert: {
+            args: Prisma.TagUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TagPayload>
+          }
+          aggregate: {
+            args: Prisma.TagAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateTag>
+          }
+          groupBy: {
+            args: Prisma.TagGroupByArgs<ExtArgs>
+            result: $Utils.Optional<TagGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.TagCountArgs<ExtArgs>
+            result: $Utils.Optional<TagCountAggregateOutputType> | number
+          }
+        }
+      }
+      WatchlistTag: {
+        payload: Prisma.$WatchlistTagPayload<ExtArgs>
+        fields: Prisma.WatchlistTagFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.WatchlistTagFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$WatchlistTagPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.WatchlistTagFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$WatchlistTagPayload>
+          }
+          findFirst: {
+            args: Prisma.WatchlistTagFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$WatchlistTagPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.WatchlistTagFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$WatchlistTagPayload>
+          }
+          findMany: {
+            args: Prisma.WatchlistTagFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$WatchlistTagPayload>[]
+          }
+          create: {
+            args: Prisma.WatchlistTagCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$WatchlistTagPayload>
+          }
+          createMany: {
+            args: Prisma.WatchlistTagCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.WatchlistTagCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$WatchlistTagPayload>[]
+          }
+          delete: {
+            args: Prisma.WatchlistTagDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$WatchlistTagPayload>
+          }
+          update: {
+            args: Prisma.WatchlistTagUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$WatchlistTagPayload>
+          }
+          deleteMany: {
+            args: Prisma.WatchlistTagDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.WatchlistTagUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.WatchlistTagUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$WatchlistTagPayload>[]
+          }
+          upsert: {
+            args: Prisma.WatchlistTagUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$WatchlistTagPayload>
+          }
+          aggregate: {
+            args: Prisma.WatchlistTagAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateWatchlistTag>
+          }
+          groupBy: {
+            args: Prisma.WatchlistTagGroupByArgs<ExtArgs>
+            result: $Utils.Optional<WatchlistTagGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.WatchlistTagCountArgs<ExtArgs>
+            result: $Utils.Optional<WatchlistTagCountAggregateOutputType> | number
+          }
+        }
+      }
+      RsFilterPreset: {
+        payload: Prisma.$RsFilterPresetPayload<ExtArgs>
+        fields: Prisma.RsFilterPresetFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.RsFilterPresetFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RsFilterPresetPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.RsFilterPresetFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RsFilterPresetPayload>
+          }
+          findFirst: {
+            args: Prisma.RsFilterPresetFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RsFilterPresetPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.RsFilterPresetFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RsFilterPresetPayload>
+          }
+          findMany: {
+            args: Prisma.RsFilterPresetFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RsFilterPresetPayload>[]
+          }
+          create: {
+            args: Prisma.RsFilterPresetCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RsFilterPresetPayload>
+          }
+          createMany: {
+            args: Prisma.RsFilterPresetCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.RsFilterPresetCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RsFilterPresetPayload>[]
+          }
+          delete: {
+            args: Prisma.RsFilterPresetDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RsFilterPresetPayload>
+          }
+          update: {
+            args: Prisma.RsFilterPresetUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RsFilterPresetPayload>
+          }
+          deleteMany: {
+            args: Prisma.RsFilterPresetDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.RsFilterPresetUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.RsFilterPresetUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RsFilterPresetPayload>[]
+          }
+          upsert: {
+            args: Prisma.RsFilterPresetUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RsFilterPresetPayload>
+          }
+          aggregate: {
+            args: Prisma.RsFilterPresetAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateRsFilterPreset>
+          }
+          groupBy: {
+            args: Prisma.RsFilterPresetGroupByArgs<ExtArgs>
+            result: $Utils.Optional<RsFilterPresetGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.RsFilterPresetCountArgs<ExtArgs>
+            result: $Utils.Optional<RsFilterPresetCountAggregateOutputType> | number
+          }
+        }
+      }
+      RsFilterPeriod: {
+        payload: Prisma.$RsFilterPeriodPayload<ExtArgs>
+        fields: Prisma.RsFilterPeriodFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.RsFilterPeriodFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RsFilterPeriodPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.RsFilterPeriodFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RsFilterPeriodPayload>
+          }
+          findFirst: {
+            args: Prisma.RsFilterPeriodFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RsFilterPeriodPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.RsFilterPeriodFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RsFilterPeriodPayload>
+          }
+          findMany: {
+            args: Prisma.RsFilterPeriodFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RsFilterPeriodPayload>[]
+          }
+          create: {
+            args: Prisma.RsFilterPeriodCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RsFilterPeriodPayload>
+          }
+          createMany: {
+            args: Prisma.RsFilterPeriodCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.RsFilterPeriodCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RsFilterPeriodPayload>[]
+          }
+          delete: {
+            args: Prisma.RsFilterPeriodDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RsFilterPeriodPayload>
+          }
+          update: {
+            args: Prisma.RsFilterPeriodUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RsFilterPeriodPayload>
+          }
+          deleteMany: {
+            args: Prisma.RsFilterPeriodDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.RsFilterPeriodUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.RsFilterPeriodUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RsFilterPeriodPayload>[]
+          }
+          upsert: {
+            args: Prisma.RsFilterPeriodUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RsFilterPeriodPayload>
+          }
+          aggregate: {
+            args: Prisma.RsFilterPeriodAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateRsFilterPeriod>
+          }
+          groupBy: {
+            args: Prisma.RsFilterPeriodGroupByArgs<ExtArgs>
+            result: $Utils.Optional<RsFilterPeriodGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.RsFilterPeriodCountArgs<ExtArgs>
+            result: $Utils.Optional<RsFilterPeriodCountAggregateOutputType> | number
+          }
+        }
+      }
+      SearchFilterPreset: {
+        payload: Prisma.$SearchFilterPresetPayload<ExtArgs>
+        fields: Prisma.SearchFilterPresetFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.SearchFilterPresetFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SearchFilterPresetPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.SearchFilterPresetFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SearchFilterPresetPayload>
+          }
+          findFirst: {
+            args: Prisma.SearchFilterPresetFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SearchFilterPresetPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.SearchFilterPresetFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SearchFilterPresetPayload>
+          }
+          findMany: {
+            args: Prisma.SearchFilterPresetFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SearchFilterPresetPayload>[]
+          }
+          create: {
+            args: Prisma.SearchFilterPresetCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SearchFilterPresetPayload>
+          }
+          createMany: {
+            args: Prisma.SearchFilterPresetCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.SearchFilterPresetCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SearchFilterPresetPayload>[]
+          }
+          delete: {
+            args: Prisma.SearchFilterPresetDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SearchFilterPresetPayload>
+          }
+          update: {
+            args: Prisma.SearchFilterPresetUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SearchFilterPresetPayload>
+          }
+          deleteMany: {
+            args: Prisma.SearchFilterPresetDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.SearchFilterPresetUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.SearchFilterPresetUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SearchFilterPresetPayload>[]
+          }
+          upsert: {
+            args: Prisma.SearchFilterPresetUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SearchFilterPresetPayload>
+          }
+          aggregate: {
+            args: Prisma.SearchFilterPresetAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateSearchFilterPreset>
+          }
+          groupBy: {
+            args: Prisma.SearchFilterPresetGroupByArgs<ExtArgs>
+            result: $Utils.Optional<SearchFilterPresetGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.SearchFilterPresetCountArgs<ExtArgs>
+            result: $Utils.Optional<SearchFilterPresetCountAggregateOutputType> | number
+          }
+        }
+      }
+      StockPriceHistory: {
+        payload: Prisma.$StockPriceHistoryPayload<ExtArgs>
+        fields: Prisma.StockPriceHistoryFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.StockPriceHistoryFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$StockPriceHistoryPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.StockPriceHistoryFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$StockPriceHistoryPayload>
+          }
+          findFirst: {
+            args: Prisma.StockPriceHistoryFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$StockPriceHistoryPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.StockPriceHistoryFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$StockPriceHistoryPayload>
+          }
+          findMany: {
+            args: Prisma.StockPriceHistoryFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$StockPriceHistoryPayload>[]
+          }
+          create: {
+            args: Prisma.StockPriceHistoryCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$StockPriceHistoryPayload>
+          }
+          createMany: {
+            args: Prisma.StockPriceHistoryCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.StockPriceHistoryCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$StockPriceHistoryPayload>[]
+          }
+          delete: {
+            args: Prisma.StockPriceHistoryDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$StockPriceHistoryPayload>
+          }
+          update: {
+            args: Prisma.StockPriceHistoryUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$StockPriceHistoryPayload>
+          }
+          deleteMany: {
+            args: Prisma.StockPriceHistoryDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.StockPriceHistoryUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.StockPriceHistoryUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$StockPriceHistoryPayload>[]
+          }
+          upsert: {
+            args: Prisma.StockPriceHistoryUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$StockPriceHistoryPayload>
+          }
+          aggregate: {
+            args: Prisma.StockPriceHistoryAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateStockPriceHistory>
+          }
+          groupBy: {
+            args: Prisma.StockPriceHistoryGroupByArgs<ExtArgs>
+            result: $Utils.Optional<StockPriceHistoryGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.StockPriceHistoryCountArgs<ExtArgs>
+            result: $Utils.Optional<StockPriceHistoryCountAggregateOutputType> | number
+          }
+        }
+      }
+      MarketIndexHistory: {
+        payload: Prisma.$MarketIndexHistoryPayload<ExtArgs>
+        fields: Prisma.MarketIndexHistoryFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.MarketIndexHistoryFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$MarketIndexHistoryPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.MarketIndexHistoryFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$MarketIndexHistoryPayload>
+          }
+          findFirst: {
+            args: Prisma.MarketIndexHistoryFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$MarketIndexHistoryPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.MarketIndexHistoryFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$MarketIndexHistoryPayload>
+          }
+          findMany: {
+            args: Prisma.MarketIndexHistoryFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$MarketIndexHistoryPayload>[]
+          }
+          create: {
+            args: Prisma.MarketIndexHistoryCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$MarketIndexHistoryPayload>
+          }
+          createMany: {
+            args: Prisma.MarketIndexHistoryCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.MarketIndexHistoryCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$MarketIndexHistoryPayload>[]
+          }
+          delete: {
+            args: Prisma.MarketIndexHistoryDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$MarketIndexHistoryPayload>
+          }
+          update: {
+            args: Prisma.MarketIndexHistoryUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$MarketIndexHistoryPayload>
+          }
+          deleteMany: {
+            args: Prisma.MarketIndexHistoryDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.MarketIndexHistoryUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.MarketIndexHistoryUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$MarketIndexHistoryPayload>[]
+          }
+          upsert: {
+            args: Prisma.MarketIndexHistoryUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$MarketIndexHistoryPayload>
+          }
+          aggregate: {
+            args: Prisma.MarketIndexHistoryAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateMarketIndexHistory>
+          }
+          groupBy: {
+            args: Prisma.MarketIndexHistoryGroupByArgs<ExtArgs>
+            result: $Utils.Optional<MarketIndexHistoryGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.MarketIndexHistoryCountArgs<ExtArgs>
+            result: $Utils.Optional<MarketIndexHistoryCountAggregateOutputType> | number
+          }
+        }
+      }
+      KiwoomApiCallLog: {
+        payload: Prisma.$KiwoomApiCallLogPayload<ExtArgs>
+        fields: Prisma.KiwoomApiCallLogFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.KiwoomApiCallLogFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$KiwoomApiCallLogPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.KiwoomApiCallLogFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$KiwoomApiCallLogPayload>
+          }
+          findFirst: {
+            args: Prisma.KiwoomApiCallLogFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$KiwoomApiCallLogPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.KiwoomApiCallLogFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$KiwoomApiCallLogPayload>
+          }
+          findMany: {
+            args: Prisma.KiwoomApiCallLogFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$KiwoomApiCallLogPayload>[]
+          }
+          create: {
+            args: Prisma.KiwoomApiCallLogCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$KiwoomApiCallLogPayload>
+          }
+          createMany: {
+            args: Prisma.KiwoomApiCallLogCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.KiwoomApiCallLogCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$KiwoomApiCallLogPayload>[]
+          }
+          delete: {
+            args: Prisma.KiwoomApiCallLogDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$KiwoomApiCallLogPayload>
+          }
+          update: {
+            args: Prisma.KiwoomApiCallLogUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$KiwoomApiCallLogPayload>
+          }
+          deleteMany: {
+            args: Prisma.KiwoomApiCallLogDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.KiwoomApiCallLogUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.KiwoomApiCallLogUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$KiwoomApiCallLogPayload>[]
+          }
+          upsert: {
+            args: Prisma.KiwoomApiCallLogUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$KiwoomApiCallLogPayload>
+          }
+          aggregate: {
+            args: Prisma.KiwoomApiCallLogAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateKiwoomApiCallLog>
+          }
+          groupBy: {
+            args: Prisma.KiwoomApiCallLogGroupByArgs<ExtArgs>
+            result: $Utils.Optional<KiwoomApiCallLogGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.KiwoomApiCallLogCountArgs<ExtArgs>
+            result: $Utils.Optional<KiwoomApiCallLogCountAggregateOutputType> | number
+          }
+        }
+      }
+      BatchJobHistory: {
+        payload: Prisma.$BatchJobHistoryPayload<ExtArgs>
+        fields: Prisma.BatchJobHistoryFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.BatchJobHistoryFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BatchJobHistoryPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.BatchJobHistoryFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BatchJobHistoryPayload>
+          }
+          findFirst: {
+            args: Prisma.BatchJobHistoryFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BatchJobHistoryPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.BatchJobHistoryFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BatchJobHistoryPayload>
+          }
+          findMany: {
+            args: Prisma.BatchJobHistoryFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BatchJobHistoryPayload>[]
+          }
+          create: {
+            args: Prisma.BatchJobHistoryCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BatchJobHistoryPayload>
+          }
+          createMany: {
+            args: Prisma.BatchJobHistoryCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.BatchJobHistoryCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BatchJobHistoryPayload>[]
+          }
+          delete: {
+            args: Prisma.BatchJobHistoryDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BatchJobHistoryPayload>
+          }
+          update: {
+            args: Prisma.BatchJobHistoryUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BatchJobHistoryPayload>
+          }
+          deleteMany: {
+            args: Prisma.BatchJobHistoryDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.BatchJobHistoryUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.BatchJobHistoryUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BatchJobHistoryPayload>[]
+          }
+          upsert: {
+            args: Prisma.BatchJobHistoryUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BatchJobHistoryPayload>
+          }
+          aggregate: {
+            args: Prisma.BatchJobHistoryAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateBatchJobHistory>
+          }
+          groupBy: {
+            args: Prisma.BatchJobHistoryGroupByArgs<ExtArgs>
+            result: $Utils.Optional<BatchJobHistoryGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.BatchJobHistoryCountArgs<ExtArgs>
+            result: $Utils.Optional<BatchJobHistoryCountAggregateOutputType> | number
+          }
+        }
+      }
+    }
+  } & {
+    other: {
+      payload: any
+      operations: {
+        $executeRaw: {
+          args: [query: TemplateStringsArray | Prisma.Sql, ...values: any[]],
+          result: any
+        }
+        $executeRawUnsafe: {
+          args: [query: string, ...values: any[]],
+          result: any
+        }
+        $queryRaw: {
+          args: [query: TemplateStringsArray | Prisma.Sql, ...values: any[]],
+          result: any
+        }
+        $queryRawUnsafe: {
+          args: [query: string, ...values: any[]],
+          result: any
+        }
+      }
+    }
+  }
+  export const defineExtension: $Extensions.ExtendsHook<"define", Prisma.TypeMapCb, $Extensions.DefaultArgs>
+  export type DefaultPrismaClient = PrismaClient
+  export type ErrorFormat = 'pretty' | 'colorless' | 'minimal'
+  export interface PrismaClientOptions {
+    /**
+     * @default "colorless"
+     */
+    errorFormat?: ErrorFormat
+    /**
+     * @example
+     * ```
+     * // Shorthand for `emit: 'stdout'`
+     * log: ['query', 'info', 'warn', 'error']
+     * 
+     * // Emit as events only
+     * log: [
+     *   { emit: 'event', level: 'query' },
+     *   { emit: 'event', level: 'info' },
+     *   { emit: 'event', level: 'warn' }
+     *   { emit: 'event', level: 'error' }
+     * ]
+     * 
+     * / Emit as events and log to stdout
+     * og: [
+     *  { emit: 'stdout', level: 'query' },
+     *  { emit: 'stdout', level: 'info' },
+     *  { emit: 'stdout', level: 'warn' }
+     *  { emit: 'stdout', level: 'error' }
+     * 
+     * ```
+     * Read more in our [docs](https://pris.ly/d/logging).
+     */
+    log?: (LogLevel | LogDefinition)[]
+    /**
+     * The default values for transactionOptions
+     * maxWait ?= 2000
+     * timeout ?= 5000
+     */
+    transactionOptions?: {
+      maxWait?: number
+      timeout?: number
+      isolationLevel?: Prisma.TransactionIsolationLevel
+    }
+    /**
+     * Instance of a Driver Adapter, e.g., like one provided by `@prisma/adapter-planetscale`
+     */
+    adapter?: runtime.SqlDriverAdapterFactory
+    /**
+     * Prisma Accelerate URL allowing the client to connect through Accelerate instead of a direct database.
+     */
+    accelerateUrl?: string
+    /**
+     * Global configuration for omitting model fields by default.
+     * 
+     * @example
+     * ```
+     * const prisma = new PrismaClient({
+     *   omit: {
+     *     user: {
+     *       password: true
+     *     }
+     *   }
+     * })
+     * ```
+     */
+    omit?: Prisma.GlobalOmitConfig
+    /**
+     * SQL commenter plugins that add metadata to SQL queries as comments.
+     * Comments follow the sqlcommenter format: https://google.github.io/sqlcommenter/
+     * 
+     * @example
+     * ```
+     * const prisma = new PrismaClient({
+     *   adapter,
+     *   comments: [
+     *     traceContext(),
+     *     queryInsights(),
+     *   ],
+     * })
+     * ```
+     */
+    comments?: runtime.SqlCommenterPlugin[]
+  }
+  export type GlobalOmitConfig = {
+    user?: UserOmit
+    company?: CompanyOmit
+    userWatchlist?: UserWatchlistOmit
+    tag?: TagOmit
+    watchlistTag?: WatchlistTagOmit
+    rsFilterPreset?: RsFilterPresetOmit
+    rsFilterPeriod?: RsFilterPeriodOmit
+    searchFilterPreset?: SearchFilterPresetOmit
+    stockPriceHistory?: StockPriceHistoryOmit
+    marketIndexHistory?: MarketIndexHistoryOmit
+    kiwoomApiCallLog?: KiwoomApiCallLogOmit
+    batchJobHistory?: BatchJobHistoryOmit
+  }
+
+  /* Types for Logging */
+  export type LogLevel = 'info' | 'query' | 'warn' | 'error'
+  export type LogDefinition = {
+    level: LogLevel
+    emit: 'stdout' | 'event'
+  }
+
+  export type CheckIsLogLevel<T> = T extends LogLevel ? T : never;
+
+  export type GetLogType<T> = CheckIsLogLevel<
+    T extends LogDefinition ? T['level'] : T
+  >;
+
+  export type GetEvents<T extends any[]> = T extends Array<LogLevel | LogDefinition>
+    ? GetLogType<T[number]>
+    : never;
+
+  export type QueryEvent = {
+    timestamp: Date
+    query: string
+    params: string
+    duration: number
+    target: string
+  }
+
+  export type LogEvent = {
+    timestamp: Date
+    message: string
+    target: string
+  }
+  /* End Types for Logging */
+
+
+  export type PrismaAction =
+    | 'findUnique'
+    | 'findUniqueOrThrow'
+    | 'findMany'
+    | 'findFirst'
+    | 'findFirstOrThrow'
+    | 'create'
+    | 'createMany'
+    | 'createManyAndReturn'
+    | 'update'
+    | 'updateMany'
+    | 'updateManyAndReturn'
+    | 'upsert'
+    | 'delete'
+    | 'deleteMany'
+    | 'executeRaw'
+    | 'queryRaw'
+    | 'aggregate'
+    | 'count'
+    | 'runCommandRaw'
+    | 'findRaw'
+    | 'groupBy'
+
+  // tested in getLogLevel.test.ts
+  export function getLogLevel(log: Array<LogLevel | LogDefinition>): LogLevel | undefined;
+
+  /**
+   * `PrismaClient` proxy available in interactive transactions.
+   */
+  export type TransactionClient = Omit<Prisma.DefaultPrismaClient, runtime.ITXClientDenyList>
+
+  export type Datasource = {
+    url?: string
+  }
+
+  /**
+   * Count Types
+   */
+
+
+  /**
+   * Count Type UserCountOutputType
+   */
+
+  export type UserCountOutputType = {
+    watchlist: number
+    rsFilterPresets: number
+    searchFilterPresets: number
+    apiCallLogs: number
+  }
+
+  export type UserCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    watchlist?: boolean | UserCountOutputTypeCountWatchlistArgs
+    rsFilterPresets?: boolean | UserCountOutputTypeCountRsFilterPresetsArgs
+    searchFilterPresets?: boolean | UserCountOutputTypeCountSearchFilterPresetsArgs
+    apiCallLogs?: boolean | UserCountOutputTypeCountApiCallLogsArgs
+  }
+
+  // Custom InputTypes
+  /**
+   * UserCountOutputType without action
+   */
+  export type UserCountOutputTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the UserCountOutputType
+     */
+    select?: UserCountOutputTypeSelect<ExtArgs> | null
+  }
+
+  /**
+   * UserCountOutputType without action
+   */
+  export type UserCountOutputTypeCountWatchlistArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: UserWatchlistWhereInput
+  }
+
+  /**
+   * UserCountOutputType without action
+   */
+  export type UserCountOutputTypeCountRsFilterPresetsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: RsFilterPresetWhereInput
+  }
+
+  /**
+   * UserCountOutputType without action
+   */
+  export type UserCountOutputTypeCountSearchFilterPresetsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: SearchFilterPresetWhereInput
+  }
+
+  /**
+   * UserCountOutputType without action
+   */
+  export type UserCountOutputTypeCountApiCallLogsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: KiwoomApiCallLogWhereInput
+  }
+
+
+  /**
+   * Count Type CompanyCountOutputType
+   */
+
+  export type CompanyCountOutputType = {
+    watchlist: number
+    priceHistory: number
+  }
+
+  export type CompanyCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    watchlist?: boolean | CompanyCountOutputTypeCountWatchlistArgs
+    priceHistory?: boolean | CompanyCountOutputTypeCountPriceHistoryArgs
+  }
+
+  // Custom InputTypes
+  /**
+   * CompanyCountOutputType without action
+   */
+  export type CompanyCountOutputTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CompanyCountOutputType
+     */
+    select?: CompanyCountOutputTypeSelect<ExtArgs> | null
+  }
+
+  /**
+   * CompanyCountOutputType without action
+   */
+  export type CompanyCountOutputTypeCountWatchlistArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: UserWatchlistWhereInput
+  }
+
+  /**
+   * CompanyCountOutputType without action
+   */
+  export type CompanyCountOutputTypeCountPriceHistoryArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: StockPriceHistoryWhereInput
+  }
+
+
+  /**
+   * Count Type UserWatchlistCountOutputType
+   */
+
+  export type UserWatchlistCountOutputType = {
+    tags: number
+  }
+
+  export type UserWatchlistCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    tags?: boolean | UserWatchlistCountOutputTypeCountTagsArgs
+  }
+
+  // Custom InputTypes
+  /**
+   * UserWatchlistCountOutputType without action
+   */
+  export type UserWatchlistCountOutputTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the UserWatchlistCountOutputType
+     */
+    select?: UserWatchlistCountOutputTypeSelect<ExtArgs> | null
+  }
+
+  /**
+   * UserWatchlistCountOutputType without action
+   */
+  export type UserWatchlistCountOutputTypeCountTagsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: WatchlistTagWhereInput
+  }
+
+
+  /**
+   * Count Type TagCountOutputType
+   */
+
+  export type TagCountOutputType = {
+    watchlistTags: number
+  }
+
+  export type TagCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    watchlistTags?: boolean | TagCountOutputTypeCountWatchlistTagsArgs
+  }
+
+  // Custom InputTypes
+  /**
+   * TagCountOutputType without action
+   */
+  export type TagCountOutputTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TagCountOutputType
+     */
+    select?: TagCountOutputTypeSelect<ExtArgs> | null
+  }
+
+  /**
+   * TagCountOutputType without action
+   */
+  export type TagCountOutputTypeCountWatchlistTagsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: WatchlistTagWhereInput
+  }
+
+
+  /**
+   * Count Type RsFilterPresetCountOutputType
+   */
+
+  export type RsFilterPresetCountOutputType = {
+    periods: number
+  }
+
+  export type RsFilterPresetCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    periods?: boolean | RsFilterPresetCountOutputTypeCountPeriodsArgs
+  }
+
+  // Custom InputTypes
+  /**
+   * RsFilterPresetCountOutputType without action
+   */
+  export type RsFilterPresetCountOutputTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RsFilterPresetCountOutputType
+     */
+    select?: RsFilterPresetCountOutputTypeSelect<ExtArgs> | null
+  }
+
+  /**
+   * RsFilterPresetCountOutputType without action
+   */
+  export type RsFilterPresetCountOutputTypeCountPeriodsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: RsFilterPeriodWhereInput
+  }
+
+
+  /**
+   * Models
+   */
+
+  /**
+   * Model User
+   */
+
+  export type AggregateUser = {
+    _count: UserCountAggregateOutputType | null
+    _min: UserMinAggregateOutputType | null
+    _max: UserMaxAggregateOutputType | null
+  }
+
+  export type UserMinAggregateOutputType = {
+    userId: string | null
+    username: string | null
+    email: string | null
+    password: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+    deletedAt: Date | null
+  }
+
+  export type UserMaxAggregateOutputType = {
+    userId: string | null
+    username: string | null
+    email: string | null
+    password: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+    deletedAt: Date | null
+  }
+
+  export type UserCountAggregateOutputType = {
+    userId: number
+    username: number
+    email: number
+    password: number
+    createdAt: number
+    updatedAt: number
+    deletedAt: number
+    _all: number
+  }
+
+
+  export type UserMinAggregateInputType = {
+    userId?: true
+    username?: true
+    email?: true
+    password?: true
+    createdAt?: true
+    updatedAt?: true
+    deletedAt?: true
+  }
+
+  export type UserMaxAggregateInputType = {
+    userId?: true
+    username?: true
+    email?: true
+    password?: true
+    createdAt?: true
+    updatedAt?: true
+    deletedAt?: true
+  }
+
+  export type UserCountAggregateInputType = {
+    userId?: true
+    username?: true
+    email?: true
+    password?: true
+    createdAt?: true
+    updatedAt?: true
+    deletedAt?: true
+    _all?: true
+  }
+
+  export type UserAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which User to aggregate.
+     */
+    where?: UserWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Users to fetch.
+     */
+    orderBy?: UserOrderByWithRelationInput | UserOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: UserWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Users from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Users.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned Users
+    **/
+    _count?: true | UserCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: UserMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: UserMaxAggregateInputType
+  }
+
+  export type GetUserAggregateType<T extends UserAggregateArgs> = {
+        [P in keyof T & keyof AggregateUser]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateUser[P]>
+      : GetScalarType<T[P], AggregateUser[P]>
+  }
+
+
+
+
+  export type UserGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: UserWhereInput
+    orderBy?: UserOrderByWithAggregationInput | UserOrderByWithAggregationInput[]
+    by: UserScalarFieldEnum[] | UserScalarFieldEnum
+    having?: UserScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: UserCountAggregateInputType | true
+    _min?: UserMinAggregateInputType
+    _max?: UserMaxAggregateInputType
+  }
+
+  export type UserGroupByOutputType = {
+    userId: string
+    username: string
+    email: string
+    password: string
+    createdAt: Date
+    updatedAt: Date
+    deletedAt: Date | null
+    _count: UserCountAggregateOutputType | null
+    _min: UserMinAggregateOutputType | null
+    _max: UserMaxAggregateOutputType | null
+  }
+
+  type GetUserGroupByPayload<T extends UserGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<UserGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof UserGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], UserGroupByOutputType[P]>
+            : GetScalarType<T[P], UserGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type UserSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    userId?: boolean
+    username?: boolean
+    email?: boolean
+    password?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    deletedAt?: boolean
+    watchlist?: boolean | User$watchlistArgs<ExtArgs>
+    rsFilterPresets?: boolean | User$rsFilterPresetsArgs<ExtArgs>
+    searchFilterPresets?: boolean | User$searchFilterPresetsArgs<ExtArgs>
+    apiCallLogs?: boolean | User$apiCallLogsArgs<ExtArgs>
+    _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["user"]>
+
+  export type UserSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    userId?: boolean
+    username?: boolean
+    email?: boolean
+    password?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    deletedAt?: boolean
+  }, ExtArgs["result"]["user"]>
+
+  export type UserSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    userId?: boolean
+    username?: boolean
+    email?: boolean
+    password?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    deletedAt?: boolean
+  }, ExtArgs["result"]["user"]>
+
+  export type UserSelectScalar = {
+    userId?: boolean
+    username?: boolean
+    email?: boolean
+    password?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    deletedAt?: boolean
+  }
+
+  export type UserOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"userId" | "username" | "email" | "password" | "createdAt" | "updatedAt" | "deletedAt", ExtArgs["result"]["user"]>
+  export type UserInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    watchlist?: boolean | User$watchlistArgs<ExtArgs>
+    rsFilterPresets?: boolean | User$rsFilterPresetsArgs<ExtArgs>
+    searchFilterPresets?: boolean | User$searchFilterPresetsArgs<ExtArgs>
+    apiCallLogs?: boolean | User$apiCallLogsArgs<ExtArgs>
+    _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
+  }
+  export type UserIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
+  export type UserIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
+
+  export type $UserPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "User"
+    objects: {
+      watchlist: Prisma.$UserWatchlistPayload<ExtArgs>[]
+      rsFilterPresets: Prisma.$RsFilterPresetPayload<ExtArgs>[]
+      searchFilterPresets: Prisma.$SearchFilterPresetPayload<ExtArgs>[]
+      apiCallLogs: Prisma.$KiwoomApiCallLogPayload<ExtArgs>[]
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      userId: string
+      username: string
+      email: string
+      password: string
+      createdAt: Date
+      updatedAt: Date
+      deletedAt: Date | null
+    }, ExtArgs["result"]["user"]>
+    composites: {}
+  }
+
+  type UserGetPayload<S extends boolean | null | undefined | UserDefaultArgs> = $Result.GetResult<Prisma.$UserPayload, S>
+
+  type UserCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<UserFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: UserCountAggregateInputType | true
+    }
+
+  export interface UserDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['User'], meta: { name: 'User' } }
+    /**
+     * Find zero or one User that matches the filter.
+     * @param {UserFindUniqueArgs} args - Arguments to find a User
+     * @example
+     * // Get one User
+     * const user = await prisma.user.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends UserFindUniqueArgs>(args: SelectSubset<T, UserFindUniqueArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one User that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {UserFindUniqueOrThrowArgs} args - Arguments to find a User
+     * @example
+     * // Get one User
+     * const user = await prisma.user.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends UserFindUniqueOrThrowArgs>(args: SelectSubset<T, UserFindUniqueOrThrowArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first User that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {UserFindFirstArgs} args - Arguments to find a User
+     * @example
+     * // Get one User
+     * const user = await prisma.user.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends UserFindFirstArgs>(args?: SelectSubset<T, UserFindFirstArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first User that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {UserFindFirstOrThrowArgs} args - Arguments to find a User
+     * @example
+     * // Get one User
+     * const user = await prisma.user.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends UserFindFirstOrThrowArgs>(args?: SelectSubset<T, UserFindFirstOrThrowArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more Users that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {UserFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all Users
+     * const users = await prisma.user.findMany()
+     * 
+     * // Get first 10 Users
+     * const users = await prisma.user.findMany({ take: 10 })
+     * 
+     * // Only select the `userId`
+     * const userWithUserIdOnly = await prisma.user.findMany({ select: { userId: true } })
+     * 
+     */
+    findMany<T extends UserFindManyArgs>(args?: SelectSubset<T, UserFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a User.
+     * @param {UserCreateArgs} args - Arguments to create a User.
+     * @example
+     * // Create one User
+     * const User = await prisma.user.create({
+     *   data: {
+     *     // ... data to create a User
+     *   }
+     * })
+     * 
+     */
+    create<T extends UserCreateArgs>(args: SelectSubset<T, UserCreateArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many Users.
+     * @param {UserCreateManyArgs} args - Arguments to create many Users.
+     * @example
+     * // Create many Users
+     * const user = await prisma.user.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends UserCreateManyArgs>(args?: SelectSubset<T, UserCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many Users and returns the data saved in the database.
+     * @param {UserCreateManyAndReturnArgs} args - Arguments to create many Users.
+     * @example
+     * // Create many Users
+     * const user = await prisma.user.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many Users and only return the `userId`
+     * const userWithUserIdOnly = await prisma.user.createManyAndReturn({
+     *   select: { userId: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends UserCreateManyAndReturnArgs>(args?: SelectSubset<T, UserCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a User.
+     * @param {UserDeleteArgs} args - Arguments to delete one User.
+     * @example
+     * // Delete one User
+     * const User = await prisma.user.delete({
+     *   where: {
+     *     // ... filter to delete one User
+     *   }
+     * })
+     * 
+     */
+    delete<T extends UserDeleteArgs>(args: SelectSubset<T, UserDeleteArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one User.
+     * @param {UserUpdateArgs} args - Arguments to update one User.
+     * @example
+     * // Update one User
+     * const user = await prisma.user.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends UserUpdateArgs>(args: SelectSubset<T, UserUpdateArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more Users.
+     * @param {UserDeleteManyArgs} args - Arguments to filter Users to delete.
+     * @example
+     * // Delete a few Users
+     * const { count } = await prisma.user.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends UserDeleteManyArgs>(args?: SelectSubset<T, UserDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Users.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {UserUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many Users
+     * const user = await prisma.user.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends UserUpdateManyArgs>(args: SelectSubset<T, UserUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Users and returns the data updated in the database.
+     * @param {UserUpdateManyAndReturnArgs} args - Arguments to update many Users.
+     * @example
+     * // Update many Users
+     * const user = await prisma.user.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more Users and only return the `userId`
+     * const userWithUserIdOnly = await prisma.user.updateManyAndReturn({
+     *   select: { userId: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends UserUpdateManyAndReturnArgs>(args: SelectSubset<T, UserUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one User.
+     * @param {UserUpsertArgs} args - Arguments to update or create a User.
+     * @example
+     * // Update or create a User
+     * const user = await prisma.user.upsert({
+     *   create: {
+     *     // ... data to create a User
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the User we want to update
+     *   }
+     * })
+     */
+    upsert<T extends UserUpsertArgs>(args: SelectSubset<T, UserUpsertArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of Users.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {UserCountArgs} args - Arguments to filter Users to count.
+     * @example
+     * // Count the number of Users
+     * const count = await prisma.user.count({
+     *   where: {
+     *     // ... the filter for the Users we want to count
+     *   }
+     * })
+    **/
+    count<T extends UserCountArgs>(
+      args?: Subset<T, UserCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], UserCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a User.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {UserAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends UserAggregateArgs>(args: Subset<T, UserAggregateArgs>): Prisma.PrismaPromise<GetUserAggregateType<T>>
+
+    /**
+     * Group by User.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {UserGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends UserGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: UserGroupByArgs['orderBy'] }
+        : { orderBy?: UserGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, UserGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetUserGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the User model
+   */
+  readonly fields: UserFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for User.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__UserClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    watchlist<T extends User$watchlistArgs<ExtArgs> = {}>(args?: Subset<T, User$watchlistArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$UserWatchlistPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    rsFilterPresets<T extends User$rsFilterPresetsArgs<ExtArgs> = {}>(args?: Subset<T, User$rsFilterPresetsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$RsFilterPresetPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    searchFilterPresets<T extends User$searchFilterPresetsArgs<ExtArgs> = {}>(args?: Subset<T, User$searchFilterPresetsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SearchFilterPresetPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    apiCallLogs<T extends User$apiCallLogsArgs<ExtArgs> = {}>(args?: Subset<T, User$apiCallLogsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$KiwoomApiCallLogPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the User model
+   */
+  interface UserFieldRefs {
+    readonly userId: FieldRef<"User", 'String'>
+    readonly username: FieldRef<"User", 'String'>
+    readonly email: FieldRef<"User", 'String'>
+    readonly password: FieldRef<"User", 'String'>
+    readonly createdAt: FieldRef<"User", 'DateTime'>
+    readonly updatedAt: FieldRef<"User", 'DateTime'>
+    readonly deletedAt: FieldRef<"User", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * User findUnique
+   */
+  export type UserFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the User
+     */
+    select?: UserSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the User
+     */
+    omit?: UserOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserInclude<ExtArgs> | null
+    /**
+     * Filter, which User to fetch.
+     */
+    where: UserWhereUniqueInput
+  }
+
+  /**
+   * User findUniqueOrThrow
+   */
+  export type UserFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the User
+     */
+    select?: UserSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the User
+     */
+    omit?: UserOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserInclude<ExtArgs> | null
+    /**
+     * Filter, which User to fetch.
+     */
+    where: UserWhereUniqueInput
+  }
+
+  /**
+   * User findFirst
+   */
+  export type UserFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the User
+     */
+    select?: UserSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the User
+     */
+    omit?: UserOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserInclude<ExtArgs> | null
+    /**
+     * Filter, which User to fetch.
+     */
+    where?: UserWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Users to fetch.
+     */
+    orderBy?: UserOrderByWithRelationInput | UserOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for Users.
+     */
+    cursor?: UserWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Users from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Users.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of Users.
+     */
+    distinct?: UserScalarFieldEnum | UserScalarFieldEnum[]
+  }
+
+  /**
+   * User findFirstOrThrow
+   */
+  export type UserFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the User
+     */
+    select?: UserSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the User
+     */
+    omit?: UserOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserInclude<ExtArgs> | null
+    /**
+     * Filter, which User to fetch.
+     */
+    where?: UserWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Users to fetch.
+     */
+    orderBy?: UserOrderByWithRelationInput | UserOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for Users.
+     */
+    cursor?: UserWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Users from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Users.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of Users.
+     */
+    distinct?: UserScalarFieldEnum | UserScalarFieldEnum[]
+  }
+
+  /**
+   * User findMany
+   */
+  export type UserFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the User
+     */
+    select?: UserSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the User
+     */
+    omit?: UserOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserInclude<ExtArgs> | null
+    /**
+     * Filter, which Users to fetch.
+     */
+    where?: UserWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Users to fetch.
+     */
+    orderBy?: UserOrderByWithRelationInput | UserOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing Users.
+     */
+    cursor?: UserWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Users from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Users.
+     */
+    skip?: number
+    distinct?: UserScalarFieldEnum | UserScalarFieldEnum[]
+  }
+
+  /**
+   * User create
+   */
+  export type UserCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the User
+     */
+    select?: UserSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the User
+     */
+    omit?: UserOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserInclude<ExtArgs> | null
+    /**
+     * The data needed to create a User.
+     */
+    data: XOR<UserCreateInput, UserUncheckedCreateInput>
+  }
+
+  /**
+   * User createMany
+   */
+  export type UserCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many Users.
+     */
+    data: UserCreateManyInput | UserCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * User createManyAndReturn
+   */
+  export type UserCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the User
+     */
+    select?: UserSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the User
+     */
+    omit?: UserOmit<ExtArgs> | null
+    /**
+     * The data used to create many Users.
+     */
+    data: UserCreateManyInput | UserCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * User update
+   */
+  export type UserUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the User
+     */
+    select?: UserSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the User
+     */
+    omit?: UserOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserInclude<ExtArgs> | null
+    /**
+     * The data needed to update a User.
+     */
+    data: XOR<UserUpdateInput, UserUncheckedUpdateInput>
+    /**
+     * Choose, which User to update.
+     */
+    where: UserWhereUniqueInput
+  }
+
+  /**
+   * User updateMany
+   */
+  export type UserUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update Users.
+     */
+    data: XOR<UserUpdateManyMutationInput, UserUncheckedUpdateManyInput>
+    /**
+     * Filter which Users to update
+     */
+    where?: UserWhereInput
+    /**
+     * Limit how many Users to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * User updateManyAndReturn
+   */
+  export type UserUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the User
+     */
+    select?: UserSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the User
+     */
+    omit?: UserOmit<ExtArgs> | null
+    /**
+     * The data used to update Users.
+     */
+    data: XOR<UserUpdateManyMutationInput, UserUncheckedUpdateManyInput>
+    /**
+     * Filter which Users to update
+     */
+    where?: UserWhereInput
+    /**
+     * Limit how many Users to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * User upsert
+   */
+  export type UserUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the User
+     */
+    select?: UserSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the User
+     */
+    omit?: UserOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserInclude<ExtArgs> | null
+    /**
+     * The filter to search for the User to update in case it exists.
+     */
+    where: UserWhereUniqueInput
+    /**
+     * In case the User found by the `where` argument doesn't exist, create a new User with this data.
+     */
+    create: XOR<UserCreateInput, UserUncheckedCreateInput>
+    /**
+     * In case the User was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<UserUpdateInput, UserUncheckedUpdateInput>
+  }
+
+  /**
+   * User delete
+   */
+  export type UserDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the User
+     */
+    select?: UserSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the User
+     */
+    omit?: UserOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserInclude<ExtArgs> | null
+    /**
+     * Filter which User to delete.
+     */
+    where: UserWhereUniqueInput
+  }
+
+  /**
+   * User deleteMany
+   */
+  export type UserDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which Users to delete
+     */
+    where?: UserWhereInput
+    /**
+     * Limit how many Users to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * User.watchlist
+   */
+  export type User$watchlistArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the UserWatchlist
+     */
+    select?: UserWatchlistSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the UserWatchlist
+     */
+    omit?: UserWatchlistOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserWatchlistInclude<ExtArgs> | null
+    where?: UserWatchlistWhereInput
+    orderBy?: UserWatchlistOrderByWithRelationInput | UserWatchlistOrderByWithRelationInput[]
+    cursor?: UserWatchlistWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: UserWatchlistScalarFieldEnum | UserWatchlistScalarFieldEnum[]
+  }
+
+  /**
+   * User.rsFilterPresets
+   */
+  export type User$rsFilterPresetsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RsFilterPreset
+     */
+    select?: RsFilterPresetSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the RsFilterPreset
+     */
+    omit?: RsFilterPresetOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RsFilterPresetInclude<ExtArgs> | null
+    where?: RsFilterPresetWhereInput
+    orderBy?: RsFilterPresetOrderByWithRelationInput | RsFilterPresetOrderByWithRelationInput[]
+    cursor?: RsFilterPresetWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: RsFilterPresetScalarFieldEnum | RsFilterPresetScalarFieldEnum[]
+  }
+
+  /**
+   * User.searchFilterPresets
+   */
+  export type User$searchFilterPresetsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SearchFilterPreset
+     */
+    select?: SearchFilterPresetSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SearchFilterPreset
+     */
+    omit?: SearchFilterPresetOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SearchFilterPresetInclude<ExtArgs> | null
+    where?: SearchFilterPresetWhereInput
+    orderBy?: SearchFilterPresetOrderByWithRelationInput | SearchFilterPresetOrderByWithRelationInput[]
+    cursor?: SearchFilterPresetWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: SearchFilterPresetScalarFieldEnum | SearchFilterPresetScalarFieldEnum[]
+  }
+
+  /**
+   * User.apiCallLogs
+   */
+  export type User$apiCallLogsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the KiwoomApiCallLog
+     */
+    select?: KiwoomApiCallLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the KiwoomApiCallLog
+     */
+    omit?: KiwoomApiCallLogOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: KiwoomApiCallLogInclude<ExtArgs> | null
+    where?: KiwoomApiCallLogWhereInput
+    orderBy?: KiwoomApiCallLogOrderByWithRelationInput | KiwoomApiCallLogOrderByWithRelationInput[]
+    cursor?: KiwoomApiCallLogWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: KiwoomApiCallLogScalarFieldEnum | KiwoomApiCallLogScalarFieldEnum[]
+  }
+
+  /**
+   * User without action
+   */
+  export type UserDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the User
+     */
+    select?: UserSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the User
+     */
+    omit?: UserOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model Company
+   */
+
+  export type AggregateCompany = {
+    _count: CompanyCountAggregateOutputType | null
+    _min: CompanyMinAggregateOutputType | null
+    _max: CompanyMaxAggregateOutputType | null
+  }
+
+  export type CompanyMinAggregateOutputType = {
+    companyId: string | null
+    companyName: string | null
+    stockCode: string | null
+    marketType: $Enums.MarketType | null
+    createdAt: Date | null
+    updatedAt: Date | null
+    deletedAt: Date | null
+  }
+
+  export type CompanyMaxAggregateOutputType = {
+    companyId: string | null
+    companyName: string | null
+    stockCode: string | null
+    marketType: $Enums.MarketType | null
+    createdAt: Date | null
+    updatedAt: Date | null
+    deletedAt: Date | null
+  }
+
+  export type CompanyCountAggregateOutputType = {
+    companyId: number
+    companyName: number
+    stockCode: number
+    marketType: number
+    createdAt: number
+    updatedAt: number
+    deletedAt: number
+    _all: number
+  }
+
+
+  export type CompanyMinAggregateInputType = {
+    companyId?: true
+    companyName?: true
+    stockCode?: true
+    marketType?: true
+    createdAt?: true
+    updatedAt?: true
+    deletedAt?: true
+  }
+
+  export type CompanyMaxAggregateInputType = {
+    companyId?: true
+    companyName?: true
+    stockCode?: true
+    marketType?: true
+    createdAt?: true
+    updatedAt?: true
+    deletedAt?: true
+  }
+
+  export type CompanyCountAggregateInputType = {
+    companyId?: true
+    companyName?: true
+    stockCode?: true
+    marketType?: true
+    createdAt?: true
+    updatedAt?: true
+    deletedAt?: true
+    _all?: true
+  }
+
+  export type CompanyAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which Company to aggregate.
+     */
+    where?: CompanyWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Companies to fetch.
+     */
+    orderBy?: CompanyOrderByWithRelationInput | CompanyOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: CompanyWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Companies from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Companies.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned Companies
+    **/
+    _count?: true | CompanyCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: CompanyMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: CompanyMaxAggregateInputType
+  }
+
+  export type GetCompanyAggregateType<T extends CompanyAggregateArgs> = {
+        [P in keyof T & keyof AggregateCompany]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateCompany[P]>
+      : GetScalarType<T[P], AggregateCompany[P]>
+  }
+
+
+
+
+  export type CompanyGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: CompanyWhereInput
+    orderBy?: CompanyOrderByWithAggregationInput | CompanyOrderByWithAggregationInput[]
+    by: CompanyScalarFieldEnum[] | CompanyScalarFieldEnum
+    having?: CompanyScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: CompanyCountAggregateInputType | true
+    _min?: CompanyMinAggregateInputType
+    _max?: CompanyMaxAggregateInputType
+  }
+
+  export type CompanyGroupByOutputType = {
+    companyId: string
+    companyName: string
+    stockCode: string
+    marketType: $Enums.MarketType
+    createdAt: Date
+    updatedAt: Date
+    deletedAt: Date | null
+    _count: CompanyCountAggregateOutputType | null
+    _min: CompanyMinAggregateOutputType | null
+    _max: CompanyMaxAggregateOutputType | null
+  }
+
+  type GetCompanyGroupByPayload<T extends CompanyGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<CompanyGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof CompanyGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], CompanyGroupByOutputType[P]>
+            : GetScalarType<T[P], CompanyGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type CompanySelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    companyId?: boolean
+    companyName?: boolean
+    stockCode?: boolean
+    marketType?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    deletedAt?: boolean
+    watchlist?: boolean | Company$watchlistArgs<ExtArgs>
+    priceHistory?: boolean | Company$priceHistoryArgs<ExtArgs>
+    _count?: boolean | CompanyCountOutputTypeDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["company"]>
+
+  export type CompanySelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    companyId?: boolean
+    companyName?: boolean
+    stockCode?: boolean
+    marketType?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    deletedAt?: boolean
+  }, ExtArgs["result"]["company"]>
+
+  export type CompanySelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    companyId?: boolean
+    companyName?: boolean
+    stockCode?: boolean
+    marketType?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    deletedAt?: boolean
+  }, ExtArgs["result"]["company"]>
+
+  export type CompanySelectScalar = {
+    companyId?: boolean
+    companyName?: boolean
+    stockCode?: boolean
+    marketType?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    deletedAt?: boolean
+  }
+
+  export type CompanyOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"companyId" | "companyName" | "stockCode" | "marketType" | "createdAt" | "updatedAt" | "deletedAt", ExtArgs["result"]["company"]>
+  export type CompanyInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    watchlist?: boolean | Company$watchlistArgs<ExtArgs>
+    priceHistory?: boolean | Company$priceHistoryArgs<ExtArgs>
+    _count?: boolean | CompanyCountOutputTypeDefaultArgs<ExtArgs>
+  }
+  export type CompanyIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
+  export type CompanyIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
+
+  export type $CompanyPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "Company"
+    objects: {
+      watchlist: Prisma.$UserWatchlistPayload<ExtArgs>[]
+      priceHistory: Prisma.$StockPriceHistoryPayload<ExtArgs>[]
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      companyId: string
+      companyName: string
+      stockCode: string
+      marketType: $Enums.MarketType
+      createdAt: Date
+      updatedAt: Date
+      deletedAt: Date | null
+    }, ExtArgs["result"]["company"]>
+    composites: {}
+  }
+
+  type CompanyGetPayload<S extends boolean | null | undefined | CompanyDefaultArgs> = $Result.GetResult<Prisma.$CompanyPayload, S>
+
+  type CompanyCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<CompanyFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: CompanyCountAggregateInputType | true
+    }
+
+  export interface CompanyDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['Company'], meta: { name: 'Company' } }
+    /**
+     * Find zero or one Company that matches the filter.
+     * @param {CompanyFindUniqueArgs} args - Arguments to find a Company
+     * @example
+     * // Get one Company
+     * const company = await prisma.company.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends CompanyFindUniqueArgs>(args: SelectSubset<T, CompanyFindUniqueArgs<ExtArgs>>): Prisma__CompanyClient<$Result.GetResult<Prisma.$CompanyPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one Company that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {CompanyFindUniqueOrThrowArgs} args - Arguments to find a Company
+     * @example
+     * // Get one Company
+     * const company = await prisma.company.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends CompanyFindUniqueOrThrowArgs>(args: SelectSubset<T, CompanyFindUniqueOrThrowArgs<ExtArgs>>): Prisma__CompanyClient<$Result.GetResult<Prisma.$CompanyPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first Company that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CompanyFindFirstArgs} args - Arguments to find a Company
+     * @example
+     * // Get one Company
+     * const company = await prisma.company.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends CompanyFindFirstArgs>(args?: SelectSubset<T, CompanyFindFirstArgs<ExtArgs>>): Prisma__CompanyClient<$Result.GetResult<Prisma.$CompanyPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first Company that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CompanyFindFirstOrThrowArgs} args - Arguments to find a Company
+     * @example
+     * // Get one Company
+     * const company = await prisma.company.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends CompanyFindFirstOrThrowArgs>(args?: SelectSubset<T, CompanyFindFirstOrThrowArgs<ExtArgs>>): Prisma__CompanyClient<$Result.GetResult<Prisma.$CompanyPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more Companies that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CompanyFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all Companies
+     * const companies = await prisma.company.findMany()
+     * 
+     * // Get first 10 Companies
+     * const companies = await prisma.company.findMany({ take: 10 })
+     * 
+     * // Only select the `companyId`
+     * const companyWithCompanyIdOnly = await prisma.company.findMany({ select: { companyId: true } })
+     * 
+     */
+    findMany<T extends CompanyFindManyArgs>(args?: SelectSubset<T, CompanyFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CompanyPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a Company.
+     * @param {CompanyCreateArgs} args - Arguments to create a Company.
+     * @example
+     * // Create one Company
+     * const Company = await prisma.company.create({
+     *   data: {
+     *     // ... data to create a Company
+     *   }
+     * })
+     * 
+     */
+    create<T extends CompanyCreateArgs>(args: SelectSubset<T, CompanyCreateArgs<ExtArgs>>): Prisma__CompanyClient<$Result.GetResult<Prisma.$CompanyPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many Companies.
+     * @param {CompanyCreateManyArgs} args - Arguments to create many Companies.
+     * @example
+     * // Create many Companies
+     * const company = await prisma.company.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends CompanyCreateManyArgs>(args?: SelectSubset<T, CompanyCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many Companies and returns the data saved in the database.
+     * @param {CompanyCreateManyAndReturnArgs} args - Arguments to create many Companies.
+     * @example
+     * // Create many Companies
+     * const company = await prisma.company.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many Companies and only return the `companyId`
+     * const companyWithCompanyIdOnly = await prisma.company.createManyAndReturn({
+     *   select: { companyId: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends CompanyCreateManyAndReturnArgs>(args?: SelectSubset<T, CompanyCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CompanyPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a Company.
+     * @param {CompanyDeleteArgs} args - Arguments to delete one Company.
+     * @example
+     * // Delete one Company
+     * const Company = await prisma.company.delete({
+     *   where: {
+     *     // ... filter to delete one Company
+     *   }
+     * })
+     * 
+     */
+    delete<T extends CompanyDeleteArgs>(args: SelectSubset<T, CompanyDeleteArgs<ExtArgs>>): Prisma__CompanyClient<$Result.GetResult<Prisma.$CompanyPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one Company.
+     * @param {CompanyUpdateArgs} args - Arguments to update one Company.
+     * @example
+     * // Update one Company
+     * const company = await prisma.company.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends CompanyUpdateArgs>(args: SelectSubset<T, CompanyUpdateArgs<ExtArgs>>): Prisma__CompanyClient<$Result.GetResult<Prisma.$CompanyPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more Companies.
+     * @param {CompanyDeleteManyArgs} args - Arguments to filter Companies to delete.
+     * @example
+     * // Delete a few Companies
+     * const { count } = await prisma.company.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends CompanyDeleteManyArgs>(args?: SelectSubset<T, CompanyDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Companies.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CompanyUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many Companies
+     * const company = await prisma.company.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends CompanyUpdateManyArgs>(args: SelectSubset<T, CompanyUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Companies and returns the data updated in the database.
+     * @param {CompanyUpdateManyAndReturnArgs} args - Arguments to update many Companies.
+     * @example
+     * // Update many Companies
+     * const company = await prisma.company.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more Companies and only return the `companyId`
+     * const companyWithCompanyIdOnly = await prisma.company.updateManyAndReturn({
+     *   select: { companyId: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends CompanyUpdateManyAndReturnArgs>(args: SelectSubset<T, CompanyUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CompanyPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one Company.
+     * @param {CompanyUpsertArgs} args - Arguments to update or create a Company.
+     * @example
+     * // Update or create a Company
+     * const company = await prisma.company.upsert({
+     *   create: {
+     *     // ... data to create a Company
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the Company we want to update
+     *   }
+     * })
+     */
+    upsert<T extends CompanyUpsertArgs>(args: SelectSubset<T, CompanyUpsertArgs<ExtArgs>>): Prisma__CompanyClient<$Result.GetResult<Prisma.$CompanyPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of Companies.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CompanyCountArgs} args - Arguments to filter Companies to count.
+     * @example
+     * // Count the number of Companies
+     * const count = await prisma.company.count({
+     *   where: {
+     *     // ... the filter for the Companies we want to count
+     *   }
+     * })
+    **/
+    count<T extends CompanyCountArgs>(
+      args?: Subset<T, CompanyCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], CompanyCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a Company.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CompanyAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends CompanyAggregateArgs>(args: Subset<T, CompanyAggregateArgs>): Prisma.PrismaPromise<GetCompanyAggregateType<T>>
+
+    /**
+     * Group by Company.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CompanyGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends CompanyGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: CompanyGroupByArgs['orderBy'] }
+        : { orderBy?: CompanyGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, CompanyGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetCompanyGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the Company model
+   */
+  readonly fields: CompanyFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for Company.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__CompanyClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    watchlist<T extends Company$watchlistArgs<ExtArgs> = {}>(args?: Subset<T, Company$watchlistArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$UserWatchlistPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    priceHistory<T extends Company$priceHistoryArgs<ExtArgs> = {}>(args?: Subset<T, Company$priceHistoryArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$StockPriceHistoryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the Company model
+   */
+  interface CompanyFieldRefs {
+    readonly companyId: FieldRef<"Company", 'String'>
+    readonly companyName: FieldRef<"Company", 'String'>
+    readonly stockCode: FieldRef<"Company", 'String'>
+    readonly marketType: FieldRef<"Company", 'MarketType'>
+    readonly createdAt: FieldRef<"Company", 'DateTime'>
+    readonly updatedAt: FieldRef<"Company", 'DateTime'>
+    readonly deletedAt: FieldRef<"Company", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * Company findUnique
+   */
+  export type CompanyFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Company
+     */
+    select?: CompanySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Company
+     */
+    omit?: CompanyOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CompanyInclude<ExtArgs> | null
+    /**
+     * Filter, which Company to fetch.
+     */
+    where: CompanyWhereUniqueInput
+  }
+
+  /**
+   * Company findUniqueOrThrow
+   */
+  export type CompanyFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Company
+     */
+    select?: CompanySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Company
+     */
+    omit?: CompanyOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CompanyInclude<ExtArgs> | null
+    /**
+     * Filter, which Company to fetch.
+     */
+    where: CompanyWhereUniqueInput
+  }
+
+  /**
+   * Company findFirst
+   */
+  export type CompanyFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Company
+     */
+    select?: CompanySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Company
+     */
+    omit?: CompanyOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CompanyInclude<ExtArgs> | null
+    /**
+     * Filter, which Company to fetch.
+     */
+    where?: CompanyWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Companies to fetch.
+     */
+    orderBy?: CompanyOrderByWithRelationInput | CompanyOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for Companies.
+     */
+    cursor?: CompanyWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Companies from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Companies.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of Companies.
+     */
+    distinct?: CompanyScalarFieldEnum | CompanyScalarFieldEnum[]
+  }
+
+  /**
+   * Company findFirstOrThrow
+   */
+  export type CompanyFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Company
+     */
+    select?: CompanySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Company
+     */
+    omit?: CompanyOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CompanyInclude<ExtArgs> | null
+    /**
+     * Filter, which Company to fetch.
+     */
+    where?: CompanyWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Companies to fetch.
+     */
+    orderBy?: CompanyOrderByWithRelationInput | CompanyOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for Companies.
+     */
+    cursor?: CompanyWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Companies from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Companies.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of Companies.
+     */
+    distinct?: CompanyScalarFieldEnum | CompanyScalarFieldEnum[]
+  }
+
+  /**
+   * Company findMany
+   */
+  export type CompanyFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Company
+     */
+    select?: CompanySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Company
+     */
+    omit?: CompanyOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CompanyInclude<ExtArgs> | null
+    /**
+     * Filter, which Companies to fetch.
+     */
+    where?: CompanyWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Companies to fetch.
+     */
+    orderBy?: CompanyOrderByWithRelationInput | CompanyOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing Companies.
+     */
+    cursor?: CompanyWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Companies from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Companies.
+     */
+    skip?: number
+    distinct?: CompanyScalarFieldEnum | CompanyScalarFieldEnum[]
+  }
+
+  /**
+   * Company create
+   */
+  export type CompanyCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Company
+     */
+    select?: CompanySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Company
+     */
+    omit?: CompanyOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CompanyInclude<ExtArgs> | null
+    /**
+     * The data needed to create a Company.
+     */
+    data: XOR<CompanyCreateInput, CompanyUncheckedCreateInput>
+  }
+
+  /**
+   * Company createMany
+   */
+  export type CompanyCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many Companies.
+     */
+    data: CompanyCreateManyInput | CompanyCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * Company createManyAndReturn
+   */
+  export type CompanyCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Company
+     */
+    select?: CompanySelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the Company
+     */
+    omit?: CompanyOmit<ExtArgs> | null
+    /**
+     * The data used to create many Companies.
+     */
+    data: CompanyCreateManyInput | CompanyCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * Company update
+   */
+  export type CompanyUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Company
+     */
+    select?: CompanySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Company
+     */
+    omit?: CompanyOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CompanyInclude<ExtArgs> | null
+    /**
+     * The data needed to update a Company.
+     */
+    data: XOR<CompanyUpdateInput, CompanyUncheckedUpdateInput>
+    /**
+     * Choose, which Company to update.
+     */
+    where: CompanyWhereUniqueInput
+  }
+
+  /**
+   * Company updateMany
+   */
+  export type CompanyUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update Companies.
+     */
+    data: XOR<CompanyUpdateManyMutationInput, CompanyUncheckedUpdateManyInput>
+    /**
+     * Filter which Companies to update
+     */
+    where?: CompanyWhereInput
+    /**
+     * Limit how many Companies to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * Company updateManyAndReturn
+   */
+  export type CompanyUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Company
+     */
+    select?: CompanySelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the Company
+     */
+    omit?: CompanyOmit<ExtArgs> | null
+    /**
+     * The data used to update Companies.
+     */
+    data: XOR<CompanyUpdateManyMutationInput, CompanyUncheckedUpdateManyInput>
+    /**
+     * Filter which Companies to update
+     */
+    where?: CompanyWhereInput
+    /**
+     * Limit how many Companies to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * Company upsert
+   */
+  export type CompanyUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Company
+     */
+    select?: CompanySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Company
+     */
+    omit?: CompanyOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CompanyInclude<ExtArgs> | null
+    /**
+     * The filter to search for the Company to update in case it exists.
+     */
+    where: CompanyWhereUniqueInput
+    /**
+     * In case the Company found by the `where` argument doesn't exist, create a new Company with this data.
+     */
+    create: XOR<CompanyCreateInput, CompanyUncheckedCreateInput>
+    /**
+     * In case the Company was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<CompanyUpdateInput, CompanyUncheckedUpdateInput>
+  }
+
+  /**
+   * Company delete
+   */
+  export type CompanyDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Company
+     */
+    select?: CompanySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Company
+     */
+    omit?: CompanyOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CompanyInclude<ExtArgs> | null
+    /**
+     * Filter which Company to delete.
+     */
+    where: CompanyWhereUniqueInput
+  }
+
+  /**
+   * Company deleteMany
+   */
+  export type CompanyDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which Companies to delete
+     */
+    where?: CompanyWhereInput
+    /**
+     * Limit how many Companies to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * Company.watchlist
+   */
+  export type Company$watchlistArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the UserWatchlist
+     */
+    select?: UserWatchlistSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the UserWatchlist
+     */
+    omit?: UserWatchlistOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserWatchlistInclude<ExtArgs> | null
+    where?: UserWatchlistWhereInput
+    orderBy?: UserWatchlistOrderByWithRelationInput | UserWatchlistOrderByWithRelationInput[]
+    cursor?: UserWatchlistWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: UserWatchlistScalarFieldEnum | UserWatchlistScalarFieldEnum[]
+  }
+
+  /**
+   * Company.priceHistory
+   */
+  export type Company$priceHistoryArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the StockPriceHistory
+     */
+    select?: StockPriceHistorySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the StockPriceHistory
+     */
+    omit?: StockPriceHistoryOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: StockPriceHistoryInclude<ExtArgs> | null
+    where?: StockPriceHistoryWhereInput
+    orderBy?: StockPriceHistoryOrderByWithRelationInput | StockPriceHistoryOrderByWithRelationInput[]
+    cursor?: StockPriceHistoryWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: StockPriceHistoryScalarFieldEnum | StockPriceHistoryScalarFieldEnum[]
+  }
+
+  /**
+   * Company without action
+   */
+  export type CompanyDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Company
+     */
+    select?: CompanySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Company
+     */
+    omit?: CompanyOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CompanyInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model UserWatchlist
+   */
+
+  export type AggregateUserWatchlist = {
+    _count: UserWatchlistCountAggregateOutputType | null
+    _min: UserWatchlistMinAggregateOutputType | null
+    _max: UserWatchlistMaxAggregateOutputType | null
+  }
+
+  export type UserWatchlistMinAggregateOutputType = {
+    userId: string | null
+    companyId: string | null
+    addedDate: Date | null
+    memo: string | null
+    deletedAt: Date | null
+  }
+
+  export type UserWatchlistMaxAggregateOutputType = {
+    userId: string | null
+    companyId: string | null
+    addedDate: Date | null
+    memo: string | null
+    deletedAt: Date | null
+  }
+
+  export type UserWatchlistCountAggregateOutputType = {
+    userId: number
+    companyId: number
+    addedDate: number
+    memo: number
+    deletedAt: number
+    _all: number
+  }
+
+
+  export type UserWatchlistMinAggregateInputType = {
+    userId?: true
+    companyId?: true
+    addedDate?: true
+    memo?: true
+    deletedAt?: true
+  }
+
+  export type UserWatchlistMaxAggregateInputType = {
+    userId?: true
+    companyId?: true
+    addedDate?: true
+    memo?: true
+    deletedAt?: true
+  }
+
+  export type UserWatchlistCountAggregateInputType = {
+    userId?: true
+    companyId?: true
+    addedDate?: true
+    memo?: true
+    deletedAt?: true
+    _all?: true
+  }
+
+  export type UserWatchlistAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which UserWatchlist to aggregate.
+     */
+    where?: UserWatchlistWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of UserWatchlists to fetch.
+     */
+    orderBy?: UserWatchlistOrderByWithRelationInput | UserWatchlistOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: UserWatchlistWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` UserWatchlists from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` UserWatchlists.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned UserWatchlists
+    **/
+    _count?: true | UserWatchlistCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: UserWatchlistMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: UserWatchlistMaxAggregateInputType
+  }
+
+  export type GetUserWatchlistAggregateType<T extends UserWatchlistAggregateArgs> = {
+        [P in keyof T & keyof AggregateUserWatchlist]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateUserWatchlist[P]>
+      : GetScalarType<T[P], AggregateUserWatchlist[P]>
+  }
+
+
+
+
+  export type UserWatchlistGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: UserWatchlistWhereInput
+    orderBy?: UserWatchlistOrderByWithAggregationInput | UserWatchlistOrderByWithAggregationInput[]
+    by: UserWatchlistScalarFieldEnum[] | UserWatchlistScalarFieldEnum
+    having?: UserWatchlistScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: UserWatchlistCountAggregateInputType | true
+    _min?: UserWatchlistMinAggregateInputType
+    _max?: UserWatchlistMaxAggregateInputType
+  }
+
+  export type UserWatchlistGroupByOutputType = {
+    userId: string
+    companyId: string
+    addedDate: Date
+    memo: string | null
+    deletedAt: Date | null
+    _count: UserWatchlistCountAggregateOutputType | null
+    _min: UserWatchlistMinAggregateOutputType | null
+    _max: UserWatchlistMaxAggregateOutputType | null
+  }
+
+  type GetUserWatchlistGroupByPayload<T extends UserWatchlistGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<UserWatchlistGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof UserWatchlistGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], UserWatchlistGroupByOutputType[P]>
+            : GetScalarType<T[P], UserWatchlistGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type UserWatchlistSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    userId?: boolean
+    companyId?: boolean
+    addedDate?: boolean
+    memo?: boolean
+    deletedAt?: boolean
+    user?: boolean | UserDefaultArgs<ExtArgs>
+    company?: boolean | CompanyDefaultArgs<ExtArgs>
+    tags?: boolean | UserWatchlist$tagsArgs<ExtArgs>
+    _count?: boolean | UserWatchlistCountOutputTypeDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["userWatchlist"]>
+
+  export type UserWatchlistSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    userId?: boolean
+    companyId?: boolean
+    addedDate?: boolean
+    memo?: boolean
+    deletedAt?: boolean
+    user?: boolean | UserDefaultArgs<ExtArgs>
+    company?: boolean | CompanyDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["userWatchlist"]>
+
+  export type UserWatchlistSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    userId?: boolean
+    companyId?: boolean
+    addedDate?: boolean
+    memo?: boolean
+    deletedAt?: boolean
+    user?: boolean | UserDefaultArgs<ExtArgs>
+    company?: boolean | CompanyDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["userWatchlist"]>
+
+  export type UserWatchlistSelectScalar = {
+    userId?: boolean
+    companyId?: boolean
+    addedDate?: boolean
+    memo?: boolean
+    deletedAt?: boolean
+  }
+
+  export type UserWatchlistOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"userId" | "companyId" | "addedDate" | "memo" | "deletedAt", ExtArgs["result"]["userWatchlist"]>
+  export type UserWatchlistInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    user?: boolean | UserDefaultArgs<ExtArgs>
+    company?: boolean | CompanyDefaultArgs<ExtArgs>
+    tags?: boolean | UserWatchlist$tagsArgs<ExtArgs>
+    _count?: boolean | UserWatchlistCountOutputTypeDefaultArgs<ExtArgs>
+  }
+  export type UserWatchlistIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    user?: boolean | UserDefaultArgs<ExtArgs>
+    company?: boolean | CompanyDefaultArgs<ExtArgs>
+  }
+  export type UserWatchlistIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    user?: boolean | UserDefaultArgs<ExtArgs>
+    company?: boolean | CompanyDefaultArgs<ExtArgs>
+  }
+
+  export type $UserWatchlistPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "UserWatchlist"
+    objects: {
+      user: Prisma.$UserPayload<ExtArgs>
+      company: Prisma.$CompanyPayload<ExtArgs>
+      tags: Prisma.$WatchlistTagPayload<ExtArgs>[]
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      userId: string
+      companyId: string
+      addedDate: Date
+      memo: string | null
+      deletedAt: Date | null
+    }, ExtArgs["result"]["userWatchlist"]>
+    composites: {}
+  }
+
+  type UserWatchlistGetPayload<S extends boolean | null | undefined | UserWatchlistDefaultArgs> = $Result.GetResult<Prisma.$UserWatchlistPayload, S>
+
+  type UserWatchlistCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<UserWatchlistFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: UserWatchlistCountAggregateInputType | true
+    }
+
+  export interface UserWatchlistDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['UserWatchlist'], meta: { name: 'UserWatchlist' } }
+    /**
+     * Find zero or one UserWatchlist that matches the filter.
+     * @param {UserWatchlistFindUniqueArgs} args - Arguments to find a UserWatchlist
+     * @example
+     * // Get one UserWatchlist
+     * const userWatchlist = await prisma.userWatchlist.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends UserWatchlistFindUniqueArgs>(args: SelectSubset<T, UserWatchlistFindUniqueArgs<ExtArgs>>): Prisma__UserWatchlistClient<$Result.GetResult<Prisma.$UserWatchlistPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one UserWatchlist that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {UserWatchlistFindUniqueOrThrowArgs} args - Arguments to find a UserWatchlist
+     * @example
+     * // Get one UserWatchlist
+     * const userWatchlist = await prisma.userWatchlist.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends UserWatchlistFindUniqueOrThrowArgs>(args: SelectSubset<T, UserWatchlistFindUniqueOrThrowArgs<ExtArgs>>): Prisma__UserWatchlistClient<$Result.GetResult<Prisma.$UserWatchlistPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first UserWatchlist that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {UserWatchlistFindFirstArgs} args - Arguments to find a UserWatchlist
+     * @example
+     * // Get one UserWatchlist
+     * const userWatchlist = await prisma.userWatchlist.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends UserWatchlistFindFirstArgs>(args?: SelectSubset<T, UserWatchlistFindFirstArgs<ExtArgs>>): Prisma__UserWatchlistClient<$Result.GetResult<Prisma.$UserWatchlistPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first UserWatchlist that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {UserWatchlistFindFirstOrThrowArgs} args - Arguments to find a UserWatchlist
+     * @example
+     * // Get one UserWatchlist
+     * const userWatchlist = await prisma.userWatchlist.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends UserWatchlistFindFirstOrThrowArgs>(args?: SelectSubset<T, UserWatchlistFindFirstOrThrowArgs<ExtArgs>>): Prisma__UserWatchlistClient<$Result.GetResult<Prisma.$UserWatchlistPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more UserWatchlists that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {UserWatchlistFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all UserWatchlists
+     * const userWatchlists = await prisma.userWatchlist.findMany()
+     * 
+     * // Get first 10 UserWatchlists
+     * const userWatchlists = await prisma.userWatchlist.findMany({ take: 10 })
+     * 
+     * // Only select the `userId`
+     * const userWatchlistWithUserIdOnly = await prisma.userWatchlist.findMany({ select: { userId: true } })
+     * 
+     */
+    findMany<T extends UserWatchlistFindManyArgs>(args?: SelectSubset<T, UserWatchlistFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$UserWatchlistPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a UserWatchlist.
+     * @param {UserWatchlistCreateArgs} args - Arguments to create a UserWatchlist.
+     * @example
+     * // Create one UserWatchlist
+     * const UserWatchlist = await prisma.userWatchlist.create({
+     *   data: {
+     *     // ... data to create a UserWatchlist
+     *   }
+     * })
+     * 
+     */
+    create<T extends UserWatchlistCreateArgs>(args: SelectSubset<T, UserWatchlistCreateArgs<ExtArgs>>): Prisma__UserWatchlistClient<$Result.GetResult<Prisma.$UserWatchlistPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many UserWatchlists.
+     * @param {UserWatchlistCreateManyArgs} args - Arguments to create many UserWatchlists.
+     * @example
+     * // Create many UserWatchlists
+     * const userWatchlist = await prisma.userWatchlist.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends UserWatchlistCreateManyArgs>(args?: SelectSubset<T, UserWatchlistCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many UserWatchlists and returns the data saved in the database.
+     * @param {UserWatchlistCreateManyAndReturnArgs} args - Arguments to create many UserWatchlists.
+     * @example
+     * // Create many UserWatchlists
+     * const userWatchlist = await prisma.userWatchlist.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many UserWatchlists and only return the `userId`
+     * const userWatchlistWithUserIdOnly = await prisma.userWatchlist.createManyAndReturn({
+     *   select: { userId: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends UserWatchlistCreateManyAndReturnArgs>(args?: SelectSubset<T, UserWatchlistCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$UserWatchlistPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a UserWatchlist.
+     * @param {UserWatchlistDeleteArgs} args - Arguments to delete one UserWatchlist.
+     * @example
+     * // Delete one UserWatchlist
+     * const UserWatchlist = await prisma.userWatchlist.delete({
+     *   where: {
+     *     // ... filter to delete one UserWatchlist
+     *   }
+     * })
+     * 
+     */
+    delete<T extends UserWatchlistDeleteArgs>(args: SelectSubset<T, UserWatchlistDeleteArgs<ExtArgs>>): Prisma__UserWatchlistClient<$Result.GetResult<Prisma.$UserWatchlistPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one UserWatchlist.
+     * @param {UserWatchlistUpdateArgs} args - Arguments to update one UserWatchlist.
+     * @example
+     * // Update one UserWatchlist
+     * const userWatchlist = await prisma.userWatchlist.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends UserWatchlistUpdateArgs>(args: SelectSubset<T, UserWatchlistUpdateArgs<ExtArgs>>): Prisma__UserWatchlistClient<$Result.GetResult<Prisma.$UserWatchlistPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more UserWatchlists.
+     * @param {UserWatchlistDeleteManyArgs} args - Arguments to filter UserWatchlists to delete.
+     * @example
+     * // Delete a few UserWatchlists
+     * const { count } = await prisma.userWatchlist.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends UserWatchlistDeleteManyArgs>(args?: SelectSubset<T, UserWatchlistDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more UserWatchlists.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {UserWatchlistUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many UserWatchlists
+     * const userWatchlist = await prisma.userWatchlist.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends UserWatchlistUpdateManyArgs>(args: SelectSubset<T, UserWatchlistUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more UserWatchlists and returns the data updated in the database.
+     * @param {UserWatchlistUpdateManyAndReturnArgs} args - Arguments to update many UserWatchlists.
+     * @example
+     * // Update many UserWatchlists
+     * const userWatchlist = await prisma.userWatchlist.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more UserWatchlists and only return the `userId`
+     * const userWatchlistWithUserIdOnly = await prisma.userWatchlist.updateManyAndReturn({
+     *   select: { userId: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends UserWatchlistUpdateManyAndReturnArgs>(args: SelectSubset<T, UserWatchlistUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$UserWatchlistPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one UserWatchlist.
+     * @param {UserWatchlistUpsertArgs} args - Arguments to update or create a UserWatchlist.
+     * @example
+     * // Update or create a UserWatchlist
+     * const userWatchlist = await prisma.userWatchlist.upsert({
+     *   create: {
+     *     // ... data to create a UserWatchlist
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the UserWatchlist we want to update
+     *   }
+     * })
+     */
+    upsert<T extends UserWatchlistUpsertArgs>(args: SelectSubset<T, UserWatchlistUpsertArgs<ExtArgs>>): Prisma__UserWatchlistClient<$Result.GetResult<Prisma.$UserWatchlistPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of UserWatchlists.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {UserWatchlistCountArgs} args - Arguments to filter UserWatchlists to count.
+     * @example
+     * // Count the number of UserWatchlists
+     * const count = await prisma.userWatchlist.count({
+     *   where: {
+     *     // ... the filter for the UserWatchlists we want to count
+     *   }
+     * })
+    **/
+    count<T extends UserWatchlistCountArgs>(
+      args?: Subset<T, UserWatchlistCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], UserWatchlistCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a UserWatchlist.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {UserWatchlistAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends UserWatchlistAggregateArgs>(args: Subset<T, UserWatchlistAggregateArgs>): Prisma.PrismaPromise<GetUserWatchlistAggregateType<T>>
+
+    /**
+     * Group by UserWatchlist.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {UserWatchlistGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends UserWatchlistGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: UserWatchlistGroupByArgs['orderBy'] }
+        : { orderBy?: UserWatchlistGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, UserWatchlistGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetUserWatchlistGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the UserWatchlist model
+   */
+  readonly fields: UserWatchlistFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for UserWatchlist.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__UserWatchlistClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    user<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    company<T extends CompanyDefaultArgs<ExtArgs> = {}>(args?: Subset<T, CompanyDefaultArgs<ExtArgs>>): Prisma__CompanyClient<$Result.GetResult<Prisma.$CompanyPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    tags<T extends UserWatchlist$tagsArgs<ExtArgs> = {}>(args?: Subset<T, UserWatchlist$tagsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$WatchlistTagPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the UserWatchlist model
+   */
+  interface UserWatchlistFieldRefs {
+    readonly userId: FieldRef<"UserWatchlist", 'String'>
+    readonly companyId: FieldRef<"UserWatchlist", 'String'>
+    readonly addedDate: FieldRef<"UserWatchlist", 'DateTime'>
+    readonly memo: FieldRef<"UserWatchlist", 'String'>
+    readonly deletedAt: FieldRef<"UserWatchlist", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * UserWatchlist findUnique
+   */
+  export type UserWatchlistFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the UserWatchlist
+     */
+    select?: UserWatchlistSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the UserWatchlist
+     */
+    omit?: UserWatchlistOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserWatchlistInclude<ExtArgs> | null
+    /**
+     * Filter, which UserWatchlist to fetch.
+     */
+    where: UserWatchlistWhereUniqueInput
+  }
+
+  /**
+   * UserWatchlist findUniqueOrThrow
+   */
+  export type UserWatchlistFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the UserWatchlist
+     */
+    select?: UserWatchlistSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the UserWatchlist
+     */
+    omit?: UserWatchlistOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserWatchlistInclude<ExtArgs> | null
+    /**
+     * Filter, which UserWatchlist to fetch.
+     */
+    where: UserWatchlistWhereUniqueInput
+  }
+
+  /**
+   * UserWatchlist findFirst
+   */
+  export type UserWatchlistFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the UserWatchlist
+     */
+    select?: UserWatchlistSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the UserWatchlist
+     */
+    omit?: UserWatchlistOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserWatchlistInclude<ExtArgs> | null
+    /**
+     * Filter, which UserWatchlist to fetch.
+     */
+    where?: UserWatchlistWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of UserWatchlists to fetch.
+     */
+    orderBy?: UserWatchlistOrderByWithRelationInput | UserWatchlistOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for UserWatchlists.
+     */
+    cursor?: UserWatchlistWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` UserWatchlists from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` UserWatchlists.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of UserWatchlists.
+     */
+    distinct?: UserWatchlistScalarFieldEnum | UserWatchlistScalarFieldEnum[]
+  }
+
+  /**
+   * UserWatchlist findFirstOrThrow
+   */
+  export type UserWatchlistFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the UserWatchlist
+     */
+    select?: UserWatchlistSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the UserWatchlist
+     */
+    omit?: UserWatchlistOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserWatchlistInclude<ExtArgs> | null
+    /**
+     * Filter, which UserWatchlist to fetch.
+     */
+    where?: UserWatchlistWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of UserWatchlists to fetch.
+     */
+    orderBy?: UserWatchlistOrderByWithRelationInput | UserWatchlistOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for UserWatchlists.
+     */
+    cursor?: UserWatchlistWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` UserWatchlists from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` UserWatchlists.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of UserWatchlists.
+     */
+    distinct?: UserWatchlistScalarFieldEnum | UserWatchlistScalarFieldEnum[]
+  }
+
+  /**
+   * UserWatchlist findMany
+   */
+  export type UserWatchlistFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the UserWatchlist
+     */
+    select?: UserWatchlistSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the UserWatchlist
+     */
+    omit?: UserWatchlistOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserWatchlistInclude<ExtArgs> | null
+    /**
+     * Filter, which UserWatchlists to fetch.
+     */
+    where?: UserWatchlistWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of UserWatchlists to fetch.
+     */
+    orderBy?: UserWatchlistOrderByWithRelationInput | UserWatchlistOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing UserWatchlists.
+     */
+    cursor?: UserWatchlistWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` UserWatchlists from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` UserWatchlists.
+     */
+    skip?: number
+    distinct?: UserWatchlistScalarFieldEnum | UserWatchlistScalarFieldEnum[]
+  }
+
+  /**
+   * UserWatchlist create
+   */
+  export type UserWatchlistCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the UserWatchlist
+     */
+    select?: UserWatchlistSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the UserWatchlist
+     */
+    omit?: UserWatchlistOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserWatchlistInclude<ExtArgs> | null
+    /**
+     * The data needed to create a UserWatchlist.
+     */
+    data: XOR<UserWatchlistCreateInput, UserWatchlistUncheckedCreateInput>
+  }
+
+  /**
+   * UserWatchlist createMany
+   */
+  export type UserWatchlistCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many UserWatchlists.
+     */
+    data: UserWatchlistCreateManyInput | UserWatchlistCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * UserWatchlist createManyAndReturn
+   */
+  export type UserWatchlistCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the UserWatchlist
+     */
+    select?: UserWatchlistSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the UserWatchlist
+     */
+    omit?: UserWatchlistOmit<ExtArgs> | null
+    /**
+     * The data used to create many UserWatchlists.
+     */
+    data: UserWatchlistCreateManyInput | UserWatchlistCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserWatchlistIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * UserWatchlist update
+   */
+  export type UserWatchlistUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the UserWatchlist
+     */
+    select?: UserWatchlistSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the UserWatchlist
+     */
+    omit?: UserWatchlistOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserWatchlistInclude<ExtArgs> | null
+    /**
+     * The data needed to update a UserWatchlist.
+     */
+    data: XOR<UserWatchlistUpdateInput, UserWatchlistUncheckedUpdateInput>
+    /**
+     * Choose, which UserWatchlist to update.
+     */
+    where: UserWatchlistWhereUniqueInput
+  }
+
+  /**
+   * UserWatchlist updateMany
+   */
+  export type UserWatchlistUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update UserWatchlists.
+     */
+    data: XOR<UserWatchlistUpdateManyMutationInput, UserWatchlistUncheckedUpdateManyInput>
+    /**
+     * Filter which UserWatchlists to update
+     */
+    where?: UserWatchlistWhereInput
+    /**
+     * Limit how many UserWatchlists to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * UserWatchlist updateManyAndReturn
+   */
+  export type UserWatchlistUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the UserWatchlist
+     */
+    select?: UserWatchlistSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the UserWatchlist
+     */
+    omit?: UserWatchlistOmit<ExtArgs> | null
+    /**
+     * The data used to update UserWatchlists.
+     */
+    data: XOR<UserWatchlistUpdateManyMutationInput, UserWatchlistUncheckedUpdateManyInput>
+    /**
+     * Filter which UserWatchlists to update
+     */
+    where?: UserWatchlistWhereInput
+    /**
+     * Limit how many UserWatchlists to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserWatchlistIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * UserWatchlist upsert
+   */
+  export type UserWatchlistUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the UserWatchlist
+     */
+    select?: UserWatchlistSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the UserWatchlist
+     */
+    omit?: UserWatchlistOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserWatchlistInclude<ExtArgs> | null
+    /**
+     * The filter to search for the UserWatchlist to update in case it exists.
+     */
+    where: UserWatchlistWhereUniqueInput
+    /**
+     * In case the UserWatchlist found by the `where` argument doesn't exist, create a new UserWatchlist with this data.
+     */
+    create: XOR<UserWatchlistCreateInput, UserWatchlistUncheckedCreateInput>
+    /**
+     * In case the UserWatchlist was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<UserWatchlistUpdateInput, UserWatchlistUncheckedUpdateInput>
+  }
+
+  /**
+   * UserWatchlist delete
+   */
+  export type UserWatchlistDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the UserWatchlist
+     */
+    select?: UserWatchlistSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the UserWatchlist
+     */
+    omit?: UserWatchlistOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserWatchlistInclude<ExtArgs> | null
+    /**
+     * Filter which UserWatchlist to delete.
+     */
+    where: UserWatchlistWhereUniqueInput
+  }
+
+  /**
+   * UserWatchlist deleteMany
+   */
+  export type UserWatchlistDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which UserWatchlists to delete
+     */
+    where?: UserWatchlistWhereInput
+    /**
+     * Limit how many UserWatchlists to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * UserWatchlist.tags
+   */
+  export type UserWatchlist$tagsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the WatchlistTag
+     */
+    select?: WatchlistTagSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the WatchlistTag
+     */
+    omit?: WatchlistTagOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: WatchlistTagInclude<ExtArgs> | null
+    where?: WatchlistTagWhereInput
+    orderBy?: WatchlistTagOrderByWithRelationInput | WatchlistTagOrderByWithRelationInput[]
+    cursor?: WatchlistTagWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: WatchlistTagScalarFieldEnum | WatchlistTagScalarFieldEnum[]
+  }
+
+  /**
+   * UserWatchlist without action
+   */
+  export type UserWatchlistDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the UserWatchlist
+     */
+    select?: UserWatchlistSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the UserWatchlist
+     */
+    omit?: UserWatchlistOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserWatchlistInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model Tag
+   */
+
+  export type AggregateTag = {
+    _count: TagCountAggregateOutputType | null
+    _min: TagMinAggregateOutputType | null
+    _max: TagMaxAggregateOutputType | null
+  }
+
+  export type TagMinAggregateOutputType = {
+    tagId: string | null
+    tagName: string | null
+    createdAt: Date | null
+    deletedAt: Date | null
+  }
+
+  export type TagMaxAggregateOutputType = {
+    tagId: string | null
+    tagName: string | null
+    createdAt: Date | null
+    deletedAt: Date | null
+  }
+
+  export type TagCountAggregateOutputType = {
+    tagId: number
+    tagName: number
+    createdAt: number
+    deletedAt: number
+    _all: number
+  }
+
+
+  export type TagMinAggregateInputType = {
+    tagId?: true
+    tagName?: true
+    createdAt?: true
+    deletedAt?: true
+  }
+
+  export type TagMaxAggregateInputType = {
+    tagId?: true
+    tagName?: true
+    createdAt?: true
+    deletedAt?: true
+  }
+
+  export type TagCountAggregateInputType = {
+    tagId?: true
+    tagName?: true
+    createdAt?: true
+    deletedAt?: true
+    _all?: true
+  }
+
+  export type TagAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which Tag to aggregate.
+     */
+    where?: TagWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Tags to fetch.
+     */
+    orderBy?: TagOrderByWithRelationInput | TagOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: TagWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Tags from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Tags.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned Tags
+    **/
+    _count?: true | TagCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: TagMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: TagMaxAggregateInputType
+  }
+
+  export type GetTagAggregateType<T extends TagAggregateArgs> = {
+        [P in keyof T & keyof AggregateTag]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateTag[P]>
+      : GetScalarType<T[P], AggregateTag[P]>
+  }
+
+
+
+
+  export type TagGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: TagWhereInput
+    orderBy?: TagOrderByWithAggregationInput | TagOrderByWithAggregationInput[]
+    by: TagScalarFieldEnum[] | TagScalarFieldEnum
+    having?: TagScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: TagCountAggregateInputType | true
+    _min?: TagMinAggregateInputType
+    _max?: TagMaxAggregateInputType
+  }
+
+  export type TagGroupByOutputType = {
+    tagId: string
+    tagName: string
+    createdAt: Date
+    deletedAt: Date | null
+    _count: TagCountAggregateOutputType | null
+    _min: TagMinAggregateOutputType | null
+    _max: TagMaxAggregateOutputType | null
+  }
+
+  type GetTagGroupByPayload<T extends TagGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<TagGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof TagGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], TagGroupByOutputType[P]>
+            : GetScalarType<T[P], TagGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type TagSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    tagId?: boolean
+    tagName?: boolean
+    createdAt?: boolean
+    deletedAt?: boolean
+    watchlistTags?: boolean | Tag$watchlistTagsArgs<ExtArgs>
+    _count?: boolean | TagCountOutputTypeDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["tag"]>
+
+  export type TagSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    tagId?: boolean
+    tagName?: boolean
+    createdAt?: boolean
+    deletedAt?: boolean
+  }, ExtArgs["result"]["tag"]>
+
+  export type TagSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    tagId?: boolean
+    tagName?: boolean
+    createdAt?: boolean
+    deletedAt?: boolean
+  }, ExtArgs["result"]["tag"]>
+
+  export type TagSelectScalar = {
+    tagId?: boolean
+    tagName?: boolean
+    createdAt?: boolean
+    deletedAt?: boolean
+  }
+
+  export type TagOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"tagId" | "tagName" | "createdAt" | "deletedAt", ExtArgs["result"]["tag"]>
+  export type TagInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    watchlistTags?: boolean | Tag$watchlistTagsArgs<ExtArgs>
+    _count?: boolean | TagCountOutputTypeDefaultArgs<ExtArgs>
+  }
+  export type TagIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
+  export type TagIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
+
+  export type $TagPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "Tag"
+    objects: {
+      watchlistTags: Prisma.$WatchlistTagPayload<ExtArgs>[]
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      tagId: string
+      tagName: string
+      createdAt: Date
+      deletedAt: Date | null
+    }, ExtArgs["result"]["tag"]>
+    composites: {}
+  }
+
+  type TagGetPayload<S extends boolean | null | undefined | TagDefaultArgs> = $Result.GetResult<Prisma.$TagPayload, S>
+
+  type TagCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<TagFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: TagCountAggregateInputType | true
+    }
+
+  export interface TagDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['Tag'], meta: { name: 'Tag' } }
+    /**
+     * Find zero or one Tag that matches the filter.
+     * @param {TagFindUniqueArgs} args - Arguments to find a Tag
+     * @example
+     * // Get one Tag
+     * const tag = await prisma.tag.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends TagFindUniqueArgs>(args: SelectSubset<T, TagFindUniqueArgs<ExtArgs>>): Prisma__TagClient<$Result.GetResult<Prisma.$TagPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one Tag that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {TagFindUniqueOrThrowArgs} args - Arguments to find a Tag
+     * @example
+     * // Get one Tag
+     * const tag = await prisma.tag.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends TagFindUniqueOrThrowArgs>(args: SelectSubset<T, TagFindUniqueOrThrowArgs<ExtArgs>>): Prisma__TagClient<$Result.GetResult<Prisma.$TagPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first Tag that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TagFindFirstArgs} args - Arguments to find a Tag
+     * @example
+     * // Get one Tag
+     * const tag = await prisma.tag.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends TagFindFirstArgs>(args?: SelectSubset<T, TagFindFirstArgs<ExtArgs>>): Prisma__TagClient<$Result.GetResult<Prisma.$TagPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first Tag that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TagFindFirstOrThrowArgs} args - Arguments to find a Tag
+     * @example
+     * // Get one Tag
+     * const tag = await prisma.tag.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends TagFindFirstOrThrowArgs>(args?: SelectSubset<T, TagFindFirstOrThrowArgs<ExtArgs>>): Prisma__TagClient<$Result.GetResult<Prisma.$TagPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more Tags that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TagFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all Tags
+     * const tags = await prisma.tag.findMany()
+     * 
+     * // Get first 10 Tags
+     * const tags = await prisma.tag.findMany({ take: 10 })
+     * 
+     * // Only select the `tagId`
+     * const tagWithTagIdOnly = await prisma.tag.findMany({ select: { tagId: true } })
+     * 
+     */
+    findMany<T extends TagFindManyArgs>(args?: SelectSubset<T, TagFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TagPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a Tag.
+     * @param {TagCreateArgs} args - Arguments to create a Tag.
+     * @example
+     * // Create one Tag
+     * const Tag = await prisma.tag.create({
+     *   data: {
+     *     // ... data to create a Tag
+     *   }
+     * })
+     * 
+     */
+    create<T extends TagCreateArgs>(args: SelectSubset<T, TagCreateArgs<ExtArgs>>): Prisma__TagClient<$Result.GetResult<Prisma.$TagPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many Tags.
+     * @param {TagCreateManyArgs} args - Arguments to create many Tags.
+     * @example
+     * // Create many Tags
+     * const tag = await prisma.tag.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends TagCreateManyArgs>(args?: SelectSubset<T, TagCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many Tags and returns the data saved in the database.
+     * @param {TagCreateManyAndReturnArgs} args - Arguments to create many Tags.
+     * @example
+     * // Create many Tags
+     * const tag = await prisma.tag.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many Tags and only return the `tagId`
+     * const tagWithTagIdOnly = await prisma.tag.createManyAndReturn({
+     *   select: { tagId: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends TagCreateManyAndReturnArgs>(args?: SelectSubset<T, TagCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TagPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a Tag.
+     * @param {TagDeleteArgs} args - Arguments to delete one Tag.
+     * @example
+     * // Delete one Tag
+     * const Tag = await prisma.tag.delete({
+     *   where: {
+     *     // ... filter to delete one Tag
+     *   }
+     * })
+     * 
+     */
+    delete<T extends TagDeleteArgs>(args: SelectSubset<T, TagDeleteArgs<ExtArgs>>): Prisma__TagClient<$Result.GetResult<Prisma.$TagPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one Tag.
+     * @param {TagUpdateArgs} args - Arguments to update one Tag.
+     * @example
+     * // Update one Tag
+     * const tag = await prisma.tag.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends TagUpdateArgs>(args: SelectSubset<T, TagUpdateArgs<ExtArgs>>): Prisma__TagClient<$Result.GetResult<Prisma.$TagPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more Tags.
+     * @param {TagDeleteManyArgs} args - Arguments to filter Tags to delete.
+     * @example
+     * // Delete a few Tags
+     * const { count } = await prisma.tag.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends TagDeleteManyArgs>(args?: SelectSubset<T, TagDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Tags.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TagUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many Tags
+     * const tag = await prisma.tag.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends TagUpdateManyArgs>(args: SelectSubset<T, TagUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Tags and returns the data updated in the database.
+     * @param {TagUpdateManyAndReturnArgs} args - Arguments to update many Tags.
+     * @example
+     * // Update many Tags
+     * const tag = await prisma.tag.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more Tags and only return the `tagId`
+     * const tagWithTagIdOnly = await prisma.tag.updateManyAndReturn({
+     *   select: { tagId: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends TagUpdateManyAndReturnArgs>(args: SelectSubset<T, TagUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TagPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one Tag.
+     * @param {TagUpsertArgs} args - Arguments to update or create a Tag.
+     * @example
+     * // Update or create a Tag
+     * const tag = await prisma.tag.upsert({
+     *   create: {
+     *     // ... data to create a Tag
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the Tag we want to update
+     *   }
+     * })
+     */
+    upsert<T extends TagUpsertArgs>(args: SelectSubset<T, TagUpsertArgs<ExtArgs>>): Prisma__TagClient<$Result.GetResult<Prisma.$TagPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of Tags.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TagCountArgs} args - Arguments to filter Tags to count.
+     * @example
+     * // Count the number of Tags
+     * const count = await prisma.tag.count({
+     *   where: {
+     *     // ... the filter for the Tags we want to count
+     *   }
+     * })
+    **/
+    count<T extends TagCountArgs>(
+      args?: Subset<T, TagCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], TagCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a Tag.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TagAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends TagAggregateArgs>(args: Subset<T, TagAggregateArgs>): Prisma.PrismaPromise<GetTagAggregateType<T>>
+
+    /**
+     * Group by Tag.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TagGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends TagGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: TagGroupByArgs['orderBy'] }
+        : { orderBy?: TagGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, TagGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetTagGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the Tag model
+   */
+  readonly fields: TagFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for Tag.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__TagClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    watchlistTags<T extends Tag$watchlistTagsArgs<ExtArgs> = {}>(args?: Subset<T, Tag$watchlistTagsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$WatchlistTagPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the Tag model
+   */
+  interface TagFieldRefs {
+    readonly tagId: FieldRef<"Tag", 'String'>
+    readonly tagName: FieldRef<"Tag", 'String'>
+    readonly createdAt: FieldRef<"Tag", 'DateTime'>
+    readonly deletedAt: FieldRef<"Tag", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * Tag findUnique
+   */
+  export type TagFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Tag
+     */
+    select?: TagSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Tag
+     */
+    omit?: TagOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TagInclude<ExtArgs> | null
+    /**
+     * Filter, which Tag to fetch.
+     */
+    where: TagWhereUniqueInput
+  }
+
+  /**
+   * Tag findUniqueOrThrow
+   */
+  export type TagFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Tag
+     */
+    select?: TagSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Tag
+     */
+    omit?: TagOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TagInclude<ExtArgs> | null
+    /**
+     * Filter, which Tag to fetch.
+     */
+    where: TagWhereUniqueInput
+  }
+
+  /**
+   * Tag findFirst
+   */
+  export type TagFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Tag
+     */
+    select?: TagSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Tag
+     */
+    omit?: TagOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TagInclude<ExtArgs> | null
+    /**
+     * Filter, which Tag to fetch.
+     */
+    where?: TagWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Tags to fetch.
+     */
+    orderBy?: TagOrderByWithRelationInput | TagOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for Tags.
+     */
+    cursor?: TagWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Tags from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Tags.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of Tags.
+     */
+    distinct?: TagScalarFieldEnum | TagScalarFieldEnum[]
+  }
+
+  /**
+   * Tag findFirstOrThrow
+   */
+  export type TagFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Tag
+     */
+    select?: TagSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Tag
+     */
+    omit?: TagOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TagInclude<ExtArgs> | null
+    /**
+     * Filter, which Tag to fetch.
+     */
+    where?: TagWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Tags to fetch.
+     */
+    orderBy?: TagOrderByWithRelationInput | TagOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for Tags.
+     */
+    cursor?: TagWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Tags from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Tags.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of Tags.
+     */
+    distinct?: TagScalarFieldEnum | TagScalarFieldEnum[]
+  }
+
+  /**
+   * Tag findMany
+   */
+  export type TagFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Tag
+     */
+    select?: TagSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Tag
+     */
+    omit?: TagOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TagInclude<ExtArgs> | null
+    /**
+     * Filter, which Tags to fetch.
+     */
+    where?: TagWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Tags to fetch.
+     */
+    orderBy?: TagOrderByWithRelationInput | TagOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing Tags.
+     */
+    cursor?: TagWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Tags from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Tags.
+     */
+    skip?: number
+    distinct?: TagScalarFieldEnum | TagScalarFieldEnum[]
+  }
+
+  /**
+   * Tag create
+   */
+  export type TagCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Tag
+     */
+    select?: TagSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Tag
+     */
+    omit?: TagOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TagInclude<ExtArgs> | null
+    /**
+     * The data needed to create a Tag.
+     */
+    data: XOR<TagCreateInput, TagUncheckedCreateInput>
+  }
+
+  /**
+   * Tag createMany
+   */
+  export type TagCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many Tags.
+     */
+    data: TagCreateManyInput | TagCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * Tag createManyAndReturn
+   */
+  export type TagCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Tag
+     */
+    select?: TagSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the Tag
+     */
+    omit?: TagOmit<ExtArgs> | null
+    /**
+     * The data used to create many Tags.
+     */
+    data: TagCreateManyInput | TagCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * Tag update
+   */
+  export type TagUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Tag
+     */
+    select?: TagSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Tag
+     */
+    omit?: TagOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TagInclude<ExtArgs> | null
+    /**
+     * The data needed to update a Tag.
+     */
+    data: XOR<TagUpdateInput, TagUncheckedUpdateInput>
+    /**
+     * Choose, which Tag to update.
+     */
+    where: TagWhereUniqueInput
+  }
+
+  /**
+   * Tag updateMany
+   */
+  export type TagUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update Tags.
+     */
+    data: XOR<TagUpdateManyMutationInput, TagUncheckedUpdateManyInput>
+    /**
+     * Filter which Tags to update
+     */
+    where?: TagWhereInput
+    /**
+     * Limit how many Tags to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * Tag updateManyAndReturn
+   */
+  export type TagUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Tag
+     */
+    select?: TagSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the Tag
+     */
+    omit?: TagOmit<ExtArgs> | null
+    /**
+     * The data used to update Tags.
+     */
+    data: XOR<TagUpdateManyMutationInput, TagUncheckedUpdateManyInput>
+    /**
+     * Filter which Tags to update
+     */
+    where?: TagWhereInput
+    /**
+     * Limit how many Tags to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * Tag upsert
+   */
+  export type TagUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Tag
+     */
+    select?: TagSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Tag
+     */
+    omit?: TagOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TagInclude<ExtArgs> | null
+    /**
+     * The filter to search for the Tag to update in case it exists.
+     */
+    where: TagWhereUniqueInput
+    /**
+     * In case the Tag found by the `where` argument doesn't exist, create a new Tag with this data.
+     */
+    create: XOR<TagCreateInput, TagUncheckedCreateInput>
+    /**
+     * In case the Tag was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<TagUpdateInput, TagUncheckedUpdateInput>
+  }
+
+  /**
+   * Tag delete
+   */
+  export type TagDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Tag
+     */
+    select?: TagSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Tag
+     */
+    omit?: TagOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TagInclude<ExtArgs> | null
+    /**
+     * Filter which Tag to delete.
+     */
+    where: TagWhereUniqueInput
+  }
+
+  /**
+   * Tag deleteMany
+   */
+  export type TagDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which Tags to delete
+     */
+    where?: TagWhereInput
+    /**
+     * Limit how many Tags to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * Tag.watchlistTags
+   */
+  export type Tag$watchlistTagsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the WatchlistTag
+     */
+    select?: WatchlistTagSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the WatchlistTag
+     */
+    omit?: WatchlistTagOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: WatchlistTagInclude<ExtArgs> | null
+    where?: WatchlistTagWhereInput
+    orderBy?: WatchlistTagOrderByWithRelationInput | WatchlistTagOrderByWithRelationInput[]
+    cursor?: WatchlistTagWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: WatchlistTagScalarFieldEnum | WatchlistTagScalarFieldEnum[]
+  }
+
+  /**
+   * Tag without action
+   */
+  export type TagDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Tag
+     */
+    select?: TagSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Tag
+     */
+    omit?: TagOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: TagInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model WatchlistTag
+   */
+
+  export type AggregateWatchlistTag = {
+    _count: WatchlistTagCountAggregateOutputType | null
+    _min: WatchlistTagMinAggregateOutputType | null
+    _max: WatchlistTagMaxAggregateOutputType | null
+  }
+
+  export type WatchlistTagMinAggregateOutputType = {
+    userId: string | null
+    companyId: string | null
+    tagId: string | null
+    createdAt: Date | null
+    deletedAt: Date | null
+  }
+
+  export type WatchlistTagMaxAggregateOutputType = {
+    userId: string | null
+    companyId: string | null
+    tagId: string | null
+    createdAt: Date | null
+    deletedAt: Date | null
+  }
+
+  export type WatchlistTagCountAggregateOutputType = {
+    userId: number
+    companyId: number
+    tagId: number
+    createdAt: number
+    deletedAt: number
+    _all: number
+  }
+
+
+  export type WatchlistTagMinAggregateInputType = {
+    userId?: true
+    companyId?: true
+    tagId?: true
+    createdAt?: true
+    deletedAt?: true
+  }
+
+  export type WatchlistTagMaxAggregateInputType = {
+    userId?: true
+    companyId?: true
+    tagId?: true
+    createdAt?: true
+    deletedAt?: true
+  }
+
+  export type WatchlistTagCountAggregateInputType = {
+    userId?: true
+    companyId?: true
+    tagId?: true
+    createdAt?: true
+    deletedAt?: true
+    _all?: true
+  }
+
+  export type WatchlistTagAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which WatchlistTag to aggregate.
+     */
+    where?: WatchlistTagWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of WatchlistTags to fetch.
+     */
+    orderBy?: WatchlistTagOrderByWithRelationInput | WatchlistTagOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: WatchlistTagWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` WatchlistTags from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` WatchlistTags.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned WatchlistTags
+    **/
+    _count?: true | WatchlistTagCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: WatchlistTagMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: WatchlistTagMaxAggregateInputType
+  }
+
+  export type GetWatchlistTagAggregateType<T extends WatchlistTagAggregateArgs> = {
+        [P in keyof T & keyof AggregateWatchlistTag]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateWatchlistTag[P]>
+      : GetScalarType<T[P], AggregateWatchlistTag[P]>
+  }
+
+
+
+
+  export type WatchlistTagGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: WatchlistTagWhereInput
+    orderBy?: WatchlistTagOrderByWithAggregationInput | WatchlistTagOrderByWithAggregationInput[]
+    by: WatchlistTagScalarFieldEnum[] | WatchlistTagScalarFieldEnum
+    having?: WatchlistTagScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: WatchlistTagCountAggregateInputType | true
+    _min?: WatchlistTagMinAggregateInputType
+    _max?: WatchlistTagMaxAggregateInputType
+  }
+
+  export type WatchlistTagGroupByOutputType = {
+    userId: string
+    companyId: string
+    tagId: string
+    createdAt: Date
+    deletedAt: Date | null
+    _count: WatchlistTagCountAggregateOutputType | null
+    _min: WatchlistTagMinAggregateOutputType | null
+    _max: WatchlistTagMaxAggregateOutputType | null
+  }
+
+  type GetWatchlistTagGroupByPayload<T extends WatchlistTagGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<WatchlistTagGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof WatchlistTagGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], WatchlistTagGroupByOutputType[P]>
+            : GetScalarType<T[P], WatchlistTagGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type WatchlistTagSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    userId?: boolean
+    companyId?: boolean
+    tagId?: boolean
+    createdAt?: boolean
+    deletedAt?: boolean
+    watchlist?: boolean | UserWatchlistDefaultArgs<ExtArgs>
+    tag?: boolean | TagDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["watchlistTag"]>
+
+  export type WatchlistTagSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    userId?: boolean
+    companyId?: boolean
+    tagId?: boolean
+    createdAt?: boolean
+    deletedAt?: boolean
+    watchlist?: boolean | UserWatchlistDefaultArgs<ExtArgs>
+    tag?: boolean | TagDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["watchlistTag"]>
+
+  export type WatchlistTagSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    userId?: boolean
+    companyId?: boolean
+    tagId?: boolean
+    createdAt?: boolean
+    deletedAt?: boolean
+    watchlist?: boolean | UserWatchlistDefaultArgs<ExtArgs>
+    tag?: boolean | TagDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["watchlistTag"]>
+
+  export type WatchlistTagSelectScalar = {
+    userId?: boolean
+    companyId?: boolean
+    tagId?: boolean
+    createdAt?: boolean
+    deletedAt?: boolean
+  }
+
+  export type WatchlistTagOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"userId" | "companyId" | "tagId" | "createdAt" | "deletedAt", ExtArgs["result"]["watchlistTag"]>
+  export type WatchlistTagInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    watchlist?: boolean | UserWatchlistDefaultArgs<ExtArgs>
+    tag?: boolean | TagDefaultArgs<ExtArgs>
+  }
+  export type WatchlistTagIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    watchlist?: boolean | UserWatchlistDefaultArgs<ExtArgs>
+    tag?: boolean | TagDefaultArgs<ExtArgs>
+  }
+  export type WatchlistTagIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    watchlist?: boolean | UserWatchlistDefaultArgs<ExtArgs>
+    tag?: boolean | TagDefaultArgs<ExtArgs>
+  }
+
+  export type $WatchlistTagPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "WatchlistTag"
+    objects: {
+      watchlist: Prisma.$UserWatchlistPayload<ExtArgs>
+      tag: Prisma.$TagPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      userId: string
+      companyId: string
+      tagId: string
+      createdAt: Date
+      deletedAt: Date | null
+    }, ExtArgs["result"]["watchlistTag"]>
+    composites: {}
+  }
+
+  type WatchlistTagGetPayload<S extends boolean | null | undefined | WatchlistTagDefaultArgs> = $Result.GetResult<Prisma.$WatchlistTagPayload, S>
+
+  type WatchlistTagCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<WatchlistTagFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: WatchlistTagCountAggregateInputType | true
+    }
+
+  export interface WatchlistTagDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['WatchlistTag'], meta: { name: 'WatchlistTag' } }
+    /**
+     * Find zero or one WatchlistTag that matches the filter.
+     * @param {WatchlistTagFindUniqueArgs} args - Arguments to find a WatchlistTag
+     * @example
+     * // Get one WatchlistTag
+     * const watchlistTag = await prisma.watchlistTag.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends WatchlistTagFindUniqueArgs>(args: SelectSubset<T, WatchlistTagFindUniqueArgs<ExtArgs>>): Prisma__WatchlistTagClient<$Result.GetResult<Prisma.$WatchlistTagPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one WatchlistTag that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {WatchlistTagFindUniqueOrThrowArgs} args - Arguments to find a WatchlistTag
+     * @example
+     * // Get one WatchlistTag
+     * const watchlistTag = await prisma.watchlistTag.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends WatchlistTagFindUniqueOrThrowArgs>(args: SelectSubset<T, WatchlistTagFindUniqueOrThrowArgs<ExtArgs>>): Prisma__WatchlistTagClient<$Result.GetResult<Prisma.$WatchlistTagPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first WatchlistTag that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {WatchlistTagFindFirstArgs} args - Arguments to find a WatchlistTag
+     * @example
+     * // Get one WatchlistTag
+     * const watchlistTag = await prisma.watchlistTag.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends WatchlistTagFindFirstArgs>(args?: SelectSubset<T, WatchlistTagFindFirstArgs<ExtArgs>>): Prisma__WatchlistTagClient<$Result.GetResult<Prisma.$WatchlistTagPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first WatchlistTag that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {WatchlistTagFindFirstOrThrowArgs} args - Arguments to find a WatchlistTag
+     * @example
+     * // Get one WatchlistTag
+     * const watchlistTag = await prisma.watchlistTag.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends WatchlistTagFindFirstOrThrowArgs>(args?: SelectSubset<T, WatchlistTagFindFirstOrThrowArgs<ExtArgs>>): Prisma__WatchlistTagClient<$Result.GetResult<Prisma.$WatchlistTagPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more WatchlistTags that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {WatchlistTagFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all WatchlistTags
+     * const watchlistTags = await prisma.watchlistTag.findMany()
+     * 
+     * // Get first 10 WatchlistTags
+     * const watchlistTags = await prisma.watchlistTag.findMany({ take: 10 })
+     * 
+     * // Only select the `userId`
+     * const watchlistTagWithUserIdOnly = await prisma.watchlistTag.findMany({ select: { userId: true } })
+     * 
+     */
+    findMany<T extends WatchlistTagFindManyArgs>(args?: SelectSubset<T, WatchlistTagFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$WatchlistTagPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a WatchlistTag.
+     * @param {WatchlistTagCreateArgs} args - Arguments to create a WatchlistTag.
+     * @example
+     * // Create one WatchlistTag
+     * const WatchlistTag = await prisma.watchlistTag.create({
+     *   data: {
+     *     // ... data to create a WatchlistTag
+     *   }
+     * })
+     * 
+     */
+    create<T extends WatchlistTagCreateArgs>(args: SelectSubset<T, WatchlistTagCreateArgs<ExtArgs>>): Prisma__WatchlistTagClient<$Result.GetResult<Prisma.$WatchlistTagPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many WatchlistTags.
+     * @param {WatchlistTagCreateManyArgs} args - Arguments to create many WatchlistTags.
+     * @example
+     * // Create many WatchlistTags
+     * const watchlistTag = await prisma.watchlistTag.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends WatchlistTagCreateManyArgs>(args?: SelectSubset<T, WatchlistTagCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many WatchlistTags and returns the data saved in the database.
+     * @param {WatchlistTagCreateManyAndReturnArgs} args - Arguments to create many WatchlistTags.
+     * @example
+     * // Create many WatchlistTags
+     * const watchlistTag = await prisma.watchlistTag.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many WatchlistTags and only return the `userId`
+     * const watchlistTagWithUserIdOnly = await prisma.watchlistTag.createManyAndReturn({
+     *   select: { userId: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends WatchlistTagCreateManyAndReturnArgs>(args?: SelectSubset<T, WatchlistTagCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$WatchlistTagPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a WatchlistTag.
+     * @param {WatchlistTagDeleteArgs} args - Arguments to delete one WatchlistTag.
+     * @example
+     * // Delete one WatchlistTag
+     * const WatchlistTag = await prisma.watchlistTag.delete({
+     *   where: {
+     *     // ... filter to delete one WatchlistTag
+     *   }
+     * })
+     * 
+     */
+    delete<T extends WatchlistTagDeleteArgs>(args: SelectSubset<T, WatchlistTagDeleteArgs<ExtArgs>>): Prisma__WatchlistTagClient<$Result.GetResult<Prisma.$WatchlistTagPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one WatchlistTag.
+     * @param {WatchlistTagUpdateArgs} args - Arguments to update one WatchlistTag.
+     * @example
+     * // Update one WatchlistTag
+     * const watchlistTag = await prisma.watchlistTag.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends WatchlistTagUpdateArgs>(args: SelectSubset<T, WatchlistTagUpdateArgs<ExtArgs>>): Prisma__WatchlistTagClient<$Result.GetResult<Prisma.$WatchlistTagPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more WatchlistTags.
+     * @param {WatchlistTagDeleteManyArgs} args - Arguments to filter WatchlistTags to delete.
+     * @example
+     * // Delete a few WatchlistTags
+     * const { count } = await prisma.watchlistTag.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends WatchlistTagDeleteManyArgs>(args?: SelectSubset<T, WatchlistTagDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more WatchlistTags.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {WatchlistTagUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many WatchlistTags
+     * const watchlistTag = await prisma.watchlistTag.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends WatchlistTagUpdateManyArgs>(args: SelectSubset<T, WatchlistTagUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more WatchlistTags and returns the data updated in the database.
+     * @param {WatchlistTagUpdateManyAndReturnArgs} args - Arguments to update many WatchlistTags.
+     * @example
+     * // Update many WatchlistTags
+     * const watchlistTag = await prisma.watchlistTag.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more WatchlistTags and only return the `userId`
+     * const watchlistTagWithUserIdOnly = await prisma.watchlistTag.updateManyAndReturn({
+     *   select: { userId: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends WatchlistTagUpdateManyAndReturnArgs>(args: SelectSubset<T, WatchlistTagUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$WatchlistTagPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one WatchlistTag.
+     * @param {WatchlistTagUpsertArgs} args - Arguments to update or create a WatchlistTag.
+     * @example
+     * // Update or create a WatchlistTag
+     * const watchlistTag = await prisma.watchlistTag.upsert({
+     *   create: {
+     *     // ... data to create a WatchlistTag
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the WatchlistTag we want to update
+     *   }
+     * })
+     */
+    upsert<T extends WatchlistTagUpsertArgs>(args: SelectSubset<T, WatchlistTagUpsertArgs<ExtArgs>>): Prisma__WatchlistTagClient<$Result.GetResult<Prisma.$WatchlistTagPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of WatchlistTags.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {WatchlistTagCountArgs} args - Arguments to filter WatchlistTags to count.
+     * @example
+     * // Count the number of WatchlistTags
+     * const count = await prisma.watchlistTag.count({
+     *   where: {
+     *     // ... the filter for the WatchlistTags we want to count
+     *   }
+     * })
+    **/
+    count<T extends WatchlistTagCountArgs>(
+      args?: Subset<T, WatchlistTagCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], WatchlistTagCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a WatchlistTag.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {WatchlistTagAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends WatchlistTagAggregateArgs>(args: Subset<T, WatchlistTagAggregateArgs>): Prisma.PrismaPromise<GetWatchlistTagAggregateType<T>>
+
+    /**
+     * Group by WatchlistTag.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {WatchlistTagGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends WatchlistTagGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: WatchlistTagGroupByArgs['orderBy'] }
+        : { orderBy?: WatchlistTagGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, WatchlistTagGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetWatchlistTagGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the WatchlistTag model
+   */
+  readonly fields: WatchlistTagFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for WatchlistTag.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__WatchlistTagClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    watchlist<T extends UserWatchlistDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserWatchlistDefaultArgs<ExtArgs>>): Prisma__UserWatchlistClient<$Result.GetResult<Prisma.$UserWatchlistPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    tag<T extends TagDefaultArgs<ExtArgs> = {}>(args?: Subset<T, TagDefaultArgs<ExtArgs>>): Prisma__TagClient<$Result.GetResult<Prisma.$TagPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the WatchlistTag model
+   */
+  interface WatchlistTagFieldRefs {
+    readonly userId: FieldRef<"WatchlistTag", 'String'>
+    readonly companyId: FieldRef<"WatchlistTag", 'String'>
+    readonly tagId: FieldRef<"WatchlistTag", 'String'>
+    readonly createdAt: FieldRef<"WatchlistTag", 'DateTime'>
+    readonly deletedAt: FieldRef<"WatchlistTag", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * WatchlistTag findUnique
+   */
+  export type WatchlistTagFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the WatchlistTag
+     */
+    select?: WatchlistTagSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the WatchlistTag
+     */
+    omit?: WatchlistTagOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: WatchlistTagInclude<ExtArgs> | null
+    /**
+     * Filter, which WatchlistTag to fetch.
+     */
+    where: WatchlistTagWhereUniqueInput
+  }
+
+  /**
+   * WatchlistTag findUniqueOrThrow
+   */
+  export type WatchlistTagFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the WatchlistTag
+     */
+    select?: WatchlistTagSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the WatchlistTag
+     */
+    omit?: WatchlistTagOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: WatchlistTagInclude<ExtArgs> | null
+    /**
+     * Filter, which WatchlistTag to fetch.
+     */
+    where: WatchlistTagWhereUniqueInput
+  }
+
+  /**
+   * WatchlistTag findFirst
+   */
+  export type WatchlistTagFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the WatchlistTag
+     */
+    select?: WatchlistTagSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the WatchlistTag
+     */
+    omit?: WatchlistTagOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: WatchlistTagInclude<ExtArgs> | null
+    /**
+     * Filter, which WatchlistTag to fetch.
+     */
+    where?: WatchlistTagWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of WatchlistTags to fetch.
+     */
+    orderBy?: WatchlistTagOrderByWithRelationInput | WatchlistTagOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for WatchlistTags.
+     */
+    cursor?: WatchlistTagWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` WatchlistTags from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` WatchlistTags.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of WatchlistTags.
+     */
+    distinct?: WatchlistTagScalarFieldEnum | WatchlistTagScalarFieldEnum[]
+  }
+
+  /**
+   * WatchlistTag findFirstOrThrow
+   */
+  export type WatchlistTagFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the WatchlistTag
+     */
+    select?: WatchlistTagSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the WatchlistTag
+     */
+    omit?: WatchlistTagOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: WatchlistTagInclude<ExtArgs> | null
+    /**
+     * Filter, which WatchlistTag to fetch.
+     */
+    where?: WatchlistTagWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of WatchlistTags to fetch.
+     */
+    orderBy?: WatchlistTagOrderByWithRelationInput | WatchlistTagOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for WatchlistTags.
+     */
+    cursor?: WatchlistTagWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` WatchlistTags from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` WatchlistTags.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of WatchlistTags.
+     */
+    distinct?: WatchlistTagScalarFieldEnum | WatchlistTagScalarFieldEnum[]
+  }
+
+  /**
+   * WatchlistTag findMany
+   */
+  export type WatchlistTagFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the WatchlistTag
+     */
+    select?: WatchlistTagSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the WatchlistTag
+     */
+    omit?: WatchlistTagOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: WatchlistTagInclude<ExtArgs> | null
+    /**
+     * Filter, which WatchlistTags to fetch.
+     */
+    where?: WatchlistTagWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of WatchlistTags to fetch.
+     */
+    orderBy?: WatchlistTagOrderByWithRelationInput | WatchlistTagOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing WatchlistTags.
+     */
+    cursor?: WatchlistTagWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` WatchlistTags from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` WatchlistTags.
+     */
+    skip?: number
+    distinct?: WatchlistTagScalarFieldEnum | WatchlistTagScalarFieldEnum[]
+  }
+
+  /**
+   * WatchlistTag create
+   */
+  export type WatchlistTagCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the WatchlistTag
+     */
+    select?: WatchlistTagSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the WatchlistTag
+     */
+    omit?: WatchlistTagOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: WatchlistTagInclude<ExtArgs> | null
+    /**
+     * The data needed to create a WatchlistTag.
+     */
+    data: XOR<WatchlistTagCreateInput, WatchlistTagUncheckedCreateInput>
+  }
+
+  /**
+   * WatchlistTag createMany
+   */
+  export type WatchlistTagCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many WatchlistTags.
+     */
+    data: WatchlistTagCreateManyInput | WatchlistTagCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * WatchlistTag createManyAndReturn
+   */
+  export type WatchlistTagCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the WatchlistTag
+     */
+    select?: WatchlistTagSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the WatchlistTag
+     */
+    omit?: WatchlistTagOmit<ExtArgs> | null
+    /**
+     * The data used to create many WatchlistTags.
+     */
+    data: WatchlistTagCreateManyInput | WatchlistTagCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: WatchlistTagIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * WatchlistTag update
+   */
+  export type WatchlistTagUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the WatchlistTag
+     */
+    select?: WatchlistTagSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the WatchlistTag
+     */
+    omit?: WatchlistTagOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: WatchlistTagInclude<ExtArgs> | null
+    /**
+     * The data needed to update a WatchlistTag.
+     */
+    data: XOR<WatchlistTagUpdateInput, WatchlistTagUncheckedUpdateInput>
+    /**
+     * Choose, which WatchlistTag to update.
+     */
+    where: WatchlistTagWhereUniqueInput
+  }
+
+  /**
+   * WatchlistTag updateMany
+   */
+  export type WatchlistTagUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update WatchlistTags.
+     */
+    data: XOR<WatchlistTagUpdateManyMutationInput, WatchlistTagUncheckedUpdateManyInput>
+    /**
+     * Filter which WatchlistTags to update
+     */
+    where?: WatchlistTagWhereInput
+    /**
+     * Limit how many WatchlistTags to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * WatchlistTag updateManyAndReturn
+   */
+  export type WatchlistTagUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the WatchlistTag
+     */
+    select?: WatchlistTagSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the WatchlistTag
+     */
+    omit?: WatchlistTagOmit<ExtArgs> | null
+    /**
+     * The data used to update WatchlistTags.
+     */
+    data: XOR<WatchlistTagUpdateManyMutationInput, WatchlistTagUncheckedUpdateManyInput>
+    /**
+     * Filter which WatchlistTags to update
+     */
+    where?: WatchlistTagWhereInput
+    /**
+     * Limit how many WatchlistTags to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: WatchlistTagIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * WatchlistTag upsert
+   */
+  export type WatchlistTagUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the WatchlistTag
+     */
+    select?: WatchlistTagSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the WatchlistTag
+     */
+    omit?: WatchlistTagOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: WatchlistTagInclude<ExtArgs> | null
+    /**
+     * The filter to search for the WatchlistTag to update in case it exists.
+     */
+    where: WatchlistTagWhereUniqueInput
+    /**
+     * In case the WatchlistTag found by the `where` argument doesn't exist, create a new WatchlistTag with this data.
+     */
+    create: XOR<WatchlistTagCreateInput, WatchlistTagUncheckedCreateInput>
+    /**
+     * In case the WatchlistTag was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<WatchlistTagUpdateInput, WatchlistTagUncheckedUpdateInput>
+  }
+
+  /**
+   * WatchlistTag delete
+   */
+  export type WatchlistTagDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the WatchlistTag
+     */
+    select?: WatchlistTagSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the WatchlistTag
+     */
+    omit?: WatchlistTagOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: WatchlistTagInclude<ExtArgs> | null
+    /**
+     * Filter which WatchlistTag to delete.
+     */
+    where: WatchlistTagWhereUniqueInput
+  }
+
+  /**
+   * WatchlistTag deleteMany
+   */
+  export type WatchlistTagDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which WatchlistTags to delete
+     */
+    where?: WatchlistTagWhereInput
+    /**
+     * Limit how many WatchlistTags to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * WatchlistTag without action
+   */
+  export type WatchlistTagDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the WatchlistTag
+     */
+    select?: WatchlistTagSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the WatchlistTag
+     */
+    omit?: WatchlistTagOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: WatchlistTagInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model RsFilterPreset
+   */
+
+  export type AggregateRsFilterPreset = {
+    _count: RsFilterPresetCountAggregateOutputType | null
+    _min: RsFilterPresetMinAggregateOutputType | null
+    _max: RsFilterPresetMaxAggregateOutputType | null
+  }
+
+  export type RsFilterPresetMinAggregateOutputType = {
+    presetId: string | null
+    userId: string | null
+    presetName: string | null
+    createdAt: Date | null
+    deletedAt: Date | null
+  }
+
+  export type RsFilterPresetMaxAggregateOutputType = {
+    presetId: string | null
+    userId: string | null
+    presetName: string | null
+    createdAt: Date | null
+    deletedAt: Date | null
+  }
+
+  export type RsFilterPresetCountAggregateOutputType = {
+    presetId: number
+    userId: number
+    presetName: number
+    createdAt: number
+    deletedAt: number
+    _all: number
+  }
+
+
+  export type RsFilterPresetMinAggregateInputType = {
+    presetId?: true
+    userId?: true
+    presetName?: true
+    createdAt?: true
+    deletedAt?: true
+  }
+
+  export type RsFilterPresetMaxAggregateInputType = {
+    presetId?: true
+    userId?: true
+    presetName?: true
+    createdAt?: true
+    deletedAt?: true
+  }
+
+  export type RsFilterPresetCountAggregateInputType = {
+    presetId?: true
+    userId?: true
+    presetName?: true
+    createdAt?: true
+    deletedAt?: true
+    _all?: true
+  }
+
+  export type RsFilterPresetAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which RsFilterPreset to aggregate.
+     */
+    where?: RsFilterPresetWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of RsFilterPresets to fetch.
+     */
+    orderBy?: RsFilterPresetOrderByWithRelationInput | RsFilterPresetOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: RsFilterPresetWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` RsFilterPresets from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` RsFilterPresets.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned RsFilterPresets
+    **/
+    _count?: true | RsFilterPresetCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: RsFilterPresetMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: RsFilterPresetMaxAggregateInputType
+  }
+
+  export type GetRsFilterPresetAggregateType<T extends RsFilterPresetAggregateArgs> = {
+        [P in keyof T & keyof AggregateRsFilterPreset]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateRsFilterPreset[P]>
+      : GetScalarType<T[P], AggregateRsFilterPreset[P]>
+  }
+
+
+
+
+  export type RsFilterPresetGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: RsFilterPresetWhereInput
+    orderBy?: RsFilterPresetOrderByWithAggregationInput | RsFilterPresetOrderByWithAggregationInput[]
+    by: RsFilterPresetScalarFieldEnum[] | RsFilterPresetScalarFieldEnum
+    having?: RsFilterPresetScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: RsFilterPresetCountAggregateInputType | true
+    _min?: RsFilterPresetMinAggregateInputType
+    _max?: RsFilterPresetMaxAggregateInputType
+  }
+
+  export type RsFilterPresetGroupByOutputType = {
+    presetId: string
+    userId: string
+    presetName: string
+    createdAt: Date
+    deletedAt: Date | null
+    _count: RsFilterPresetCountAggregateOutputType | null
+    _min: RsFilterPresetMinAggregateOutputType | null
+    _max: RsFilterPresetMaxAggregateOutputType | null
+  }
+
+  type GetRsFilterPresetGroupByPayload<T extends RsFilterPresetGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<RsFilterPresetGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof RsFilterPresetGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], RsFilterPresetGroupByOutputType[P]>
+            : GetScalarType<T[P], RsFilterPresetGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type RsFilterPresetSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    presetId?: boolean
+    userId?: boolean
+    presetName?: boolean
+    createdAt?: boolean
+    deletedAt?: boolean
+    user?: boolean | UserDefaultArgs<ExtArgs>
+    periods?: boolean | RsFilterPreset$periodsArgs<ExtArgs>
+    _count?: boolean | RsFilterPresetCountOutputTypeDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["rsFilterPreset"]>
+
+  export type RsFilterPresetSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    presetId?: boolean
+    userId?: boolean
+    presetName?: boolean
+    createdAt?: boolean
+    deletedAt?: boolean
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["rsFilterPreset"]>
+
+  export type RsFilterPresetSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    presetId?: boolean
+    userId?: boolean
+    presetName?: boolean
+    createdAt?: boolean
+    deletedAt?: boolean
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["rsFilterPreset"]>
+
+  export type RsFilterPresetSelectScalar = {
+    presetId?: boolean
+    userId?: boolean
+    presetName?: boolean
+    createdAt?: boolean
+    deletedAt?: boolean
+  }
+
+  export type RsFilterPresetOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"presetId" | "userId" | "presetName" | "createdAt" | "deletedAt", ExtArgs["result"]["rsFilterPreset"]>
+  export type RsFilterPresetInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    user?: boolean | UserDefaultArgs<ExtArgs>
+    periods?: boolean | RsFilterPreset$periodsArgs<ExtArgs>
+    _count?: boolean | RsFilterPresetCountOutputTypeDefaultArgs<ExtArgs>
+  }
+  export type RsFilterPresetIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }
+  export type RsFilterPresetIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }
+
+  export type $RsFilterPresetPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "RsFilterPreset"
+    objects: {
+      user: Prisma.$UserPayload<ExtArgs>
+      periods: Prisma.$RsFilterPeriodPayload<ExtArgs>[]
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      presetId: string
+      userId: string
+      presetName: string
+      createdAt: Date
+      deletedAt: Date | null
+    }, ExtArgs["result"]["rsFilterPreset"]>
+    composites: {}
+  }
+
+  type RsFilterPresetGetPayload<S extends boolean | null | undefined | RsFilterPresetDefaultArgs> = $Result.GetResult<Prisma.$RsFilterPresetPayload, S>
+
+  type RsFilterPresetCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<RsFilterPresetFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: RsFilterPresetCountAggregateInputType | true
+    }
+
+  export interface RsFilterPresetDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['RsFilterPreset'], meta: { name: 'RsFilterPreset' } }
+    /**
+     * Find zero or one RsFilterPreset that matches the filter.
+     * @param {RsFilterPresetFindUniqueArgs} args - Arguments to find a RsFilterPreset
+     * @example
+     * // Get one RsFilterPreset
+     * const rsFilterPreset = await prisma.rsFilterPreset.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends RsFilterPresetFindUniqueArgs>(args: SelectSubset<T, RsFilterPresetFindUniqueArgs<ExtArgs>>): Prisma__RsFilterPresetClient<$Result.GetResult<Prisma.$RsFilterPresetPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one RsFilterPreset that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {RsFilterPresetFindUniqueOrThrowArgs} args - Arguments to find a RsFilterPreset
+     * @example
+     * // Get one RsFilterPreset
+     * const rsFilterPreset = await prisma.rsFilterPreset.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends RsFilterPresetFindUniqueOrThrowArgs>(args: SelectSubset<T, RsFilterPresetFindUniqueOrThrowArgs<ExtArgs>>): Prisma__RsFilterPresetClient<$Result.GetResult<Prisma.$RsFilterPresetPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first RsFilterPreset that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {RsFilterPresetFindFirstArgs} args - Arguments to find a RsFilterPreset
+     * @example
+     * // Get one RsFilterPreset
+     * const rsFilterPreset = await prisma.rsFilterPreset.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends RsFilterPresetFindFirstArgs>(args?: SelectSubset<T, RsFilterPresetFindFirstArgs<ExtArgs>>): Prisma__RsFilterPresetClient<$Result.GetResult<Prisma.$RsFilterPresetPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first RsFilterPreset that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {RsFilterPresetFindFirstOrThrowArgs} args - Arguments to find a RsFilterPreset
+     * @example
+     * // Get one RsFilterPreset
+     * const rsFilterPreset = await prisma.rsFilterPreset.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends RsFilterPresetFindFirstOrThrowArgs>(args?: SelectSubset<T, RsFilterPresetFindFirstOrThrowArgs<ExtArgs>>): Prisma__RsFilterPresetClient<$Result.GetResult<Prisma.$RsFilterPresetPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more RsFilterPresets that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {RsFilterPresetFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all RsFilterPresets
+     * const rsFilterPresets = await prisma.rsFilterPreset.findMany()
+     * 
+     * // Get first 10 RsFilterPresets
+     * const rsFilterPresets = await prisma.rsFilterPreset.findMany({ take: 10 })
+     * 
+     * // Only select the `presetId`
+     * const rsFilterPresetWithPresetIdOnly = await prisma.rsFilterPreset.findMany({ select: { presetId: true } })
+     * 
+     */
+    findMany<T extends RsFilterPresetFindManyArgs>(args?: SelectSubset<T, RsFilterPresetFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$RsFilterPresetPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a RsFilterPreset.
+     * @param {RsFilterPresetCreateArgs} args - Arguments to create a RsFilterPreset.
+     * @example
+     * // Create one RsFilterPreset
+     * const RsFilterPreset = await prisma.rsFilterPreset.create({
+     *   data: {
+     *     // ... data to create a RsFilterPreset
+     *   }
+     * })
+     * 
+     */
+    create<T extends RsFilterPresetCreateArgs>(args: SelectSubset<T, RsFilterPresetCreateArgs<ExtArgs>>): Prisma__RsFilterPresetClient<$Result.GetResult<Prisma.$RsFilterPresetPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many RsFilterPresets.
+     * @param {RsFilterPresetCreateManyArgs} args - Arguments to create many RsFilterPresets.
+     * @example
+     * // Create many RsFilterPresets
+     * const rsFilterPreset = await prisma.rsFilterPreset.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends RsFilterPresetCreateManyArgs>(args?: SelectSubset<T, RsFilterPresetCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many RsFilterPresets and returns the data saved in the database.
+     * @param {RsFilterPresetCreateManyAndReturnArgs} args - Arguments to create many RsFilterPresets.
+     * @example
+     * // Create many RsFilterPresets
+     * const rsFilterPreset = await prisma.rsFilterPreset.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many RsFilterPresets and only return the `presetId`
+     * const rsFilterPresetWithPresetIdOnly = await prisma.rsFilterPreset.createManyAndReturn({
+     *   select: { presetId: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends RsFilterPresetCreateManyAndReturnArgs>(args?: SelectSubset<T, RsFilterPresetCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$RsFilterPresetPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a RsFilterPreset.
+     * @param {RsFilterPresetDeleteArgs} args - Arguments to delete one RsFilterPreset.
+     * @example
+     * // Delete one RsFilterPreset
+     * const RsFilterPreset = await prisma.rsFilterPreset.delete({
+     *   where: {
+     *     // ... filter to delete one RsFilterPreset
+     *   }
+     * })
+     * 
+     */
+    delete<T extends RsFilterPresetDeleteArgs>(args: SelectSubset<T, RsFilterPresetDeleteArgs<ExtArgs>>): Prisma__RsFilterPresetClient<$Result.GetResult<Prisma.$RsFilterPresetPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one RsFilterPreset.
+     * @param {RsFilterPresetUpdateArgs} args - Arguments to update one RsFilterPreset.
+     * @example
+     * // Update one RsFilterPreset
+     * const rsFilterPreset = await prisma.rsFilterPreset.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends RsFilterPresetUpdateArgs>(args: SelectSubset<T, RsFilterPresetUpdateArgs<ExtArgs>>): Prisma__RsFilterPresetClient<$Result.GetResult<Prisma.$RsFilterPresetPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more RsFilterPresets.
+     * @param {RsFilterPresetDeleteManyArgs} args - Arguments to filter RsFilterPresets to delete.
+     * @example
+     * // Delete a few RsFilterPresets
+     * const { count } = await prisma.rsFilterPreset.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends RsFilterPresetDeleteManyArgs>(args?: SelectSubset<T, RsFilterPresetDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more RsFilterPresets.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {RsFilterPresetUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many RsFilterPresets
+     * const rsFilterPreset = await prisma.rsFilterPreset.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends RsFilterPresetUpdateManyArgs>(args: SelectSubset<T, RsFilterPresetUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more RsFilterPresets and returns the data updated in the database.
+     * @param {RsFilterPresetUpdateManyAndReturnArgs} args - Arguments to update many RsFilterPresets.
+     * @example
+     * // Update many RsFilterPresets
+     * const rsFilterPreset = await prisma.rsFilterPreset.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more RsFilterPresets and only return the `presetId`
+     * const rsFilterPresetWithPresetIdOnly = await prisma.rsFilterPreset.updateManyAndReturn({
+     *   select: { presetId: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends RsFilterPresetUpdateManyAndReturnArgs>(args: SelectSubset<T, RsFilterPresetUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$RsFilterPresetPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one RsFilterPreset.
+     * @param {RsFilterPresetUpsertArgs} args - Arguments to update or create a RsFilterPreset.
+     * @example
+     * // Update or create a RsFilterPreset
+     * const rsFilterPreset = await prisma.rsFilterPreset.upsert({
+     *   create: {
+     *     // ... data to create a RsFilterPreset
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the RsFilterPreset we want to update
+     *   }
+     * })
+     */
+    upsert<T extends RsFilterPresetUpsertArgs>(args: SelectSubset<T, RsFilterPresetUpsertArgs<ExtArgs>>): Prisma__RsFilterPresetClient<$Result.GetResult<Prisma.$RsFilterPresetPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of RsFilterPresets.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {RsFilterPresetCountArgs} args - Arguments to filter RsFilterPresets to count.
+     * @example
+     * // Count the number of RsFilterPresets
+     * const count = await prisma.rsFilterPreset.count({
+     *   where: {
+     *     // ... the filter for the RsFilterPresets we want to count
+     *   }
+     * })
+    **/
+    count<T extends RsFilterPresetCountArgs>(
+      args?: Subset<T, RsFilterPresetCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], RsFilterPresetCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a RsFilterPreset.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {RsFilterPresetAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends RsFilterPresetAggregateArgs>(args: Subset<T, RsFilterPresetAggregateArgs>): Prisma.PrismaPromise<GetRsFilterPresetAggregateType<T>>
+
+    /**
+     * Group by RsFilterPreset.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {RsFilterPresetGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends RsFilterPresetGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: RsFilterPresetGroupByArgs['orderBy'] }
+        : { orderBy?: RsFilterPresetGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, RsFilterPresetGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetRsFilterPresetGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the RsFilterPreset model
+   */
+  readonly fields: RsFilterPresetFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for RsFilterPreset.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__RsFilterPresetClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    user<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    periods<T extends RsFilterPreset$periodsArgs<ExtArgs> = {}>(args?: Subset<T, RsFilterPreset$periodsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$RsFilterPeriodPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the RsFilterPreset model
+   */
+  interface RsFilterPresetFieldRefs {
+    readonly presetId: FieldRef<"RsFilterPreset", 'String'>
+    readonly userId: FieldRef<"RsFilterPreset", 'String'>
+    readonly presetName: FieldRef<"RsFilterPreset", 'String'>
+    readonly createdAt: FieldRef<"RsFilterPreset", 'DateTime'>
+    readonly deletedAt: FieldRef<"RsFilterPreset", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * RsFilterPreset findUnique
+   */
+  export type RsFilterPresetFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RsFilterPreset
+     */
+    select?: RsFilterPresetSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the RsFilterPreset
+     */
+    omit?: RsFilterPresetOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RsFilterPresetInclude<ExtArgs> | null
+    /**
+     * Filter, which RsFilterPreset to fetch.
+     */
+    where: RsFilterPresetWhereUniqueInput
+  }
+
+  /**
+   * RsFilterPreset findUniqueOrThrow
+   */
+  export type RsFilterPresetFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RsFilterPreset
+     */
+    select?: RsFilterPresetSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the RsFilterPreset
+     */
+    omit?: RsFilterPresetOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RsFilterPresetInclude<ExtArgs> | null
+    /**
+     * Filter, which RsFilterPreset to fetch.
+     */
+    where: RsFilterPresetWhereUniqueInput
+  }
+
+  /**
+   * RsFilterPreset findFirst
+   */
+  export type RsFilterPresetFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RsFilterPreset
+     */
+    select?: RsFilterPresetSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the RsFilterPreset
+     */
+    omit?: RsFilterPresetOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RsFilterPresetInclude<ExtArgs> | null
+    /**
+     * Filter, which RsFilterPreset to fetch.
+     */
+    where?: RsFilterPresetWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of RsFilterPresets to fetch.
+     */
+    orderBy?: RsFilterPresetOrderByWithRelationInput | RsFilterPresetOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for RsFilterPresets.
+     */
+    cursor?: RsFilterPresetWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` RsFilterPresets from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` RsFilterPresets.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of RsFilterPresets.
+     */
+    distinct?: RsFilterPresetScalarFieldEnum | RsFilterPresetScalarFieldEnum[]
+  }
+
+  /**
+   * RsFilterPreset findFirstOrThrow
+   */
+  export type RsFilterPresetFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RsFilterPreset
+     */
+    select?: RsFilterPresetSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the RsFilterPreset
+     */
+    omit?: RsFilterPresetOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RsFilterPresetInclude<ExtArgs> | null
+    /**
+     * Filter, which RsFilterPreset to fetch.
+     */
+    where?: RsFilterPresetWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of RsFilterPresets to fetch.
+     */
+    orderBy?: RsFilterPresetOrderByWithRelationInput | RsFilterPresetOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for RsFilterPresets.
+     */
+    cursor?: RsFilterPresetWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` RsFilterPresets from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` RsFilterPresets.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of RsFilterPresets.
+     */
+    distinct?: RsFilterPresetScalarFieldEnum | RsFilterPresetScalarFieldEnum[]
+  }
+
+  /**
+   * RsFilterPreset findMany
+   */
+  export type RsFilterPresetFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RsFilterPreset
+     */
+    select?: RsFilterPresetSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the RsFilterPreset
+     */
+    omit?: RsFilterPresetOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RsFilterPresetInclude<ExtArgs> | null
+    /**
+     * Filter, which RsFilterPresets to fetch.
+     */
+    where?: RsFilterPresetWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of RsFilterPresets to fetch.
+     */
+    orderBy?: RsFilterPresetOrderByWithRelationInput | RsFilterPresetOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing RsFilterPresets.
+     */
+    cursor?: RsFilterPresetWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` RsFilterPresets from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` RsFilterPresets.
+     */
+    skip?: number
+    distinct?: RsFilterPresetScalarFieldEnum | RsFilterPresetScalarFieldEnum[]
+  }
+
+  /**
+   * RsFilterPreset create
+   */
+  export type RsFilterPresetCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RsFilterPreset
+     */
+    select?: RsFilterPresetSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the RsFilterPreset
+     */
+    omit?: RsFilterPresetOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RsFilterPresetInclude<ExtArgs> | null
+    /**
+     * The data needed to create a RsFilterPreset.
+     */
+    data: XOR<RsFilterPresetCreateInput, RsFilterPresetUncheckedCreateInput>
+  }
+
+  /**
+   * RsFilterPreset createMany
+   */
+  export type RsFilterPresetCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many RsFilterPresets.
+     */
+    data: RsFilterPresetCreateManyInput | RsFilterPresetCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * RsFilterPreset createManyAndReturn
+   */
+  export type RsFilterPresetCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RsFilterPreset
+     */
+    select?: RsFilterPresetSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the RsFilterPreset
+     */
+    omit?: RsFilterPresetOmit<ExtArgs> | null
+    /**
+     * The data used to create many RsFilterPresets.
+     */
+    data: RsFilterPresetCreateManyInput | RsFilterPresetCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RsFilterPresetIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * RsFilterPreset update
+   */
+  export type RsFilterPresetUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RsFilterPreset
+     */
+    select?: RsFilterPresetSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the RsFilterPreset
+     */
+    omit?: RsFilterPresetOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RsFilterPresetInclude<ExtArgs> | null
+    /**
+     * The data needed to update a RsFilterPreset.
+     */
+    data: XOR<RsFilterPresetUpdateInput, RsFilterPresetUncheckedUpdateInput>
+    /**
+     * Choose, which RsFilterPreset to update.
+     */
+    where: RsFilterPresetWhereUniqueInput
+  }
+
+  /**
+   * RsFilterPreset updateMany
+   */
+  export type RsFilterPresetUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update RsFilterPresets.
+     */
+    data: XOR<RsFilterPresetUpdateManyMutationInput, RsFilterPresetUncheckedUpdateManyInput>
+    /**
+     * Filter which RsFilterPresets to update
+     */
+    where?: RsFilterPresetWhereInput
+    /**
+     * Limit how many RsFilterPresets to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * RsFilterPreset updateManyAndReturn
+   */
+  export type RsFilterPresetUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RsFilterPreset
+     */
+    select?: RsFilterPresetSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the RsFilterPreset
+     */
+    omit?: RsFilterPresetOmit<ExtArgs> | null
+    /**
+     * The data used to update RsFilterPresets.
+     */
+    data: XOR<RsFilterPresetUpdateManyMutationInput, RsFilterPresetUncheckedUpdateManyInput>
+    /**
+     * Filter which RsFilterPresets to update
+     */
+    where?: RsFilterPresetWhereInput
+    /**
+     * Limit how many RsFilterPresets to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RsFilterPresetIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * RsFilterPreset upsert
+   */
+  export type RsFilterPresetUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RsFilterPreset
+     */
+    select?: RsFilterPresetSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the RsFilterPreset
+     */
+    omit?: RsFilterPresetOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RsFilterPresetInclude<ExtArgs> | null
+    /**
+     * The filter to search for the RsFilterPreset to update in case it exists.
+     */
+    where: RsFilterPresetWhereUniqueInput
+    /**
+     * In case the RsFilterPreset found by the `where` argument doesn't exist, create a new RsFilterPreset with this data.
+     */
+    create: XOR<RsFilterPresetCreateInput, RsFilterPresetUncheckedCreateInput>
+    /**
+     * In case the RsFilterPreset was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<RsFilterPresetUpdateInput, RsFilterPresetUncheckedUpdateInput>
+  }
+
+  /**
+   * RsFilterPreset delete
+   */
+  export type RsFilterPresetDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RsFilterPreset
+     */
+    select?: RsFilterPresetSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the RsFilterPreset
+     */
+    omit?: RsFilterPresetOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RsFilterPresetInclude<ExtArgs> | null
+    /**
+     * Filter which RsFilterPreset to delete.
+     */
+    where: RsFilterPresetWhereUniqueInput
+  }
+
+  /**
+   * RsFilterPreset deleteMany
+   */
+  export type RsFilterPresetDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which RsFilterPresets to delete
+     */
+    where?: RsFilterPresetWhereInput
+    /**
+     * Limit how many RsFilterPresets to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * RsFilterPreset.periods
+   */
+  export type RsFilterPreset$periodsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RsFilterPeriod
+     */
+    select?: RsFilterPeriodSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the RsFilterPeriod
+     */
+    omit?: RsFilterPeriodOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RsFilterPeriodInclude<ExtArgs> | null
+    where?: RsFilterPeriodWhereInput
+    orderBy?: RsFilterPeriodOrderByWithRelationInput | RsFilterPeriodOrderByWithRelationInput[]
+    cursor?: RsFilterPeriodWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: RsFilterPeriodScalarFieldEnum | RsFilterPeriodScalarFieldEnum[]
+  }
+
+  /**
+   * RsFilterPreset without action
+   */
+  export type RsFilterPresetDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RsFilterPreset
+     */
+    select?: RsFilterPresetSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the RsFilterPreset
+     */
+    omit?: RsFilterPresetOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RsFilterPresetInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model RsFilterPeriod
+   */
+
+  export type AggregateRsFilterPeriod = {
+    _count: RsFilterPeriodCountAggregateOutputType | null
+    _avg: RsFilterPeriodAvgAggregateOutputType | null
+    _sum: RsFilterPeriodSumAggregateOutputType | null
+    _min: RsFilterPeriodMinAggregateOutputType | null
+    _max: RsFilterPeriodMaxAggregateOutputType | null
+  }
+
+  export type RsFilterPeriodAvgAggregateOutputType = {
+    weightRatio: Decimal | null
+  }
+
+  export type RsFilterPeriodSumAggregateOutputType = {
+    weightRatio: Decimal | null
+  }
+
+  export type RsFilterPeriodMinAggregateOutputType = {
+    periodId: string | null
+    presetId: string | null
+    startDate: Date | null
+    endDate: Date | null
+    weightRatio: Decimal | null
+    createdAt: Date | null
+    deletedAt: Date | null
+  }
+
+  export type RsFilterPeriodMaxAggregateOutputType = {
+    periodId: string | null
+    presetId: string | null
+    startDate: Date | null
+    endDate: Date | null
+    weightRatio: Decimal | null
+    createdAt: Date | null
+    deletedAt: Date | null
+  }
+
+  export type RsFilterPeriodCountAggregateOutputType = {
+    periodId: number
+    presetId: number
+    startDate: number
+    endDate: number
+    weightRatio: number
+    createdAt: number
+    deletedAt: number
+    _all: number
+  }
+
+
+  export type RsFilterPeriodAvgAggregateInputType = {
+    weightRatio?: true
+  }
+
+  export type RsFilterPeriodSumAggregateInputType = {
+    weightRatio?: true
+  }
+
+  export type RsFilterPeriodMinAggregateInputType = {
+    periodId?: true
+    presetId?: true
+    startDate?: true
+    endDate?: true
+    weightRatio?: true
+    createdAt?: true
+    deletedAt?: true
+  }
+
+  export type RsFilterPeriodMaxAggregateInputType = {
+    periodId?: true
+    presetId?: true
+    startDate?: true
+    endDate?: true
+    weightRatio?: true
+    createdAt?: true
+    deletedAt?: true
+  }
+
+  export type RsFilterPeriodCountAggregateInputType = {
+    periodId?: true
+    presetId?: true
+    startDate?: true
+    endDate?: true
+    weightRatio?: true
+    createdAt?: true
+    deletedAt?: true
+    _all?: true
+  }
+
+  export type RsFilterPeriodAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which RsFilterPeriod to aggregate.
+     */
+    where?: RsFilterPeriodWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of RsFilterPeriods to fetch.
+     */
+    orderBy?: RsFilterPeriodOrderByWithRelationInput | RsFilterPeriodOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: RsFilterPeriodWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` RsFilterPeriods from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` RsFilterPeriods.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned RsFilterPeriods
+    **/
+    _count?: true | RsFilterPeriodCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: RsFilterPeriodAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: RsFilterPeriodSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: RsFilterPeriodMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: RsFilterPeriodMaxAggregateInputType
+  }
+
+  export type GetRsFilterPeriodAggregateType<T extends RsFilterPeriodAggregateArgs> = {
+        [P in keyof T & keyof AggregateRsFilterPeriod]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateRsFilterPeriod[P]>
+      : GetScalarType<T[P], AggregateRsFilterPeriod[P]>
+  }
+
+
+
+
+  export type RsFilterPeriodGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: RsFilterPeriodWhereInput
+    orderBy?: RsFilterPeriodOrderByWithAggregationInput | RsFilterPeriodOrderByWithAggregationInput[]
+    by: RsFilterPeriodScalarFieldEnum[] | RsFilterPeriodScalarFieldEnum
+    having?: RsFilterPeriodScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: RsFilterPeriodCountAggregateInputType | true
+    _avg?: RsFilterPeriodAvgAggregateInputType
+    _sum?: RsFilterPeriodSumAggregateInputType
+    _min?: RsFilterPeriodMinAggregateInputType
+    _max?: RsFilterPeriodMaxAggregateInputType
+  }
+
+  export type RsFilterPeriodGroupByOutputType = {
+    periodId: string
+    presetId: string
+    startDate: Date
+    endDate: Date
+    weightRatio: Decimal
+    createdAt: Date
+    deletedAt: Date | null
+    _count: RsFilterPeriodCountAggregateOutputType | null
+    _avg: RsFilterPeriodAvgAggregateOutputType | null
+    _sum: RsFilterPeriodSumAggregateOutputType | null
+    _min: RsFilterPeriodMinAggregateOutputType | null
+    _max: RsFilterPeriodMaxAggregateOutputType | null
+  }
+
+  type GetRsFilterPeriodGroupByPayload<T extends RsFilterPeriodGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<RsFilterPeriodGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof RsFilterPeriodGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], RsFilterPeriodGroupByOutputType[P]>
+            : GetScalarType<T[P], RsFilterPeriodGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type RsFilterPeriodSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    periodId?: boolean
+    presetId?: boolean
+    startDate?: boolean
+    endDate?: boolean
+    weightRatio?: boolean
+    createdAt?: boolean
+    deletedAt?: boolean
+    preset?: boolean | RsFilterPresetDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["rsFilterPeriod"]>
+
+  export type RsFilterPeriodSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    periodId?: boolean
+    presetId?: boolean
+    startDate?: boolean
+    endDate?: boolean
+    weightRatio?: boolean
+    createdAt?: boolean
+    deletedAt?: boolean
+    preset?: boolean | RsFilterPresetDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["rsFilterPeriod"]>
+
+  export type RsFilterPeriodSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    periodId?: boolean
+    presetId?: boolean
+    startDate?: boolean
+    endDate?: boolean
+    weightRatio?: boolean
+    createdAt?: boolean
+    deletedAt?: boolean
+    preset?: boolean | RsFilterPresetDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["rsFilterPeriod"]>
+
+  export type RsFilterPeriodSelectScalar = {
+    periodId?: boolean
+    presetId?: boolean
+    startDate?: boolean
+    endDate?: boolean
+    weightRatio?: boolean
+    createdAt?: boolean
+    deletedAt?: boolean
+  }
+
+  export type RsFilterPeriodOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"periodId" | "presetId" | "startDate" | "endDate" | "weightRatio" | "createdAt" | "deletedAt", ExtArgs["result"]["rsFilterPeriod"]>
+  export type RsFilterPeriodInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    preset?: boolean | RsFilterPresetDefaultArgs<ExtArgs>
+  }
+  export type RsFilterPeriodIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    preset?: boolean | RsFilterPresetDefaultArgs<ExtArgs>
+  }
+  export type RsFilterPeriodIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    preset?: boolean | RsFilterPresetDefaultArgs<ExtArgs>
+  }
+
+  export type $RsFilterPeriodPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "RsFilterPeriod"
+    objects: {
+      preset: Prisma.$RsFilterPresetPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      periodId: string
+      presetId: string
+      startDate: Date
+      endDate: Date
+      weightRatio: Prisma.Decimal
+      createdAt: Date
+      deletedAt: Date | null
+    }, ExtArgs["result"]["rsFilterPeriod"]>
+    composites: {}
+  }
+
+  type RsFilterPeriodGetPayload<S extends boolean | null | undefined | RsFilterPeriodDefaultArgs> = $Result.GetResult<Prisma.$RsFilterPeriodPayload, S>
+
+  type RsFilterPeriodCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<RsFilterPeriodFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: RsFilterPeriodCountAggregateInputType | true
+    }
+
+  export interface RsFilterPeriodDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['RsFilterPeriod'], meta: { name: 'RsFilterPeriod' } }
+    /**
+     * Find zero or one RsFilterPeriod that matches the filter.
+     * @param {RsFilterPeriodFindUniqueArgs} args - Arguments to find a RsFilterPeriod
+     * @example
+     * // Get one RsFilterPeriod
+     * const rsFilterPeriod = await prisma.rsFilterPeriod.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends RsFilterPeriodFindUniqueArgs>(args: SelectSubset<T, RsFilterPeriodFindUniqueArgs<ExtArgs>>): Prisma__RsFilterPeriodClient<$Result.GetResult<Prisma.$RsFilterPeriodPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one RsFilterPeriod that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {RsFilterPeriodFindUniqueOrThrowArgs} args - Arguments to find a RsFilterPeriod
+     * @example
+     * // Get one RsFilterPeriod
+     * const rsFilterPeriod = await prisma.rsFilterPeriod.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends RsFilterPeriodFindUniqueOrThrowArgs>(args: SelectSubset<T, RsFilterPeriodFindUniqueOrThrowArgs<ExtArgs>>): Prisma__RsFilterPeriodClient<$Result.GetResult<Prisma.$RsFilterPeriodPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first RsFilterPeriod that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {RsFilterPeriodFindFirstArgs} args - Arguments to find a RsFilterPeriod
+     * @example
+     * // Get one RsFilterPeriod
+     * const rsFilterPeriod = await prisma.rsFilterPeriod.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends RsFilterPeriodFindFirstArgs>(args?: SelectSubset<T, RsFilterPeriodFindFirstArgs<ExtArgs>>): Prisma__RsFilterPeriodClient<$Result.GetResult<Prisma.$RsFilterPeriodPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first RsFilterPeriod that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {RsFilterPeriodFindFirstOrThrowArgs} args - Arguments to find a RsFilterPeriod
+     * @example
+     * // Get one RsFilterPeriod
+     * const rsFilterPeriod = await prisma.rsFilterPeriod.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends RsFilterPeriodFindFirstOrThrowArgs>(args?: SelectSubset<T, RsFilterPeriodFindFirstOrThrowArgs<ExtArgs>>): Prisma__RsFilterPeriodClient<$Result.GetResult<Prisma.$RsFilterPeriodPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more RsFilterPeriods that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {RsFilterPeriodFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all RsFilterPeriods
+     * const rsFilterPeriods = await prisma.rsFilterPeriod.findMany()
+     * 
+     * // Get first 10 RsFilterPeriods
+     * const rsFilterPeriods = await prisma.rsFilterPeriod.findMany({ take: 10 })
+     * 
+     * // Only select the `periodId`
+     * const rsFilterPeriodWithPeriodIdOnly = await prisma.rsFilterPeriod.findMany({ select: { periodId: true } })
+     * 
+     */
+    findMany<T extends RsFilterPeriodFindManyArgs>(args?: SelectSubset<T, RsFilterPeriodFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$RsFilterPeriodPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a RsFilterPeriod.
+     * @param {RsFilterPeriodCreateArgs} args - Arguments to create a RsFilterPeriod.
+     * @example
+     * // Create one RsFilterPeriod
+     * const RsFilterPeriod = await prisma.rsFilterPeriod.create({
+     *   data: {
+     *     // ... data to create a RsFilterPeriod
+     *   }
+     * })
+     * 
+     */
+    create<T extends RsFilterPeriodCreateArgs>(args: SelectSubset<T, RsFilterPeriodCreateArgs<ExtArgs>>): Prisma__RsFilterPeriodClient<$Result.GetResult<Prisma.$RsFilterPeriodPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many RsFilterPeriods.
+     * @param {RsFilterPeriodCreateManyArgs} args - Arguments to create many RsFilterPeriods.
+     * @example
+     * // Create many RsFilterPeriods
+     * const rsFilterPeriod = await prisma.rsFilterPeriod.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends RsFilterPeriodCreateManyArgs>(args?: SelectSubset<T, RsFilterPeriodCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many RsFilterPeriods and returns the data saved in the database.
+     * @param {RsFilterPeriodCreateManyAndReturnArgs} args - Arguments to create many RsFilterPeriods.
+     * @example
+     * // Create many RsFilterPeriods
+     * const rsFilterPeriod = await prisma.rsFilterPeriod.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many RsFilterPeriods and only return the `periodId`
+     * const rsFilterPeriodWithPeriodIdOnly = await prisma.rsFilterPeriod.createManyAndReturn({
+     *   select: { periodId: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends RsFilterPeriodCreateManyAndReturnArgs>(args?: SelectSubset<T, RsFilterPeriodCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$RsFilterPeriodPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a RsFilterPeriod.
+     * @param {RsFilterPeriodDeleteArgs} args - Arguments to delete one RsFilterPeriod.
+     * @example
+     * // Delete one RsFilterPeriod
+     * const RsFilterPeriod = await prisma.rsFilterPeriod.delete({
+     *   where: {
+     *     // ... filter to delete one RsFilterPeriod
+     *   }
+     * })
+     * 
+     */
+    delete<T extends RsFilterPeriodDeleteArgs>(args: SelectSubset<T, RsFilterPeriodDeleteArgs<ExtArgs>>): Prisma__RsFilterPeriodClient<$Result.GetResult<Prisma.$RsFilterPeriodPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one RsFilterPeriod.
+     * @param {RsFilterPeriodUpdateArgs} args - Arguments to update one RsFilterPeriod.
+     * @example
+     * // Update one RsFilterPeriod
+     * const rsFilterPeriod = await prisma.rsFilterPeriod.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends RsFilterPeriodUpdateArgs>(args: SelectSubset<T, RsFilterPeriodUpdateArgs<ExtArgs>>): Prisma__RsFilterPeriodClient<$Result.GetResult<Prisma.$RsFilterPeriodPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more RsFilterPeriods.
+     * @param {RsFilterPeriodDeleteManyArgs} args - Arguments to filter RsFilterPeriods to delete.
+     * @example
+     * // Delete a few RsFilterPeriods
+     * const { count } = await prisma.rsFilterPeriod.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends RsFilterPeriodDeleteManyArgs>(args?: SelectSubset<T, RsFilterPeriodDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more RsFilterPeriods.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {RsFilterPeriodUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many RsFilterPeriods
+     * const rsFilterPeriod = await prisma.rsFilterPeriod.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends RsFilterPeriodUpdateManyArgs>(args: SelectSubset<T, RsFilterPeriodUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more RsFilterPeriods and returns the data updated in the database.
+     * @param {RsFilterPeriodUpdateManyAndReturnArgs} args - Arguments to update many RsFilterPeriods.
+     * @example
+     * // Update many RsFilterPeriods
+     * const rsFilterPeriod = await prisma.rsFilterPeriod.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more RsFilterPeriods and only return the `periodId`
+     * const rsFilterPeriodWithPeriodIdOnly = await prisma.rsFilterPeriod.updateManyAndReturn({
+     *   select: { periodId: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends RsFilterPeriodUpdateManyAndReturnArgs>(args: SelectSubset<T, RsFilterPeriodUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$RsFilterPeriodPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one RsFilterPeriod.
+     * @param {RsFilterPeriodUpsertArgs} args - Arguments to update or create a RsFilterPeriod.
+     * @example
+     * // Update or create a RsFilterPeriod
+     * const rsFilterPeriod = await prisma.rsFilterPeriod.upsert({
+     *   create: {
+     *     // ... data to create a RsFilterPeriod
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the RsFilterPeriod we want to update
+     *   }
+     * })
+     */
+    upsert<T extends RsFilterPeriodUpsertArgs>(args: SelectSubset<T, RsFilterPeriodUpsertArgs<ExtArgs>>): Prisma__RsFilterPeriodClient<$Result.GetResult<Prisma.$RsFilterPeriodPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of RsFilterPeriods.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {RsFilterPeriodCountArgs} args - Arguments to filter RsFilterPeriods to count.
+     * @example
+     * // Count the number of RsFilterPeriods
+     * const count = await prisma.rsFilterPeriod.count({
+     *   where: {
+     *     // ... the filter for the RsFilterPeriods we want to count
+     *   }
+     * })
+    **/
+    count<T extends RsFilterPeriodCountArgs>(
+      args?: Subset<T, RsFilterPeriodCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], RsFilterPeriodCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a RsFilterPeriod.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {RsFilterPeriodAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends RsFilterPeriodAggregateArgs>(args: Subset<T, RsFilterPeriodAggregateArgs>): Prisma.PrismaPromise<GetRsFilterPeriodAggregateType<T>>
+
+    /**
+     * Group by RsFilterPeriod.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {RsFilterPeriodGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends RsFilterPeriodGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: RsFilterPeriodGroupByArgs['orderBy'] }
+        : { orderBy?: RsFilterPeriodGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, RsFilterPeriodGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetRsFilterPeriodGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the RsFilterPeriod model
+   */
+  readonly fields: RsFilterPeriodFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for RsFilterPeriod.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__RsFilterPeriodClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    preset<T extends RsFilterPresetDefaultArgs<ExtArgs> = {}>(args?: Subset<T, RsFilterPresetDefaultArgs<ExtArgs>>): Prisma__RsFilterPresetClient<$Result.GetResult<Prisma.$RsFilterPresetPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the RsFilterPeriod model
+   */
+  interface RsFilterPeriodFieldRefs {
+    readonly periodId: FieldRef<"RsFilterPeriod", 'String'>
+    readonly presetId: FieldRef<"RsFilterPeriod", 'String'>
+    readonly startDate: FieldRef<"RsFilterPeriod", 'DateTime'>
+    readonly endDate: FieldRef<"RsFilterPeriod", 'DateTime'>
+    readonly weightRatio: FieldRef<"RsFilterPeriod", 'Decimal'>
+    readonly createdAt: FieldRef<"RsFilterPeriod", 'DateTime'>
+    readonly deletedAt: FieldRef<"RsFilterPeriod", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * RsFilterPeriod findUnique
+   */
+  export type RsFilterPeriodFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RsFilterPeriod
+     */
+    select?: RsFilterPeriodSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the RsFilterPeriod
+     */
+    omit?: RsFilterPeriodOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RsFilterPeriodInclude<ExtArgs> | null
+    /**
+     * Filter, which RsFilterPeriod to fetch.
+     */
+    where: RsFilterPeriodWhereUniqueInput
+  }
+
+  /**
+   * RsFilterPeriod findUniqueOrThrow
+   */
+  export type RsFilterPeriodFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RsFilterPeriod
+     */
+    select?: RsFilterPeriodSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the RsFilterPeriod
+     */
+    omit?: RsFilterPeriodOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RsFilterPeriodInclude<ExtArgs> | null
+    /**
+     * Filter, which RsFilterPeriod to fetch.
+     */
+    where: RsFilterPeriodWhereUniqueInput
+  }
+
+  /**
+   * RsFilterPeriod findFirst
+   */
+  export type RsFilterPeriodFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RsFilterPeriod
+     */
+    select?: RsFilterPeriodSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the RsFilterPeriod
+     */
+    omit?: RsFilterPeriodOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RsFilterPeriodInclude<ExtArgs> | null
+    /**
+     * Filter, which RsFilterPeriod to fetch.
+     */
+    where?: RsFilterPeriodWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of RsFilterPeriods to fetch.
+     */
+    orderBy?: RsFilterPeriodOrderByWithRelationInput | RsFilterPeriodOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for RsFilterPeriods.
+     */
+    cursor?: RsFilterPeriodWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` RsFilterPeriods from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` RsFilterPeriods.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of RsFilterPeriods.
+     */
+    distinct?: RsFilterPeriodScalarFieldEnum | RsFilterPeriodScalarFieldEnum[]
+  }
+
+  /**
+   * RsFilterPeriod findFirstOrThrow
+   */
+  export type RsFilterPeriodFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RsFilterPeriod
+     */
+    select?: RsFilterPeriodSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the RsFilterPeriod
+     */
+    omit?: RsFilterPeriodOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RsFilterPeriodInclude<ExtArgs> | null
+    /**
+     * Filter, which RsFilterPeriod to fetch.
+     */
+    where?: RsFilterPeriodWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of RsFilterPeriods to fetch.
+     */
+    orderBy?: RsFilterPeriodOrderByWithRelationInput | RsFilterPeriodOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for RsFilterPeriods.
+     */
+    cursor?: RsFilterPeriodWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` RsFilterPeriods from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` RsFilterPeriods.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of RsFilterPeriods.
+     */
+    distinct?: RsFilterPeriodScalarFieldEnum | RsFilterPeriodScalarFieldEnum[]
+  }
+
+  /**
+   * RsFilterPeriod findMany
+   */
+  export type RsFilterPeriodFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RsFilterPeriod
+     */
+    select?: RsFilterPeriodSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the RsFilterPeriod
+     */
+    omit?: RsFilterPeriodOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RsFilterPeriodInclude<ExtArgs> | null
+    /**
+     * Filter, which RsFilterPeriods to fetch.
+     */
+    where?: RsFilterPeriodWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of RsFilterPeriods to fetch.
+     */
+    orderBy?: RsFilterPeriodOrderByWithRelationInput | RsFilterPeriodOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing RsFilterPeriods.
+     */
+    cursor?: RsFilterPeriodWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` RsFilterPeriods from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` RsFilterPeriods.
+     */
+    skip?: number
+    distinct?: RsFilterPeriodScalarFieldEnum | RsFilterPeriodScalarFieldEnum[]
+  }
+
+  /**
+   * RsFilterPeriod create
+   */
+  export type RsFilterPeriodCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RsFilterPeriod
+     */
+    select?: RsFilterPeriodSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the RsFilterPeriod
+     */
+    omit?: RsFilterPeriodOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RsFilterPeriodInclude<ExtArgs> | null
+    /**
+     * The data needed to create a RsFilterPeriod.
+     */
+    data: XOR<RsFilterPeriodCreateInput, RsFilterPeriodUncheckedCreateInput>
+  }
+
+  /**
+   * RsFilterPeriod createMany
+   */
+  export type RsFilterPeriodCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many RsFilterPeriods.
+     */
+    data: RsFilterPeriodCreateManyInput | RsFilterPeriodCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * RsFilterPeriod createManyAndReturn
+   */
+  export type RsFilterPeriodCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RsFilterPeriod
+     */
+    select?: RsFilterPeriodSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the RsFilterPeriod
+     */
+    omit?: RsFilterPeriodOmit<ExtArgs> | null
+    /**
+     * The data used to create many RsFilterPeriods.
+     */
+    data: RsFilterPeriodCreateManyInput | RsFilterPeriodCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RsFilterPeriodIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * RsFilterPeriod update
+   */
+  export type RsFilterPeriodUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RsFilterPeriod
+     */
+    select?: RsFilterPeriodSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the RsFilterPeriod
+     */
+    omit?: RsFilterPeriodOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RsFilterPeriodInclude<ExtArgs> | null
+    /**
+     * The data needed to update a RsFilterPeriod.
+     */
+    data: XOR<RsFilterPeriodUpdateInput, RsFilterPeriodUncheckedUpdateInput>
+    /**
+     * Choose, which RsFilterPeriod to update.
+     */
+    where: RsFilterPeriodWhereUniqueInput
+  }
+
+  /**
+   * RsFilterPeriod updateMany
+   */
+  export type RsFilterPeriodUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update RsFilterPeriods.
+     */
+    data: XOR<RsFilterPeriodUpdateManyMutationInput, RsFilterPeriodUncheckedUpdateManyInput>
+    /**
+     * Filter which RsFilterPeriods to update
+     */
+    where?: RsFilterPeriodWhereInput
+    /**
+     * Limit how many RsFilterPeriods to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * RsFilterPeriod updateManyAndReturn
+   */
+  export type RsFilterPeriodUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RsFilterPeriod
+     */
+    select?: RsFilterPeriodSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the RsFilterPeriod
+     */
+    omit?: RsFilterPeriodOmit<ExtArgs> | null
+    /**
+     * The data used to update RsFilterPeriods.
+     */
+    data: XOR<RsFilterPeriodUpdateManyMutationInput, RsFilterPeriodUncheckedUpdateManyInput>
+    /**
+     * Filter which RsFilterPeriods to update
+     */
+    where?: RsFilterPeriodWhereInput
+    /**
+     * Limit how many RsFilterPeriods to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RsFilterPeriodIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * RsFilterPeriod upsert
+   */
+  export type RsFilterPeriodUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RsFilterPeriod
+     */
+    select?: RsFilterPeriodSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the RsFilterPeriod
+     */
+    omit?: RsFilterPeriodOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RsFilterPeriodInclude<ExtArgs> | null
+    /**
+     * The filter to search for the RsFilterPeriod to update in case it exists.
+     */
+    where: RsFilterPeriodWhereUniqueInput
+    /**
+     * In case the RsFilterPeriod found by the `where` argument doesn't exist, create a new RsFilterPeriod with this data.
+     */
+    create: XOR<RsFilterPeriodCreateInput, RsFilterPeriodUncheckedCreateInput>
+    /**
+     * In case the RsFilterPeriod was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<RsFilterPeriodUpdateInput, RsFilterPeriodUncheckedUpdateInput>
+  }
+
+  /**
+   * RsFilterPeriod delete
+   */
+  export type RsFilterPeriodDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RsFilterPeriod
+     */
+    select?: RsFilterPeriodSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the RsFilterPeriod
+     */
+    omit?: RsFilterPeriodOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RsFilterPeriodInclude<ExtArgs> | null
+    /**
+     * Filter which RsFilterPeriod to delete.
+     */
+    where: RsFilterPeriodWhereUniqueInput
+  }
+
+  /**
+   * RsFilterPeriod deleteMany
+   */
+  export type RsFilterPeriodDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which RsFilterPeriods to delete
+     */
+    where?: RsFilterPeriodWhereInput
+    /**
+     * Limit how many RsFilterPeriods to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * RsFilterPeriod without action
+   */
+  export type RsFilterPeriodDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RsFilterPeriod
+     */
+    select?: RsFilterPeriodSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the RsFilterPeriod
+     */
+    omit?: RsFilterPeriodOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RsFilterPeriodInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model SearchFilterPreset
+   */
+
+  export type AggregateSearchFilterPreset = {
+    _count: SearchFilterPresetCountAggregateOutputType | null
+    _min: SearchFilterPresetMinAggregateOutputType | null
+    _max: SearchFilterPresetMaxAggregateOutputType | null
+  }
+
+  export type SearchFilterPresetMinAggregateOutputType = {
+    filterId: string | null
+    userId: string | null
+    filterName: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+    deletedAt: Date | null
+  }
+
+  export type SearchFilterPresetMaxAggregateOutputType = {
+    filterId: string | null
+    userId: string | null
+    filterName: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+    deletedAt: Date | null
+  }
+
+  export type SearchFilterPresetCountAggregateOutputType = {
+    filterId: number
+    userId: number
+    filterName: number
+    filterConfig: number
+    createdAt: number
+    updatedAt: number
+    deletedAt: number
+    _all: number
+  }
+
+
+  export type SearchFilterPresetMinAggregateInputType = {
+    filterId?: true
+    userId?: true
+    filterName?: true
+    createdAt?: true
+    updatedAt?: true
+    deletedAt?: true
+  }
+
+  export type SearchFilterPresetMaxAggregateInputType = {
+    filterId?: true
+    userId?: true
+    filterName?: true
+    createdAt?: true
+    updatedAt?: true
+    deletedAt?: true
+  }
+
+  export type SearchFilterPresetCountAggregateInputType = {
+    filterId?: true
+    userId?: true
+    filterName?: true
+    filterConfig?: true
+    createdAt?: true
+    updatedAt?: true
+    deletedAt?: true
+    _all?: true
+  }
+
+  export type SearchFilterPresetAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which SearchFilterPreset to aggregate.
+     */
+    where?: SearchFilterPresetWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of SearchFilterPresets to fetch.
+     */
+    orderBy?: SearchFilterPresetOrderByWithRelationInput | SearchFilterPresetOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: SearchFilterPresetWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` SearchFilterPresets from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` SearchFilterPresets.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned SearchFilterPresets
+    **/
+    _count?: true | SearchFilterPresetCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: SearchFilterPresetMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: SearchFilterPresetMaxAggregateInputType
+  }
+
+  export type GetSearchFilterPresetAggregateType<T extends SearchFilterPresetAggregateArgs> = {
+        [P in keyof T & keyof AggregateSearchFilterPreset]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateSearchFilterPreset[P]>
+      : GetScalarType<T[P], AggregateSearchFilterPreset[P]>
+  }
+
+
+
+
+  export type SearchFilterPresetGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: SearchFilterPresetWhereInput
+    orderBy?: SearchFilterPresetOrderByWithAggregationInput | SearchFilterPresetOrderByWithAggregationInput[]
+    by: SearchFilterPresetScalarFieldEnum[] | SearchFilterPresetScalarFieldEnum
+    having?: SearchFilterPresetScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: SearchFilterPresetCountAggregateInputType | true
+    _min?: SearchFilterPresetMinAggregateInputType
+    _max?: SearchFilterPresetMaxAggregateInputType
+  }
+
+  export type SearchFilterPresetGroupByOutputType = {
+    filterId: string
+    userId: string
+    filterName: string
+    filterConfig: JsonValue
+    createdAt: Date
+    updatedAt: Date
+    deletedAt: Date | null
+    _count: SearchFilterPresetCountAggregateOutputType | null
+    _min: SearchFilterPresetMinAggregateOutputType | null
+    _max: SearchFilterPresetMaxAggregateOutputType | null
+  }
+
+  type GetSearchFilterPresetGroupByPayload<T extends SearchFilterPresetGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<SearchFilterPresetGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof SearchFilterPresetGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], SearchFilterPresetGroupByOutputType[P]>
+            : GetScalarType<T[P], SearchFilterPresetGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type SearchFilterPresetSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    filterId?: boolean
+    userId?: boolean
+    filterName?: boolean
+    filterConfig?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    deletedAt?: boolean
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["searchFilterPreset"]>
+
+  export type SearchFilterPresetSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    filterId?: boolean
+    userId?: boolean
+    filterName?: boolean
+    filterConfig?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    deletedAt?: boolean
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["searchFilterPreset"]>
+
+  export type SearchFilterPresetSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    filterId?: boolean
+    userId?: boolean
+    filterName?: boolean
+    filterConfig?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    deletedAt?: boolean
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["searchFilterPreset"]>
+
+  export type SearchFilterPresetSelectScalar = {
+    filterId?: boolean
+    userId?: boolean
+    filterName?: boolean
+    filterConfig?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    deletedAt?: boolean
+  }
+
+  export type SearchFilterPresetOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"filterId" | "userId" | "filterName" | "filterConfig" | "createdAt" | "updatedAt" | "deletedAt", ExtArgs["result"]["searchFilterPreset"]>
+  export type SearchFilterPresetInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }
+  export type SearchFilterPresetIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }
+  export type SearchFilterPresetIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }
+
+  export type $SearchFilterPresetPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "SearchFilterPreset"
+    objects: {
+      user: Prisma.$UserPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      filterId: string
+      userId: string
+      filterName: string
+      filterConfig: Prisma.JsonValue
+      createdAt: Date
+      updatedAt: Date
+      deletedAt: Date | null
+    }, ExtArgs["result"]["searchFilterPreset"]>
+    composites: {}
+  }
+
+  type SearchFilterPresetGetPayload<S extends boolean | null | undefined | SearchFilterPresetDefaultArgs> = $Result.GetResult<Prisma.$SearchFilterPresetPayload, S>
+
+  type SearchFilterPresetCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<SearchFilterPresetFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: SearchFilterPresetCountAggregateInputType | true
+    }
+
+  export interface SearchFilterPresetDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['SearchFilterPreset'], meta: { name: 'SearchFilterPreset' } }
+    /**
+     * Find zero or one SearchFilterPreset that matches the filter.
+     * @param {SearchFilterPresetFindUniqueArgs} args - Arguments to find a SearchFilterPreset
+     * @example
+     * // Get one SearchFilterPreset
+     * const searchFilterPreset = await prisma.searchFilterPreset.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends SearchFilterPresetFindUniqueArgs>(args: SelectSubset<T, SearchFilterPresetFindUniqueArgs<ExtArgs>>): Prisma__SearchFilterPresetClient<$Result.GetResult<Prisma.$SearchFilterPresetPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one SearchFilterPreset that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {SearchFilterPresetFindUniqueOrThrowArgs} args - Arguments to find a SearchFilterPreset
+     * @example
+     * // Get one SearchFilterPreset
+     * const searchFilterPreset = await prisma.searchFilterPreset.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends SearchFilterPresetFindUniqueOrThrowArgs>(args: SelectSubset<T, SearchFilterPresetFindUniqueOrThrowArgs<ExtArgs>>): Prisma__SearchFilterPresetClient<$Result.GetResult<Prisma.$SearchFilterPresetPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first SearchFilterPreset that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SearchFilterPresetFindFirstArgs} args - Arguments to find a SearchFilterPreset
+     * @example
+     * // Get one SearchFilterPreset
+     * const searchFilterPreset = await prisma.searchFilterPreset.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends SearchFilterPresetFindFirstArgs>(args?: SelectSubset<T, SearchFilterPresetFindFirstArgs<ExtArgs>>): Prisma__SearchFilterPresetClient<$Result.GetResult<Prisma.$SearchFilterPresetPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first SearchFilterPreset that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SearchFilterPresetFindFirstOrThrowArgs} args - Arguments to find a SearchFilterPreset
+     * @example
+     * // Get one SearchFilterPreset
+     * const searchFilterPreset = await prisma.searchFilterPreset.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends SearchFilterPresetFindFirstOrThrowArgs>(args?: SelectSubset<T, SearchFilterPresetFindFirstOrThrowArgs<ExtArgs>>): Prisma__SearchFilterPresetClient<$Result.GetResult<Prisma.$SearchFilterPresetPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more SearchFilterPresets that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SearchFilterPresetFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all SearchFilterPresets
+     * const searchFilterPresets = await prisma.searchFilterPreset.findMany()
+     * 
+     * // Get first 10 SearchFilterPresets
+     * const searchFilterPresets = await prisma.searchFilterPreset.findMany({ take: 10 })
+     * 
+     * // Only select the `filterId`
+     * const searchFilterPresetWithFilterIdOnly = await prisma.searchFilterPreset.findMany({ select: { filterId: true } })
+     * 
+     */
+    findMany<T extends SearchFilterPresetFindManyArgs>(args?: SelectSubset<T, SearchFilterPresetFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SearchFilterPresetPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a SearchFilterPreset.
+     * @param {SearchFilterPresetCreateArgs} args - Arguments to create a SearchFilterPreset.
+     * @example
+     * // Create one SearchFilterPreset
+     * const SearchFilterPreset = await prisma.searchFilterPreset.create({
+     *   data: {
+     *     // ... data to create a SearchFilterPreset
+     *   }
+     * })
+     * 
+     */
+    create<T extends SearchFilterPresetCreateArgs>(args: SelectSubset<T, SearchFilterPresetCreateArgs<ExtArgs>>): Prisma__SearchFilterPresetClient<$Result.GetResult<Prisma.$SearchFilterPresetPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many SearchFilterPresets.
+     * @param {SearchFilterPresetCreateManyArgs} args - Arguments to create many SearchFilterPresets.
+     * @example
+     * // Create many SearchFilterPresets
+     * const searchFilterPreset = await prisma.searchFilterPreset.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends SearchFilterPresetCreateManyArgs>(args?: SelectSubset<T, SearchFilterPresetCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many SearchFilterPresets and returns the data saved in the database.
+     * @param {SearchFilterPresetCreateManyAndReturnArgs} args - Arguments to create many SearchFilterPresets.
+     * @example
+     * // Create many SearchFilterPresets
+     * const searchFilterPreset = await prisma.searchFilterPreset.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many SearchFilterPresets and only return the `filterId`
+     * const searchFilterPresetWithFilterIdOnly = await prisma.searchFilterPreset.createManyAndReturn({
+     *   select: { filterId: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends SearchFilterPresetCreateManyAndReturnArgs>(args?: SelectSubset<T, SearchFilterPresetCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SearchFilterPresetPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a SearchFilterPreset.
+     * @param {SearchFilterPresetDeleteArgs} args - Arguments to delete one SearchFilterPreset.
+     * @example
+     * // Delete one SearchFilterPreset
+     * const SearchFilterPreset = await prisma.searchFilterPreset.delete({
+     *   where: {
+     *     // ... filter to delete one SearchFilterPreset
+     *   }
+     * })
+     * 
+     */
+    delete<T extends SearchFilterPresetDeleteArgs>(args: SelectSubset<T, SearchFilterPresetDeleteArgs<ExtArgs>>): Prisma__SearchFilterPresetClient<$Result.GetResult<Prisma.$SearchFilterPresetPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one SearchFilterPreset.
+     * @param {SearchFilterPresetUpdateArgs} args - Arguments to update one SearchFilterPreset.
+     * @example
+     * // Update one SearchFilterPreset
+     * const searchFilterPreset = await prisma.searchFilterPreset.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends SearchFilterPresetUpdateArgs>(args: SelectSubset<T, SearchFilterPresetUpdateArgs<ExtArgs>>): Prisma__SearchFilterPresetClient<$Result.GetResult<Prisma.$SearchFilterPresetPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more SearchFilterPresets.
+     * @param {SearchFilterPresetDeleteManyArgs} args - Arguments to filter SearchFilterPresets to delete.
+     * @example
+     * // Delete a few SearchFilterPresets
+     * const { count } = await prisma.searchFilterPreset.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends SearchFilterPresetDeleteManyArgs>(args?: SelectSubset<T, SearchFilterPresetDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more SearchFilterPresets.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SearchFilterPresetUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many SearchFilterPresets
+     * const searchFilterPreset = await prisma.searchFilterPreset.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends SearchFilterPresetUpdateManyArgs>(args: SelectSubset<T, SearchFilterPresetUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more SearchFilterPresets and returns the data updated in the database.
+     * @param {SearchFilterPresetUpdateManyAndReturnArgs} args - Arguments to update many SearchFilterPresets.
+     * @example
+     * // Update many SearchFilterPresets
+     * const searchFilterPreset = await prisma.searchFilterPreset.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more SearchFilterPresets and only return the `filterId`
+     * const searchFilterPresetWithFilterIdOnly = await prisma.searchFilterPreset.updateManyAndReturn({
+     *   select: { filterId: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends SearchFilterPresetUpdateManyAndReturnArgs>(args: SelectSubset<T, SearchFilterPresetUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SearchFilterPresetPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one SearchFilterPreset.
+     * @param {SearchFilterPresetUpsertArgs} args - Arguments to update or create a SearchFilterPreset.
+     * @example
+     * // Update or create a SearchFilterPreset
+     * const searchFilterPreset = await prisma.searchFilterPreset.upsert({
+     *   create: {
+     *     // ... data to create a SearchFilterPreset
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the SearchFilterPreset we want to update
+     *   }
+     * })
+     */
+    upsert<T extends SearchFilterPresetUpsertArgs>(args: SelectSubset<T, SearchFilterPresetUpsertArgs<ExtArgs>>): Prisma__SearchFilterPresetClient<$Result.GetResult<Prisma.$SearchFilterPresetPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of SearchFilterPresets.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SearchFilterPresetCountArgs} args - Arguments to filter SearchFilterPresets to count.
+     * @example
+     * // Count the number of SearchFilterPresets
+     * const count = await prisma.searchFilterPreset.count({
+     *   where: {
+     *     // ... the filter for the SearchFilterPresets we want to count
+     *   }
+     * })
+    **/
+    count<T extends SearchFilterPresetCountArgs>(
+      args?: Subset<T, SearchFilterPresetCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], SearchFilterPresetCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a SearchFilterPreset.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SearchFilterPresetAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends SearchFilterPresetAggregateArgs>(args: Subset<T, SearchFilterPresetAggregateArgs>): Prisma.PrismaPromise<GetSearchFilterPresetAggregateType<T>>
+
+    /**
+     * Group by SearchFilterPreset.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SearchFilterPresetGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends SearchFilterPresetGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: SearchFilterPresetGroupByArgs['orderBy'] }
+        : { orderBy?: SearchFilterPresetGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, SearchFilterPresetGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetSearchFilterPresetGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the SearchFilterPreset model
+   */
+  readonly fields: SearchFilterPresetFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for SearchFilterPreset.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__SearchFilterPresetClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    user<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the SearchFilterPreset model
+   */
+  interface SearchFilterPresetFieldRefs {
+    readonly filterId: FieldRef<"SearchFilterPreset", 'String'>
+    readonly userId: FieldRef<"SearchFilterPreset", 'String'>
+    readonly filterName: FieldRef<"SearchFilterPreset", 'String'>
+    readonly filterConfig: FieldRef<"SearchFilterPreset", 'Json'>
+    readonly createdAt: FieldRef<"SearchFilterPreset", 'DateTime'>
+    readonly updatedAt: FieldRef<"SearchFilterPreset", 'DateTime'>
+    readonly deletedAt: FieldRef<"SearchFilterPreset", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * SearchFilterPreset findUnique
+   */
+  export type SearchFilterPresetFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SearchFilterPreset
+     */
+    select?: SearchFilterPresetSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SearchFilterPreset
+     */
+    omit?: SearchFilterPresetOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SearchFilterPresetInclude<ExtArgs> | null
+    /**
+     * Filter, which SearchFilterPreset to fetch.
+     */
+    where: SearchFilterPresetWhereUniqueInput
+  }
+
+  /**
+   * SearchFilterPreset findUniqueOrThrow
+   */
+  export type SearchFilterPresetFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SearchFilterPreset
+     */
+    select?: SearchFilterPresetSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SearchFilterPreset
+     */
+    omit?: SearchFilterPresetOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SearchFilterPresetInclude<ExtArgs> | null
+    /**
+     * Filter, which SearchFilterPreset to fetch.
+     */
+    where: SearchFilterPresetWhereUniqueInput
+  }
+
+  /**
+   * SearchFilterPreset findFirst
+   */
+  export type SearchFilterPresetFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SearchFilterPreset
+     */
+    select?: SearchFilterPresetSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SearchFilterPreset
+     */
+    omit?: SearchFilterPresetOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SearchFilterPresetInclude<ExtArgs> | null
+    /**
+     * Filter, which SearchFilterPreset to fetch.
+     */
+    where?: SearchFilterPresetWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of SearchFilterPresets to fetch.
+     */
+    orderBy?: SearchFilterPresetOrderByWithRelationInput | SearchFilterPresetOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for SearchFilterPresets.
+     */
+    cursor?: SearchFilterPresetWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` SearchFilterPresets from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` SearchFilterPresets.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of SearchFilterPresets.
+     */
+    distinct?: SearchFilterPresetScalarFieldEnum | SearchFilterPresetScalarFieldEnum[]
+  }
+
+  /**
+   * SearchFilterPreset findFirstOrThrow
+   */
+  export type SearchFilterPresetFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SearchFilterPreset
+     */
+    select?: SearchFilterPresetSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SearchFilterPreset
+     */
+    omit?: SearchFilterPresetOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SearchFilterPresetInclude<ExtArgs> | null
+    /**
+     * Filter, which SearchFilterPreset to fetch.
+     */
+    where?: SearchFilterPresetWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of SearchFilterPresets to fetch.
+     */
+    orderBy?: SearchFilterPresetOrderByWithRelationInput | SearchFilterPresetOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for SearchFilterPresets.
+     */
+    cursor?: SearchFilterPresetWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` SearchFilterPresets from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` SearchFilterPresets.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of SearchFilterPresets.
+     */
+    distinct?: SearchFilterPresetScalarFieldEnum | SearchFilterPresetScalarFieldEnum[]
+  }
+
+  /**
+   * SearchFilterPreset findMany
+   */
+  export type SearchFilterPresetFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SearchFilterPreset
+     */
+    select?: SearchFilterPresetSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SearchFilterPreset
+     */
+    omit?: SearchFilterPresetOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SearchFilterPresetInclude<ExtArgs> | null
+    /**
+     * Filter, which SearchFilterPresets to fetch.
+     */
+    where?: SearchFilterPresetWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of SearchFilterPresets to fetch.
+     */
+    orderBy?: SearchFilterPresetOrderByWithRelationInput | SearchFilterPresetOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing SearchFilterPresets.
+     */
+    cursor?: SearchFilterPresetWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` SearchFilterPresets from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` SearchFilterPresets.
+     */
+    skip?: number
+    distinct?: SearchFilterPresetScalarFieldEnum | SearchFilterPresetScalarFieldEnum[]
+  }
+
+  /**
+   * SearchFilterPreset create
+   */
+  export type SearchFilterPresetCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SearchFilterPreset
+     */
+    select?: SearchFilterPresetSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SearchFilterPreset
+     */
+    omit?: SearchFilterPresetOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SearchFilterPresetInclude<ExtArgs> | null
+    /**
+     * The data needed to create a SearchFilterPreset.
+     */
+    data: XOR<SearchFilterPresetCreateInput, SearchFilterPresetUncheckedCreateInput>
+  }
+
+  /**
+   * SearchFilterPreset createMany
+   */
+  export type SearchFilterPresetCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many SearchFilterPresets.
+     */
+    data: SearchFilterPresetCreateManyInput | SearchFilterPresetCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * SearchFilterPreset createManyAndReturn
+   */
+  export type SearchFilterPresetCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SearchFilterPreset
+     */
+    select?: SearchFilterPresetSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the SearchFilterPreset
+     */
+    omit?: SearchFilterPresetOmit<ExtArgs> | null
+    /**
+     * The data used to create many SearchFilterPresets.
+     */
+    data: SearchFilterPresetCreateManyInput | SearchFilterPresetCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SearchFilterPresetIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * SearchFilterPreset update
+   */
+  export type SearchFilterPresetUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SearchFilterPreset
+     */
+    select?: SearchFilterPresetSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SearchFilterPreset
+     */
+    omit?: SearchFilterPresetOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SearchFilterPresetInclude<ExtArgs> | null
+    /**
+     * The data needed to update a SearchFilterPreset.
+     */
+    data: XOR<SearchFilterPresetUpdateInput, SearchFilterPresetUncheckedUpdateInput>
+    /**
+     * Choose, which SearchFilterPreset to update.
+     */
+    where: SearchFilterPresetWhereUniqueInput
+  }
+
+  /**
+   * SearchFilterPreset updateMany
+   */
+  export type SearchFilterPresetUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update SearchFilterPresets.
+     */
+    data: XOR<SearchFilterPresetUpdateManyMutationInput, SearchFilterPresetUncheckedUpdateManyInput>
+    /**
+     * Filter which SearchFilterPresets to update
+     */
+    where?: SearchFilterPresetWhereInput
+    /**
+     * Limit how many SearchFilterPresets to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * SearchFilterPreset updateManyAndReturn
+   */
+  export type SearchFilterPresetUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SearchFilterPreset
+     */
+    select?: SearchFilterPresetSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the SearchFilterPreset
+     */
+    omit?: SearchFilterPresetOmit<ExtArgs> | null
+    /**
+     * The data used to update SearchFilterPresets.
+     */
+    data: XOR<SearchFilterPresetUpdateManyMutationInput, SearchFilterPresetUncheckedUpdateManyInput>
+    /**
+     * Filter which SearchFilterPresets to update
+     */
+    where?: SearchFilterPresetWhereInput
+    /**
+     * Limit how many SearchFilterPresets to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SearchFilterPresetIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * SearchFilterPreset upsert
+   */
+  export type SearchFilterPresetUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SearchFilterPreset
+     */
+    select?: SearchFilterPresetSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SearchFilterPreset
+     */
+    omit?: SearchFilterPresetOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SearchFilterPresetInclude<ExtArgs> | null
+    /**
+     * The filter to search for the SearchFilterPreset to update in case it exists.
+     */
+    where: SearchFilterPresetWhereUniqueInput
+    /**
+     * In case the SearchFilterPreset found by the `where` argument doesn't exist, create a new SearchFilterPreset with this data.
+     */
+    create: XOR<SearchFilterPresetCreateInput, SearchFilterPresetUncheckedCreateInput>
+    /**
+     * In case the SearchFilterPreset was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<SearchFilterPresetUpdateInput, SearchFilterPresetUncheckedUpdateInput>
+  }
+
+  /**
+   * SearchFilterPreset delete
+   */
+  export type SearchFilterPresetDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SearchFilterPreset
+     */
+    select?: SearchFilterPresetSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SearchFilterPreset
+     */
+    omit?: SearchFilterPresetOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SearchFilterPresetInclude<ExtArgs> | null
+    /**
+     * Filter which SearchFilterPreset to delete.
+     */
+    where: SearchFilterPresetWhereUniqueInput
+  }
+
+  /**
+   * SearchFilterPreset deleteMany
+   */
+  export type SearchFilterPresetDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which SearchFilterPresets to delete
+     */
+    where?: SearchFilterPresetWhereInput
+    /**
+     * Limit how many SearchFilterPresets to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * SearchFilterPreset without action
+   */
+  export type SearchFilterPresetDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SearchFilterPreset
+     */
+    select?: SearchFilterPresetSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SearchFilterPreset
+     */
+    omit?: SearchFilterPresetOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SearchFilterPresetInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model StockPriceHistory
+   */
+
+  export type AggregateStockPriceHistory = {
+    _count: StockPriceHistoryCountAggregateOutputType | null
+    _avg: StockPriceHistoryAvgAggregateOutputType | null
+    _sum: StockPriceHistorySumAggregateOutputType | null
+    _min: StockPriceHistoryMinAggregateOutputType | null
+    _max: StockPriceHistoryMaxAggregateOutputType | null
+  }
+
+  export type StockPriceHistoryAvgAggregateOutputType = {
+    openPrice: Decimal | null
+    highPrice: Decimal | null
+    lowPrice: Decimal | null
+    closePrice: Decimal | null
+    volume: number | null
+    tradingValue: number | null
+  }
+
+  export type StockPriceHistorySumAggregateOutputType = {
+    openPrice: Decimal | null
+    highPrice: Decimal | null
+    lowPrice: Decimal | null
+    closePrice: Decimal | null
+    volume: bigint | null
+    tradingValue: bigint | null
+  }
+
+  export type StockPriceHistoryMinAggregateOutputType = {
+    priceId: string | null
+    companyId: string | null
+    tradeDate: Date | null
+    openPrice: Decimal | null
+    highPrice: Decimal | null
+    lowPrice: Decimal | null
+    closePrice: Decimal | null
+    volume: bigint | null
+    tradingValue: bigint | null
+    createdAt: Date | null
+  }
+
+  export type StockPriceHistoryMaxAggregateOutputType = {
+    priceId: string | null
+    companyId: string | null
+    tradeDate: Date | null
+    openPrice: Decimal | null
+    highPrice: Decimal | null
+    lowPrice: Decimal | null
+    closePrice: Decimal | null
+    volume: bigint | null
+    tradingValue: bigint | null
+    createdAt: Date | null
+  }
+
+  export type StockPriceHistoryCountAggregateOutputType = {
+    priceId: number
+    companyId: number
+    tradeDate: number
+    openPrice: number
+    highPrice: number
+    lowPrice: number
+    closePrice: number
+    volume: number
+    tradingValue: number
+    createdAt: number
+    _all: number
+  }
+
+
+  export type StockPriceHistoryAvgAggregateInputType = {
+    openPrice?: true
+    highPrice?: true
+    lowPrice?: true
+    closePrice?: true
+    volume?: true
+    tradingValue?: true
+  }
+
+  export type StockPriceHistorySumAggregateInputType = {
+    openPrice?: true
+    highPrice?: true
+    lowPrice?: true
+    closePrice?: true
+    volume?: true
+    tradingValue?: true
+  }
+
+  export type StockPriceHistoryMinAggregateInputType = {
+    priceId?: true
+    companyId?: true
+    tradeDate?: true
+    openPrice?: true
+    highPrice?: true
+    lowPrice?: true
+    closePrice?: true
+    volume?: true
+    tradingValue?: true
+    createdAt?: true
+  }
+
+  export type StockPriceHistoryMaxAggregateInputType = {
+    priceId?: true
+    companyId?: true
+    tradeDate?: true
+    openPrice?: true
+    highPrice?: true
+    lowPrice?: true
+    closePrice?: true
+    volume?: true
+    tradingValue?: true
+    createdAt?: true
+  }
+
+  export type StockPriceHistoryCountAggregateInputType = {
+    priceId?: true
+    companyId?: true
+    tradeDate?: true
+    openPrice?: true
+    highPrice?: true
+    lowPrice?: true
+    closePrice?: true
+    volume?: true
+    tradingValue?: true
+    createdAt?: true
+    _all?: true
+  }
+
+  export type StockPriceHistoryAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which StockPriceHistory to aggregate.
+     */
+    where?: StockPriceHistoryWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of StockPriceHistories to fetch.
+     */
+    orderBy?: StockPriceHistoryOrderByWithRelationInput | StockPriceHistoryOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: StockPriceHistoryWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` StockPriceHistories from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` StockPriceHistories.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned StockPriceHistories
+    **/
+    _count?: true | StockPriceHistoryCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: StockPriceHistoryAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: StockPriceHistorySumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: StockPriceHistoryMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: StockPriceHistoryMaxAggregateInputType
+  }
+
+  export type GetStockPriceHistoryAggregateType<T extends StockPriceHistoryAggregateArgs> = {
+        [P in keyof T & keyof AggregateStockPriceHistory]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateStockPriceHistory[P]>
+      : GetScalarType<T[P], AggregateStockPriceHistory[P]>
+  }
+
+
+
+
+  export type StockPriceHistoryGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: StockPriceHistoryWhereInput
+    orderBy?: StockPriceHistoryOrderByWithAggregationInput | StockPriceHistoryOrderByWithAggregationInput[]
+    by: StockPriceHistoryScalarFieldEnum[] | StockPriceHistoryScalarFieldEnum
+    having?: StockPriceHistoryScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: StockPriceHistoryCountAggregateInputType | true
+    _avg?: StockPriceHistoryAvgAggregateInputType
+    _sum?: StockPriceHistorySumAggregateInputType
+    _min?: StockPriceHistoryMinAggregateInputType
+    _max?: StockPriceHistoryMaxAggregateInputType
+  }
+
+  export type StockPriceHistoryGroupByOutputType = {
+    priceId: string
+    companyId: string
+    tradeDate: Date
+    openPrice: Decimal
+    highPrice: Decimal
+    lowPrice: Decimal
+    closePrice: Decimal
+    volume: bigint
+    tradingValue: bigint
+    createdAt: Date
+    _count: StockPriceHistoryCountAggregateOutputType | null
+    _avg: StockPriceHistoryAvgAggregateOutputType | null
+    _sum: StockPriceHistorySumAggregateOutputType | null
+    _min: StockPriceHistoryMinAggregateOutputType | null
+    _max: StockPriceHistoryMaxAggregateOutputType | null
+  }
+
+  type GetStockPriceHistoryGroupByPayload<T extends StockPriceHistoryGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<StockPriceHistoryGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof StockPriceHistoryGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], StockPriceHistoryGroupByOutputType[P]>
+            : GetScalarType<T[P], StockPriceHistoryGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type StockPriceHistorySelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    priceId?: boolean
+    companyId?: boolean
+    tradeDate?: boolean
+    openPrice?: boolean
+    highPrice?: boolean
+    lowPrice?: boolean
+    closePrice?: boolean
+    volume?: boolean
+    tradingValue?: boolean
+    createdAt?: boolean
+    company?: boolean | CompanyDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["stockPriceHistory"]>
+
+  export type StockPriceHistorySelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    priceId?: boolean
+    companyId?: boolean
+    tradeDate?: boolean
+    openPrice?: boolean
+    highPrice?: boolean
+    lowPrice?: boolean
+    closePrice?: boolean
+    volume?: boolean
+    tradingValue?: boolean
+    createdAt?: boolean
+    company?: boolean | CompanyDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["stockPriceHistory"]>
+
+  export type StockPriceHistorySelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    priceId?: boolean
+    companyId?: boolean
+    tradeDate?: boolean
+    openPrice?: boolean
+    highPrice?: boolean
+    lowPrice?: boolean
+    closePrice?: boolean
+    volume?: boolean
+    tradingValue?: boolean
+    createdAt?: boolean
+    company?: boolean | CompanyDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["stockPriceHistory"]>
+
+  export type StockPriceHistorySelectScalar = {
+    priceId?: boolean
+    companyId?: boolean
+    tradeDate?: boolean
+    openPrice?: boolean
+    highPrice?: boolean
+    lowPrice?: boolean
+    closePrice?: boolean
+    volume?: boolean
+    tradingValue?: boolean
+    createdAt?: boolean
+  }
+
+  export type StockPriceHistoryOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"priceId" | "companyId" | "tradeDate" | "openPrice" | "highPrice" | "lowPrice" | "closePrice" | "volume" | "tradingValue" | "createdAt", ExtArgs["result"]["stockPriceHistory"]>
+  export type StockPriceHistoryInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    company?: boolean | CompanyDefaultArgs<ExtArgs>
+  }
+  export type StockPriceHistoryIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    company?: boolean | CompanyDefaultArgs<ExtArgs>
+  }
+  export type StockPriceHistoryIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    company?: boolean | CompanyDefaultArgs<ExtArgs>
+  }
+
+  export type $StockPriceHistoryPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "StockPriceHistory"
+    objects: {
+      company: Prisma.$CompanyPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      priceId: string
+      companyId: string
+      tradeDate: Date
+      openPrice: Prisma.Decimal
+      highPrice: Prisma.Decimal
+      lowPrice: Prisma.Decimal
+      closePrice: Prisma.Decimal
+      volume: bigint
+      tradingValue: bigint
+      createdAt: Date
+    }, ExtArgs["result"]["stockPriceHistory"]>
+    composites: {}
+  }
+
+  type StockPriceHistoryGetPayload<S extends boolean | null | undefined | StockPriceHistoryDefaultArgs> = $Result.GetResult<Prisma.$StockPriceHistoryPayload, S>
+
+  type StockPriceHistoryCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<StockPriceHistoryFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: StockPriceHistoryCountAggregateInputType | true
+    }
+
+  export interface StockPriceHistoryDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['StockPriceHistory'], meta: { name: 'StockPriceHistory' } }
+    /**
+     * Find zero or one StockPriceHistory that matches the filter.
+     * @param {StockPriceHistoryFindUniqueArgs} args - Arguments to find a StockPriceHistory
+     * @example
+     * // Get one StockPriceHistory
+     * const stockPriceHistory = await prisma.stockPriceHistory.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends StockPriceHistoryFindUniqueArgs>(args: SelectSubset<T, StockPriceHistoryFindUniqueArgs<ExtArgs>>): Prisma__StockPriceHistoryClient<$Result.GetResult<Prisma.$StockPriceHistoryPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one StockPriceHistory that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {StockPriceHistoryFindUniqueOrThrowArgs} args - Arguments to find a StockPriceHistory
+     * @example
+     * // Get one StockPriceHistory
+     * const stockPriceHistory = await prisma.stockPriceHistory.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends StockPriceHistoryFindUniqueOrThrowArgs>(args: SelectSubset<T, StockPriceHistoryFindUniqueOrThrowArgs<ExtArgs>>): Prisma__StockPriceHistoryClient<$Result.GetResult<Prisma.$StockPriceHistoryPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first StockPriceHistory that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {StockPriceHistoryFindFirstArgs} args - Arguments to find a StockPriceHistory
+     * @example
+     * // Get one StockPriceHistory
+     * const stockPriceHistory = await prisma.stockPriceHistory.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends StockPriceHistoryFindFirstArgs>(args?: SelectSubset<T, StockPriceHistoryFindFirstArgs<ExtArgs>>): Prisma__StockPriceHistoryClient<$Result.GetResult<Prisma.$StockPriceHistoryPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first StockPriceHistory that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {StockPriceHistoryFindFirstOrThrowArgs} args - Arguments to find a StockPriceHistory
+     * @example
+     * // Get one StockPriceHistory
+     * const stockPriceHistory = await prisma.stockPriceHistory.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends StockPriceHistoryFindFirstOrThrowArgs>(args?: SelectSubset<T, StockPriceHistoryFindFirstOrThrowArgs<ExtArgs>>): Prisma__StockPriceHistoryClient<$Result.GetResult<Prisma.$StockPriceHistoryPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more StockPriceHistories that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {StockPriceHistoryFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all StockPriceHistories
+     * const stockPriceHistories = await prisma.stockPriceHistory.findMany()
+     * 
+     * // Get first 10 StockPriceHistories
+     * const stockPriceHistories = await prisma.stockPriceHistory.findMany({ take: 10 })
+     * 
+     * // Only select the `priceId`
+     * const stockPriceHistoryWithPriceIdOnly = await prisma.stockPriceHistory.findMany({ select: { priceId: true } })
+     * 
+     */
+    findMany<T extends StockPriceHistoryFindManyArgs>(args?: SelectSubset<T, StockPriceHistoryFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$StockPriceHistoryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a StockPriceHistory.
+     * @param {StockPriceHistoryCreateArgs} args - Arguments to create a StockPriceHistory.
+     * @example
+     * // Create one StockPriceHistory
+     * const StockPriceHistory = await prisma.stockPriceHistory.create({
+     *   data: {
+     *     // ... data to create a StockPriceHistory
+     *   }
+     * })
+     * 
+     */
+    create<T extends StockPriceHistoryCreateArgs>(args: SelectSubset<T, StockPriceHistoryCreateArgs<ExtArgs>>): Prisma__StockPriceHistoryClient<$Result.GetResult<Prisma.$StockPriceHistoryPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many StockPriceHistories.
+     * @param {StockPriceHistoryCreateManyArgs} args - Arguments to create many StockPriceHistories.
+     * @example
+     * // Create many StockPriceHistories
+     * const stockPriceHistory = await prisma.stockPriceHistory.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends StockPriceHistoryCreateManyArgs>(args?: SelectSubset<T, StockPriceHistoryCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many StockPriceHistories and returns the data saved in the database.
+     * @param {StockPriceHistoryCreateManyAndReturnArgs} args - Arguments to create many StockPriceHistories.
+     * @example
+     * // Create many StockPriceHistories
+     * const stockPriceHistory = await prisma.stockPriceHistory.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many StockPriceHistories and only return the `priceId`
+     * const stockPriceHistoryWithPriceIdOnly = await prisma.stockPriceHistory.createManyAndReturn({
+     *   select: { priceId: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends StockPriceHistoryCreateManyAndReturnArgs>(args?: SelectSubset<T, StockPriceHistoryCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$StockPriceHistoryPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a StockPriceHistory.
+     * @param {StockPriceHistoryDeleteArgs} args - Arguments to delete one StockPriceHistory.
+     * @example
+     * // Delete one StockPriceHistory
+     * const StockPriceHistory = await prisma.stockPriceHistory.delete({
+     *   where: {
+     *     // ... filter to delete one StockPriceHistory
+     *   }
+     * })
+     * 
+     */
+    delete<T extends StockPriceHistoryDeleteArgs>(args: SelectSubset<T, StockPriceHistoryDeleteArgs<ExtArgs>>): Prisma__StockPriceHistoryClient<$Result.GetResult<Prisma.$StockPriceHistoryPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one StockPriceHistory.
+     * @param {StockPriceHistoryUpdateArgs} args - Arguments to update one StockPriceHistory.
+     * @example
+     * // Update one StockPriceHistory
+     * const stockPriceHistory = await prisma.stockPriceHistory.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends StockPriceHistoryUpdateArgs>(args: SelectSubset<T, StockPriceHistoryUpdateArgs<ExtArgs>>): Prisma__StockPriceHistoryClient<$Result.GetResult<Prisma.$StockPriceHistoryPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more StockPriceHistories.
+     * @param {StockPriceHistoryDeleteManyArgs} args - Arguments to filter StockPriceHistories to delete.
+     * @example
+     * // Delete a few StockPriceHistories
+     * const { count } = await prisma.stockPriceHistory.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends StockPriceHistoryDeleteManyArgs>(args?: SelectSubset<T, StockPriceHistoryDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more StockPriceHistories.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {StockPriceHistoryUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many StockPriceHistories
+     * const stockPriceHistory = await prisma.stockPriceHistory.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends StockPriceHistoryUpdateManyArgs>(args: SelectSubset<T, StockPriceHistoryUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more StockPriceHistories and returns the data updated in the database.
+     * @param {StockPriceHistoryUpdateManyAndReturnArgs} args - Arguments to update many StockPriceHistories.
+     * @example
+     * // Update many StockPriceHistories
+     * const stockPriceHistory = await prisma.stockPriceHistory.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more StockPriceHistories and only return the `priceId`
+     * const stockPriceHistoryWithPriceIdOnly = await prisma.stockPriceHistory.updateManyAndReturn({
+     *   select: { priceId: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends StockPriceHistoryUpdateManyAndReturnArgs>(args: SelectSubset<T, StockPriceHistoryUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$StockPriceHistoryPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one StockPriceHistory.
+     * @param {StockPriceHistoryUpsertArgs} args - Arguments to update or create a StockPriceHistory.
+     * @example
+     * // Update or create a StockPriceHistory
+     * const stockPriceHistory = await prisma.stockPriceHistory.upsert({
+     *   create: {
+     *     // ... data to create a StockPriceHistory
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the StockPriceHistory we want to update
+     *   }
+     * })
+     */
+    upsert<T extends StockPriceHistoryUpsertArgs>(args: SelectSubset<T, StockPriceHistoryUpsertArgs<ExtArgs>>): Prisma__StockPriceHistoryClient<$Result.GetResult<Prisma.$StockPriceHistoryPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of StockPriceHistories.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {StockPriceHistoryCountArgs} args - Arguments to filter StockPriceHistories to count.
+     * @example
+     * // Count the number of StockPriceHistories
+     * const count = await prisma.stockPriceHistory.count({
+     *   where: {
+     *     // ... the filter for the StockPriceHistories we want to count
+     *   }
+     * })
+    **/
+    count<T extends StockPriceHistoryCountArgs>(
+      args?: Subset<T, StockPriceHistoryCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], StockPriceHistoryCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a StockPriceHistory.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {StockPriceHistoryAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends StockPriceHistoryAggregateArgs>(args: Subset<T, StockPriceHistoryAggregateArgs>): Prisma.PrismaPromise<GetStockPriceHistoryAggregateType<T>>
+
+    /**
+     * Group by StockPriceHistory.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {StockPriceHistoryGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends StockPriceHistoryGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: StockPriceHistoryGroupByArgs['orderBy'] }
+        : { orderBy?: StockPriceHistoryGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, StockPriceHistoryGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetStockPriceHistoryGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the StockPriceHistory model
+   */
+  readonly fields: StockPriceHistoryFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for StockPriceHistory.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__StockPriceHistoryClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    company<T extends CompanyDefaultArgs<ExtArgs> = {}>(args?: Subset<T, CompanyDefaultArgs<ExtArgs>>): Prisma__CompanyClient<$Result.GetResult<Prisma.$CompanyPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the StockPriceHistory model
+   */
+  interface StockPriceHistoryFieldRefs {
+    readonly priceId: FieldRef<"StockPriceHistory", 'String'>
+    readonly companyId: FieldRef<"StockPriceHistory", 'String'>
+    readonly tradeDate: FieldRef<"StockPriceHistory", 'DateTime'>
+    readonly openPrice: FieldRef<"StockPriceHistory", 'Decimal'>
+    readonly highPrice: FieldRef<"StockPriceHistory", 'Decimal'>
+    readonly lowPrice: FieldRef<"StockPriceHistory", 'Decimal'>
+    readonly closePrice: FieldRef<"StockPriceHistory", 'Decimal'>
+    readonly volume: FieldRef<"StockPriceHistory", 'BigInt'>
+    readonly tradingValue: FieldRef<"StockPriceHistory", 'BigInt'>
+    readonly createdAt: FieldRef<"StockPriceHistory", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * StockPriceHistory findUnique
+   */
+  export type StockPriceHistoryFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the StockPriceHistory
+     */
+    select?: StockPriceHistorySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the StockPriceHistory
+     */
+    omit?: StockPriceHistoryOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: StockPriceHistoryInclude<ExtArgs> | null
+    /**
+     * Filter, which StockPriceHistory to fetch.
+     */
+    where: StockPriceHistoryWhereUniqueInput
+  }
+
+  /**
+   * StockPriceHistory findUniqueOrThrow
+   */
+  export type StockPriceHistoryFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the StockPriceHistory
+     */
+    select?: StockPriceHistorySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the StockPriceHistory
+     */
+    omit?: StockPriceHistoryOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: StockPriceHistoryInclude<ExtArgs> | null
+    /**
+     * Filter, which StockPriceHistory to fetch.
+     */
+    where: StockPriceHistoryWhereUniqueInput
+  }
+
+  /**
+   * StockPriceHistory findFirst
+   */
+  export type StockPriceHistoryFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the StockPriceHistory
+     */
+    select?: StockPriceHistorySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the StockPriceHistory
+     */
+    omit?: StockPriceHistoryOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: StockPriceHistoryInclude<ExtArgs> | null
+    /**
+     * Filter, which StockPriceHistory to fetch.
+     */
+    where?: StockPriceHistoryWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of StockPriceHistories to fetch.
+     */
+    orderBy?: StockPriceHistoryOrderByWithRelationInput | StockPriceHistoryOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for StockPriceHistories.
+     */
+    cursor?: StockPriceHistoryWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` StockPriceHistories from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` StockPriceHistories.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of StockPriceHistories.
+     */
+    distinct?: StockPriceHistoryScalarFieldEnum | StockPriceHistoryScalarFieldEnum[]
+  }
+
+  /**
+   * StockPriceHistory findFirstOrThrow
+   */
+  export type StockPriceHistoryFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the StockPriceHistory
+     */
+    select?: StockPriceHistorySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the StockPriceHistory
+     */
+    omit?: StockPriceHistoryOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: StockPriceHistoryInclude<ExtArgs> | null
+    /**
+     * Filter, which StockPriceHistory to fetch.
+     */
+    where?: StockPriceHistoryWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of StockPriceHistories to fetch.
+     */
+    orderBy?: StockPriceHistoryOrderByWithRelationInput | StockPriceHistoryOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for StockPriceHistories.
+     */
+    cursor?: StockPriceHistoryWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` StockPriceHistories from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` StockPriceHistories.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of StockPriceHistories.
+     */
+    distinct?: StockPriceHistoryScalarFieldEnum | StockPriceHistoryScalarFieldEnum[]
+  }
+
+  /**
+   * StockPriceHistory findMany
+   */
+  export type StockPriceHistoryFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the StockPriceHistory
+     */
+    select?: StockPriceHistorySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the StockPriceHistory
+     */
+    omit?: StockPriceHistoryOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: StockPriceHistoryInclude<ExtArgs> | null
+    /**
+     * Filter, which StockPriceHistories to fetch.
+     */
+    where?: StockPriceHistoryWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of StockPriceHistories to fetch.
+     */
+    orderBy?: StockPriceHistoryOrderByWithRelationInput | StockPriceHistoryOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing StockPriceHistories.
+     */
+    cursor?: StockPriceHistoryWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` StockPriceHistories from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` StockPriceHistories.
+     */
+    skip?: number
+    distinct?: StockPriceHistoryScalarFieldEnum | StockPriceHistoryScalarFieldEnum[]
+  }
+
+  /**
+   * StockPriceHistory create
+   */
+  export type StockPriceHistoryCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the StockPriceHistory
+     */
+    select?: StockPriceHistorySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the StockPriceHistory
+     */
+    omit?: StockPriceHistoryOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: StockPriceHistoryInclude<ExtArgs> | null
+    /**
+     * The data needed to create a StockPriceHistory.
+     */
+    data: XOR<StockPriceHistoryCreateInput, StockPriceHistoryUncheckedCreateInput>
+  }
+
+  /**
+   * StockPriceHistory createMany
+   */
+  export type StockPriceHistoryCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many StockPriceHistories.
+     */
+    data: StockPriceHistoryCreateManyInput | StockPriceHistoryCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * StockPriceHistory createManyAndReturn
+   */
+  export type StockPriceHistoryCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the StockPriceHistory
+     */
+    select?: StockPriceHistorySelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the StockPriceHistory
+     */
+    omit?: StockPriceHistoryOmit<ExtArgs> | null
+    /**
+     * The data used to create many StockPriceHistories.
+     */
+    data: StockPriceHistoryCreateManyInput | StockPriceHistoryCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: StockPriceHistoryIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * StockPriceHistory update
+   */
+  export type StockPriceHistoryUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the StockPriceHistory
+     */
+    select?: StockPriceHistorySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the StockPriceHistory
+     */
+    omit?: StockPriceHistoryOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: StockPriceHistoryInclude<ExtArgs> | null
+    /**
+     * The data needed to update a StockPriceHistory.
+     */
+    data: XOR<StockPriceHistoryUpdateInput, StockPriceHistoryUncheckedUpdateInput>
+    /**
+     * Choose, which StockPriceHistory to update.
+     */
+    where: StockPriceHistoryWhereUniqueInput
+  }
+
+  /**
+   * StockPriceHistory updateMany
+   */
+  export type StockPriceHistoryUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update StockPriceHistories.
+     */
+    data: XOR<StockPriceHistoryUpdateManyMutationInput, StockPriceHistoryUncheckedUpdateManyInput>
+    /**
+     * Filter which StockPriceHistories to update
+     */
+    where?: StockPriceHistoryWhereInput
+    /**
+     * Limit how many StockPriceHistories to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * StockPriceHistory updateManyAndReturn
+   */
+  export type StockPriceHistoryUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the StockPriceHistory
+     */
+    select?: StockPriceHistorySelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the StockPriceHistory
+     */
+    omit?: StockPriceHistoryOmit<ExtArgs> | null
+    /**
+     * The data used to update StockPriceHistories.
+     */
+    data: XOR<StockPriceHistoryUpdateManyMutationInput, StockPriceHistoryUncheckedUpdateManyInput>
+    /**
+     * Filter which StockPriceHistories to update
+     */
+    where?: StockPriceHistoryWhereInput
+    /**
+     * Limit how many StockPriceHistories to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: StockPriceHistoryIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * StockPriceHistory upsert
+   */
+  export type StockPriceHistoryUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the StockPriceHistory
+     */
+    select?: StockPriceHistorySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the StockPriceHistory
+     */
+    omit?: StockPriceHistoryOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: StockPriceHistoryInclude<ExtArgs> | null
+    /**
+     * The filter to search for the StockPriceHistory to update in case it exists.
+     */
+    where: StockPriceHistoryWhereUniqueInput
+    /**
+     * In case the StockPriceHistory found by the `where` argument doesn't exist, create a new StockPriceHistory with this data.
+     */
+    create: XOR<StockPriceHistoryCreateInput, StockPriceHistoryUncheckedCreateInput>
+    /**
+     * In case the StockPriceHistory was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<StockPriceHistoryUpdateInput, StockPriceHistoryUncheckedUpdateInput>
+  }
+
+  /**
+   * StockPriceHistory delete
+   */
+  export type StockPriceHistoryDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the StockPriceHistory
+     */
+    select?: StockPriceHistorySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the StockPriceHistory
+     */
+    omit?: StockPriceHistoryOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: StockPriceHistoryInclude<ExtArgs> | null
+    /**
+     * Filter which StockPriceHistory to delete.
+     */
+    where: StockPriceHistoryWhereUniqueInput
+  }
+
+  /**
+   * StockPriceHistory deleteMany
+   */
+  export type StockPriceHistoryDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which StockPriceHistories to delete
+     */
+    where?: StockPriceHistoryWhereInput
+    /**
+     * Limit how many StockPriceHistories to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * StockPriceHistory without action
+   */
+  export type StockPriceHistoryDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the StockPriceHistory
+     */
+    select?: StockPriceHistorySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the StockPriceHistory
+     */
+    omit?: StockPriceHistoryOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: StockPriceHistoryInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model MarketIndexHistory
+   */
+
+  export type AggregateMarketIndexHistory = {
+    _count: MarketIndexHistoryCountAggregateOutputType | null
+    _avg: MarketIndexHistoryAvgAggregateOutputType | null
+    _sum: MarketIndexHistorySumAggregateOutputType | null
+    _min: MarketIndexHistoryMinAggregateOutputType | null
+    _max: MarketIndexHistoryMaxAggregateOutputType | null
+  }
+
+  export type MarketIndexHistoryAvgAggregateOutputType = {
+    closeIndex: Decimal | null
+  }
+
+  export type MarketIndexHistorySumAggregateOutputType = {
+    closeIndex: Decimal | null
+  }
+
+  export type MarketIndexHistoryMinAggregateOutputType = {
+    indexId: string | null
+    marketType: $Enums.MarketIndexType | null
+    tradeDate: Date | null
+    closeIndex: Decimal | null
+    createdAt: Date | null
+  }
+
+  export type MarketIndexHistoryMaxAggregateOutputType = {
+    indexId: string | null
+    marketType: $Enums.MarketIndexType | null
+    tradeDate: Date | null
+    closeIndex: Decimal | null
+    createdAt: Date | null
+  }
+
+  export type MarketIndexHistoryCountAggregateOutputType = {
+    indexId: number
+    marketType: number
+    tradeDate: number
+    closeIndex: number
+    createdAt: number
+    _all: number
+  }
+
+
+  export type MarketIndexHistoryAvgAggregateInputType = {
+    closeIndex?: true
+  }
+
+  export type MarketIndexHistorySumAggregateInputType = {
+    closeIndex?: true
+  }
+
+  export type MarketIndexHistoryMinAggregateInputType = {
+    indexId?: true
+    marketType?: true
+    tradeDate?: true
+    closeIndex?: true
+    createdAt?: true
+  }
+
+  export type MarketIndexHistoryMaxAggregateInputType = {
+    indexId?: true
+    marketType?: true
+    tradeDate?: true
+    closeIndex?: true
+    createdAt?: true
+  }
+
+  export type MarketIndexHistoryCountAggregateInputType = {
+    indexId?: true
+    marketType?: true
+    tradeDate?: true
+    closeIndex?: true
+    createdAt?: true
+    _all?: true
+  }
+
+  export type MarketIndexHistoryAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which MarketIndexHistory to aggregate.
+     */
+    where?: MarketIndexHistoryWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of MarketIndexHistories to fetch.
+     */
+    orderBy?: MarketIndexHistoryOrderByWithRelationInput | MarketIndexHistoryOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: MarketIndexHistoryWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` MarketIndexHistories from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` MarketIndexHistories.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned MarketIndexHistories
+    **/
+    _count?: true | MarketIndexHistoryCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: MarketIndexHistoryAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: MarketIndexHistorySumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: MarketIndexHistoryMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: MarketIndexHistoryMaxAggregateInputType
+  }
+
+  export type GetMarketIndexHistoryAggregateType<T extends MarketIndexHistoryAggregateArgs> = {
+        [P in keyof T & keyof AggregateMarketIndexHistory]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateMarketIndexHistory[P]>
+      : GetScalarType<T[P], AggregateMarketIndexHistory[P]>
+  }
+
+
+
+
+  export type MarketIndexHistoryGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: MarketIndexHistoryWhereInput
+    orderBy?: MarketIndexHistoryOrderByWithAggregationInput | MarketIndexHistoryOrderByWithAggregationInput[]
+    by: MarketIndexHistoryScalarFieldEnum[] | MarketIndexHistoryScalarFieldEnum
+    having?: MarketIndexHistoryScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: MarketIndexHistoryCountAggregateInputType | true
+    _avg?: MarketIndexHistoryAvgAggregateInputType
+    _sum?: MarketIndexHistorySumAggregateInputType
+    _min?: MarketIndexHistoryMinAggregateInputType
+    _max?: MarketIndexHistoryMaxAggregateInputType
+  }
+
+  export type MarketIndexHistoryGroupByOutputType = {
+    indexId: string
+    marketType: $Enums.MarketIndexType
+    tradeDate: Date
+    closeIndex: Decimal
+    createdAt: Date
+    _count: MarketIndexHistoryCountAggregateOutputType | null
+    _avg: MarketIndexHistoryAvgAggregateOutputType | null
+    _sum: MarketIndexHistorySumAggregateOutputType | null
+    _min: MarketIndexHistoryMinAggregateOutputType | null
+    _max: MarketIndexHistoryMaxAggregateOutputType | null
+  }
+
+  type GetMarketIndexHistoryGroupByPayload<T extends MarketIndexHistoryGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<MarketIndexHistoryGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof MarketIndexHistoryGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], MarketIndexHistoryGroupByOutputType[P]>
+            : GetScalarType<T[P], MarketIndexHistoryGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type MarketIndexHistorySelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    indexId?: boolean
+    marketType?: boolean
+    tradeDate?: boolean
+    closeIndex?: boolean
+    createdAt?: boolean
+  }, ExtArgs["result"]["marketIndexHistory"]>
+
+  export type MarketIndexHistorySelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    indexId?: boolean
+    marketType?: boolean
+    tradeDate?: boolean
+    closeIndex?: boolean
+    createdAt?: boolean
+  }, ExtArgs["result"]["marketIndexHistory"]>
+
+  export type MarketIndexHistorySelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    indexId?: boolean
+    marketType?: boolean
+    tradeDate?: boolean
+    closeIndex?: boolean
+    createdAt?: boolean
+  }, ExtArgs["result"]["marketIndexHistory"]>
+
+  export type MarketIndexHistorySelectScalar = {
+    indexId?: boolean
+    marketType?: boolean
+    tradeDate?: boolean
+    closeIndex?: boolean
+    createdAt?: boolean
+  }
+
+  export type MarketIndexHistoryOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"indexId" | "marketType" | "tradeDate" | "closeIndex" | "createdAt", ExtArgs["result"]["marketIndexHistory"]>
+
+  export type $MarketIndexHistoryPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "MarketIndexHistory"
+    objects: {}
+    scalars: $Extensions.GetPayloadResult<{
+      indexId: string
+      marketType: $Enums.MarketIndexType
+      tradeDate: Date
+      closeIndex: Prisma.Decimal
+      createdAt: Date
+    }, ExtArgs["result"]["marketIndexHistory"]>
+    composites: {}
+  }
+
+  type MarketIndexHistoryGetPayload<S extends boolean | null | undefined | MarketIndexHistoryDefaultArgs> = $Result.GetResult<Prisma.$MarketIndexHistoryPayload, S>
+
+  type MarketIndexHistoryCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<MarketIndexHistoryFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: MarketIndexHistoryCountAggregateInputType | true
+    }
+
+  export interface MarketIndexHistoryDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['MarketIndexHistory'], meta: { name: 'MarketIndexHistory' } }
+    /**
+     * Find zero or one MarketIndexHistory that matches the filter.
+     * @param {MarketIndexHistoryFindUniqueArgs} args - Arguments to find a MarketIndexHistory
+     * @example
+     * // Get one MarketIndexHistory
+     * const marketIndexHistory = await prisma.marketIndexHistory.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends MarketIndexHistoryFindUniqueArgs>(args: SelectSubset<T, MarketIndexHistoryFindUniqueArgs<ExtArgs>>): Prisma__MarketIndexHistoryClient<$Result.GetResult<Prisma.$MarketIndexHistoryPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one MarketIndexHistory that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {MarketIndexHistoryFindUniqueOrThrowArgs} args - Arguments to find a MarketIndexHistory
+     * @example
+     * // Get one MarketIndexHistory
+     * const marketIndexHistory = await prisma.marketIndexHistory.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends MarketIndexHistoryFindUniqueOrThrowArgs>(args: SelectSubset<T, MarketIndexHistoryFindUniqueOrThrowArgs<ExtArgs>>): Prisma__MarketIndexHistoryClient<$Result.GetResult<Prisma.$MarketIndexHistoryPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first MarketIndexHistory that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {MarketIndexHistoryFindFirstArgs} args - Arguments to find a MarketIndexHistory
+     * @example
+     * // Get one MarketIndexHistory
+     * const marketIndexHistory = await prisma.marketIndexHistory.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends MarketIndexHistoryFindFirstArgs>(args?: SelectSubset<T, MarketIndexHistoryFindFirstArgs<ExtArgs>>): Prisma__MarketIndexHistoryClient<$Result.GetResult<Prisma.$MarketIndexHistoryPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first MarketIndexHistory that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {MarketIndexHistoryFindFirstOrThrowArgs} args - Arguments to find a MarketIndexHistory
+     * @example
+     * // Get one MarketIndexHistory
+     * const marketIndexHistory = await prisma.marketIndexHistory.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends MarketIndexHistoryFindFirstOrThrowArgs>(args?: SelectSubset<T, MarketIndexHistoryFindFirstOrThrowArgs<ExtArgs>>): Prisma__MarketIndexHistoryClient<$Result.GetResult<Prisma.$MarketIndexHistoryPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more MarketIndexHistories that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {MarketIndexHistoryFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all MarketIndexHistories
+     * const marketIndexHistories = await prisma.marketIndexHistory.findMany()
+     * 
+     * // Get first 10 MarketIndexHistories
+     * const marketIndexHistories = await prisma.marketIndexHistory.findMany({ take: 10 })
+     * 
+     * // Only select the `indexId`
+     * const marketIndexHistoryWithIndexIdOnly = await prisma.marketIndexHistory.findMany({ select: { indexId: true } })
+     * 
+     */
+    findMany<T extends MarketIndexHistoryFindManyArgs>(args?: SelectSubset<T, MarketIndexHistoryFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$MarketIndexHistoryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a MarketIndexHistory.
+     * @param {MarketIndexHistoryCreateArgs} args - Arguments to create a MarketIndexHistory.
+     * @example
+     * // Create one MarketIndexHistory
+     * const MarketIndexHistory = await prisma.marketIndexHistory.create({
+     *   data: {
+     *     // ... data to create a MarketIndexHistory
+     *   }
+     * })
+     * 
+     */
+    create<T extends MarketIndexHistoryCreateArgs>(args: SelectSubset<T, MarketIndexHistoryCreateArgs<ExtArgs>>): Prisma__MarketIndexHistoryClient<$Result.GetResult<Prisma.$MarketIndexHistoryPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many MarketIndexHistories.
+     * @param {MarketIndexHistoryCreateManyArgs} args - Arguments to create many MarketIndexHistories.
+     * @example
+     * // Create many MarketIndexHistories
+     * const marketIndexHistory = await prisma.marketIndexHistory.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends MarketIndexHistoryCreateManyArgs>(args?: SelectSubset<T, MarketIndexHistoryCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many MarketIndexHistories and returns the data saved in the database.
+     * @param {MarketIndexHistoryCreateManyAndReturnArgs} args - Arguments to create many MarketIndexHistories.
+     * @example
+     * // Create many MarketIndexHistories
+     * const marketIndexHistory = await prisma.marketIndexHistory.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many MarketIndexHistories and only return the `indexId`
+     * const marketIndexHistoryWithIndexIdOnly = await prisma.marketIndexHistory.createManyAndReturn({
+     *   select: { indexId: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends MarketIndexHistoryCreateManyAndReturnArgs>(args?: SelectSubset<T, MarketIndexHistoryCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$MarketIndexHistoryPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a MarketIndexHistory.
+     * @param {MarketIndexHistoryDeleteArgs} args - Arguments to delete one MarketIndexHistory.
+     * @example
+     * // Delete one MarketIndexHistory
+     * const MarketIndexHistory = await prisma.marketIndexHistory.delete({
+     *   where: {
+     *     // ... filter to delete one MarketIndexHistory
+     *   }
+     * })
+     * 
+     */
+    delete<T extends MarketIndexHistoryDeleteArgs>(args: SelectSubset<T, MarketIndexHistoryDeleteArgs<ExtArgs>>): Prisma__MarketIndexHistoryClient<$Result.GetResult<Prisma.$MarketIndexHistoryPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one MarketIndexHistory.
+     * @param {MarketIndexHistoryUpdateArgs} args - Arguments to update one MarketIndexHistory.
+     * @example
+     * // Update one MarketIndexHistory
+     * const marketIndexHistory = await prisma.marketIndexHistory.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends MarketIndexHistoryUpdateArgs>(args: SelectSubset<T, MarketIndexHistoryUpdateArgs<ExtArgs>>): Prisma__MarketIndexHistoryClient<$Result.GetResult<Prisma.$MarketIndexHistoryPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more MarketIndexHistories.
+     * @param {MarketIndexHistoryDeleteManyArgs} args - Arguments to filter MarketIndexHistories to delete.
+     * @example
+     * // Delete a few MarketIndexHistories
+     * const { count } = await prisma.marketIndexHistory.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends MarketIndexHistoryDeleteManyArgs>(args?: SelectSubset<T, MarketIndexHistoryDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more MarketIndexHistories.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {MarketIndexHistoryUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many MarketIndexHistories
+     * const marketIndexHistory = await prisma.marketIndexHistory.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends MarketIndexHistoryUpdateManyArgs>(args: SelectSubset<T, MarketIndexHistoryUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more MarketIndexHistories and returns the data updated in the database.
+     * @param {MarketIndexHistoryUpdateManyAndReturnArgs} args - Arguments to update many MarketIndexHistories.
+     * @example
+     * // Update many MarketIndexHistories
+     * const marketIndexHistory = await prisma.marketIndexHistory.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more MarketIndexHistories and only return the `indexId`
+     * const marketIndexHistoryWithIndexIdOnly = await prisma.marketIndexHistory.updateManyAndReturn({
+     *   select: { indexId: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends MarketIndexHistoryUpdateManyAndReturnArgs>(args: SelectSubset<T, MarketIndexHistoryUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$MarketIndexHistoryPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one MarketIndexHistory.
+     * @param {MarketIndexHistoryUpsertArgs} args - Arguments to update or create a MarketIndexHistory.
+     * @example
+     * // Update or create a MarketIndexHistory
+     * const marketIndexHistory = await prisma.marketIndexHistory.upsert({
+     *   create: {
+     *     // ... data to create a MarketIndexHistory
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the MarketIndexHistory we want to update
+     *   }
+     * })
+     */
+    upsert<T extends MarketIndexHistoryUpsertArgs>(args: SelectSubset<T, MarketIndexHistoryUpsertArgs<ExtArgs>>): Prisma__MarketIndexHistoryClient<$Result.GetResult<Prisma.$MarketIndexHistoryPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of MarketIndexHistories.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {MarketIndexHistoryCountArgs} args - Arguments to filter MarketIndexHistories to count.
+     * @example
+     * // Count the number of MarketIndexHistories
+     * const count = await prisma.marketIndexHistory.count({
+     *   where: {
+     *     // ... the filter for the MarketIndexHistories we want to count
+     *   }
+     * })
+    **/
+    count<T extends MarketIndexHistoryCountArgs>(
+      args?: Subset<T, MarketIndexHistoryCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], MarketIndexHistoryCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a MarketIndexHistory.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {MarketIndexHistoryAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends MarketIndexHistoryAggregateArgs>(args: Subset<T, MarketIndexHistoryAggregateArgs>): Prisma.PrismaPromise<GetMarketIndexHistoryAggregateType<T>>
+
+    /**
+     * Group by MarketIndexHistory.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {MarketIndexHistoryGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends MarketIndexHistoryGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: MarketIndexHistoryGroupByArgs['orderBy'] }
+        : { orderBy?: MarketIndexHistoryGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, MarketIndexHistoryGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetMarketIndexHistoryGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the MarketIndexHistory model
+   */
+  readonly fields: MarketIndexHistoryFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for MarketIndexHistory.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__MarketIndexHistoryClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the MarketIndexHistory model
+   */
+  interface MarketIndexHistoryFieldRefs {
+    readonly indexId: FieldRef<"MarketIndexHistory", 'String'>
+    readonly marketType: FieldRef<"MarketIndexHistory", 'MarketIndexType'>
+    readonly tradeDate: FieldRef<"MarketIndexHistory", 'DateTime'>
+    readonly closeIndex: FieldRef<"MarketIndexHistory", 'Decimal'>
+    readonly createdAt: FieldRef<"MarketIndexHistory", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * MarketIndexHistory findUnique
+   */
+  export type MarketIndexHistoryFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MarketIndexHistory
+     */
+    select?: MarketIndexHistorySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the MarketIndexHistory
+     */
+    omit?: MarketIndexHistoryOmit<ExtArgs> | null
+    /**
+     * Filter, which MarketIndexHistory to fetch.
+     */
+    where: MarketIndexHistoryWhereUniqueInput
+  }
+
+  /**
+   * MarketIndexHistory findUniqueOrThrow
+   */
+  export type MarketIndexHistoryFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MarketIndexHistory
+     */
+    select?: MarketIndexHistorySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the MarketIndexHistory
+     */
+    omit?: MarketIndexHistoryOmit<ExtArgs> | null
+    /**
+     * Filter, which MarketIndexHistory to fetch.
+     */
+    where: MarketIndexHistoryWhereUniqueInput
+  }
+
+  /**
+   * MarketIndexHistory findFirst
+   */
+  export type MarketIndexHistoryFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MarketIndexHistory
+     */
+    select?: MarketIndexHistorySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the MarketIndexHistory
+     */
+    omit?: MarketIndexHistoryOmit<ExtArgs> | null
+    /**
+     * Filter, which MarketIndexHistory to fetch.
+     */
+    where?: MarketIndexHistoryWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of MarketIndexHistories to fetch.
+     */
+    orderBy?: MarketIndexHistoryOrderByWithRelationInput | MarketIndexHistoryOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for MarketIndexHistories.
+     */
+    cursor?: MarketIndexHistoryWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` MarketIndexHistories from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` MarketIndexHistories.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of MarketIndexHistories.
+     */
+    distinct?: MarketIndexHistoryScalarFieldEnum | MarketIndexHistoryScalarFieldEnum[]
+  }
+
+  /**
+   * MarketIndexHistory findFirstOrThrow
+   */
+  export type MarketIndexHistoryFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MarketIndexHistory
+     */
+    select?: MarketIndexHistorySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the MarketIndexHistory
+     */
+    omit?: MarketIndexHistoryOmit<ExtArgs> | null
+    /**
+     * Filter, which MarketIndexHistory to fetch.
+     */
+    where?: MarketIndexHistoryWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of MarketIndexHistories to fetch.
+     */
+    orderBy?: MarketIndexHistoryOrderByWithRelationInput | MarketIndexHistoryOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for MarketIndexHistories.
+     */
+    cursor?: MarketIndexHistoryWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` MarketIndexHistories from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` MarketIndexHistories.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of MarketIndexHistories.
+     */
+    distinct?: MarketIndexHistoryScalarFieldEnum | MarketIndexHistoryScalarFieldEnum[]
+  }
+
+  /**
+   * MarketIndexHistory findMany
+   */
+  export type MarketIndexHistoryFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MarketIndexHistory
+     */
+    select?: MarketIndexHistorySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the MarketIndexHistory
+     */
+    omit?: MarketIndexHistoryOmit<ExtArgs> | null
+    /**
+     * Filter, which MarketIndexHistories to fetch.
+     */
+    where?: MarketIndexHistoryWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of MarketIndexHistories to fetch.
+     */
+    orderBy?: MarketIndexHistoryOrderByWithRelationInput | MarketIndexHistoryOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing MarketIndexHistories.
+     */
+    cursor?: MarketIndexHistoryWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` MarketIndexHistories from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` MarketIndexHistories.
+     */
+    skip?: number
+    distinct?: MarketIndexHistoryScalarFieldEnum | MarketIndexHistoryScalarFieldEnum[]
+  }
+
+  /**
+   * MarketIndexHistory create
+   */
+  export type MarketIndexHistoryCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MarketIndexHistory
+     */
+    select?: MarketIndexHistorySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the MarketIndexHistory
+     */
+    omit?: MarketIndexHistoryOmit<ExtArgs> | null
+    /**
+     * The data needed to create a MarketIndexHistory.
+     */
+    data: XOR<MarketIndexHistoryCreateInput, MarketIndexHistoryUncheckedCreateInput>
+  }
+
+  /**
+   * MarketIndexHistory createMany
+   */
+  export type MarketIndexHistoryCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many MarketIndexHistories.
+     */
+    data: MarketIndexHistoryCreateManyInput | MarketIndexHistoryCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * MarketIndexHistory createManyAndReturn
+   */
+  export type MarketIndexHistoryCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MarketIndexHistory
+     */
+    select?: MarketIndexHistorySelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the MarketIndexHistory
+     */
+    omit?: MarketIndexHistoryOmit<ExtArgs> | null
+    /**
+     * The data used to create many MarketIndexHistories.
+     */
+    data: MarketIndexHistoryCreateManyInput | MarketIndexHistoryCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * MarketIndexHistory update
+   */
+  export type MarketIndexHistoryUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MarketIndexHistory
+     */
+    select?: MarketIndexHistorySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the MarketIndexHistory
+     */
+    omit?: MarketIndexHistoryOmit<ExtArgs> | null
+    /**
+     * The data needed to update a MarketIndexHistory.
+     */
+    data: XOR<MarketIndexHistoryUpdateInput, MarketIndexHistoryUncheckedUpdateInput>
+    /**
+     * Choose, which MarketIndexHistory to update.
+     */
+    where: MarketIndexHistoryWhereUniqueInput
+  }
+
+  /**
+   * MarketIndexHistory updateMany
+   */
+  export type MarketIndexHistoryUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update MarketIndexHistories.
+     */
+    data: XOR<MarketIndexHistoryUpdateManyMutationInput, MarketIndexHistoryUncheckedUpdateManyInput>
+    /**
+     * Filter which MarketIndexHistories to update
+     */
+    where?: MarketIndexHistoryWhereInput
+    /**
+     * Limit how many MarketIndexHistories to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * MarketIndexHistory updateManyAndReturn
+   */
+  export type MarketIndexHistoryUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MarketIndexHistory
+     */
+    select?: MarketIndexHistorySelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the MarketIndexHistory
+     */
+    omit?: MarketIndexHistoryOmit<ExtArgs> | null
+    /**
+     * The data used to update MarketIndexHistories.
+     */
+    data: XOR<MarketIndexHistoryUpdateManyMutationInput, MarketIndexHistoryUncheckedUpdateManyInput>
+    /**
+     * Filter which MarketIndexHistories to update
+     */
+    where?: MarketIndexHistoryWhereInput
+    /**
+     * Limit how many MarketIndexHistories to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * MarketIndexHistory upsert
+   */
+  export type MarketIndexHistoryUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MarketIndexHistory
+     */
+    select?: MarketIndexHistorySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the MarketIndexHistory
+     */
+    omit?: MarketIndexHistoryOmit<ExtArgs> | null
+    /**
+     * The filter to search for the MarketIndexHistory to update in case it exists.
+     */
+    where: MarketIndexHistoryWhereUniqueInput
+    /**
+     * In case the MarketIndexHistory found by the `where` argument doesn't exist, create a new MarketIndexHistory with this data.
+     */
+    create: XOR<MarketIndexHistoryCreateInput, MarketIndexHistoryUncheckedCreateInput>
+    /**
+     * In case the MarketIndexHistory was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<MarketIndexHistoryUpdateInput, MarketIndexHistoryUncheckedUpdateInput>
+  }
+
+  /**
+   * MarketIndexHistory delete
+   */
+  export type MarketIndexHistoryDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MarketIndexHistory
+     */
+    select?: MarketIndexHistorySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the MarketIndexHistory
+     */
+    omit?: MarketIndexHistoryOmit<ExtArgs> | null
+    /**
+     * Filter which MarketIndexHistory to delete.
+     */
+    where: MarketIndexHistoryWhereUniqueInput
+  }
+
+  /**
+   * MarketIndexHistory deleteMany
+   */
+  export type MarketIndexHistoryDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which MarketIndexHistories to delete
+     */
+    where?: MarketIndexHistoryWhereInput
+    /**
+     * Limit how many MarketIndexHistories to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * MarketIndexHistory without action
+   */
+  export type MarketIndexHistoryDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MarketIndexHistory
+     */
+    select?: MarketIndexHistorySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the MarketIndexHistory
+     */
+    omit?: MarketIndexHistoryOmit<ExtArgs> | null
+  }
+
+
+  /**
+   * Model KiwoomApiCallLog
+   */
+
+  export type AggregateKiwoomApiCallLog = {
+    _count: KiwoomApiCallLogCountAggregateOutputType | null
+    _avg: KiwoomApiCallLogAvgAggregateOutputType | null
+    _sum: KiwoomApiCallLogSumAggregateOutputType | null
+    _min: KiwoomApiCallLogMinAggregateOutputType | null
+    _max: KiwoomApiCallLogMaxAggregateOutputType | null
+  }
+
+  export type KiwoomApiCallLogAvgAggregateOutputType = {
+    responseTimeMs: number | null
+  }
+
+  export type KiwoomApiCallLogSumAggregateOutputType = {
+    responseTimeMs: number | null
+  }
+
+  export type KiwoomApiCallLogMinAggregateOutputType = {
+    logId: string | null
+    userId: string | null
+    apiName: string | null
+    stockCode: string | null
+    responseStatus: string | null
+    responseMessage: string | null
+    callTimestamp: Date | null
+    responseTimeMs: number | null
+  }
+
+  export type KiwoomApiCallLogMaxAggregateOutputType = {
+    logId: string | null
+    userId: string | null
+    apiName: string | null
+    stockCode: string | null
+    responseStatus: string | null
+    responseMessage: string | null
+    callTimestamp: Date | null
+    responseTimeMs: number | null
+  }
+
+  export type KiwoomApiCallLogCountAggregateOutputType = {
+    logId: number
+    userId: number
+    apiName: number
+    stockCode: number
+    requestData: number
+    responseStatus: number
+    responseMessage: number
+    callTimestamp: number
+    responseTimeMs: number
+    _all: number
+  }
+
+
+  export type KiwoomApiCallLogAvgAggregateInputType = {
+    responseTimeMs?: true
+  }
+
+  export type KiwoomApiCallLogSumAggregateInputType = {
+    responseTimeMs?: true
+  }
+
+  export type KiwoomApiCallLogMinAggregateInputType = {
+    logId?: true
+    userId?: true
+    apiName?: true
+    stockCode?: true
+    responseStatus?: true
+    responseMessage?: true
+    callTimestamp?: true
+    responseTimeMs?: true
+  }
+
+  export type KiwoomApiCallLogMaxAggregateInputType = {
+    logId?: true
+    userId?: true
+    apiName?: true
+    stockCode?: true
+    responseStatus?: true
+    responseMessage?: true
+    callTimestamp?: true
+    responseTimeMs?: true
+  }
+
+  export type KiwoomApiCallLogCountAggregateInputType = {
+    logId?: true
+    userId?: true
+    apiName?: true
+    stockCode?: true
+    requestData?: true
+    responseStatus?: true
+    responseMessage?: true
+    callTimestamp?: true
+    responseTimeMs?: true
+    _all?: true
+  }
+
+  export type KiwoomApiCallLogAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which KiwoomApiCallLog to aggregate.
+     */
+    where?: KiwoomApiCallLogWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of KiwoomApiCallLogs to fetch.
+     */
+    orderBy?: KiwoomApiCallLogOrderByWithRelationInput | KiwoomApiCallLogOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: KiwoomApiCallLogWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` KiwoomApiCallLogs from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` KiwoomApiCallLogs.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned KiwoomApiCallLogs
+    **/
+    _count?: true | KiwoomApiCallLogCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: KiwoomApiCallLogAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: KiwoomApiCallLogSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: KiwoomApiCallLogMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: KiwoomApiCallLogMaxAggregateInputType
+  }
+
+  export type GetKiwoomApiCallLogAggregateType<T extends KiwoomApiCallLogAggregateArgs> = {
+        [P in keyof T & keyof AggregateKiwoomApiCallLog]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateKiwoomApiCallLog[P]>
+      : GetScalarType<T[P], AggregateKiwoomApiCallLog[P]>
+  }
+
+
+
+
+  export type KiwoomApiCallLogGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: KiwoomApiCallLogWhereInput
+    orderBy?: KiwoomApiCallLogOrderByWithAggregationInput | KiwoomApiCallLogOrderByWithAggregationInput[]
+    by: KiwoomApiCallLogScalarFieldEnum[] | KiwoomApiCallLogScalarFieldEnum
+    having?: KiwoomApiCallLogScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: KiwoomApiCallLogCountAggregateInputType | true
+    _avg?: KiwoomApiCallLogAvgAggregateInputType
+    _sum?: KiwoomApiCallLogSumAggregateInputType
+    _min?: KiwoomApiCallLogMinAggregateInputType
+    _max?: KiwoomApiCallLogMaxAggregateInputType
+  }
+
+  export type KiwoomApiCallLogGroupByOutputType = {
+    logId: string
+    userId: string | null
+    apiName: string
+    stockCode: string | null
+    requestData: JsonValue | null
+    responseStatus: string | null
+    responseMessage: string | null
+    callTimestamp: Date
+    responseTimeMs: number | null
+    _count: KiwoomApiCallLogCountAggregateOutputType | null
+    _avg: KiwoomApiCallLogAvgAggregateOutputType | null
+    _sum: KiwoomApiCallLogSumAggregateOutputType | null
+    _min: KiwoomApiCallLogMinAggregateOutputType | null
+    _max: KiwoomApiCallLogMaxAggregateOutputType | null
+  }
+
+  type GetKiwoomApiCallLogGroupByPayload<T extends KiwoomApiCallLogGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<KiwoomApiCallLogGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof KiwoomApiCallLogGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], KiwoomApiCallLogGroupByOutputType[P]>
+            : GetScalarType<T[P], KiwoomApiCallLogGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type KiwoomApiCallLogSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    logId?: boolean
+    userId?: boolean
+    apiName?: boolean
+    stockCode?: boolean
+    requestData?: boolean
+    responseStatus?: boolean
+    responseMessage?: boolean
+    callTimestamp?: boolean
+    responseTimeMs?: boolean
+    user?: boolean | KiwoomApiCallLog$userArgs<ExtArgs>
+  }, ExtArgs["result"]["kiwoomApiCallLog"]>
+
+  export type KiwoomApiCallLogSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    logId?: boolean
+    userId?: boolean
+    apiName?: boolean
+    stockCode?: boolean
+    requestData?: boolean
+    responseStatus?: boolean
+    responseMessage?: boolean
+    callTimestamp?: boolean
+    responseTimeMs?: boolean
+    user?: boolean | KiwoomApiCallLog$userArgs<ExtArgs>
+  }, ExtArgs["result"]["kiwoomApiCallLog"]>
+
+  export type KiwoomApiCallLogSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    logId?: boolean
+    userId?: boolean
+    apiName?: boolean
+    stockCode?: boolean
+    requestData?: boolean
+    responseStatus?: boolean
+    responseMessage?: boolean
+    callTimestamp?: boolean
+    responseTimeMs?: boolean
+    user?: boolean | KiwoomApiCallLog$userArgs<ExtArgs>
+  }, ExtArgs["result"]["kiwoomApiCallLog"]>
+
+  export type KiwoomApiCallLogSelectScalar = {
+    logId?: boolean
+    userId?: boolean
+    apiName?: boolean
+    stockCode?: boolean
+    requestData?: boolean
+    responseStatus?: boolean
+    responseMessage?: boolean
+    callTimestamp?: boolean
+    responseTimeMs?: boolean
+  }
+
+  export type KiwoomApiCallLogOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"logId" | "userId" | "apiName" | "stockCode" | "requestData" | "responseStatus" | "responseMessage" | "callTimestamp" | "responseTimeMs", ExtArgs["result"]["kiwoomApiCallLog"]>
+  export type KiwoomApiCallLogInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    user?: boolean | KiwoomApiCallLog$userArgs<ExtArgs>
+  }
+  export type KiwoomApiCallLogIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    user?: boolean | KiwoomApiCallLog$userArgs<ExtArgs>
+  }
+  export type KiwoomApiCallLogIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    user?: boolean | KiwoomApiCallLog$userArgs<ExtArgs>
+  }
+
+  export type $KiwoomApiCallLogPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "KiwoomApiCallLog"
+    objects: {
+      user: Prisma.$UserPayload<ExtArgs> | null
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      logId: string
+      userId: string | null
+      apiName: string
+      stockCode: string | null
+      requestData: Prisma.JsonValue | null
+      responseStatus: string | null
+      responseMessage: string | null
+      callTimestamp: Date
+      responseTimeMs: number | null
+    }, ExtArgs["result"]["kiwoomApiCallLog"]>
+    composites: {}
+  }
+
+  type KiwoomApiCallLogGetPayload<S extends boolean | null | undefined | KiwoomApiCallLogDefaultArgs> = $Result.GetResult<Prisma.$KiwoomApiCallLogPayload, S>
+
+  type KiwoomApiCallLogCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<KiwoomApiCallLogFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: KiwoomApiCallLogCountAggregateInputType | true
+    }
+
+  export interface KiwoomApiCallLogDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['KiwoomApiCallLog'], meta: { name: 'KiwoomApiCallLog' } }
+    /**
+     * Find zero or one KiwoomApiCallLog that matches the filter.
+     * @param {KiwoomApiCallLogFindUniqueArgs} args - Arguments to find a KiwoomApiCallLog
+     * @example
+     * // Get one KiwoomApiCallLog
+     * const kiwoomApiCallLog = await prisma.kiwoomApiCallLog.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends KiwoomApiCallLogFindUniqueArgs>(args: SelectSubset<T, KiwoomApiCallLogFindUniqueArgs<ExtArgs>>): Prisma__KiwoomApiCallLogClient<$Result.GetResult<Prisma.$KiwoomApiCallLogPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one KiwoomApiCallLog that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {KiwoomApiCallLogFindUniqueOrThrowArgs} args - Arguments to find a KiwoomApiCallLog
+     * @example
+     * // Get one KiwoomApiCallLog
+     * const kiwoomApiCallLog = await prisma.kiwoomApiCallLog.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends KiwoomApiCallLogFindUniqueOrThrowArgs>(args: SelectSubset<T, KiwoomApiCallLogFindUniqueOrThrowArgs<ExtArgs>>): Prisma__KiwoomApiCallLogClient<$Result.GetResult<Prisma.$KiwoomApiCallLogPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first KiwoomApiCallLog that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {KiwoomApiCallLogFindFirstArgs} args - Arguments to find a KiwoomApiCallLog
+     * @example
+     * // Get one KiwoomApiCallLog
+     * const kiwoomApiCallLog = await prisma.kiwoomApiCallLog.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends KiwoomApiCallLogFindFirstArgs>(args?: SelectSubset<T, KiwoomApiCallLogFindFirstArgs<ExtArgs>>): Prisma__KiwoomApiCallLogClient<$Result.GetResult<Prisma.$KiwoomApiCallLogPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first KiwoomApiCallLog that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {KiwoomApiCallLogFindFirstOrThrowArgs} args - Arguments to find a KiwoomApiCallLog
+     * @example
+     * // Get one KiwoomApiCallLog
+     * const kiwoomApiCallLog = await prisma.kiwoomApiCallLog.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends KiwoomApiCallLogFindFirstOrThrowArgs>(args?: SelectSubset<T, KiwoomApiCallLogFindFirstOrThrowArgs<ExtArgs>>): Prisma__KiwoomApiCallLogClient<$Result.GetResult<Prisma.$KiwoomApiCallLogPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more KiwoomApiCallLogs that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {KiwoomApiCallLogFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all KiwoomApiCallLogs
+     * const kiwoomApiCallLogs = await prisma.kiwoomApiCallLog.findMany()
+     * 
+     * // Get first 10 KiwoomApiCallLogs
+     * const kiwoomApiCallLogs = await prisma.kiwoomApiCallLog.findMany({ take: 10 })
+     * 
+     * // Only select the `logId`
+     * const kiwoomApiCallLogWithLogIdOnly = await prisma.kiwoomApiCallLog.findMany({ select: { logId: true } })
+     * 
+     */
+    findMany<T extends KiwoomApiCallLogFindManyArgs>(args?: SelectSubset<T, KiwoomApiCallLogFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$KiwoomApiCallLogPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a KiwoomApiCallLog.
+     * @param {KiwoomApiCallLogCreateArgs} args - Arguments to create a KiwoomApiCallLog.
+     * @example
+     * // Create one KiwoomApiCallLog
+     * const KiwoomApiCallLog = await prisma.kiwoomApiCallLog.create({
+     *   data: {
+     *     // ... data to create a KiwoomApiCallLog
+     *   }
+     * })
+     * 
+     */
+    create<T extends KiwoomApiCallLogCreateArgs>(args: SelectSubset<T, KiwoomApiCallLogCreateArgs<ExtArgs>>): Prisma__KiwoomApiCallLogClient<$Result.GetResult<Prisma.$KiwoomApiCallLogPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many KiwoomApiCallLogs.
+     * @param {KiwoomApiCallLogCreateManyArgs} args - Arguments to create many KiwoomApiCallLogs.
+     * @example
+     * // Create many KiwoomApiCallLogs
+     * const kiwoomApiCallLog = await prisma.kiwoomApiCallLog.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends KiwoomApiCallLogCreateManyArgs>(args?: SelectSubset<T, KiwoomApiCallLogCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many KiwoomApiCallLogs and returns the data saved in the database.
+     * @param {KiwoomApiCallLogCreateManyAndReturnArgs} args - Arguments to create many KiwoomApiCallLogs.
+     * @example
+     * // Create many KiwoomApiCallLogs
+     * const kiwoomApiCallLog = await prisma.kiwoomApiCallLog.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many KiwoomApiCallLogs and only return the `logId`
+     * const kiwoomApiCallLogWithLogIdOnly = await prisma.kiwoomApiCallLog.createManyAndReturn({
+     *   select: { logId: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends KiwoomApiCallLogCreateManyAndReturnArgs>(args?: SelectSubset<T, KiwoomApiCallLogCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$KiwoomApiCallLogPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a KiwoomApiCallLog.
+     * @param {KiwoomApiCallLogDeleteArgs} args - Arguments to delete one KiwoomApiCallLog.
+     * @example
+     * // Delete one KiwoomApiCallLog
+     * const KiwoomApiCallLog = await prisma.kiwoomApiCallLog.delete({
+     *   where: {
+     *     // ... filter to delete one KiwoomApiCallLog
+     *   }
+     * })
+     * 
+     */
+    delete<T extends KiwoomApiCallLogDeleteArgs>(args: SelectSubset<T, KiwoomApiCallLogDeleteArgs<ExtArgs>>): Prisma__KiwoomApiCallLogClient<$Result.GetResult<Prisma.$KiwoomApiCallLogPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one KiwoomApiCallLog.
+     * @param {KiwoomApiCallLogUpdateArgs} args - Arguments to update one KiwoomApiCallLog.
+     * @example
+     * // Update one KiwoomApiCallLog
+     * const kiwoomApiCallLog = await prisma.kiwoomApiCallLog.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends KiwoomApiCallLogUpdateArgs>(args: SelectSubset<T, KiwoomApiCallLogUpdateArgs<ExtArgs>>): Prisma__KiwoomApiCallLogClient<$Result.GetResult<Prisma.$KiwoomApiCallLogPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more KiwoomApiCallLogs.
+     * @param {KiwoomApiCallLogDeleteManyArgs} args - Arguments to filter KiwoomApiCallLogs to delete.
+     * @example
+     * // Delete a few KiwoomApiCallLogs
+     * const { count } = await prisma.kiwoomApiCallLog.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends KiwoomApiCallLogDeleteManyArgs>(args?: SelectSubset<T, KiwoomApiCallLogDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more KiwoomApiCallLogs.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {KiwoomApiCallLogUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many KiwoomApiCallLogs
+     * const kiwoomApiCallLog = await prisma.kiwoomApiCallLog.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends KiwoomApiCallLogUpdateManyArgs>(args: SelectSubset<T, KiwoomApiCallLogUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more KiwoomApiCallLogs and returns the data updated in the database.
+     * @param {KiwoomApiCallLogUpdateManyAndReturnArgs} args - Arguments to update many KiwoomApiCallLogs.
+     * @example
+     * // Update many KiwoomApiCallLogs
+     * const kiwoomApiCallLog = await prisma.kiwoomApiCallLog.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more KiwoomApiCallLogs and only return the `logId`
+     * const kiwoomApiCallLogWithLogIdOnly = await prisma.kiwoomApiCallLog.updateManyAndReturn({
+     *   select: { logId: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends KiwoomApiCallLogUpdateManyAndReturnArgs>(args: SelectSubset<T, KiwoomApiCallLogUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$KiwoomApiCallLogPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one KiwoomApiCallLog.
+     * @param {KiwoomApiCallLogUpsertArgs} args - Arguments to update or create a KiwoomApiCallLog.
+     * @example
+     * // Update or create a KiwoomApiCallLog
+     * const kiwoomApiCallLog = await prisma.kiwoomApiCallLog.upsert({
+     *   create: {
+     *     // ... data to create a KiwoomApiCallLog
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the KiwoomApiCallLog we want to update
+     *   }
+     * })
+     */
+    upsert<T extends KiwoomApiCallLogUpsertArgs>(args: SelectSubset<T, KiwoomApiCallLogUpsertArgs<ExtArgs>>): Prisma__KiwoomApiCallLogClient<$Result.GetResult<Prisma.$KiwoomApiCallLogPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of KiwoomApiCallLogs.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {KiwoomApiCallLogCountArgs} args - Arguments to filter KiwoomApiCallLogs to count.
+     * @example
+     * // Count the number of KiwoomApiCallLogs
+     * const count = await prisma.kiwoomApiCallLog.count({
+     *   where: {
+     *     // ... the filter for the KiwoomApiCallLogs we want to count
+     *   }
+     * })
+    **/
+    count<T extends KiwoomApiCallLogCountArgs>(
+      args?: Subset<T, KiwoomApiCallLogCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], KiwoomApiCallLogCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a KiwoomApiCallLog.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {KiwoomApiCallLogAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends KiwoomApiCallLogAggregateArgs>(args: Subset<T, KiwoomApiCallLogAggregateArgs>): Prisma.PrismaPromise<GetKiwoomApiCallLogAggregateType<T>>
+
+    /**
+     * Group by KiwoomApiCallLog.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {KiwoomApiCallLogGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends KiwoomApiCallLogGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: KiwoomApiCallLogGroupByArgs['orderBy'] }
+        : { orderBy?: KiwoomApiCallLogGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, KiwoomApiCallLogGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetKiwoomApiCallLogGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the KiwoomApiCallLog model
+   */
+  readonly fields: KiwoomApiCallLogFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for KiwoomApiCallLog.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__KiwoomApiCallLogClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    user<T extends KiwoomApiCallLog$userArgs<ExtArgs> = {}>(args?: Subset<T, KiwoomApiCallLog$userArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the KiwoomApiCallLog model
+   */
+  interface KiwoomApiCallLogFieldRefs {
+    readonly logId: FieldRef<"KiwoomApiCallLog", 'String'>
+    readonly userId: FieldRef<"KiwoomApiCallLog", 'String'>
+    readonly apiName: FieldRef<"KiwoomApiCallLog", 'String'>
+    readonly stockCode: FieldRef<"KiwoomApiCallLog", 'String'>
+    readonly requestData: FieldRef<"KiwoomApiCallLog", 'Json'>
+    readonly responseStatus: FieldRef<"KiwoomApiCallLog", 'String'>
+    readonly responseMessage: FieldRef<"KiwoomApiCallLog", 'String'>
+    readonly callTimestamp: FieldRef<"KiwoomApiCallLog", 'DateTime'>
+    readonly responseTimeMs: FieldRef<"KiwoomApiCallLog", 'Int'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * KiwoomApiCallLog findUnique
+   */
+  export type KiwoomApiCallLogFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the KiwoomApiCallLog
+     */
+    select?: KiwoomApiCallLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the KiwoomApiCallLog
+     */
+    omit?: KiwoomApiCallLogOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: KiwoomApiCallLogInclude<ExtArgs> | null
+    /**
+     * Filter, which KiwoomApiCallLog to fetch.
+     */
+    where: KiwoomApiCallLogWhereUniqueInput
+  }
+
+  /**
+   * KiwoomApiCallLog findUniqueOrThrow
+   */
+  export type KiwoomApiCallLogFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the KiwoomApiCallLog
+     */
+    select?: KiwoomApiCallLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the KiwoomApiCallLog
+     */
+    omit?: KiwoomApiCallLogOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: KiwoomApiCallLogInclude<ExtArgs> | null
+    /**
+     * Filter, which KiwoomApiCallLog to fetch.
+     */
+    where: KiwoomApiCallLogWhereUniqueInput
+  }
+
+  /**
+   * KiwoomApiCallLog findFirst
+   */
+  export type KiwoomApiCallLogFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the KiwoomApiCallLog
+     */
+    select?: KiwoomApiCallLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the KiwoomApiCallLog
+     */
+    omit?: KiwoomApiCallLogOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: KiwoomApiCallLogInclude<ExtArgs> | null
+    /**
+     * Filter, which KiwoomApiCallLog to fetch.
+     */
+    where?: KiwoomApiCallLogWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of KiwoomApiCallLogs to fetch.
+     */
+    orderBy?: KiwoomApiCallLogOrderByWithRelationInput | KiwoomApiCallLogOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for KiwoomApiCallLogs.
+     */
+    cursor?: KiwoomApiCallLogWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` KiwoomApiCallLogs from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` KiwoomApiCallLogs.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of KiwoomApiCallLogs.
+     */
+    distinct?: KiwoomApiCallLogScalarFieldEnum | KiwoomApiCallLogScalarFieldEnum[]
+  }
+
+  /**
+   * KiwoomApiCallLog findFirstOrThrow
+   */
+  export type KiwoomApiCallLogFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the KiwoomApiCallLog
+     */
+    select?: KiwoomApiCallLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the KiwoomApiCallLog
+     */
+    omit?: KiwoomApiCallLogOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: KiwoomApiCallLogInclude<ExtArgs> | null
+    /**
+     * Filter, which KiwoomApiCallLog to fetch.
+     */
+    where?: KiwoomApiCallLogWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of KiwoomApiCallLogs to fetch.
+     */
+    orderBy?: KiwoomApiCallLogOrderByWithRelationInput | KiwoomApiCallLogOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for KiwoomApiCallLogs.
+     */
+    cursor?: KiwoomApiCallLogWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` KiwoomApiCallLogs from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` KiwoomApiCallLogs.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of KiwoomApiCallLogs.
+     */
+    distinct?: KiwoomApiCallLogScalarFieldEnum | KiwoomApiCallLogScalarFieldEnum[]
+  }
+
+  /**
+   * KiwoomApiCallLog findMany
+   */
+  export type KiwoomApiCallLogFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the KiwoomApiCallLog
+     */
+    select?: KiwoomApiCallLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the KiwoomApiCallLog
+     */
+    omit?: KiwoomApiCallLogOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: KiwoomApiCallLogInclude<ExtArgs> | null
+    /**
+     * Filter, which KiwoomApiCallLogs to fetch.
+     */
+    where?: KiwoomApiCallLogWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of KiwoomApiCallLogs to fetch.
+     */
+    orderBy?: KiwoomApiCallLogOrderByWithRelationInput | KiwoomApiCallLogOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing KiwoomApiCallLogs.
+     */
+    cursor?: KiwoomApiCallLogWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` KiwoomApiCallLogs from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` KiwoomApiCallLogs.
+     */
+    skip?: number
+    distinct?: KiwoomApiCallLogScalarFieldEnum | KiwoomApiCallLogScalarFieldEnum[]
+  }
+
+  /**
+   * KiwoomApiCallLog create
+   */
+  export type KiwoomApiCallLogCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the KiwoomApiCallLog
+     */
+    select?: KiwoomApiCallLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the KiwoomApiCallLog
+     */
+    omit?: KiwoomApiCallLogOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: KiwoomApiCallLogInclude<ExtArgs> | null
+    /**
+     * The data needed to create a KiwoomApiCallLog.
+     */
+    data: XOR<KiwoomApiCallLogCreateInput, KiwoomApiCallLogUncheckedCreateInput>
+  }
+
+  /**
+   * KiwoomApiCallLog createMany
+   */
+  export type KiwoomApiCallLogCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many KiwoomApiCallLogs.
+     */
+    data: KiwoomApiCallLogCreateManyInput | KiwoomApiCallLogCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * KiwoomApiCallLog createManyAndReturn
+   */
+  export type KiwoomApiCallLogCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the KiwoomApiCallLog
+     */
+    select?: KiwoomApiCallLogSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the KiwoomApiCallLog
+     */
+    omit?: KiwoomApiCallLogOmit<ExtArgs> | null
+    /**
+     * The data used to create many KiwoomApiCallLogs.
+     */
+    data: KiwoomApiCallLogCreateManyInput | KiwoomApiCallLogCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: KiwoomApiCallLogIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * KiwoomApiCallLog update
+   */
+  export type KiwoomApiCallLogUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the KiwoomApiCallLog
+     */
+    select?: KiwoomApiCallLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the KiwoomApiCallLog
+     */
+    omit?: KiwoomApiCallLogOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: KiwoomApiCallLogInclude<ExtArgs> | null
+    /**
+     * The data needed to update a KiwoomApiCallLog.
+     */
+    data: XOR<KiwoomApiCallLogUpdateInput, KiwoomApiCallLogUncheckedUpdateInput>
+    /**
+     * Choose, which KiwoomApiCallLog to update.
+     */
+    where: KiwoomApiCallLogWhereUniqueInput
+  }
+
+  /**
+   * KiwoomApiCallLog updateMany
+   */
+  export type KiwoomApiCallLogUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update KiwoomApiCallLogs.
+     */
+    data: XOR<KiwoomApiCallLogUpdateManyMutationInput, KiwoomApiCallLogUncheckedUpdateManyInput>
+    /**
+     * Filter which KiwoomApiCallLogs to update
+     */
+    where?: KiwoomApiCallLogWhereInput
+    /**
+     * Limit how many KiwoomApiCallLogs to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * KiwoomApiCallLog updateManyAndReturn
+   */
+  export type KiwoomApiCallLogUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the KiwoomApiCallLog
+     */
+    select?: KiwoomApiCallLogSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the KiwoomApiCallLog
+     */
+    omit?: KiwoomApiCallLogOmit<ExtArgs> | null
+    /**
+     * The data used to update KiwoomApiCallLogs.
+     */
+    data: XOR<KiwoomApiCallLogUpdateManyMutationInput, KiwoomApiCallLogUncheckedUpdateManyInput>
+    /**
+     * Filter which KiwoomApiCallLogs to update
+     */
+    where?: KiwoomApiCallLogWhereInput
+    /**
+     * Limit how many KiwoomApiCallLogs to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: KiwoomApiCallLogIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * KiwoomApiCallLog upsert
+   */
+  export type KiwoomApiCallLogUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the KiwoomApiCallLog
+     */
+    select?: KiwoomApiCallLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the KiwoomApiCallLog
+     */
+    omit?: KiwoomApiCallLogOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: KiwoomApiCallLogInclude<ExtArgs> | null
+    /**
+     * The filter to search for the KiwoomApiCallLog to update in case it exists.
+     */
+    where: KiwoomApiCallLogWhereUniqueInput
+    /**
+     * In case the KiwoomApiCallLog found by the `where` argument doesn't exist, create a new KiwoomApiCallLog with this data.
+     */
+    create: XOR<KiwoomApiCallLogCreateInput, KiwoomApiCallLogUncheckedCreateInput>
+    /**
+     * In case the KiwoomApiCallLog was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<KiwoomApiCallLogUpdateInput, KiwoomApiCallLogUncheckedUpdateInput>
+  }
+
+  /**
+   * KiwoomApiCallLog delete
+   */
+  export type KiwoomApiCallLogDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the KiwoomApiCallLog
+     */
+    select?: KiwoomApiCallLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the KiwoomApiCallLog
+     */
+    omit?: KiwoomApiCallLogOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: KiwoomApiCallLogInclude<ExtArgs> | null
+    /**
+     * Filter which KiwoomApiCallLog to delete.
+     */
+    where: KiwoomApiCallLogWhereUniqueInput
+  }
+
+  /**
+   * KiwoomApiCallLog deleteMany
+   */
+  export type KiwoomApiCallLogDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which KiwoomApiCallLogs to delete
+     */
+    where?: KiwoomApiCallLogWhereInput
+    /**
+     * Limit how many KiwoomApiCallLogs to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * KiwoomApiCallLog.user
+   */
+  export type KiwoomApiCallLog$userArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the User
+     */
+    select?: UserSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the User
+     */
+    omit?: UserOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserInclude<ExtArgs> | null
+    where?: UserWhereInput
+  }
+
+  /**
+   * KiwoomApiCallLog without action
+   */
+  export type KiwoomApiCallLogDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the KiwoomApiCallLog
+     */
+    select?: KiwoomApiCallLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the KiwoomApiCallLog
+     */
+    omit?: KiwoomApiCallLogOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: KiwoomApiCallLogInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model BatchJobHistory
+   */
+
+  export type AggregateBatchJobHistory = {
+    _count: BatchJobHistoryCountAggregateOutputType | null
+    _avg: BatchJobHistoryAvgAggregateOutputType | null
+    _sum: BatchJobHistorySumAggregateOutputType | null
+    _min: BatchJobHistoryMinAggregateOutputType | null
+    _max: BatchJobHistoryMaxAggregateOutputType | null
+  }
+
+  export type BatchJobHistoryAvgAggregateOutputType = {
+    processedCount: number | null
+  }
+
+  export type BatchJobHistorySumAggregateOutputType = {
+    processedCount: number | null
+  }
+
+  export type BatchJobHistoryMinAggregateOutputType = {
+    jobId: string | null
+    jobType: $Enums.BatchJobType | null
+    targetDate: Date | null
+    status: $Enums.BatchJobStatus | null
+    startTime: Date | null
+    endTime: Date | null
+    processedCount: number | null
+    errorMessage: string | null
+  }
+
+  export type BatchJobHistoryMaxAggregateOutputType = {
+    jobId: string | null
+    jobType: $Enums.BatchJobType | null
+    targetDate: Date | null
+    status: $Enums.BatchJobStatus | null
+    startTime: Date | null
+    endTime: Date | null
+    processedCount: number | null
+    errorMessage: string | null
+  }
+
+  export type BatchJobHistoryCountAggregateOutputType = {
+    jobId: number
+    jobType: number
+    targetDate: number
+    status: number
+    startTime: number
+    endTime: number
+    processedCount: number
+    errorMessage: number
+    _all: number
+  }
+
+
+  export type BatchJobHistoryAvgAggregateInputType = {
+    processedCount?: true
+  }
+
+  export type BatchJobHistorySumAggregateInputType = {
+    processedCount?: true
+  }
+
+  export type BatchJobHistoryMinAggregateInputType = {
+    jobId?: true
+    jobType?: true
+    targetDate?: true
+    status?: true
+    startTime?: true
+    endTime?: true
+    processedCount?: true
+    errorMessage?: true
+  }
+
+  export type BatchJobHistoryMaxAggregateInputType = {
+    jobId?: true
+    jobType?: true
+    targetDate?: true
+    status?: true
+    startTime?: true
+    endTime?: true
+    processedCount?: true
+    errorMessage?: true
+  }
+
+  export type BatchJobHistoryCountAggregateInputType = {
+    jobId?: true
+    jobType?: true
+    targetDate?: true
+    status?: true
+    startTime?: true
+    endTime?: true
+    processedCount?: true
+    errorMessage?: true
+    _all?: true
+  }
+
+  export type BatchJobHistoryAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which BatchJobHistory to aggregate.
+     */
+    where?: BatchJobHistoryWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of BatchJobHistories to fetch.
+     */
+    orderBy?: BatchJobHistoryOrderByWithRelationInput | BatchJobHistoryOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: BatchJobHistoryWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` BatchJobHistories from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` BatchJobHistories.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned BatchJobHistories
+    **/
+    _count?: true | BatchJobHistoryCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: BatchJobHistoryAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: BatchJobHistorySumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: BatchJobHistoryMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: BatchJobHistoryMaxAggregateInputType
+  }
+
+  export type GetBatchJobHistoryAggregateType<T extends BatchJobHistoryAggregateArgs> = {
+        [P in keyof T & keyof AggregateBatchJobHistory]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateBatchJobHistory[P]>
+      : GetScalarType<T[P], AggregateBatchJobHistory[P]>
+  }
+
+
+
+
+  export type BatchJobHistoryGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: BatchJobHistoryWhereInput
+    orderBy?: BatchJobHistoryOrderByWithAggregationInput | BatchJobHistoryOrderByWithAggregationInput[]
+    by: BatchJobHistoryScalarFieldEnum[] | BatchJobHistoryScalarFieldEnum
+    having?: BatchJobHistoryScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: BatchJobHistoryCountAggregateInputType | true
+    _avg?: BatchJobHistoryAvgAggregateInputType
+    _sum?: BatchJobHistorySumAggregateInputType
+    _min?: BatchJobHistoryMinAggregateInputType
+    _max?: BatchJobHistoryMaxAggregateInputType
+  }
+
+  export type BatchJobHistoryGroupByOutputType = {
+    jobId: string
+    jobType: $Enums.BatchJobType
+    targetDate: Date
+    status: $Enums.BatchJobStatus
+    startTime: Date
+    endTime: Date | null
+    processedCount: number
+    errorMessage: string | null
+    _count: BatchJobHistoryCountAggregateOutputType | null
+    _avg: BatchJobHistoryAvgAggregateOutputType | null
+    _sum: BatchJobHistorySumAggregateOutputType | null
+    _min: BatchJobHistoryMinAggregateOutputType | null
+    _max: BatchJobHistoryMaxAggregateOutputType | null
+  }
+
+  type GetBatchJobHistoryGroupByPayload<T extends BatchJobHistoryGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<BatchJobHistoryGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof BatchJobHistoryGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], BatchJobHistoryGroupByOutputType[P]>
+            : GetScalarType<T[P], BatchJobHistoryGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type BatchJobHistorySelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    jobId?: boolean
+    jobType?: boolean
+    targetDate?: boolean
+    status?: boolean
+    startTime?: boolean
+    endTime?: boolean
+    processedCount?: boolean
+    errorMessage?: boolean
+  }, ExtArgs["result"]["batchJobHistory"]>
+
+  export type BatchJobHistorySelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    jobId?: boolean
+    jobType?: boolean
+    targetDate?: boolean
+    status?: boolean
+    startTime?: boolean
+    endTime?: boolean
+    processedCount?: boolean
+    errorMessage?: boolean
+  }, ExtArgs["result"]["batchJobHistory"]>
+
+  export type BatchJobHistorySelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    jobId?: boolean
+    jobType?: boolean
+    targetDate?: boolean
+    status?: boolean
+    startTime?: boolean
+    endTime?: boolean
+    processedCount?: boolean
+    errorMessage?: boolean
+  }, ExtArgs["result"]["batchJobHistory"]>
+
+  export type BatchJobHistorySelectScalar = {
+    jobId?: boolean
+    jobType?: boolean
+    targetDate?: boolean
+    status?: boolean
+    startTime?: boolean
+    endTime?: boolean
+    processedCount?: boolean
+    errorMessage?: boolean
+  }
+
+  export type BatchJobHistoryOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"jobId" | "jobType" | "targetDate" | "status" | "startTime" | "endTime" | "processedCount" | "errorMessage", ExtArgs["result"]["batchJobHistory"]>
+
+  export type $BatchJobHistoryPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "BatchJobHistory"
+    objects: {}
+    scalars: $Extensions.GetPayloadResult<{
+      jobId: string
+      jobType: $Enums.BatchJobType
+      targetDate: Date
+      status: $Enums.BatchJobStatus
+      startTime: Date
+      endTime: Date | null
+      processedCount: number
+      errorMessage: string | null
+    }, ExtArgs["result"]["batchJobHistory"]>
+    composites: {}
+  }
+
+  type BatchJobHistoryGetPayload<S extends boolean | null | undefined | BatchJobHistoryDefaultArgs> = $Result.GetResult<Prisma.$BatchJobHistoryPayload, S>
+
+  type BatchJobHistoryCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<BatchJobHistoryFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: BatchJobHistoryCountAggregateInputType | true
+    }
+
+  export interface BatchJobHistoryDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['BatchJobHistory'], meta: { name: 'BatchJobHistory' } }
+    /**
+     * Find zero or one BatchJobHistory that matches the filter.
+     * @param {BatchJobHistoryFindUniqueArgs} args - Arguments to find a BatchJobHistory
+     * @example
+     * // Get one BatchJobHistory
+     * const batchJobHistory = await prisma.batchJobHistory.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends BatchJobHistoryFindUniqueArgs>(args: SelectSubset<T, BatchJobHistoryFindUniqueArgs<ExtArgs>>): Prisma__BatchJobHistoryClient<$Result.GetResult<Prisma.$BatchJobHistoryPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one BatchJobHistory that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {BatchJobHistoryFindUniqueOrThrowArgs} args - Arguments to find a BatchJobHistory
+     * @example
+     * // Get one BatchJobHistory
+     * const batchJobHistory = await prisma.batchJobHistory.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends BatchJobHistoryFindUniqueOrThrowArgs>(args: SelectSubset<T, BatchJobHistoryFindUniqueOrThrowArgs<ExtArgs>>): Prisma__BatchJobHistoryClient<$Result.GetResult<Prisma.$BatchJobHistoryPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first BatchJobHistory that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {BatchJobHistoryFindFirstArgs} args - Arguments to find a BatchJobHistory
+     * @example
+     * // Get one BatchJobHistory
+     * const batchJobHistory = await prisma.batchJobHistory.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends BatchJobHistoryFindFirstArgs>(args?: SelectSubset<T, BatchJobHistoryFindFirstArgs<ExtArgs>>): Prisma__BatchJobHistoryClient<$Result.GetResult<Prisma.$BatchJobHistoryPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first BatchJobHistory that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {BatchJobHistoryFindFirstOrThrowArgs} args - Arguments to find a BatchJobHistory
+     * @example
+     * // Get one BatchJobHistory
+     * const batchJobHistory = await prisma.batchJobHistory.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends BatchJobHistoryFindFirstOrThrowArgs>(args?: SelectSubset<T, BatchJobHistoryFindFirstOrThrowArgs<ExtArgs>>): Prisma__BatchJobHistoryClient<$Result.GetResult<Prisma.$BatchJobHistoryPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more BatchJobHistories that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {BatchJobHistoryFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all BatchJobHistories
+     * const batchJobHistories = await prisma.batchJobHistory.findMany()
+     * 
+     * // Get first 10 BatchJobHistories
+     * const batchJobHistories = await prisma.batchJobHistory.findMany({ take: 10 })
+     * 
+     * // Only select the `jobId`
+     * const batchJobHistoryWithJobIdOnly = await prisma.batchJobHistory.findMany({ select: { jobId: true } })
+     * 
+     */
+    findMany<T extends BatchJobHistoryFindManyArgs>(args?: SelectSubset<T, BatchJobHistoryFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$BatchJobHistoryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a BatchJobHistory.
+     * @param {BatchJobHistoryCreateArgs} args - Arguments to create a BatchJobHistory.
+     * @example
+     * // Create one BatchJobHistory
+     * const BatchJobHistory = await prisma.batchJobHistory.create({
+     *   data: {
+     *     // ... data to create a BatchJobHistory
+     *   }
+     * })
+     * 
+     */
+    create<T extends BatchJobHistoryCreateArgs>(args: SelectSubset<T, BatchJobHistoryCreateArgs<ExtArgs>>): Prisma__BatchJobHistoryClient<$Result.GetResult<Prisma.$BatchJobHistoryPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many BatchJobHistories.
+     * @param {BatchJobHistoryCreateManyArgs} args - Arguments to create many BatchJobHistories.
+     * @example
+     * // Create many BatchJobHistories
+     * const batchJobHistory = await prisma.batchJobHistory.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends BatchJobHistoryCreateManyArgs>(args?: SelectSubset<T, BatchJobHistoryCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many BatchJobHistories and returns the data saved in the database.
+     * @param {BatchJobHistoryCreateManyAndReturnArgs} args - Arguments to create many BatchJobHistories.
+     * @example
+     * // Create many BatchJobHistories
+     * const batchJobHistory = await prisma.batchJobHistory.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many BatchJobHistories and only return the `jobId`
+     * const batchJobHistoryWithJobIdOnly = await prisma.batchJobHistory.createManyAndReturn({
+     *   select: { jobId: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends BatchJobHistoryCreateManyAndReturnArgs>(args?: SelectSubset<T, BatchJobHistoryCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$BatchJobHistoryPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a BatchJobHistory.
+     * @param {BatchJobHistoryDeleteArgs} args - Arguments to delete one BatchJobHistory.
+     * @example
+     * // Delete one BatchJobHistory
+     * const BatchJobHistory = await prisma.batchJobHistory.delete({
+     *   where: {
+     *     // ... filter to delete one BatchJobHistory
+     *   }
+     * })
+     * 
+     */
+    delete<T extends BatchJobHistoryDeleteArgs>(args: SelectSubset<T, BatchJobHistoryDeleteArgs<ExtArgs>>): Prisma__BatchJobHistoryClient<$Result.GetResult<Prisma.$BatchJobHistoryPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one BatchJobHistory.
+     * @param {BatchJobHistoryUpdateArgs} args - Arguments to update one BatchJobHistory.
+     * @example
+     * // Update one BatchJobHistory
+     * const batchJobHistory = await prisma.batchJobHistory.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends BatchJobHistoryUpdateArgs>(args: SelectSubset<T, BatchJobHistoryUpdateArgs<ExtArgs>>): Prisma__BatchJobHistoryClient<$Result.GetResult<Prisma.$BatchJobHistoryPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more BatchJobHistories.
+     * @param {BatchJobHistoryDeleteManyArgs} args - Arguments to filter BatchJobHistories to delete.
+     * @example
+     * // Delete a few BatchJobHistories
+     * const { count } = await prisma.batchJobHistory.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends BatchJobHistoryDeleteManyArgs>(args?: SelectSubset<T, BatchJobHistoryDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more BatchJobHistories.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {BatchJobHistoryUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many BatchJobHistories
+     * const batchJobHistory = await prisma.batchJobHistory.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends BatchJobHistoryUpdateManyArgs>(args: SelectSubset<T, BatchJobHistoryUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more BatchJobHistories and returns the data updated in the database.
+     * @param {BatchJobHistoryUpdateManyAndReturnArgs} args - Arguments to update many BatchJobHistories.
+     * @example
+     * // Update many BatchJobHistories
+     * const batchJobHistory = await prisma.batchJobHistory.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more BatchJobHistories and only return the `jobId`
+     * const batchJobHistoryWithJobIdOnly = await prisma.batchJobHistory.updateManyAndReturn({
+     *   select: { jobId: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends BatchJobHistoryUpdateManyAndReturnArgs>(args: SelectSubset<T, BatchJobHistoryUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$BatchJobHistoryPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one BatchJobHistory.
+     * @param {BatchJobHistoryUpsertArgs} args - Arguments to update or create a BatchJobHistory.
+     * @example
+     * // Update or create a BatchJobHistory
+     * const batchJobHistory = await prisma.batchJobHistory.upsert({
+     *   create: {
+     *     // ... data to create a BatchJobHistory
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the BatchJobHistory we want to update
+     *   }
+     * })
+     */
+    upsert<T extends BatchJobHistoryUpsertArgs>(args: SelectSubset<T, BatchJobHistoryUpsertArgs<ExtArgs>>): Prisma__BatchJobHistoryClient<$Result.GetResult<Prisma.$BatchJobHistoryPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of BatchJobHistories.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {BatchJobHistoryCountArgs} args - Arguments to filter BatchJobHistories to count.
+     * @example
+     * // Count the number of BatchJobHistories
+     * const count = await prisma.batchJobHistory.count({
+     *   where: {
+     *     // ... the filter for the BatchJobHistories we want to count
+     *   }
+     * })
+    **/
+    count<T extends BatchJobHistoryCountArgs>(
+      args?: Subset<T, BatchJobHistoryCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], BatchJobHistoryCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a BatchJobHistory.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {BatchJobHistoryAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends BatchJobHistoryAggregateArgs>(args: Subset<T, BatchJobHistoryAggregateArgs>): Prisma.PrismaPromise<GetBatchJobHistoryAggregateType<T>>
+
+    /**
+     * Group by BatchJobHistory.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {BatchJobHistoryGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends BatchJobHistoryGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: BatchJobHistoryGroupByArgs['orderBy'] }
+        : { orderBy?: BatchJobHistoryGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, BatchJobHistoryGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetBatchJobHistoryGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the BatchJobHistory model
+   */
+  readonly fields: BatchJobHistoryFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for BatchJobHistory.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__BatchJobHistoryClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the BatchJobHistory model
+   */
+  interface BatchJobHistoryFieldRefs {
+    readonly jobId: FieldRef<"BatchJobHistory", 'String'>
+    readonly jobType: FieldRef<"BatchJobHistory", 'BatchJobType'>
+    readonly targetDate: FieldRef<"BatchJobHistory", 'DateTime'>
+    readonly status: FieldRef<"BatchJobHistory", 'BatchJobStatus'>
+    readonly startTime: FieldRef<"BatchJobHistory", 'DateTime'>
+    readonly endTime: FieldRef<"BatchJobHistory", 'DateTime'>
+    readonly processedCount: FieldRef<"BatchJobHistory", 'Int'>
+    readonly errorMessage: FieldRef<"BatchJobHistory", 'String'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * BatchJobHistory findUnique
+   */
+  export type BatchJobHistoryFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BatchJobHistory
+     */
+    select?: BatchJobHistorySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BatchJobHistory
+     */
+    omit?: BatchJobHistoryOmit<ExtArgs> | null
+    /**
+     * Filter, which BatchJobHistory to fetch.
+     */
+    where: BatchJobHistoryWhereUniqueInput
+  }
+
+  /**
+   * BatchJobHistory findUniqueOrThrow
+   */
+  export type BatchJobHistoryFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BatchJobHistory
+     */
+    select?: BatchJobHistorySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BatchJobHistory
+     */
+    omit?: BatchJobHistoryOmit<ExtArgs> | null
+    /**
+     * Filter, which BatchJobHistory to fetch.
+     */
+    where: BatchJobHistoryWhereUniqueInput
+  }
+
+  /**
+   * BatchJobHistory findFirst
+   */
+  export type BatchJobHistoryFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BatchJobHistory
+     */
+    select?: BatchJobHistorySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BatchJobHistory
+     */
+    omit?: BatchJobHistoryOmit<ExtArgs> | null
+    /**
+     * Filter, which BatchJobHistory to fetch.
+     */
+    where?: BatchJobHistoryWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of BatchJobHistories to fetch.
+     */
+    orderBy?: BatchJobHistoryOrderByWithRelationInput | BatchJobHistoryOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for BatchJobHistories.
+     */
+    cursor?: BatchJobHistoryWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` BatchJobHistories from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` BatchJobHistories.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of BatchJobHistories.
+     */
+    distinct?: BatchJobHistoryScalarFieldEnum | BatchJobHistoryScalarFieldEnum[]
+  }
+
+  /**
+   * BatchJobHistory findFirstOrThrow
+   */
+  export type BatchJobHistoryFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BatchJobHistory
+     */
+    select?: BatchJobHistorySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BatchJobHistory
+     */
+    omit?: BatchJobHistoryOmit<ExtArgs> | null
+    /**
+     * Filter, which BatchJobHistory to fetch.
+     */
+    where?: BatchJobHistoryWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of BatchJobHistories to fetch.
+     */
+    orderBy?: BatchJobHistoryOrderByWithRelationInput | BatchJobHistoryOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for BatchJobHistories.
+     */
+    cursor?: BatchJobHistoryWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` BatchJobHistories from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` BatchJobHistories.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of BatchJobHistories.
+     */
+    distinct?: BatchJobHistoryScalarFieldEnum | BatchJobHistoryScalarFieldEnum[]
+  }
+
+  /**
+   * BatchJobHistory findMany
+   */
+  export type BatchJobHistoryFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BatchJobHistory
+     */
+    select?: BatchJobHistorySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BatchJobHistory
+     */
+    omit?: BatchJobHistoryOmit<ExtArgs> | null
+    /**
+     * Filter, which BatchJobHistories to fetch.
+     */
+    where?: BatchJobHistoryWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of BatchJobHistories to fetch.
+     */
+    orderBy?: BatchJobHistoryOrderByWithRelationInput | BatchJobHistoryOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing BatchJobHistories.
+     */
+    cursor?: BatchJobHistoryWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` BatchJobHistories from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` BatchJobHistories.
+     */
+    skip?: number
+    distinct?: BatchJobHistoryScalarFieldEnum | BatchJobHistoryScalarFieldEnum[]
+  }
+
+  /**
+   * BatchJobHistory create
+   */
+  export type BatchJobHistoryCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BatchJobHistory
+     */
+    select?: BatchJobHistorySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BatchJobHistory
+     */
+    omit?: BatchJobHistoryOmit<ExtArgs> | null
+    /**
+     * The data needed to create a BatchJobHistory.
+     */
+    data: XOR<BatchJobHistoryCreateInput, BatchJobHistoryUncheckedCreateInput>
+  }
+
+  /**
+   * BatchJobHistory createMany
+   */
+  export type BatchJobHistoryCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many BatchJobHistories.
+     */
+    data: BatchJobHistoryCreateManyInput | BatchJobHistoryCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * BatchJobHistory createManyAndReturn
+   */
+  export type BatchJobHistoryCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BatchJobHistory
+     */
+    select?: BatchJobHistorySelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the BatchJobHistory
+     */
+    omit?: BatchJobHistoryOmit<ExtArgs> | null
+    /**
+     * The data used to create many BatchJobHistories.
+     */
+    data: BatchJobHistoryCreateManyInput | BatchJobHistoryCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * BatchJobHistory update
+   */
+  export type BatchJobHistoryUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BatchJobHistory
+     */
+    select?: BatchJobHistorySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BatchJobHistory
+     */
+    omit?: BatchJobHistoryOmit<ExtArgs> | null
+    /**
+     * The data needed to update a BatchJobHistory.
+     */
+    data: XOR<BatchJobHistoryUpdateInput, BatchJobHistoryUncheckedUpdateInput>
+    /**
+     * Choose, which BatchJobHistory to update.
+     */
+    where: BatchJobHistoryWhereUniqueInput
+  }
+
+  /**
+   * BatchJobHistory updateMany
+   */
+  export type BatchJobHistoryUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update BatchJobHistories.
+     */
+    data: XOR<BatchJobHistoryUpdateManyMutationInput, BatchJobHistoryUncheckedUpdateManyInput>
+    /**
+     * Filter which BatchJobHistories to update
+     */
+    where?: BatchJobHistoryWhereInput
+    /**
+     * Limit how many BatchJobHistories to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * BatchJobHistory updateManyAndReturn
+   */
+  export type BatchJobHistoryUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BatchJobHistory
+     */
+    select?: BatchJobHistorySelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the BatchJobHistory
+     */
+    omit?: BatchJobHistoryOmit<ExtArgs> | null
+    /**
+     * The data used to update BatchJobHistories.
+     */
+    data: XOR<BatchJobHistoryUpdateManyMutationInput, BatchJobHistoryUncheckedUpdateManyInput>
+    /**
+     * Filter which BatchJobHistories to update
+     */
+    where?: BatchJobHistoryWhereInput
+    /**
+     * Limit how many BatchJobHistories to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * BatchJobHistory upsert
+   */
+  export type BatchJobHistoryUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BatchJobHistory
+     */
+    select?: BatchJobHistorySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BatchJobHistory
+     */
+    omit?: BatchJobHistoryOmit<ExtArgs> | null
+    /**
+     * The filter to search for the BatchJobHistory to update in case it exists.
+     */
+    where: BatchJobHistoryWhereUniqueInput
+    /**
+     * In case the BatchJobHistory found by the `where` argument doesn't exist, create a new BatchJobHistory with this data.
+     */
+    create: XOR<BatchJobHistoryCreateInput, BatchJobHistoryUncheckedCreateInput>
+    /**
+     * In case the BatchJobHistory was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<BatchJobHistoryUpdateInput, BatchJobHistoryUncheckedUpdateInput>
+  }
+
+  /**
+   * BatchJobHistory delete
+   */
+  export type BatchJobHistoryDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BatchJobHistory
+     */
+    select?: BatchJobHistorySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BatchJobHistory
+     */
+    omit?: BatchJobHistoryOmit<ExtArgs> | null
+    /**
+     * Filter which BatchJobHistory to delete.
+     */
+    where: BatchJobHistoryWhereUniqueInput
+  }
+
+  /**
+   * BatchJobHistory deleteMany
+   */
+  export type BatchJobHistoryDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which BatchJobHistories to delete
+     */
+    where?: BatchJobHistoryWhereInput
+    /**
+     * Limit how many BatchJobHistories to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * BatchJobHistory without action
+   */
+  export type BatchJobHistoryDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BatchJobHistory
+     */
+    select?: BatchJobHistorySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BatchJobHistory
+     */
+    omit?: BatchJobHistoryOmit<ExtArgs> | null
+  }
+
+
+  /**
+   * Enums
+   */
+
+  export const TransactionIsolationLevel: {
+    ReadUncommitted: 'ReadUncommitted',
+    ReadCommitted: 'ReadCommitted',
+    RepeatableRead: 'RepeatableRead',
+    Serializable: 'Serializable'
+  };
+
+  export type TransactionIsolationLevel = (typeof TransactionIsolationLevel)[keyof typeof TransactionIsolationLevel]
+
+
+  export const UserScalarFieldEnum: {
+    userId: 'userId',
+    username: 'username',
+    email: 'email',
+    password: 'password',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt',
+    deletedAt: 'deletedAt'
+  };
+
+  export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum]
+
+
+  export const CompanyScalarFieldEnum: {
+    companyId: 'companyId',
+    companyName: 'companyName',
+    stockCode: 'stockCode',
+    marketType: 'marketType',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt',
+    deletedAt: 'deletedAt'
+  };
+
+  export type CompanyScalarFieldEnum = (typeof CompanyScalarFieldEnum)[keyof typeof CompanyScalarFieldEnum]
+
+
+  export const UserWatchlistScalarFieldEnum: {
+    userId: 'userId',
+    companyId: 'companyId',
+    addedDate: 'addedDate',
+    memo: 'memo',
+    deletedAt: 'deletedAt'
+  };
+
+  export type UserWatchlistScalarFieldEnum = (typeof UserWatchlistScalarFieldEnum)[keyof typeof UserWatchlistScalarFieldEnum]
+
+
+  export const TagScalarFieldEnum: {
+    tagId: 'tagId',
+    tagName: 'tagName',
+    createdAt: 'createdAt',
+    deletedAt: 'deletedAt'
+  };
+
+  export type TagScalarFieldEnum = (typeof TagScalarFieldEnum)[keyof typeof TagScalarFieldEnum]
+
+
+  export const WatchlistTagScalarFieldEnum: {
+    userId: 'userId',
+    companyId: 'companyId',
+    tagId: 'tagId',
+    createdAt: 'createdAt',
+    deletedAt: 'deletedAt'
+  };
+
+  export type WatchlistTagScalarFieldEnum = (typeof WatchlistTagScalarFieldEnum)[keyof typeof WatchlistTagScalarFieldEnum]
+
+
+  export const RsFilterPresetScalarFieldEnum: {
+    presetId: 'presetId',
+    userId: 'userId',
+    presetName: 'presetName',
+    createdAt: 'createdAt',
+    deletedAt: 'deletedAt'
+  };
+
+  export type RsFilterPresetScalarFieldEnum = (typeof RsFilterPresetScalarFieldEnum)[keyof typeof RsFilterPresetScalarFieldEnum]
+
+
+  export const RsFilterPeriodScalarFieldEnum: {
+    periodId: 'periodId',
+    presetId: 'presetId',
+    startDate: 'startDate',
+    endDate: 'endDate',
+    weightRatio: 'weightRatio',
+    createdAt: 'createdAt',
+    deletedAt: 'deletedAt'
+  };
+
+  export type RsFilterPeriodScalarFieldEnum = (typeof RsFilterPeriodScalarFieldEnum)[keyof typeof RsFilterPeriodScalarFieldEnum]
+
+
+  export const SearchFilterPresetScalarFieldEnum: {
+    filterId: 'filterId',
+    userId: 'userId',
+    filterName: 'filterName',
+    filterConfig: 'filterConfig',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt',
+    deletedAt: 'deletedAt'
+  };
+
+  export type SearchFilterPresetScalarFieldEnum = (typeof SearchFilterPresetScalarFieldEnum)[keyof typeof SearchFilterPresetScalarFieldEnum]
+
+
+  export const StockPriceHistoryScalarFieldEnum: {
+    priceId: 'priceId',
+    companyId: 'companyId',
+    tradeDate: 'tradeDate',
+    openPrice: 'openPrice',
+    highPrice: 'highPrice',
+    lowPrice: 'lowPrice',
+    closePrice: 'closePrice',
+    volume: 'volume',
+    tradingValue: 'tradingValue',
+    createdAt: 'createdAt'
+  };
+
+  export type StockPriceHistoryScalarFieldEnum = (typeof StockPriceHistoryScalarFieldEnum)[keyof typeof StockPriceHistoryScalarFieldEnum]
+
+
+  export const MarketIndexHistoryScalarFieldEnum: {
+    indexId: 'indexId',
+    marketType: 'marketType',
+    tradeDate: 'tradeDate',
+    closeIndex: 'closeIndex',
+    createdAt: 'createdAt'
+  };
+
+  export type MarketIndexHistoryScalarFieldEnum = (typeof MarketIndexHistoryScalarFieldEnum)[keyof typeof MarketIndexHistoryScalarFieldEnum]
+
+
+  export const KiwoomApiCallLogScalarFieldEnum: {
+    logId: 'logId',
+    userId: 'userId',
+    apiName: 'apiName',
+    stockCode: 'stockCode',
+    requestData: 'requestData',
+    responseStatus: 'responseStatus',
+    responseMessage: 'responseMessage',
+    callTimestamp: 'callTimestamp',
+    responseTimeMs: 'responseTimeMs'
+  };
+
+  export type KiwoomApiCallLogScalarFieldEnum = (typeof KiwoomApiCallLogScalarFieldEnum)[keyof typeof KiwoomApiCallLogScalarFieldEnum]
+
+
+  export const BatchJobHistoryScalarFieldEnum: {
+    jobId: 'jobId',
+    jobType: 'jobType',
+    targetDate: 'targetDate',
+    status: 'status',
+    startTime: 'startTime',
+    endTime: 'endTime',
+    processedCount: 'processedCount',
+    errorMessage: 'errorMessage'
+  };
+
+  export type BatchJobHistoryScalarFieldEnum = (typeof BatchJobHistoryScalarFieldEnum)[keyof typeof BatchJobHistoryScalarFieldEnum]
+
+
+  export const SortOrder: {
+    asc: 'asc',
+    desc: 'desc'
+  };
+
+  export type SortOrder = (typeof SortOrder)[keyof typeof SortOrder]
+
+
+  export const JsonNullValueInput: {
+    JsonNull: typeof JsonNull
+  };
+
+  export type JsonNullValueInput = (typeof JsonNullValueInput)[keyof typeof JsonNullValueInput]
+
+
+  export const NullableJsonNullValueInput: {
+    DbNull: typeof DbNull,
+    JsonNull: typeof JsonNull
+  };
+
+  export type NullableJsonNullValueInput = (typeof NullableJsonNullValueInput)[keyof typeof NullableJsonNullValueInput]
+
+
+  export const QueryMode: {
+    default: 'default',
+    insensitive: 'insensitive'
+  };
+
+  export type QueryMode = (typeof QueryMode)[keyof typeof QueryMode]
+
+
+  export const NullsOrder: {
+    first: 'first',
+    last: 'last'
+  };
+
+  export type NullsOrder = (typeof NullsOrder)[keyof typeof NullsOrder]
+
+
+  export const JsonNullValueFilter: {
+    DbNull: typeof DbNull,
+    JsonNull: typeof JsonNull,
+    AnyNull: typeof AnyNull
+  };
+
+  export type JsonNullValueFilter = (typeof JsonNullValueFilter)[keyof typeof JsonNullValueFilter]
+
+
+  /**
+   * Field references
+   */
+
+
+  /**
+   * Reference to a field of type 'String'
+   */
+  export type StringFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'String'>
+    
+
+
+  /**
+   * Reference to a field of type 'String[]'
+   */
+  export type ListStringFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'String[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'DateTime'
+   */
+  export type DateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DateTime'>
+    
+
+
+  /**
+   * Reference to a field of type 'DateTime[]'
+   */
+  export type ListDateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DateTime[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'MarketType'
+   */
+  export type EnumMarketTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'MarketType'>
+    
+
+
+  /**
+   * Reference to a field of type 'MarketType[]'
+   */
+  export type ListEnumMarketTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'MarketType[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'Decimal'
+   */
+  export type DecimalFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Decimal'>
+    
+
+
+  /**
+   * Reference to a field of type 'Decimal[]'
+   */
+  export type ListDecimalFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Decimal[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'Json'
+   */
+  export type JsonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Json'>
+    
+
+
+  /**
+   * Reference to a field of type 'QueryMode'
+   */
+  export type EnumQueryModeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'QueryMode'>
+    
+
+
+  /**
+   * Reference to a field of type 'BigInt'
+   */
+  export type BigIntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'BigInt'>
+    
+
+
+  /**
+   * Reference to a field of type 'BigInt[]'
+   */
+  export type ListBigIntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'BigInt[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'MarketIndexType'
+   */
+  export type EnumMarketIndexTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'MarketIndexType'>
+    
+
+
+  /**
+   * Reference to a field of type 'MarketIndexType[]'
+   */
+  export type ListEnumMarketIndexTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'MarketIndexType[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'Int'
+   */
+  export type IntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int'>
+    
+
+
+  /**
+   * Reference to a field of type 'Int[]'
+   */
+  export type ListIntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'BatchJobType'
+   */
+  export type EnumBatchJobTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'BatchJobType'>
+    
+
+
+  /**
+   * Reference to a field of type 'BatchJobType[]'
+   */
+  export type ListEnumBatchJobTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'BatchJobType[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'BatchJobStatus'
+   */
+  export type EnumBatchJobStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'BatchJobStatus'>
+    
+
+
+  /**
+   * Reference to a field of type 'BatchJobStatus[]'
+   */
+  export type ListEnumBatchJobStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'BatchJobStatus[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'Float'
+   */
+  export type FloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float'>
+    
+
+
+  /**
+   * Reference to a field of type 'Float[]'
+   */
+  export type ListFloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float[]'>
+    
+  /**
+   * Deep Input Types
+   */
+
+
+  export type UserWhereInput = {
+    AND?: UserWhereInput | UserWhereInput[]
+    OR?: UserWhereInput[]
+    NOT?: UserWhereInput | UserWhereInput[]
+    userId?: UuidFilter<"User"> | string
+    username?: StringFilter<"User"> | string
+    email?: StringFilter<"User"> | string
+    password?: StringFilter<"User"> | string
+    createdAt?: DateTimeFilter<"User"> | Date | string
+    updatedAt?: DateTimeFilter<"User"> | Date | string
+    deletedAt?: DateTimeNullableFilter<"User"> | Date | string | null
+    watchlist?: UserWatchlistListRelationFilter
+    rsFilterPresets?: RsFilterPresetListRelationFilter
+    searchFilterPresets?: SearchFilterPresetListRelationFilter
+    apiCallLogs?: KiwoomApiCallLogListRelationFilter
+  }
+
+  export type UserOrderByWithRelationInput = {
+    userId?: SortOrder
+    username?: SortOrder
+    email?: SortOrder
+    password?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    deletedAt?: SortOrderInput | SortOrder
+    watchlist?: UserWatchlistOrderByRelationAggregateInput
+    rsFilterPresets?: RsFilterPresetOrderByRelationAggregateInput
+    searchFilterPresets?: SearchFilterPresetOrderByRelationAggregateInput
+    apiCallLogs?: KiwoomApiCallLogOrderByRelationAggregateInput
+  }
+
+  export type UserWhereUniqueInput = Prisma.AtLeast<{
+    userId?: string
+    username_deletedAt?: UserUsernameDeletedAtCompoundUniqueInput
+    email_deletedAt?: UserEmailDeletedAtCompoundUniqueInput
+    AND?: UserWhereInput | UserWhereInput[]
+    OR?: UserWhereInput[]
+    NOT?: UserWhereInput | UserWhereInput[]
+    username?: StringFilter<"User"> | string
+    email?: StringFilter<"User"> | string
+    password?: StringFilter<"User"> | string
+    createdAt?: DateTimeFilter<"User"> | Date | string
+    updatedAt?: DateTimeFilter<"User"> | Date | string
+    deletedAt?: DateTimeNullableFilter<"User"> | Date | string | null
+    watchlist?: UserWatchlistListRelationFilter
+    rsFilterPresets?: RsFilterPresetListRelationFilter
+    searchFilterPresets?: SearchFilterPresetListRelationFilter
+    apiCallLogs?: KiwoomApiCallLogListRelationFilter
+  }, "userId" | "username_deletedAt" | "email_deletedAt">
+
+  export type UserOrderByWithAggregationInput = {
+    userId?: SortOrder
+    username?: SortOrder
+    email?: SortOrder
+    password?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    deletedAt?: SortOrderInput | SortOrder
+    _count?: UserCountOrderByAggregateInput
+    _max?: UserMaxOrderByAggregateInput
+    _min?: UserMinOrderByAggregateInput
+  }
+
+  export type UserScalarWhereWithAggregatesInput = {
+    AND?: UserScalarWhereWithAggregatesInput | UserScalarWhereWithAggregatesInput[]
+    OR?: UserScalarWhereWithAggregatesInput[]
+    NOT?: UserScalarWhereWithAggregatesInput | UserScalarWhereWithAggregatesInput[]
+    userId?: UuidWithAggregatesFilter<"User"> | string
+    username?: StringWithAggregatesFilter<"User"> | string
+    email?: StringWithAggregatesFilter<"User"> | string
+    password?: StringWithAggregatesFilter<"User"> | string
+    createdAt?: DateTimeWithAggregatesFilter<"User"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"User"> | Date | string
+    deletedAt?: DateTimeNullableWithAggregatesFilter<"User"> | Date | string | null
+  }
+
+  export type CompanyWhereInput = {
+    AND?: CompanyWhereInput | CompanyWhereInput[]
+    OR?: CompanyWhereInput[]
+    NOT?: CompanyWhereInput | CompanyWhereInput[]
+    companyId?: UuidFilter<"Company"> | string
+    companyName?: StringFilter<"Company"> | string
+    stockCode?: StringFilter<"Company"> | string
+    marketType?: EnumMarketTypeFilter<"Company"> | $Enums.MarketType
+    createdAt?: DateTimeFilter<"Company"> | Date | string
+    updatedAt?: DateTimeFilter<"Company"> | Date | string
+    deletedAt?: DateTimeNullableFilter<"Company"> | Date | string | null
+    watchlist?: UserWatchlistListRelationFilter
+    priceHistory?: StockPriceHistoryListRelationFilter
+  }
+
+  export type CompanyOrderByWithRelationInput = {
+    companyId?: SortOrder
+    companyName?: SortOrder
+    stockCode?: SortOrder
+    marketType?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    deletedAt?: SortOrderInput | SortOrder
+    watchlist?: UserWatchlistOrderByRelationAggregateInput
+    priceHistory?: StockPriceHistoryOrderByRelationAggregateInput
+  }
+
+  export type CompanyWhereUniqueInput = Prisma.AtLeast<{
+    companyId?: string
+    stockCode_deletedAt?: CompanyStockCodeDeletedAtCompoundUniqueInput
+    AND?: CompanyWhereInput | CompanyWhereInput[]
+    OR?: CompanyWhereInput[]
+    NOT?: CompanyWhereInput | CompanyWhereInput[]
+    companyName?: StringFilter<"Company"> | string
+    stockCode?: StringFilter<"Company"> | string
+    marketType?: EnumMarketTypeFilter<"Company"> | $Enums.MarketType
+    createdAt?: DateTimeFilter<"Company"> | Date | string
+    updatedAt?: DateTimeFilter<"Company"> | Date | string
+    deletedAt?: DateTimeNullableFilter<"Company"> | Date | string | null
+    watchlist?: UserWatchlistListRelationFilter
+    priceHistory?: StockPriceHistoryListRelationFilter
+  }, "companyId" | "stockCode_deletedAt">
+
+  export type CompanyOrderByWithAggregationInput = {
+    companyId?: SortOrder
+    companyName?: SortOrder
+    stockCode?: SortOrder
+    marketType?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    deletedAt?: SortOrderInput | SortOrder
+    _count?: CompanyCountOrderByAggregateInput
+    _max?: CompanyMaxOrderByAggregateInput
+    _min?: CompanyMinOrderByAggregateInput
+  }
+
+  export type CompanyScalarWhereWithAggregatesInput = {
+    AND?: CompanyScalarWhereWithAggregatesInput | CompanyScalarWhereWithAggregatesInput[]
+    OR?: CompanyScalarWhereWithAggregatesInput[]
+    NOT?: CompanyScalarWhereWithAggregatesInput | CompanyScalarWhereWithAggregatesInput[]
+    companyId?: UuidWithAggregatesFilter<"Company"> | string
+    companyName?: StringWithAggregatesFilter<"Company"> | string
+    stockCode?: StringWithAggregatesFilter<"Company"> | string
+    marketType?: EnumMarketTypeWithAggregatesFilter<"Company"> | $Enums.MarketType
+    createdAt?: DateTimeWithAggregatesFilter<"Company"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"Company"> | Date | string
+    deletedAt?: DateTimeNullableWithAggregatesFilter<"Company"> | Date | string | null
+  }
+
+  export type UserWatchlistWhereInput = {
+    AND?: UserWatchlistWhereInput | UserWatchlistWhereInput[]
+    OR?: UserWatchlistWhereInput[]
+    NOT?: UserWatchlistWhereInput | UserWatchlistWhereInput[]
+    userId?: UuidFilter<"UserWatchlist"> | string
+    companyId?: UuidFilter<"UserWatchlist"> | string
+    addedDate?: DateTimeFilter<"UserWatchlist"> | Date | string
+    memo?: StringNullableFilter<"UserWatchlist"> | string | null
+    deletedAt?: DateTimeNullableFilter<"UserWatchlist"> | Date | string | null
+    user?: XOR<UserScalarRelationFilter, UserWhereInput>
+    company?: XOR<CompanyScalarRelationFilter, CompanyWhereInput>
+    tags?: WatchlistTagListRelationFilter
+  }
+
+  export type UserWatchlistOrderByWithRelationInput = {
+    userId?: SortOrder
+    companyId?: SortOrder
+    addedDate?: SortOrder
+    memo?: SortOrderInput | SortOrder
+    deletedAt?: SortOrderInput | SortOrder
+    user?: UserOrderByWithRelationInput
+    company?: CompanyOrderByWithRelationInput
+    tags?: WatchlistTagOrderByRelationAggregateInput
+  }
+
+  export type UserWatchlistWhereUniqueInput = Prisma.AtLeast<{
+    userId_companyId?: UserWatchlistUserIdCompanyIdCompoundUniqueInput
+    AND?: UserWatchlistWhereInput | UserWatchlistWhereInput[]
+    OR?: UserWatchlistWhereInput[]
+    NOT?: UserWatchlistWhereInput | UserWatchlistWhereInput[]
+    userId?: UuidFilter<"UserWatchlist"> | string
+    companyId?: UuidFilter<"UserWatchlist"> | string
+    addedDate?: DateTimeFilter<"UserWatchlist"> | Date | string
+    memo?: StringNullableFilter<"UserWatchlist"> | string | null
+    deletedAt?: DateTimeNullableFilter<"UserWatchlist"> | Date | string | null
+    user?: XOR<UserScalarRelationFilter, UserWhereInput>
+    company?: XOR<CompanyScalarRelationFilter, CompanyWhereInput>
+    tags?: WatchlistTagListRelationFilter
+  }, "userId_companyId">
+
+  export type UserWatchlistOrderByWithAggregationInput = {
+    userId?: SortOrder
+    companyId?: SortOrder
+    addedDate?: SortOrder
+    memo?: SortOrderInput | SortOrder
+    deletedAt?: SortOrderInput | SortOrder
+    _count?: UserWatchlistCountOrderByAggregateInput
+    _max?: UserWatchlistMaxOrderByAggregateInput
+    _min?: UserWatchlistMinOrderByAggregateInput
+  }
+
+  export type UserWatchlistScalarWhereWithAggregatesInput = {
+    AND?: UserWatchlistScalarWhereWithAggregatesInput | UserWatchlistScalarWhereWithAggregatesInput[]
+    OR?: UserWatchlistScalarWhereWithAggregatesInput[]
+    NOT?: UserWatchlistScalarWhereWithAggregatesInput | UserWatchlistScalarWhereWithAggregatesInput[]
+    userId?: UuidWithAggregatesFilter<"UserWatchlist"> | string
+    companyId?: UuidWithAggregatesFilter<"UserWatchlist"> | string
+    addedDate?: DateTimeWithAggregatesFilter<"UserWatchlist"> | Date | string
+    memo?: StringNullableWithAggregatesFilter<"UserWatchlist"> | string | null
+    deletedAt?: DateTimeNullableWithAggregatesFilter<"UserWatchlist"> | Date | string | null
+  }
+
+  export type TagWhereInput = {
+    AND?: TagWhereInput | TagWhereInput[]
+    OR?: TagWhereInput[]
+    NOT?: TagWhereInput | TagWhereInput[]
+    tagId?: UuidFilter<"Tag"> | string
+    tagName?: StringFilter<"Tag"> | string
+    createdAt?: DateTimeFilter<"Tag"> | Date | string
+    deletedAt?: DateTimeNullableFilter<"Tag"> | Date | string | null
+    watchlistTags?: WatchlistTagListRelationFilter
+  }
+
+  export type TagOrderByWithRelationInput = {
+    tagId?: SortOrder
+    tagName?: SortOrder
+    createdAt?: SortOrder
+    deletedAt?: SortOrderInput | SortOrder
+    watchlistTags?: WatchlistTagOrderByRelationAggregateInput
+  }
+
+  export type TagWhereUniqueInput = Prisma.AtLeast<{
+    tagId?: string
+    tagName_deletedAt?: TagTagNameDeletedAtCompoundUniqueInput
+    AND?: TagWhereInput | TagWhereInput[]
+    OR?: TagWhereInput[]
+    NOT?: TagWhereInput | TagWhereInput[]
+    tagName?: StringFilter<"Tag"> | string
+    createdAt?: DateTimeFilter<"Tag"> | Date | string
+    deletedAt?: DateTimeNullableFilter<"Tag"> | Date | string | null
+    watchlistTags?: WatchlistTagListRelationFilter
+  }, "tagId" | "tagName_deletedAt">
+
+  export type TagOrderByWithAggregationInput = {
+    tagId?: SortOrder
+    tagName?: SortOrder
+    createdAt?: SortOrder
+    deletedAt?: SortOrderInput | SortOrder
+    _count?: TagCountOrderByAggregateInput
+    _max?: TagMaxOrderByAggregateInput
+    _min?: TagMinOrderByAggregateInput
+  }
+
+  export type TagScalarWhereWithAggregatesInput = {
+    AND?: TagScalarWhereWithAggregatesInput | TagScalarWhereWithAggregatesInput[]
+    OR?: TagScalarWhereWithAggregatesInput[]
+    NOT?: TagScalarWhereWithAggregatesInput | TagScalarWhereWithAggregatesInput[]
+    tagId?: UuidWithAggregatesFilter<"Tag"> | string
+    tagName?: StringWithAggregatesFilter<"Tag"> | string
+    createdAt?: DateTimeWithAggregatesFilter<"Tag"> | Date | string
+    deletedAt?: DateTimeNullableWithAggregatesFilter<"Tag"> | Date | string | null
+  }
+
+  export type WatchlistTagWhereInput = {
+    AND?: WatchlistTagWhereInput | WatchlistTagWhereInput[]
+    OR?: WatchlistTagWhereInput[]
+    NOT?: WatchlistTagWhereInput | WatchlistTagWhereInput[]
+    userId?: UuidFilter<"WatchlistTag"> | string
+    companyId?: UuidFilter<"WatchlistTag"> | string
+    tagId?: UuidFilter<"WatchlistTag"> | string
+    createdAt?: DateTimeFilter<"WatchlistTag"> | Date | string
+    deletedAt?: DateTimeNullableFilter<"WatchlistTag"> | Date | string | null
+    watchlist?: XOR<UserWatchlistScalarRelationFilter, UserWatchlistWhereInput>
+    tag?: XOR<TagScalarRelationFilter, TagWhereInput>
+  }
+
+  export type WatchlistTagOrderByWithRelationInput = {
+    userId?: SortOrder
+    companyId?: SortOrder
+    tagId?: SortOrder
+    createdAt?: SortOrder
+    deletedAt?: SortOrderInput | SortOrder
+    watchlist?: UserWatchlistOrderByWithRelationInput
+    tag?: TagOrderByWithRelationInput
+  }
+
+  export type WatchlistTagWhereUniqueInput = Prisma.AtLeast<{
+    userId_companyId_tagId?: WatchlistTagUserIdCompanyIdTagIdCompoundUniqueInput
+    AND?: WatchlistTagWhereInput | WatchlistTagWhereInput[]
+    OR?: WatchlistTagWhereInput[]
+    NOT?: WatchlistTagWhereInput | WatchlistTagWhereInput[]
+    userId?: UuidFilter<"WatchlistTag"> | string
+    companyId?: UuidFilter<"WatchlistTag"> | string
+    tagId?: UuidFilter<"WatchlistTag"> | string
+    createdAt?: DateTimeFilter<"WatchlistTag"> | Date | string
+    deletedAt?: DateTimeNullableFilter<"WatchlistTag"> | Date | string | null
+    watchlist?: XOR<UserWatchlistScalarRelationFilter, UserWatchlistWhereInput>
+    tag?: XOR<TagScalarRelationFilter, TagWhereInput>
+  }, "userId_companyId_tagId">
+
+  export type WatchlistTagOrderByWithAggregationInput = {
+    userId?: SortOrder
+    companyId?: SortOrder
+    tagId?: SortOrder
+    createdAt?: SortOrder
+    deletedAt?: SortOrderInput | SortOrder
+    _count?: WatchlistTagCountOrderByAggregateInput
+    _max?: WatchlistTagMaxOrderByAggregateInput
+    _min?: WatchlistTagMinOrderByAggregateInput
+  }
+
+  export type WatchlistTagScalarWhereWithAggregatesInput = {
+    AND?: WatchlistTagScalarWhereWithAggregatesInput | WatchlistTagScalarWhereWithAggregatesInput[]
+    OR?: WatchlistTagScalarWhereWithAggregatesInput[]
+    NOT?: WatchlistTagScalarWhereWithAggregatesInput | WatchlistTagScalarWhereWithAggregatesInput[]
+    userId?: UuidWithAggregatesFilter<"WatchlistTag"> | string
+    companyId?: UuidWithAggregatesFilter<"WatchlistTag"> | string
+    tagId?: UuidWithAggregatesFilter<"WatchlistTag"> | string
+    createdAt?: DateTimeWithAggregatesFilter<"WatchlistTag"> | Date | string
+    deletedAt?: DateTimeNullableWithAggregatesFilter<"WatchlistTag"> | Date | string | null
+  }
+
+  export type RsFilterPresetWhereInput = {
+    AND?: RsFilterPresetWhereInput | RsFilterPresetWhereInput[]
+    OR?: RsFilterPresetWhereInput[]
+    NOT?: RsFilterPresetWhereInput | RsFilterPresetWhereInput[]
+    presetId?: UuidFilter<"RsFilterPreset"> | string
+    userId?: UuidFilter<"RsFilterPreset"> | string
+    presetName?: StringFilter<"RsFilterPreset"> | string
+    createdAt?: DateTimeFilter<"RsFilterPreset"> | Date | string
+    deletedAt?: DateTimeNullableFilter<"RsFilterPreset"> | Date | string | null
+    user?: XOR<UserScalarRelationFilter, UserWhereInput>
+    periods?: RsFilterPeriodListRelationFilter
+  }
+
+  export type RsFilterPresetOrderByWithRelationInput = {
+    presetId?: SortOrder
+    userId?: SortOrder
+    presetName?: SortOrder
+    createdAt?: SortOrder
+    deletedAt?: SortOrderInput | SortOrder
+    user?: UserOrderByWithRelationInput
+    periods?: RsFilterPeriodOrderByRelationAggregateInput
+  }
+
+  export type RsFilterPresetWhereUniqueInput = Prisma.AtLeast<{
+    presetId?: string
+    userId_presetName_deletedAt?: RsFilterPresetUserIdPresetNameDeletedAtCompoundUniqueInput
+    AND?: RsFilterPresetWhereInput | RsFilterPresetWhereInput[]
+    OR?: RsFilterPresetWhereInput[]
+    NOT?: RsFilterPresetWhereInput | RsFilterPresetWhereInput[]
+    userId?: UuidFilter<"RsFilterPreset"> | string
+    presetName?: StringFilter<"RsFilterPreset"> | string
+    createdAt?: DateTimeFilter<"RsFilterPreset"> | Date | string
+    deletedAt?: DateTimeNullableFilter<"RsFilterPreset"> | Date | string | null
+    user?: XOR<UserScalarRelationFilter, UserWhereInput>
+    periods?: RsFilterPeriodListRelationFilter
+  }, "presetId" | "userId_presetName_deletedAt">
+
+  export type RsFilterPresetOrderByWithAggregationInput = {
+    presetId?: SortOrder
+    userId?: SortOrder
+    presetName?: SortOrder
+    createdAt?: SortOrder
+    deletedAt?: SortOrderInput | SortOrder
+    _count?: RsFilterPresetCountOrderByAggregateInput
+    _max?: RsFilterPresetMaxOrderByAggregateInput
+    _min?: RsFilterPresetMinOrderByAggregateInput
+  }
+
+  export type RsFilterPresetScalarWhereWithAggregatesInput = {
+    AND?: RsFilterPresetScalarWhereWithAggregatesInput | RsFilterPresetScalarWhereWithAggregatesInput[]
+    OR?: RsFilterPresetScalarWhereWithAggregatesInput[]
+    NOT?: RsFilterPresetScalarWhereWithAggregatesInput | RsFilterPresetScalarWhereWithAggregatesInput[]
+    presetId?: UuidWithAggregatesFilter<"RsFilterPreset"> | string
+    userId?: UuidWithAggregatesFilter<"RsFilterPreset"> | string
+    presetName?: StringWithAggregatesFilter<"RsFilterPreset"> | string
+    createdAt?: DateTimeWithAggregatesFilter<"RsFilterPreset"> | Date | string
+    deletedAt?: DateTimeNullableWithAggregatesFilter<"RsFilterPreset"> | Date | string | null
+  }
+
+  export type RsFilterPeriodWhereInput = {
+    AND?: RsFilterPeriodWhereInput | RsFilterPeriodWhereInput[]
+    OR?: RsFilterPeriodWhereInput[]
+    NOT?: RsFilterPeriodWhereInput | RsFilterPeriodWhereInput[]
+    periodId?: UuidFilter<"RsFilterPeriod"> | string
+    presetId?: UuidFilter<"RsFilterPeriod"> | string
+    startDate?: DateTimeFilter<"RsFilterPeriod"> | Date | string
+    endDate?: DateTimeFilter<"RsFilterPeriod"> | Date | string
+    weightRatio?: DecimalFilter<"RsFilterPeriod"> | Decimal | DecimalJsLike | number | string
+    createdAt?: DateTimeFilter<"RsFilterPeriod"> | Date | string
+    deletedAt?: DateTimeNullableFilter<"RsFilterPeriod"> | Date | string | null
+    preset?: XOR<RsFilterPresetScalarRelationFilter, RsFilterPresetWhereInput>
+  }
+
+  export type RsFilterPeriodOrderByWithRelationInput = {
+    periodId?: SortOrder
+    presetId?: SortOrder
+    startDate?: SortOrder
+    endDate?: SortOrder
+    weightRatio?: SortOrder
+    createdAt?: SortOrder
+    deletedAt?: SortOrderInput | SortOrder
+    preset?: RsFilterPresetOrderByWithRelationInput
+  }
+
+  export type RsFilterPeriodWhereUniqueInput = Prisma.AtLeast<{
+    periodId?: string
+    AND?: RsFilterPeriodWhereInput | RsFilterPeriodWhereInput[]
+    OR?: RsFilterPeriodWhereInput[]
+    NOT?: RsFilterPeriodWhereInput | RsFilterPeriodWhereInput[]
+    presetId?: UuidFilter<"RsFilterPeriod"> | string
+    startDate?: DateTimeFilter<"RsFilterPeriod"> | Date | string
+    endDate?: DateTimeFilter<"RsFilterPeriod"> | Date | string
+    weightRatio?: DecimalFilter<"RsFilterPeriod"> | Decimal | DecimalJsLike | number | string
+    createdAt?: DateTimeFilter<"RsFilterPeriod"> | Date | string
+    deletedAt?: DateTimeNullableFilter<"RsFilterPeriod"> | Date | string | null
+    preset?: XOR<RsFilterPresetScalarRelationFilter, RsFilterPresetWhereInput>
+  }, "periodId">
+
+  export type RsFilterPeriodOrderByWithAggregationInput = {
+    periodId?: SortOrder
+    presetId?: SortOrder
+    startDate?: SortOrder
+    endDate?: SortOrder
+    weightRatio?: SortOrder
+    createdAt?: SortOrder
+    deletedAt?: SortOrderInput | SortOrder
+    _count?: RsFilterPeriodCountOrderByAggregateInput
+    _avg?: RsFilterPeriodAvgOrderByAggregateInput
+    _max?: RsFilterPeriodMaxOrderByAggregateInput
+    _min?: RsFilterPeriodMinOrderByAggregateInput
+    _sum?: RsFilterPeriodSumOrderByAggregateInput
+  }
+
+  export type RsFilterPeriodScalarWhereWithAggregatesInput = {
+    AND?: RsFilterPeriodScalarWhereWithAggregatesInput | RsFilterPeriodScalarWhereWithAggregatesInput[]
+    OR?: RsFilterPeriodScalarWhereWithAggregatesInput[]
+    NOT?: RsFilterPeriodScalarWhereWithAggregatesInput | RsFilterPeriodScalarWhereWithAggregatesInput[]
+    periodId?: UuidWithAggregatesFilter<"RsFilterPeriod"> | string
+    presetId?: UuidWithAggregatesFilter<"RsFilterPeriod"> | string
+    startDate?: DateTimeWithAggregatesFilter<"RsFilterPeriod"> | Date | string
+    endDate?: DateTimeWithAggregatesFilter<"RsFilterPeriod"> | Date | string
+    weightRatio?: DecimalWithAggregatesFilter<"RsFilterPeriod"> | Decimal | DecimalJsLike | number | string
+    createdAt?: DateTimeWithAggregatesFilter<"RsFilterPeriod"> | Date | string
+    deletedAt?: DateTimeNullableWithAggregatesFilter<"RsFilterPeriod"> | Date | string | null
+  }
+
+  export type SearchFilterPresetWhereInput = {
+    AND?: SearchFilterPresetWhereInput | SearchFilterPresetWhereInput[]
+    OR?: SearchFilterPresetWhereInput[]
+    NOT?: SearchFilterPresetWhereInput | SearchFilterPresetWhereInput[]
+    filterId?: UuidFilter<"SearchFilterPreset"> | string
+    userId?: UuidFilter<"SearchFilterPreset"> | string
+    filterName?: StringFilter<"SearchFilterPreset"> | string
+    filterConfig?: JsonFilter<"SearchFilterPreset">
+    createdAt?: DateTimeFilter<"SearchFilterPreset"> | Date | string
+    updatedAt?: DateTimeFilter<"SearchFilterPreset"> | Date | string
+    deletedAt?: DateTimeNullableFilter<"SearchFilterPreset"> | Date | string | null
+    user?: XOR<UserScalarRelationFilter, UserWhereInput>
+  }
+
+  export type SearchFilterPresetOrderByWithRelationInput = {
+    filterId?: SortOrder
+    userId?: SortOrder
+    filterName?: SortOrder
+    filterConfig?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    deletedAt?: SortOrderInput | SortOrder
+    user?: UserOrderByWithRelationInput
+  }
+
+  export type SearchFilterPresetWhereUniqueInput = Prisma.AtLeast<{
+    filterId?: string
+    userId_filterName_deletedAt?: SearchFilterPresetUserIdFilterNameDeletedAtCompoundUniqueInput
+    AND?: SearchFilterPresetWhereInput | SearchFilterPresetWhereInput[]
+    OR?: SearchFilterPresetWhereInput[]
+    NOT?: SearchFilterPresetWhereInput | SearchFilterPresetWhereInput[]
+    userId?: UuidFilter<"SearchFilterPreset"> | string
+    filterName?: StringFilter<"SearchFilterPreset"> | string
+    filterConfig?: JsonFilter<"SearchFilterPreset">
+    createdAt?: DateTimeFilter<"SearchFilterPreset"> | Date | string
+    updatedAt?: DateTimeFilter<"SearchFilterPreset"> | Date | string
+    deletedAt?: DateTimeNullableFilter<"SearchFilterPreset"> | Date | string | null
+    user?: XOR<UserScalarRelationFilter, UserWhereInput>
+  }, "filterId" | "userId_filterName_deletedAt">
+
+  export type SearchFilterPresetOrderByWithAggregationInput = {
+    filterId?: SortOrder
+    userId?: SortOrder
+    filterName?: SortOrder
+    filterConfig?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    deletedAt?: SortOrderInput | SortOrder
+    _count?: SearchFilterPresetCountOrderByAggregateInput
+    _max?: SearchFilterPresetMaxOrderByAggregateInput
+    _min?: SearchFilterPresetMinOrderByAggregateInput
+  }
+
+  export type SearchFilterPresetScalarWhereWithAggregatesInput = {
+    AND?: SearchFilterPresetScalarWhereWithAggregatesInput | SearchFilterPresetScalarWhereWithAggregatesInput[]
+    OR?: SearchFilterPresetScalarWhereWithAggregatesInput[]
+    NOT?: SearchFilterPresetScalarWhereWithAggregatesInput | SearchFilterPresetScalarWhereWithAggregatesInput[]
+    filterId?: UuidWithAggregatesFilter<"SearchFilterPreset"> | string
+    userId?: UuidWithAggregatesFilter<"SearchFilterPreset"> | string
+    filterName?: StringWithAggregatesFilter<"SearchFilterPreset"> | string
+    filterConfig?: JsonWithAggregatesFilter<"SearchFilterPreset">
+    createdAt?: DateTimeWithAggregatesFilter<"SearchFilterPreset"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"SearchFilterPreset"> | Date | string
+    deletedAt?: DateTimeNullableWithAggregatesFilter<"SearchFilterPreset"> | Date | string | null
+  }
+
+  export type StockPriceHistoryWhereInput = {
+    AND?: StockPriceHistoryWhereInput | StockPriceHistoryWhereInput[]
+    OR?: StockPriceHistoryWhereInput[]
+    NOT?: StockPriceHistoryWhereInput | StockPriceHistoryWhereInput[]
+    priceId?: UuidFilter<"StockPriceHistory"> | string
+    companyId?: UuidFilter<"StockPriceHistory"> | string
+    tradeDate?: DateTimeFilter<"StockPriceHistory"> | Date | string
+    openPrice?: DecimalFilter<"StockPriceHistory"> | Decimal | DecimalJsLike | number | string
+    highPrice?: DecimalFilter<"StockPriceHistory"> | Decimal | DecimalJsLike | number | string
+    lowPrice?: DecimalFilter<"StockPriceHistory"> | Decimal | DecimalJsLike | number | string
+    closePrice?: DecimalFilter<"StockPriceHistory"> | Decimal | DecimalJsLike | number | string
+    volume?: BigIntFilter<"StockPriceHistory"> | bigint | number
+    tradingValue?: BigIntFilter<"StockPriceHistory"> | bigint | number
+    createdAt?: DateTimeFilter<"StockPriceHistory"> | Date | string
+    company?: XOR<CompanyScalarRelationFilter, CompanyWhereInput>
+  }
+
+  export type StockPriceHistoryOrderByWithRelationInput = {
+    priceId?: SortOrder
+    companyId?: SortOrder
+    tradeDate?: SortOrder
+    openPrice?: SortOrder
+    highPrice?: SortOrder
+    lowPrice?: SortOrder
+    closePrice?: SortOrder
+    volume?: SortOrder
+    tradingValue?: SortOrder
+    createdAt?: SortOrder
+    company?: CompanyOrderByWithRelationInput
+  }
+
+  export type StockPriceHistoryWhereUniqueInput = Prisma.AtLeast<{
+    priceId?: string
+    companyId_tradeDate?: StockPriceHistoryCompanyIdTradeDateCompoundUniqueInput
+    AND?: StockPriceHistoryWhereInput | StockPriceHistoryWhereInput[]
+    OR?: StockPriceHistoryWhereInput[]
+    NOT?: StockPriceHistoryWhereInput | StockPriceHistoryWhereInput[]
+    companyId?: UuidFilter<"StockPriceHistory"> | string
+    tradeDate?: DateTimeFilter<"StockPriceHistory"> | Date | string
+    openPrice?: DecimalFilter<"StockPriceHistory"> | Decimal | DecimalJsLike | number | string
+    highPrice?: DecimalFilter<"StockPriceHistory"> | Decimal | DecimalJsLike | number | string
+    lowPrice?: DecimalFilter<"StockPriceHistory"> | Decimal | DecimalJsLike | number | string
+    closePrice?: DecimalFilter<"StockPriceHistory"> | Decimal | DecimalJsLike | number | string
+    volume?: BigIntFilter<"StockPriceHistory"> | bigint | number
+    tradingValue?: BigIntFilter<"StockPriceHistory"> | bigint | number
+    createdAt?: DateTimeFilter<"StockPriceHistory"> | Date | string
+    company?: XOR<CompanyScalarRelationFilter, CompanyWhereInput>
+  }, "priceId" | "companyId_tradeDate">
+
+  export type StockPriceHistoryOrderByWithAggregationInput = {
+    priceId?: SortOrder
+    companyId?: SortOrder
+    tradeDate?: SortOrder
+    openPrice?: SortOrder
+    highPrice?: SortOrder
+    lowPrice?: SortOrder
+    closePrice?: SortOrder
+    volume?: SortOrder
+    tradingValue?: SortOrder
+    createdAt?: SortOrder
+    _count?: StockPriceHistoryCountOrderByAggregateInput
+    _avg?: StockPriceHistoryAvgOrderByAggregateInput
+    _max?: StockPriceHistoryMaxOrderByAggregateInput
+    _min?: StockPriceHistoryMinOrderByAggregateInput
+    _sum?: StockPriceHistorySumOrderByAggregateInput
+  }
+
+  export type StockPriceHistoryScalarWhereWithAggregatesInput = {
+    AND?: StockPriceHistoryScalarWhereWithAggregatesInput | StockPriceHistoryScalarWhereWithAggregatesInput[]
+    OR?: StockPriceHistoryScalarWhereWithAggregatesInput[]
+    NOT?: StockPriceHistoryScalarWhereWithAggregatesInput | StockPriceHistoryScalarWhereWithAggregatesInput[]
+    priceId?: UuidWithAggregatesFilter<"StockPriceHistory"> | string
+    companyId?: UuidWithAggregatesFilter<"StockPriceHistory"> | string
+    tradeDate?: DateTimeWithAggregatesFilter<"StockPriceHistory"> | Date | string
+    openPrice?: DecimalWithAggregatesFilter<"StockPriceHistory"> | Decimal | DecimalJsLike | number | string
+    highPrice?: DecimalWithAggregatesFilter<"StockPriceHistory"> | Decimal | DecimalJsLike | number | string
+    lowPrice?: DecimalWithAggregatesFilter<"StockPriceHistory"> | Decimal | DecimalJsLike | number | string
+    closePrice?: DecimalWithAggregatesFilter<"StockPriceHistory"> | Decimal | DecimalJsLike | number | string
+    volume?: BigIntWithAggregatesFilter<"StockPriceHistory"> | bigint | number
+    tradingValue?: BigIntWithAggregatesFilter<"StockPriceHistory"> | bigint | number
+    createdAt?: DateTimeWithAggregatesFilter<"StockPriceHistory"> | Date | string
+  }
+
+  export type MarketIndexHistoryWhereInput = {
+    AND?: MarketIndexHistoryWhereInput | MarketIndexHistoryWhereInput[]
+    OR?: MarketIndexHistoryWhereInput[]
+    NOT?: MarketIndexHistoryWhereInput | MarketIndexHistoryWhereInput[]
+    indexId?: UuidFilter<"MarketIndexHistory"> | string
+    marketType?: EnumMarketIndexTypeFilter<"MarketIndexHistory"> | $Enums.MarketIndexType
+    tradeDate?: DateTimeFilter<"MarketIndexHistory"> | Date | string
+    closeIndex?: DecimalFilter<"MarketIndexHistory"> | Decimal | DecimalJsLike | number | string
+    createdAt?: DateTimeFilter<"MarketIndexHistory"> | Date | string
+  }
+
+  export type MarketIndexHistoryOrderByWithRelationInput = {
+    indexId?: SortOrder
+    marketType?: SortOrder
+    tradeDate?: SortOrder
+    closeIndex?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type MarketIndexHistoryWhereUniqueInput = Prisma.AtLeast<{
+    indexId?: string
+    marketType_tradeDate?: MarketIndexHistoryMarketTypeTradeDateCompoundUniqueInput
+    AND?: MarketIndexHistoryWhereInput | MarketIndexHistoryWhereInput[]
+    OR?: MarketIndexHistoryWhereInput[]
+    NOT?: MarketIndexHistoryWhereInput | MarketIndexHistoryWhereInput[]
+    marketType?: EnumMarketIndexTypeFilter<"MarketIndexHistory"> | $Enums.MarketIndexType
+    tradeDate?: DateTimeFilter<"MarketIndexHistory"> | Date | string
+    closeIndex?: DecimalFilter<"MarketIndexHistory"> | Decimal | DecimalJsLike | number | string
+    createdAt?: DateTimeFilter<"MarketIndexHistory"> | Date | string
+  }, "indexId" | "marketType_tradeDate">
+
+  export type MarketIndexHistoryOrderByWithAggregationInput = {
+    indexId?: SortOrder
+    marketType?: SortOrder
+    tradeDate?: SortOrder
+    closeIndex?: SortOrder
+    createdAt?: SortOrder
+    _count?: MarketIndexHistoryCountOrderByAggregateInput
+    _avg?: MarketIndexHistoryAvgOrderByAggregateInput
+    _max?: MarketIndexHistoryMaxOrderByAggregateInput
+    _min?: MarketIndexHistoryMinOrderByAggregateInput
+    _sum?: MarketIndexHistorySumOrderByAggregateInput
+  }
+
+  export type MarketIndexHistoryScalarWhereWithAggregatesInput = {
+    AND?: MarketIndexHistoryScalarWhereWithAggregatesInput | MarketIndexHistoryScalarWhereWithAggregatesInput[]
+    OR?: MarketIndexHistoryScalarWhereWithAggregatesInput[]
+    NOT?: MarketIndexHistoryScalarWhereWithAggregatesInput | MarketIndexHistoryScalarWhereWithAggregatesInput[]
+    indexId?: UuidWithAggregatesFilter<"MarketIndexHistory"> | string
+    marketType?: EnumMarketIndexTypeWithAggregatesFilter<"MarketIndexHistory"> | $Enums.MarketIndexType
+    tradeDate?: DateTimeWithAggregatesFilter<"MarketIndexHistory"> | Date | string
+    closeIndex?: DecimalWithAggregatesFilter<"MarketIndexHistory"> | Decimal | DecimalJsLike | number | string
+    createdAt?: DateTimeWithAggregatesFilter<"MarketIndexHistory"> | Date | string
+  }
+
+  export type KiwoomApiCallLogWhereInput = {
+    AND?: KiwoomApiCallLogWhereInput | KiwoomApiCallLogWhereInput[]
+    OR?: KiwoomApiCallLogWhereInput[]
+    NOT?: KiwoomApiCallLogWhereInput | KiwoomApiCallLogWhereInput[]
+    logId?: UuidFilter<"KiwoomApiCallLog"> | string
+    userId?: UuidNullableFilter<"KiwoomApiCallLog"> | string | null
+    apiName?: StringFilter<"KiwoomApiCallLog"> | string
+    stockCode?: StringNullableFilter<"KiwoomApiCallLog"> | string | null
+    requestData?: JsonNullableFilter<"KiwoomApiCallLog">
+    responseStatus?: StringNullableFilter<"KiwoomApiCallLog"> | string | null
+    responseMessage?: StringNullableFilter<"KiwoomApiCallLog"> | string | null
+    callTimestamp?: DateTimeFilter<"KiwoomApiCallLog"> | Date | string
+    responseTimeMs?: IntNullableFilter<"KiwoomApiCallLog"> | number | null
+    user?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
+  }
+
+  export type KiwoomApiCallLogOrderByWithRelationInput = {
+    logId?: SortOrder
+    userId?: SortOrderInput | SortOrder
+    apiName?: SortOrder
+    stockCode?: SortOrderInput | SortOrder
+    requestData?: SortOrderInput | SortOrder
+    responseStatus?: SortOrderInput | SortOrder
+    responseMessage?: SortOrderInput | SortOrder
+    callTimestamp?: SortOrder
+    responseTimeMs?: SortOrderInput | SortOrder
+    user?: UserOrderByWithRelationInput
+  }
+
+  export type KiwoomApiCallLogWhereUniqueInput = Prisma.AtLeast<{
+    logId?: string
+    AND?: KiwoomApiCallLogWhereInput | KiwoomApiCallLogWhereInput[]
+    OR?: KiwoomApiCallLogWhereInput[]
+    NOT?: KiwoomApiCallLogWhereInput | KiwoomApiCallLogWhereInput[]
+    userId?: UuidNullableFilter<"KiwoomApiCallLog"> | string | null
+    apiName?: StringFilter<"KiwoomApiCallLog"> | string
+    stockCode?: StringNullableFilter<"KiwoomApiCallLog"> | string | null
+    requestData?: JsonNullableFilter<"KiwoomApiCallLog">
+    responseStatus?: StringNullableFilter<"KiwoomApiCallLog"> | string | null
+    responseMessage?: StringNullableFilter<"KiwoomApiCallLog"> | string | null
+    callTimestamp?: DateTimeFilter<"KiwoomApiCallLog"> | Date | string
+    responseTimeMs?: IntNullableFilter<"KiwoomApiCallLog"> | number | null
+    user?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
+  }, "logId">
+
+  export type KiwoomApiCallLogOrderByWithAggregationInput = {
+    logId?: SortOrder
+    userId?: SortOrderInput | SortOrder
+    apiName?: SortOrder
+    stockCode?: SortOrderInput | SortOrder
+    requestData?: SortOrderInput | SortOrder
+    responseStatus?: SortOrderInput | SortOrder
+    responseMessage?: SortOrderInput | SortOrder
+    callTimestamp?: SortOrder
+    responseTimeMs?: SortOrderInput | SortOrder
+    _count?: KiwoomApiCallLogCountOrderByAggregateInput
+    _avg?: KiwoomApiCallLogAvgOrderByAggregateInput
+    _max?: KiwoomApiCallLogMaxOrderByAggregateInput
+    _min?: KiwoomApiCallLogMinOrderByAggregateInput
+    _sum?: KiwoomApiCallLogSumOrderByAggregateInput
+  }
+
+  export type KiwoomApiCallLogScalarWhereWithAggregatesInput = {
+    AND?: KiwoomApiCallLogScalarWhereWithAggregatesInput | KiwoomApiCallLogScalarWhereWithAggregatesInput[]
+    OR?: KiwoomApiCallLogScalarWhereWithAggregatesInput[]
+    NOT?: KiwoomApiCallLogScalarWhereWithAggregatesInput | KiwoomApiCallLogScalarWhereWithAggregatesInput[]
+    logId?: UuidWithAggregatesFilter<"KiwoomApiCallLog"> | string
+    userId?: UuidNullableWithAggregatesFilter<"KiwoomApiCallLog"> | string | null
+    apiName?: StringWithAggregatesFilter<"KiwoomApiCallLog"> | string
+    stockCode?: StringNullableWithAggregatesFilter<"KiwoomApiCallLog"> | string | null
+    requestData?: JsonNullableWithAggregatesFilter<"KiwoomApiCallLog">
+    responseStatus?: StringNullableWithAggregatesFilter<"KiwoomApiCallLog"> | string | null
+    responseMessage?: StringNullableWithAggregatesFilter<"KiwoomApiCallLog"> | string | null
+    callTimestamp?: DateTimeWithAggregatesFilter<"KiwoomApiCallLog"> | Date | string
+    responseTimeMs?: IntNullableWithAggregatesFilter<"KiwoomApiCallLog"> | number | null
+  }
+
+  export type BatchJobHistoryWhereInput = {
+    AND?: BatchJobHistoryWhereInput | BatchJobHistoryWhereInput[]
+    OR?: BatchJobHistoryWhereInput[]
+    NOT?: BatchJobHistoryWhereInput | BatchJobHistoryWhereInput[]
+    jobId?: UuidFilter<"BatchJobHistory"> | string
+    jobType?: EnumBatchJobTypeFilter<"BatchJobHistory"> | $Enums.BatchJobType
+    targetDate?: DateTimeFilter<"BatchJobHistory"> | Date | string
+    status?: EnumBatchJobStatusFilter<"BatchJobHistory"> | $Enums.BatchJobStatus
+    startTime?: DateTimeFilter<"BatchJobHistory"> | Date | string
+    endTime?: DateTimeNullableFilter<"BatchJobHistory"> | Date | string | null
+    processedCount?: IntFilter<"BatchJobHistory"> | number
+    errorMessage?: StringNullableFilter<"BatchJobHistory"> | string | null
+  }
+
+  export type BatchJobHistoryOrderByWithRelationInput = {
+    jobId?: SortOrder
+    jobType?: SortOrder
+    targetDate?: SortOrder
+    status?: SortOrder
+    startTime?: SortOrder
+    endTime?: SortOrderInput | SortOrder
+    processedCount?: SortOrder
+    errorMessage?: SortOrderInput | SortOrder
+  }
+
+  export type BatchJobHistoryWhereUniqueInput = Prisma.AtLeast<{
+    jobId?: string
+    AND?: BatchJobHistoryWhereInput | BatchJobHistoryWhereInput[]
+    OR?: BatchJobHistoryWhereInput[]
+    NOT?: BatchJobHistoryWhereInput | BatchJobHistoryWhereInput[]
+    jobType?: EnumBatchJobTypeFilter<"BatchJobHistory"> | $Enums.BatchJobType
+    targetDate?: DateTimeFilter<"BatchJobHistory"> | Date | string
+    status?: EnumBatchJobStatusFilter<"BatchJobHistory"> | $Enums.BatchJobStatus
+    startTime?: DateTimeFilter<"BatchJobHistory"> | Date | string
+    endTime?: DateTimeNullableFilter<"BatchJobHistory"> | Date | string | null
+    processedCount?: IntFilter<"BatchJobHistory"> | number
+    errorMessage?: StringNullableFilter<"BatchJobHistory"> | string | null
+  }, "jobId">
+
+  export type BatchJobHistoryOrderByWithAggregationInput = {
+    jobId?: SortOrder
+    jobType?: SortOrder
+    targetDate?: SortOrder
+    status?: SortOrder
+    startTime?: SortOrder
+    endTime?: SortOrderInput | SortOrder
+    processedCount?: SortOrder
+    errorMessage?: SortOrderInput | SortOrder
+    _count?: BatchJobHistoryCountOrderByAggregateInput
+    _avg?: BatchJobHistoryAvgOrderByAggregateInput
+    _max?: BatchJobHistoryMaxOrderByAggregateInput
+    _min?: BatchJobHistoryMinOrderByAggregateInput
+    _sum?: BatchJobHistorySumOrderByAggregateInput
+  }
+
+  export type BatchJobHistoryScalarWhereWithAggregatesInput = {
+    AND?: BatchJobHistoryScalarWhereWithAggregatesInput | BatchJobHistoryScalarWhereWithAggregatesInput[]
+    OR?: BatchJobHistoryScalarWhereWithAggregatesInput[]
+    NOT?: BatchJobHistoryScalarWhereWithAggregatesInput | BatchJobHistoryScalarWhereWithAggregatesInput[]
+    jobId?: UuidWithAggregatesFilter<"BatchJobHistory"> | string
+    jobType?: EnumBatchJobTypeWithAggregatesFilter<"BatchJobHistory"> | $Enums.BatchJobType
+    targetDate?: DateTimeWithAggregatesFilter<"BatchJobHistory"> | Date | string
+    status?: EnumBatchJobStatusWithAggregatesFilter<"BatchJobHistory"> | $Enums.BatchJobStatus
+    startTime?: DateTimeWithAggregatesFilter<"BatchJobHistory"> | Date | string
+    endTime?: DateTimeNullableWithAggregatesFilter<"BatchJobHistory"> | Date | string | null
+    processedCount?: IntWithAggregatesFilter<"BatchJobHistory"> | number
+    errorMessage?: StringNullableWithAggregatesFilter<"BatchJobHistory"> | string | null
+  }
+
+  export type UserCreateInput = {
+    userId?: string
+    username: string
+    email: string
+    password: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    deletedAt?: Date | string | null
+    watchlist?: UserWatchlistCreateNestedManyWithoutUserInput
+    rsFilterPresets?: RsFilterPresetCreateNestedManyWithoutUserInput
+    searchFilterPresets?: SearchFilterPresetCreateNestedManyWithoutUserInput
+    apiCallLogs?: KiwoomApiCallLogCreateNestedManyWithoutUserInput
+  }
+
+  export type UserUncheckedCreateInput = {
+    userId?: string
+    username: string
+    email: string
+    password: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    deletedAt?: Date | string | null
+    watchlist?: UserWatchlistUncheckedCreateNestedManyWithoutUserInput
+    rsFilterPresets?: RsFilterPresetUncheckedCreateNestedManyWithoutUserInput
+    searchFilterPresets?: SearchFilterPresetUncheckedCreateNestedManyWithoutUserInput
+    apiCallLogs?: KiwoomApiCallLogUncheckedCreateNestedManyWithoutUserInput
+  }
+
+  export type UserUpdateInput = {
+    userId?: StringFieldUpdateOperationsInput | string
+    username?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    password?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    watchlist?: UserWatchlistUpdateManyWithoutUserNestedInput
+    rsFilterPresets?: RsFilterPresetUpdateManyWithoutUserNestedInput
+    searchFilterPresets?: SearchFilterPresetUpdateManyWithoutUserNestedInput
+    apiCallLogs?: KiwoomApiCallLogUpdateManyWithoutUserNestedInput
+  }
+
+  export type UserUncheckedUpdateInput = {
+    userId?: StringFieldUpdateOperationsInput | string
+    username?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    password?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    watchlist?: UserWatchlistUncheckedUpdateManyWithoutUserNestedInput
+    rsFilterPresets?: RsFilterPresetUncheckedUpdateManyWithoutUserNestedInput
+    searchFilterPresets?: SearchFilterPresetUncheckedUpdateManyWithoutUserNestedInput
+    apiCallLogs?: KiwoomApiCallLogUncheckedUpdateManyWithoutUserNestedInput
+  }
+
+  export type UserCreateManyInput = {
+    userId?: string
+    username: string
+    email: string
+    password: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    deletedAt?: Date | string | null
+  }
+
+  export type UserUpdateManyMutationInput = {
+    userId?: StringFieldUpdateOperationsInput | string
+    username?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    password?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
+  export type UserUncheckedUpdateManyInput = {
+    userId?: StringFieldUpdateOperationsInput | string
+    username?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    password?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
+  export type CompanyCreateInput = {
+    companyId?: string
+    companyName: string
+    stockCode: string
+    marketType: $Enums.MarketType
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    deletedAt?: Date | string | null
+    watchlist?: UserWatchlistCreateNestedManyWithoutCompanyInput
+    priceHistory?: StockPriceHistoryCreateNestedManyWithoutCompanyInput
+  }
+
+  export type CompanyUncheckedCreateInput = {
+    companyId?: string
+    companyName: string
+    stockCode: string
+    marketType: $Enums.MarketType
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    deletedAt?: Date | string | null
+    watchlist?: UserWatchlistUncheckedCreateNestedManyWithoutCompanyInput
+    priceHistory?: StockPriceHistoryUncheckedCreateNestedManyWithoutCompanyInput
+  }
+
+  export type CompanyUpdateInput = {
+    companyId?: StringFieldUpdateOperationsInput | string
+    companyName?: StringFieldUpdateOperationsInput | string
+    stockCode?: StringFieldUpdateOperationsInput | string
+    marketType?: EnumMarketTypeFieldUpdateOperationsInput | $Enums.MarketType
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    watchlist?: UserWatchlistUpdateManyWithoutCompanyNestedInput
+    priceHistory?: StockPriceHistoryUpdateManyWithoutCompanyNestedInput
+  }
+
+  export type CompanyUncheckedUpdateInput = {
+    companyId?: StringFieldUpdateOperationsInput | string
+    companyName?: StringFieldUpdateOperationsInput | string
+    stockCode?: StringFieldUpdateOperationsInput | string
+    marketType?: EnumMarketTypeFieldUpdateOperationsInput | $Enums.MarketType
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    watchlist?: UserWatchlistUncheckedUpdateManyWithoutCompanyNestedInput
+    priceHistory?: StockPriceHistoryUncheckedUpdateManyWithoutCompanyNestedInput
+  }
+
+  export type CompanyCreateManyInput = {
+    companyId?: string
+    companyName: string
+    stockCode: string
+    marketType: $Enums.MarketType
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    deletedAt?: Date | string | null
+  }
+
+  export type CompanyUpdateManyMutationInput = {
+    companyId?: StringFieldUpdateOperationsInput | string
+    companyName?: StringFieldUpdateOperationsInput | string
+    stockCode?: StringFieldUpdateOperationsInput | string
+    marketType?: EnumMarketTypeFieldUpdateOperationsInput | $Enums.MarketType
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
+  export type CompanyUncheckedUpdateManyInput = {
+    companyId?: StringFieldUpdateOperationsInput | string
+    companyName?: StringFieldUpdateOperationsInput | string
+    stockCode?: StringFieldUpdateOperationsInput | string
+    marketType?: EnumMarketTypeFieldUpdateOperationsInput | $Enums.MarketType
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
+  export type UserWatchlistCreateInput = {
+    addedDate?: Date | string
+    memo?: string | null
+    deletedAt?: Date | string | null
+    user: UserCreateNestedOneWithoutWatchlistInput
+    company: CompanyCreateNestedOneWithoutWatchlistInput
+    tags?: WatchlistTagCreateNestedManyWithoutWatchlistInput
+  }
+
+  export type UserWatchlistUncheckedCreateInput = {
+    userId: string
+    companyId: string
+    addedDate?: Date | string
+    memo?: string | null
+    deletedAt?: Date | string | null
+    tags?: WatchlistTagUncheckedCreateNestedManyWithoutWatchlistInput
+  }
+
+  export type UserWatchlistUpdateInput = {
+    addedDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    memo?: NullableStringFieldUpdateOperationsInput | string | null
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    user?: UserUpdateOneRequiredWithoutWatchlistNestedInput
+    company?: CompanyUpdateOneRequiredWithoutWatchlistNestedInput
+    tags?: WatchlistTagUpdateManyWithoutWatchlistNestedInput
+  }
+
+  export type UserWatchlistUncheckedUpdateInput = {
+    userId?: StringFieldUpdateOperationsInput | string
+    companyId?: StringFieldUpdateOperationsInput | string
+    addedDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    memo?: NullableStringFieldUpdateOperationsInput | string | null
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    tags?: WatchlistTagUncheckedUpdateManyWithoutWatchlistNestedInput
+  }
+
+  export type UserWatchlistCreateManyInput = {
+    userId: string
+    companyId: string
+    addedDate?: Date | string
+    memo?: string | null
+    deletedAt?: Date | string | null
+  }
+
+  export type UserWatchlistUpdateManyMutationInput = {
+    addedDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    memo?: NullableStringFieldUpdateOperationsInput | string | null
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
+  export type UserWatchlistUncheckedUpdateManyInput = {
+    userId?: StringFieldUpdateOperationsInput | string
+    companyId?: StringFieldUpdateOperationsInput | string
+    addedDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    memo?: NullableStringFieldUpdateOperationsInput | string | null
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
+  export type TagCreateInput = {
+    tagId?: string
+    tagName: string
+    createdAt?: Date | string
+    deletedAt?: Date | string | null
+    watchlistTags?: WatchlistTagCreateNestedManyWithoutTagInput
+  }
+
+  export type TagUncheckedCreateInput = {
+    tagId?: string
+    tagName: string
+    createdAt?: Date | string
+    deletedAt?: Date | string | null
+    watchlistTags?: WatchlistTagUncheckedCreateNestedManyWithoutTagInput
+  }
+
+  export type TagUpdateInput = {
+    tagId?: StringFieldUpdateOperationsInput | string
+    tagName?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    watchlistTags?: WatchlistTagUpdateManyWithoutTagNestedInput
+  }
+
+  export type TagUncheckedUpdateInput = {
+    tagId?: StringFieldUpdateOperationsInput | string
+    tagName?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    watchlistTags?: WatchlistTagUncheckedUpdateManyWithoutTagNestedInput
+  }
+
+  export type TagCreateManyInput = {
+    tagId?: string
+    tagName: string
+    createdAt?: Date | string
+    deletedAt?: Date | string | null
+  }
+
+  export type TagUpdateManyMutationInput = {
+    tagId?: StringFieldUpdateOperationsInput | string
+    tagName?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
+  export type TagUncheckedUpdateManyInput = {
+    tagId?: StringFieldUpdateOperationsInput | string
+    tagName?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
+  export type WatchlistTagCreateInput = {
+    createdAt?: Date | string
+    deletedAt?: Date | string | null
+    watchlist: UserWatchlistCreateNestedOneWithoutTagsInput
+    tag: TagCreateNestedOneWithoutWatchlistTagsInput
+  }
+
+  export type WatchlistTagUncheckedCreateInput = {
+    userId: string
+    companyId: string
+    tagId: string
+    createdAt?: Date | string
+    deletedAt?: Date | string | null
+  }
+
+  export type WatchlistTagUpdateInput = {
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    watchlist?: UserWatchlistUpdateOneRequiredWithoutTagsNestedInput
+    tag?: TagUpdateOneRequiredWithoutWatchlistTagsNestedInput
+  }
+
+  export type WatchlistTagUncheckedUpdateInput = {
+    userId?: StringFieldUpdateOperationsInput | string
+    companyId?: StringFieldUpdateOperationsInput | string
+    tagId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
+  export type WatchlistTagCreateManyInput = {
+    userId: string
+    companyId: string
+    tagId: string
+    createdAt?: Date | string
+    deletedAt?: Date | string | null
+  }
+
+  export type WatchlistTagUpdateManyMutationInput = {
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
+  export type WatchlistTagUncheckedUpdateManyInput = {
+    userId?: StringFieldUpdateOperationsInput | string
+    companyId?: StringFieldUpdateOperationsInput | string
+    tagId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
+  export type RsFilterPresetCreateInput = {
+    presetId?: string
+    presetName: string
+    createdAt?: Date | string
+    deletedAt?: Date | string | null
+    user: UserCreateNestedOneWithoutRsFilterPresetsInput
+    periods?: RsFilterPeriodCreateNestedManyWithoutPresetInput
+  }
+
+  export type RsFilterPresetUncheckedCreateInput = {
+    presetId?: string
+    userId: string
+    presetName: string
+    createdAt?: Date | string
+    deletedAt?: Date | string | null
+    periods?: RsFilterPeriodUncheckedCreateNestedManyWithoutPresetInput
+  }
+
+  export type RsFilterPresetUpdateInput = {
+    presetId?: StringFieldUpdateOperationsInput | string
+    presetName?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    user?: UserUpdateOneRequiredWithoutRsFilterPresetsNestedInput
+    periods?: RsFilterPeriodUpdateManyWithoutPresetNestedInput
+  }
+
+  export type RsFilterPresetUncheckedUpdateInput = {
+    presetId?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    presetName?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    periods?: RsFilterPeriodUncheckedUpdateManyWithoutPresetNestedInput
+  }
+
+  export type RsFilterPresetCreateManyInput = {
+    presetId?: string
+    userId: string
+    presetName: string
+    createdAt?: Date | string
+    deletedAt?: Date | string | null
+  }
+
+  export type RsFilterPresetUpdateManyMutationInput = {
+    presetId?: StringFieldUpdateOperationsInput | string
+    presetName?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
+  export type RsFilterPresetUncheckedUpdateManyInput = {
+    presetId?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    presetName?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
+  export type RsFilterPeriodCreateInput = {
+    periodId?: string
+    startDate: Date | string
+    endDate: Date | string
+    weightRatio: Decimal | DecimalJsLike | number | string
+    createdAt?: Date | string
+    deletedAt?: Date | string | null
+    preset: RsFilterPresetCreateNestedOneWithoutPeriodsInput
+  }
+
+  export type RsFilterPeriodUncheckedCreateInput = {
+    periodId?: string
+    presetId: string
+    startDate: Date | string
+    endDate: Date | string
+    weightRatio: Decimal | DecimalJsLike | number | string
+    createdAt?: Date | string
+    deletedAt?: Date | string | null
+  }
+
+  export type RsFilterPeriodUpdateInput = {
+    periodId?: StringFieldUpdateOperationsInput | string
+    startDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    endDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    weightRatio?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    preset?: RsFilterPresetUpdateOneRequiredWithoutPeriodsNestedInput
+  }
+
+  export type RsFilterPeriodUncheckedUpdateInput = {
+    periodId?: StringFieldUpdateOperationsInput | string
+    presetId?: StringFieldUpdateOperationsInput | string
+    startDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    endDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    weightRatio?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
+  export type RsFilterPeriodCreateManyInput = {
+    periodId?: string
+    presetId: string
+    startDate: Date | string
+    endDate: Date | string
+    weightRatio: Decimal | DecimalJsLike | number | string
+    createdAt?: Date | string
+    deletedAt?: Date | string | null
+  }
+
+  export type RsFilterPeriodUpdateManyMutationInput = {
+    periodId?: StringFieldUpdateOperationsInput | string
+    startDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    endDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    weightRatio?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
+  export type RsFilterPeriodUncheckedUpdateManyInput = {
+    periodId?: StringFieldUpdateOperationsInput | string
+    presetId?: StringFieldUpdateOperationsInput | string
+    startDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    endDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    weightRatio?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
+  export type SearchFilterPresetCreateInput = {
+    filterId?: string
+    filterName: string
+    filterConfig: JsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    deletedAt?: Date | string | null
+    user: UserCreateNestedOneWithoutSearchFilterPresetsInput
+  }
+
+  export type SearchFilterPresetUncheckedCreateInput = {
+    filterId?: string
+    userId: string
+    filterName: string
+    filterConfig: JsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    deletedAt?: Date | string | null
+  }
+
+  export type SearchFilterPresetUpdateInput = {
+    filterId?: StringFieldUpdateOperationsInput | string
+    filterName?: StringFieldUpdateOperationsInput | string
+    filterConfig?: JsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    user?: UserUpdateOneRequiredWithoutSearchFilterPresetsNestedInput
+  }
+
+  export type SearchFilterPresetUncheckedUpdateInput = {
+    filterId?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    filterName?: StringFieldUpdateOperationsInput | string
+    filterConfig?: JsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
+  export type SearchFilterPresetCreateManyInput = {
+    filterId?: string
+    userId: string
+    filterName: string
+    filterConfig: JsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    deletedAt?: Date | string | null
+  }
+
+  export type SearchFilterPresetUpdateManyMutationInput = {
+    filterId?: StringFieldUpdateOperationsInput | string
+    filterName?: StringFieldUpdateOperationsInput | string
+    filterConfig?: JsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
+  export type SearchFilterPresetUncheckedUpdateManyInput = {
+    filterId?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    filterName?: StringFieldUpdateOperationsInput | string
+    filterConfig?: JsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
+  export type StockPriceHistoryCreateInput = {
+    priceId?: string
+    tradeDate: Date | string
+    openPrice: Decimal | DecimalJsLike | number | string
+    highPrice: Decimal | DecimalJsLike | number | string
+    lowPrice: Decimal | DecimalJsLike | number | string
+    closePrice: Decimal | DecimalJsLike | number | string
+    volume: bigint | number
+    tradingValue: bigint | number
+    createdAt?: Date | string
+    company: CompanyCreateNestedOneWithoutPriceHistoryInput
+  }
+
+  export type StockPriceHistoryUncheckedCreateInput = {
+    priceId?: string
+    companyId: string
+    tradeDate: Date | string
+    openPrice: Decimal | DecimalJsLike | number | string
+    highPrice: Decimal | DecimalJsLike | number | string
+    lowPrice: Decimal | DecimalJsLike | number | string
+    closePrice: Decimal | DecimalJsLike | number | string
+    volume: bigint | number
+    tradingValue: bigint | number
+    createdAt?: Date | string
+  }
+
+  export type StockPriceHistoryUpdateInput = {
+    priceId?: StringFieldUpdateOperationsInput | string
+    tradeDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    openPrice?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    highPrice?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    lowPrice?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    closePrice?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    volume?: BigIntFieldUpdateOperationsInput | bigint | number
+    tradingValue?: BigIntFieldUpdateOperationsInput | bigint | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    company?: CompanyUpdateOneRequiredWithoutPriceHistoryNestedInput
+  }
+
+  export type StockPriceHistoryUncheckedUpdateInput = {
+    priceId?: StringFieldUpdateOperationsInput | string
+    companyId?: StringFieldUpdateOperationsInput | string
+    tradeDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    openPrice?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    highPrice?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    lowPrice?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    closePrice?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    volume?: BigIntFieldUpdateOperationsInput | bigint | number
+    tradingValue?: BigIntFieldUpdateOperationsInput | bigint | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type StockPriceHistoryCreateManyInput = {
+    priceId?: string
+    companyId: string
+    tradeDate: Date | string
+    openPrice: Decimal | DecimalJsLike | number | string
+    highPrice: Decimal | DecimalJsLike | number | string
+    lowPrice: Decimal | DecimalJsLike | number | string
+    closePrice: Decimal | DecimalJsLike | number | string
+    volume: bigint | number
+    tradingValue: bigint | number
+    createdAt?: Date | string
+  }
+
+  export type StockPriceHistoryUpdateManyMutationInput = {
+    priceId?: StringFieldUpdateOperationsInput | string
+    tradeDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    openPrice?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    highPrice?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    lowPrice?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    closePrice?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    volume?: BigIntFieldUpdateOperationsInput | bigint | number
+    tradingValue?: BigIntFieldUpdateOperationsInput | bigint | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type StockPriceHistoryUncheckedUpdateManyInput = {
+    priceId?: StringFieldUpdateOperationsInput | string
+    companyId?: StringFieldUpdateOperationsInput | string
+    tradeDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    openPrice?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    highPrice?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    lowPrice?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    closePrice?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    volume?: BigIntFieldUpdateOperationsInput | bigint | number
+    tradingValue?: BigIntFieldUpdateOperationsInput | bigint | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type MarketIndexHistoryCreateInput = {
+    indexId?: string
+    marketType: $Enums.MarketIndexType
+    tradeDate: Date | string
+    closeIndex: Decimal | DecimalJsLike | number | string
+    createdAt?: Date | string
+  }
+
+  export type MarketIndexHistoryUncheckedCreateInput = {
+    indexId?: string
+    marketType: $Enums.MarketIndexType
+    tradeDate: Date | string
+    closeIndex: Decimal | DecimalJsLike | number | string
+    createdAt?: Date | string
+  }
+
+  export type MarketIndexHistoryUpdateInput = {
+    indexId?: StringFieldUpdateOperationsInput | string
+    marketType?: EnumMarketIndexTypeFieldUpdateOperationsInput | $Enums.MarketIndexType
+    tradeDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    closeIndex?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type MarketIndexHistoryUncheckedUpdateInput = {
+    indexId?: StringFieldUpdateOperationsInput | string
+    marketType?: EnumMarketIndexTypeFieldUpdateOperationsInput | $Enums.MarketIndexType
+    tradeDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    closeIndex?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type MarketIndexHistoryCreateManyInput = {
+    indexId?: string
+    marketType: $Enums.MarketIndexType
+    tradeDate: Date | string
+    closeIndex: Decimal | DecimalJsLike | number | string
+    createdAt?: Date | string
+  }
+
+  export type MarketIndexHistoryUpdateManyMutationInput = {
+    indexId?: StringFieldUpdateOperationsInput | string
+    marketType?: EnumMarketIndexTypeFieldUpdateOperationsInput | $Enums.MarketIndexType
+    tradeDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    closeIndex?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type MarketIndexHistoryUncheckedUpdateManyInput = {
+    indexId?: StringFieldUpdateOperationsInput | string
+    marketType?: EnumMarketIndexTypeFieldUpdateOperationsInput | $Enums.MarketIndexType
+    tradeDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    closeIndex?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type KiwoomApiCallLogCreateInput = {
+    logId?: string
+    apiName: string
+    stockCode?: string | null
+    requestData?: NullableJsonNullValueInput | InputJsonValue
+    responseStatus?: string | null
+    responseMessage?: string | null
+    callTimestamp?: Date | string
+    responseTimeMs?: number | null
+    user?: UserCreateNestedOneWithoutApiCallLogsInput
+  }
+
+  export type KiwoomApiCallLogUncheckedCreateInput = {
+    logId?: string
+    userId?: string | null
+    apiName: string
+    stockCode?: string | null
+    requestData?: NullableJsonNullValueInput | InputJsonValue
+    responseStatus?: string | null
+    responseMessage?: string | null
+    callTimestamp?: Date | string
+    responseTimeMs?: number | null
+  }
+
+  export type KiwoomApiCallLogUpdateInput = {
+    logId?: StringFieldUpdateOperationsInput | string
+    apiName?: StringFieldUpdateOperationsInput | string
+    stockCode?: NullableStringFieldUpdateOperationsInput | string | null
+    requestData?: NullableJsonNullValueInput | InputJsonValue
+    responseStatus?: NullableStringFieldUpdateOperationsInput | string | null
+    responseMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    callTimestamp?: DateTimeFieldUpdateOperationsInput | Date | string
+    responseTimeMs?: NullableIntFieldUpdateOperationsInput | number | null
+    user?: UserUpdateOneWithoutApiCallLogsNestedInput
+  }
+
+  export type KiwoomApiCallLogUncheckedUpdateInput = {
+    logId?: StringFieldUpdateOperationsInput | string
+    userId?: NullableStringFieldUpdateOperationsInput | string | null
+    apiName?: StringFieldUpdateOperationsInput | string
+    stockCode?: NullableStringFieldUpdateOperationsInput | string | null
+    requestData?: NullableJsonNullValueInput | InputJsonValue
+    responseStatus?: NullableStringFieldUpdateOperationsInput | string | null
+    responseMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    callTimestamp?: DateTimeFieldUpdateOperationsInput | Date | string
+    responseTimeMs?: NullableIntFieldUpdateOperationsInput | number | null
+  }
+
+  export type KiwoomApiCallLogCreateManyInput = {
+    logId?: string
+    userId?: string | null
+    apiName: string
+    stockCode?: string | null
+    requestData?: NullableJsonNullValueInput | InputJsonValue
+    responseStatus?: string | null
+    responseMessage?: string | null
+    callTimestamp?: Date | string
+    responseTimeMs?: number | null
+  }
+
+  export type KiwoomApiCallLogUpdateManyMutationInput = {
+    logId?: StringFieldUpdateOperationsInput | string
+    apiName?: StringFieldUpdateOperationsInput | string
+    stockCode?: NullableStringFieldUpdateOperationsInput | string | null
+    requestData?: NullableJsonNullValueInput | InputJsonValue
+    responseStatus?: NullableStringFieldUpdateOperationsInput | string | null
+    responseMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    callTimestamp?: DateTimeFieldUpdateOperationsInput | Date | string
+    responseTimeMs?: NullableIntFieldUpdateOperationsInput | number | null
+  }
+
+  export type KiwoomApiCallLogUncheckedUpdateManyInput = {
+    logId?: StringFieldUpdateOperationsInput | string
+    userId?: NullableStringFieldUpdateOperationsInput | string | null
+    apiName?: StringFieldUpdateOperationsInput | string
+    stockCode?: NullableStringFieldUpdateOperationsInput | string | null
+    requestData?: NullableJsonNullValueInput | InputJsonValue
+    responseStatus?: NullableStringFieldUpdateOperationsInput | string | null
+    responseMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    callTimestamp?: DateTimeFieldUpdateOperationsInput | Date | string
+    responseTimeMs?: NullableIntFieldUpdateOperationsInput | number | null
+  }
+
+  export type BatchJobHistoryCreateInput = {
+    jobId?: string
+    jobType: $Enums.BatchJobType
+    targetDate: Date | string
+    status: $Enums.BatchJobStatus
+    startTime?: Date | string
+    endTime?: Date | string | null
+    processedCount?: number
+    errorMessage?: string | null
+  }
+
+  export type BatchJobHistoryUncheckedCreateInput = {
+    jobId?: string
+    jobType: $Enums.BatchJobType
+    targetDate: Date | string
+    status: $Enums.BatchJobStatus
+    startTime?: Date | string
+    endTime?: Date | string | null
+    processedCount?: number
+    errorMessage?: string | null
+  }
+
+  export type BatchJobHistoryUpdateInput = {
+    jobId?: StringFieldUpdateOperationsInput | string
+    jobType?: EnumBatchJobTypeFieldUpdateOperationsInput | $Enums.BatchJobType
+    targetDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    status?: EnumBatchJobStatusFieldUpdateOperationsInput | $Enums.BatchJobStatus
+    startTime?: DateTimeFieldUpdateOperationsInput | Date | string
+    endTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    processedCount?: IntFieldUpdateOperationsInput | number
+    errorMessage?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type BatchJobHistoryUncheckedUpdateInput = {
+    jobId?: StringFieldUpdateOperationsInput | string
+    jobType?: EnumBatchJobTypeFieldUpdateOperationsInput | $Enums.BatchJobType
+    targetDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    status?: EnumBatchJobStatusFieldUpdateOperationsInput | $Enums.BatchJobStatus
+    startTime?: DateTimeFieldUpdateOperationsInput | Date | string
+    endTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    processedCount?: IntFieldUpdateOperationsInput | number
+    errorMessage?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type BatchJobHistoryCreateManyInput = {
+    jobId?: string
+    jobType: $Enums.BatchJobType
+    targetDate: Date | string
+    status: $Enums.BatchJobStatus
+    startTime?: Date | string
+    endTime?: Date | string | null
+    processedCount?: number
+    errorMessage?: string | null
+  }
+
+  export type BatchJobHistoryUpdateManyMutationInput = {
+    jobId?: StringFieldUpdateOperationsInput | string
+    jobType?: EnumBatchJobTypeFieldUpdateOperationsInput | $Enums.BatchJobType
+    targetDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    status?: EnumBatchJobStatusFieldUpdateOperationsInput | $Enums.BatchJobStatus
+    startTime?: DateTimeFieldUpdateOperationsInput | Date | string
+    endTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    processedCount?: IntFieldUpdateOperationsInput | number
+    errorMessage?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type BatchJobHistoryUncheckedUpdateManyInput = {
+    jobId?: StringFieldUpdateOperationsInput | string
+    jobType?: EnumBatchJobTypeFieldUpdateOperationsInput | $Enums.BatchJobType
+    targetDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    status?: EnumBatchJobStatusFieldUpdateOperationsInput | $Enums.BatchJobStatus
+    startTime?: DateTimeFieldUpdateOperationsInput | Date | string
+    endTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    processedCount?: IntFieldUpdateOperationsInput | number
+    errorMessage?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type UuidFilter<$PrismaModel = never> = {
+    equals?: string | StringFieldRefInput<$PrismaModel>
+    in?: string[] | ListStringFieldRefInput<$PrismaModel>
+    notIn?: string[] | ListStringFieldRefInput<$PrismaModel>
+    lt?: string | StringFieldRefInput<$PrismaModel>
+    lte?: string | StringFieldRefInput<$PrismaModel>
+    gt?: string | StringFieldRefInput<$PrismaModel>
+    gte?: string | StringFieldRefInput<$PrismaModel>
+    mode?: QueryMode
+    not?: NestedUuidFilter<$PrismaModel> | string
+  }
+
+  export type StringFilter<$PrismaModel = never> = {
+    equals?: string | StringFieldRefInput<$PrismaModel>
+    in?: string[] | ListStringFieldRefInput<$PrismaModel>
+    notIn?: string[] | ListStringFieldRefInput<$PrismaModel>
+    lt?: string | StringFieldRefInput<$PrismaModel>
+    lte?: string | StringFieldRefInput<$PrismaModel>
+    gt?: string | StringFieldRefInput<$PrismaModel>
+    gte?: string | StringFieldRefInput<$PrismaModel>
+    contains?: string | StringFieldRefInput<$PrismaModel>
+    startsWith?: string | StringFieldRefInput<$PrismaModel>
+    endsWith?: string | StringFieldRefInput<$PrismaModel>
+    mode?: QueryMode
+    not?: NestedStringFilter<$PrismaModel> | string
+  }
+
+  export type DateTimeFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeFilter<$PrismaModel> | Date | string
+  }
+
+  export type DateTimeNullableFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeNullableFilter<$PrismaModel> | Date | string | null
+  }
+
+  export type UserWatchlistListRelationFilter = {
+    every?: UserWatchlistWhereInput
+    some?: UserWatchlistWhereInput
+    none?: UserWatchlistWhereInput
+  }
+
+  export type RsFilterPresetListRelationFilter = {
+    every?: RsFilterPresetWhereInput
+    some?: RsFilterPresetWhereInput
+    none?: RsFilterPresetWhereInput
+  }
+
+  export type SearchFilterPresetListRelationFilter = {
+    every?: SearchFilterPresetWhereInput
+    some?: SearchFilterPresetWhereInput
+    none?: SearchFilterPresetWhereInput
+  }
+
+  export type KiwoomApiCallLogListRelationFilter = {
+    every?: KiwoomApiCallLogWhereInput
+    some?: KiwoomApiCallLogWhereInput
+    none?: KiwoomApiCallLogWhereInput
+  }
+
+  export type SortOrderInput = {
+    sort: SortOrder
+    nulls?: NullsOrder
+  }
+
+  export type UserWatchlistOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type RsFilterPresetOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type SearchFilterPresetOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type KiwoomApiCallLogOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type UserUsernameDeletedAtCompoundUniqueInput = {
+    username: string
+    deletedAt: Date | string
+  }
+
+  export type UserEmailDeletedAtCompoundUniqueInput = {
+    email: string
+    deletedAt: Date | string
+  }
+
+  export type UserCountOrderByAggregateInput = {
+    userId?: SortOrder
+    username?: SortOrder
+    email?: SortOrder
+    password?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    deletedAt?: SortOrder
+  }
+
+  export type UserMaxOrderByAggregateInput = {
+    userId?: SortOrder
+    username?: SortOrder
+    email?: SortOrder
+    password?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    deletedAt?: SortOrder
+  }
+
+  export type UserMinOrderByAggregateInput = {
+    userId?: SortOrder
+    username?: SortOrder
+    email?: SortOrder
+    password?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    deletedAt?: SortOrder
+  }
+
+  export type UuidWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: string | StringFieldRefInput<$PrismaModel>
+    in?: string[] | ListStringFieldRefInput<$PrismaModel>
+    notIn?: string[] | ListStringFieldRefInput<$PrismaModel>
+    lt?: string | StringFieldRefInput<$PrismaModel>
+    lte?: string | StringFieldRefInput<$PrismaModel>
+    gt?: string | StringFieldRefInput<$PrismaModel>
+    gte?: string | StringFieldRefInput<$PrismaModel>
+    mode?: QueryMode
+    not?: NestedUuidWithAggregatesFilter<$PrismaModel> | string
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedStringFilter<$PrismaModel>
+    _max?: NestedStringFilter<$PrismaModel>
+  }
+
+  export type StringWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: string | StringFieldRefInput<$PrismaModel>
+    in?: string[] | ListStringFieldRefInput<$PrismaModel>
+    notIn?: string[] | ListStringFieldRefInput<$PrismaModel>
+    lt?: string | StringFieldRefInput<$PrismaModel>
+    lte?: string | StringFieldRefInput<$PrismaModel>
+    gt?: string | StringFieldRefInput<$PrismaModel>
+    gte?: string | StringFieldRefInput<$PrismaModel>
+    contains?: string | StringFieldRefInput<$PrismaModel>
+    startsWith?: string | StringFieldRefInput<$PrismaModel>
+    endsWith?: string | StringFieldRefInput<$PrismaModel>
+    mode?: QueryMode
+    not?: NestedStringWithAggregatesFilter<$PrismaModel> | string
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedStringFilter<$PrismaModel>
+    _max?: NestedStringFilter<$PrismaModel>
+  }
+
+  export type DateTimeWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeWithAggregatesFilter<$PrismaModel> | Date | string
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedDateTimeFilter<$PrismaModel>
+    _max?: NestedDateTimeFilter<$PrismaModel>
+  }
+
+  export type DateTimeNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeNullableWithAggregatesFilter<$PrismaModel> | Date | string | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedDateTimeNullableFilter<$PrismaModel>
+    _max?: NestedDateTimeNullableFilter<$PrismaModel>
+  }
+
+  export type EnumMarketTypeFilter<$PrismaModel = never> = {
+    equals?: $Enums.MarketType | EnumMarketTypeFieldRefInput<$PrismaModel>
+    in?: $Enums.MarketType[] | ListEnumMarketTypeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.MarketType[] | ListEnumMarketTypeFieldRefInput<$PrismaModel>
+    not?: NestedEnumMarketTypeFilter<$PrismaModel> | $Enums.MarketType
+  }
+
+  export type StockPriceHistoryListRelationFilter = {
+    every?: StockPriceHistoryWhereInput
+    some?: StockPriceHistoryWhereInput
+    none?: StockPriceHistoryWhereInput
+  }
+
+  export type StockPriceHistoryOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type CompanyStockCodeDeletedAtCompoundUniqueInput = {
+    stockCode: string
+    deletedAt: Date | string
+  }
+
+  export type CompanyCountOrderByAggregateInput = {
+    companyId?: SortOrder
+    companyName?: SortOrder
+    stockCode?: SortOrder
+    marketType?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    deletedAt?: SortOrder
+  }
+
+  export type CompanyMaxOrderByAggregateInput = {
+    companyId?: SortOrder
+    companyName?: SortOrder
+    stockCode?: SortOrder
+    marketType?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    deletedAt?: SortOrder
+  }
+
+  export type CompanyMinOrderByAggregateInput = {
+    companyId?: SortOrder
+    companyName?: SortOrder
+    stockCode?: SortOrder
+    marketType?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    deletedAt?: SortOrder
+  }
+
+  export type EnumMarketTypeWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.MarketType | EnumMarketTypeFieldRefInput<$PrismaModel>
+    in?: $Enums.MarketType[] | ListEnumMarketTypeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.MarketType[] | ListEnumMarketTypeFieldRefInput<$PrismaModel>
+    not?: NestedEnumMarketTypeWithAggregatesFilter<$PrismaModel> | $Enums.MarketType
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumMarketTypeFilter<$PrismaModel>
+    _max?: NestedEnumMarketTypeFilter<$PrismaModel>
+  }
+
+  export type StringNullableFilter<$PrismaModel = never> = {
+    equals?: string | StringFieldRefInput<$PrismaModel> | null
+    in?: string[] | ListStringFieldRefInput<$PrismaModel> | null
+    notIn?: string[] | ListStringFieldRefInput<$PrismaModel> | null
+    lt?: string | StringFieldRefInput<$PrismaModel>
+    lte?: string | StringFieldRefInput<$PrismaModel>
+    gt?: string | StringFieldRefInput<$PrismaModel>
+    gte?: string | StringFieldRefInput<$PrismaModel>
+    contains?: string | StringFieldRefInput<$PrismaModel>
+    startsWith?: string | StringFieldRefInput<$PrismaModel>
+    endsWith?: string | StringFieldRefInput<$PrismaModel>
+    mode?: QueryMode
+    not?: NestedStringNullableFilter<$PrismaModel> | string | null
+  }
+
+  export type UserScalarRelationFilter = {
+    is?: UserWhereInput
+    isNot?: UserWhereInput
+  }
+
+  export type CompanyScalarRelationFilter = {
+    is?: CompanyWhereInput
+    isNot?: CompanyWhereInput
+  }
+
+  export type WatchlistTagListRelationFilter = {
+    every?: WatchlistTagWhereInput
+    some?: WatchlistTagWhereInput
+    none?: WatchlistTagWhereInput
+  }
+
+  export type WatchlistTagOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type UserWatchlistUserIdCompanyIdCompoundUniqueInput = {
+    userId: string
+    companyId: string
+  }
+
+  export type UserWatchlistCountOrderByAggregateInput = {
+    userId?: SortOrder
+    companyId?: SortOrder
+    addedDate?: SortOrder
+    memo?: SortOrder
+    deletedAt?: SortOrder
+  }
+
+  export type UserWatchlistMaxOrderByAggregateInput = {
+    userId?: SortOrder
+    companyId?: SortOrder
+    addedDate?: SortOrder
+    memo?: SortOrder
+    deletedAt?: SortOrder
+  }
+
+  export type UserWatchlistMinOrderByAggregateInput = {
+    userId?: SortOrder
+    companyId?: SortOrder
+    addedDate?: SortOrder
+    memo?: SortOrder
+    deletedAt?: SortOrder
+  }
+
+  export type StringNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: string | StringFieldRefInput<$PrismaModel> | null
+    in?: string[] | ListStringFieldRefInput<$PrismaModel> | null
+    notIn?: string[] | ListStringFieldRefInput<$PrismaModel> | null
+    lt?: string | StringFieldRefInput<$PrismaModel>
+    lte?: string | StringFieldRefInput<$PrismaModel>
+    gt?: string | StringFieldRefInput<$PrismaModel>
+    gte?: string | StringFieldRefInput<$PrismaModel>
+    contains?: string | StringFieldRefInput<$PrismaModel>
+    startsWith?: string | StringFieldRefInput<$PrismaModel>
+    endsWith?: string | StringFieldRefInput<$PrismaModel>
+    mode?: QueryMode
+    not?: NestedStringNullableWithAggregatesFilter<$PrismaModel> | string | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedStringNullableFilter<$PrismaModel>
+    _max?: NestedStringNullableFilter<$PrismaModel>
+  }
+
+  export type TagTagNameDeletedAtCompoundUniqueInput = {
+    tagName: string
+    deletedAt: Date | string
+  }
+
+  export type TagCountOrderByAggregateInput = {
+    tagId?: SortOrder
+    tagName?: SortOrder
+    createdAt?: SortOrder
+    deletedAt?: SortOrder
+  }
+
+  export type TagMaxOrderByAggregateInput = {
+    tagId?: SortOrder
+    tagName?: SortOrder
+    createdAt?: SortOrder
+    deletedAt?: SortOrder
+  }
+
+  export type TagMinOrderByAggregateInput = {
+    tagId?: SortOrder
+    tagName?: SortOrder
+    createdAt?: SortOrder
+    deletedAt?: SortOrder
+  }
+
+  export type UserWatchlistScalarRelationFilter = {
+    is?: UserWatchlistWhereInput
+    isNot?: UserWatchlistWhereInput
+  }
+
+  export type TagScalarRelationFilter = {
+    is?: TagWhereInput
+    isNot?: TagWhereInput
+  }
+
+  export type WatchlistTagUserIdCompanyIdTagIdCompoundUniqueInput = {
+    userId: string
+    companyId: string
+    tagId: string
+  }
+
+  export type WatchlistTagCountOrderByAggregateInput = {
+    userId?: SortOrder
+    companyId?: SortOrder
+    tagId?: SortOrder
+    createdAt?: SortOrder
+    deletedAt?: SortOrder
+  }
+
+  export type WatchlistTagMaxOrderByAggregateInput = {
+    userId?: SortOrder
+    companyId?: SortOrder
+    tagId?: SortOrder
+    createdAt?: SortOrder
+    deletedAt?: SortOrder
+  }
+
+  export type WatchlistTagMinOrderByAggregateInput = {
+    userId?: SortOrder
+    companyId?: SortOrder
+    tagId?: SortOrder
+    createdAt?: SortOrder
+    deletedAt?: SortOrder
+  }
+
+  export type RsFilterPeriodListRelationFilter = {
+    every?: RsFilterPeriodWhereInput
+    some?: RsFilterPeriodWhereInput
+    none?: RsFilterPeriodWhereInput
+  }
+
+  export type RsFilterPeriodOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type RsFilterPresetUserIdPresetNameDeletedAtCompoundUniqueInput = {
+    userId: string
+    presetName: string
+    deletedAt: Date | string
+  }
+
+  export type RsFilterPresetCountOrderByAggregateInput = {
+    presetId?: SortOrder
+    userId?: SortOrder
+    presetName?: SortOrder
+    createdAt?: SortOrder
+    deletedAt?: SortOrder
+  }
+
+  export type RsFilterPresetMaxOrderByAggregateInput = {
+    presetId?: SortOrder
+    userId?: SortOrder
+    presetName?: SortOrder
+    createdAt?: SortOrder
+    deletedAt?: SortOrder
+  }
+
+  export type RsFilterPresetMinOrderByAggregateInput = {
+    presetId?: SortOrder
+    userId?: SortOrder
+    presetName?: SortOrder
+    createdAt?: SortOrder
+    deletedAt?: SortOrder
+  }
+
+  export type DecimalFilter<$PrismaModel = never> = {
+    equals?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    in?: Decimal[] | DecimalJsLike[] | number[] | string[] | ListDecimalFieldRefInput<$PrismaModel>
+    notIn?: Decimal[] | DecimalJsLike[] | number[] | string[] | ListDecimalFieldRefInput<$PrismaModel>
+    lt?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    lte?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    gt?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    gte?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    not?: NestedDecimalFilter<$PrismaModel> | Decimal | DecimalJsLike | number | string
+  }
+
+  export type RsFilterPresetScalarRelationFilter = {
+    is?: RsFilterPresetWhereInput
+    isNot?: RsFilterPresetWhereInput
+  }
+
+  export type RsFilterPeriodCountOrderByAggregateInput = {
+    periodId?: SortOrder
+    presetId?: SortOrder
+    startDate?: SortOrder
+    endDate?: SortOrder
+    weightRatio?: SortOrder
+    createdAt?: SortOrder
+    deletedAt?: SortOrder
+  }
+
+  export type RsFilterPeriodAvgOrderByAggregateInput = {
+    weightRatio?: SortOrder
+  }
+
+  export type RsFilterPeriodMaxOrderByAggregateInput = {
+    periodId?: SortOrder
+    presetId?: SortOrder
+    startDate?: SortOrder
+    endDate?: SortOrder
+    weightRatio?: SortOrder
+    createdAt?: SortOrder
+    deletedAt?: SortOrder
+  }
+
+  export type RsFilterPeriodMinOrderByAggregateInput = {
+    periodId?: SortOrder
+    presetId?: SortOrder
+    startDate?: SortOrder
+    endDate?: SortOrder
+    weightRatio?: SortOrder
+    createdAt?: SortOrder
+    deletedAt?: SortOrder
+  }
+
+  export type RsFilterPeriodSumOrderByAggregateInput = {
+    weightRatio?: SortOrder
+  }
+
+  export type DecimalWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    in?: Decimal[] | DecimalJsLike[] | number[] | string[] | ListDecimalFieldRefInput<$PrismaModel>
+    notIn?: Decimal[] | DecimalJsLike[] | number[] | string[] | ListDecimalFieldRefInput<$PrismaModel>
+    lt?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    lte?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    gt?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    gte?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    not?: NestedDecimalWithAggregatesFilter<$PrismaModel> | Decimal | DecimalJsLike | number | string
+    _count?: NestedIntFilter<$PrismaModel>
+    _avg?: NestedDecimalFilter<$PrismaModel>
+    _sum?: NestedDecimalFilter<$PrismaModel>
+    _min?: NestedDecimalFilter<$PrismaModel>
+    _max?: NestedDecimalFilter<$PrismaModel>
+  }
+  export type JsonFilter<$PrismaModel = never> =
+    | PatchUndefined<
+        Either<Required<JsonFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonFilterBase<$PrismaModel>>, 'path'>>,
+        Required<JsonFilterBase<$PrismaModel>>
+      >
+    | OptionalFlat<Omit<Required<JsonFilterBase<$PrismaModel>>, 'path'>>
+
+  export type JsonFilterBase<$PrismaModel = never> = {
+    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    path?: string[]
+    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
+    string_contains?: string | StringFieldRefInput<$PrismaModel>
+    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
+    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
+    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+  }
+
+  export type SearchFilterPresetUserIdFilterNameDeletedAtCompoundUniqueInput = {
+    userId: string
+    filterName: string
+    deletedAt: Date | string
+  }
+
+  export type SearchFilterPresetCountOrderByAggregateInput = {
+    filterId?: SortOrder
+    userId?: SortOrder
+    filterName?: SortOrder
+    filterConfig?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    deletedAt?: SortOrder
+  }
+
+  export type SearchFilterPresetMaxOrderByAggregateInput = {
+    filterId?: SortOrder
+    userId?: SortOrder
+    filterName?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    deletedAt?: SortOrder
+  }
+
+  export type SearchFilterPresetMinOrderByAggregateInput = {
+    filterId?: SortOrder
+    userId?: SortOrder
+    filterName?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    deletedAt?: SortOrder
+  }
+  export type JsonWithAggregatesFilter<$PrismaModel = never> =
+    | PatchUndefined<
+        Either<Required<JsonWithAggregatesFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonWithAggregatesFilterBase<$PrismaModel>>, 'path'>>,
+        Required<JsonWithAggregatesFilterBase<$PrismaModel>>
+      >
+    | OptionalFlat<Omit<Required<JsonWithAggregatesFilterBase<$PrismaModel>>, 'path'>>
+
+  export type JsonWithAggregatesFilterBase<$PrismaModel = never> = {
+    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    path?: string[]
+    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
+    string_contains?: string | StringFieldRefInput<$PrismaModel>
+    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
+    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
+    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedJsonFilter<$PrismaModel>
+    _max?: NestedJsonFilter<$PrismaModel>
+  }
+
+  export type BigIntFilter<$PrismaModel = never> = {
+    equals?: bigint | number | BigIntFieldRefInput<$PrismaModel>
+    in?: bigint[] | number[] | ListBigIntFieldRefInput<$PrismaModel>
+    notIn?: bigint[] | number[] | ListBigIntFieldRefInput<$PrismaModel>
+    lt?: bigint | number | BigIntFieldRefInput<$PrismaModel>
+    lte?: bigint | number | BigIntFieldRefInput<$PrismaModel>
+    gt?: bigint | number | BigIntFieldRefInput<$PrismaModel>
+    gte?: bigint | number | BigIntFieldRefInput<$PrismaModel>
+    not?: NestedBigIntFilter<$PrismaModel> | bigint | number
+  }
+
+  export type StockPriceHistoryCompanyIdTradeDateCompoundUniqueInput = {
+    companyId: string
+    tradeDate: Date | string
+  }
+
+  export type StockPriceHistoryCountOrderByAggregateInput = {
+    priceId?: SortOrder
+    companyId?: SortOrder
+    tradeDate?: SortOrder
+    openPrice?: SortOrder
+    highPrice?: SortOrder
+    lowPrice?: SortOrder
+    closePrice?: SortOrder
+    volume?: SortOrder
+    tradingValue?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type StockPriceHistoryAvgOrderByAggregateInput = {
+    openPrice?: SortOrder
+    highPrice?: SortOrder
+    lowPrice?: SortOrder
+    closePrice?: SortOrder
+    volume?: SortOrder
+    tradingValue?: SortOrder
+  }
+
+  export type StockPriceHistoryMaxOrderByAggregateInput = {
+    priceId?: SortOrder
+    companyId?: SortOrder
+    tradeDate?: SortOrder
+    openPrice?: SortOrder
+    highPrice?: SortOrder
+    lowPrice?: SortOrder
+    closePrice?: SortOrder
+    volume?: SortOrder
+    tradingValue?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type StockPriceHistoryMinOrderByAggregateInput = {
+    priceId?: SortOrder
+    companyId?: SortOrder
+    tradeDate?: SortOrder
+    openPrice?: SortOrder
+    highPrice?: SortOrder
+    lowPrice?: SortOrder
+    closePrice?: SortOrder
+    volume?: SortOrder
+    tradingValue?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type StockPriceHistorySumOrderByAggregateInput = {
+    openPrice?: SortOrder
+    highPrice?: SortOrder
+    lowPrice?: SortOrder
+    closePrice?: SortOrder
+    volume?: SortOrder
+    tradingValue?: SortOrder
+  }
+
+  export type BigIntWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: bigint | number | BigIntFieldRefInput<$PrismaModel>
+    in?: bigint[] | number[] | ListBigIntFieldRefInput<$PrismaModel>
+    notIn?: bigint[] | number[] | ListBigIntFieldRefInput<$PrismaModel>
+    lt?: bigint | number | BigIntFieldRefInput<$PrismaModel>
+    lte?: bigint | number | BigIntFieldRefInput<$PrismaModel>
+    gt?: bigint | number | BigIntFieldRefInput<$PrismaModel>
+    gte?: bigint | number | BigIntFieldRefInput<$PrismaModel>
+    not?: NestedBigIntWithAggregatesFilter<$PrismaModel> | bigint | number
+    _count?: NestedIntFilter<$PrismaModel>
+    _avg?: NestedFloatFilter<$PrismaModel>
+    _sum?: NestedBigIntFilter<$PrismaModel>
+    _min?: NestedBigIntFilter<$PrismaModel>
+    _max?: NestedBigIntFilter<$PrismaModel>
+  }
+
+  export type EnumMarketIndexTypeFilter<$PrismaModel = never> = {
+    equals?: $Enums.MarketIndexType | EnumMarketIndexTypeFieldRefInput<$PrismaModel>
+    in?: $Enums.MarketIndexType[] | ListEnumMarketIndexTypeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.MarketIndexType[] | ListEnumMarketIndexTypeFieldRefInput<$PrismaModel>
+    not?: NestedEnumMarketIndexTypeFilter<$PrismaModel> | $Enums.MarketIndexType
+  }
+
+  export type MarketIndexHistoryMarketTypeTradeDateCompoundUniqueInput = {
+    marketType: $Enums.MarketIndexType
+    tradeDate: Date | string
+  }
+
+  export type MarketIndexHistoryCountOrderByAggregateInput = {
+    indexId?: SortOrder
+    marketType?: SortOrder
+    tradeDate?: SortOrder
+    closeIndex?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type MarketIndexHistoryAvgOrderByAggregateInput = {
+    closeIndex?: SortOrder
+  }
+
+  export type MarketIndexHistoryMaxOrderByAggregateInput = {
+    indexId?: SortOrder
+    marketType?: SortOrder
+    tradeDate?: SortOrder
+    closeIndex?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type MarketIndexHistoryMinOrderByAggregateInput = {
+    indexId?: SortOrder
+    marketType?: SortOrder
+    tradeDate?: SortOrder
+    closeIndex?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type MarketIndexHistorySumOrderByAggregateInput = {
+    closeIndex?: SortOrder
+  }
+
+  export type EnumMarketIndexTypeWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.MarketIndexType | EnumMarketIndexTypeFieldRefInput<$PrismaModel>
+    in?: $Enums.MarketIndexType[] | ListEnumMarketIndexTypeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.MarketIndexType[] | ListEnumMarketIndexTypeFieldRefInput<$PrismaModel>
+    not?: NestedEnumMarketIndexTypeWithAggregatesFilter<$PrismaModel> | $Enums.MarketIndexType
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumMarketIndexTypeFilter<$PrismaModel>
+    _max?: NestedEnumMarketIndexTypeFilter<$PrismaModel>
+  }
+
+  export type UuidNullableFilter<$PrismaModel = never> = {
+    equals?: string | StringFieldRefInput<$PrismaModel> | null
+    in?: string[] | ListStringFieldRefInput<$PrismaModel> | null
+    notIn?: string[] | ListStringFieldRefInput<$PrismaModel> | null
+    lt?: string | StringFieldRefInput<$PrismaModel>
+    lte?: string | StringFieldRefInput<$PrismaModel>
+    gt?: string | StringFieldRefInput<$PrismaModel>
+    gte?: string | StringFieldRefInput<$PrismaModel>
+    mode?: QueryMode
+    not?: NestedUuidNullableFilter<$PrismaModel> | string | null
+  }
+  export type JsonNullableFilter<$PrismaModel = never> =
+    | PatchUndefined<
+        Either<Required<JsonNullableFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonNullableFilterBase<$PrismaModel>>, 'path'>>,
+        Required<JsonNullableFilterBase<$PrismaModel>>
+      >
+    | OptionalFlat<Omit<Required<JsonNullableFilterBase<$PrismaModel>>, 'path'>>
+
+  export type JsonNullableFilterBase<$PrismaModel = never> = {
+    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    path?: string[]
+    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
+    string_contains?: string | StringFieldRefInput<$PrismaModel>
+    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
+    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
+    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+  }
+
+  export type IntNullableFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel> | null
+    in?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntNullableFilter<$PrismaModel> | number | null
+  }
+
+  export type UserNullableScalarRelationFilter = {
+    is?: UserWhereInput | null
+    isNot?: UserWhereInput | null
+  }
+
+  export type KiwoomApiCallLogCountOrderByAggregateInput = {
+    logId?: SortOrder
+    userId?: SortOrder
+    apiName?: SortOrder
+    stockCode?: SortOrder
+    requestData?: SortOrder
+    responseStatus?: SortOrder
+    responseMessage?: SortOrder
+    callTimestamp?: SortOrder
+    responseTimeMs?: SortOrder
+  }
+
+  export type KiwoomApiCallLogAvgOrderByAggregateInput = {
+    responseTimeMs?: SortOrder
+  }
+
+  export type KiwoomApiCallLogMaxOrderByAggregateInput = {
+    logId?: SortOrder
+    userId?: SortOrder
+    apiName?: SortOrder
+    stockCode?: SortOrder
+    responseStatus?: SortOrder
+    responseMessage?: SortOrder
+    callTimestamp?: SortOrder
+    responseTimeMs?: SortOrder
+  }
+
+  export type KiwoomApiCallLogMinOrderByAggregateInput = {
+    logId?: SortOrder
+    userId?: SortOrder
+    apiName?: SortOrder
+    stockCode?: SortOrder
+    responseStatus?: SortOrder
+    responseMessage?: SortOrder
+    callTimestamp?: SortOrder
+    responseTimeMs?: SortOrder
+  }
+
+  export type KiwoomApiCallLogSumOrderByAggregateInput = {
+    responseTimeMs?: SortOrder
+  }
+
+  export type UuidNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: string | StringFieldRefInput<$PrismaModel> | null
+    in?: string[] | ListStringFieldRefInput<$PrismaModel> | null
+    notIn?: string[] | ListStringFieldRefInput<$PrismaModel> | null
+    lt?: string | StringFieldRefInput<$PrismaModel>
+    lte?: string | StringFieldRefInput<$PrismaModel>
+    gt?: string | StringFieldRefInput<$PrismaModel>
+    gte?: string | StringFieldRefInput<$PrismaModel>
+    mode?: QueryMode
+    not?: NestedUuidNullableWithAggregatesFilter<$PrismaModel> | string | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedStringNullableFilter<$PrismaModel>
+    _max?: NestedStringNullableFilter<$PrismaModel>
+  }
+  export type JsonNullableWithAggregatesFilter<$PrismaModel = never> =
+    | PatchUndefined<
+        Either<Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>, 'path'>>,
+        Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>
+      >
+    | OptionalFlat<Omit<Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>, 'path'>>
+
+  export type JsonNullableWithAggregatesFilterBase<$PrismaModel = never> = {
+    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    path?: string[]
+    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
+    string_contains?: string | StringFieldRefInput<$PrismaModel>
+    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
+    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
+    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedJsonNullableFilter<$PrismaModel>
+    _max?: NestedJsonNullableFilter<$PrismaModel>
+  }
+
+  export type IntNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel> | null
+    in?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntNullableWithAggregatesFilter<$PrismaModel> | number | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _avg?: NestedFloatNullableFilter<$PrismaModel>
+    _sum?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedIntNullableFilter<$PrismaModel>
+    _max?: NestedIntNullableFilter<$PrismaModel>
+  }
+
+  export type EnumBatchJobTypeFilter<$PrismaModel = never> = {
+    equals?: $Enums.BatchJobType | EnumBatchJobTypeFieldRefInput<$PrismaModel>
+    in?: $Enums.BatchJobType[] | ListEnumBatchJobTypeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.BatchJobType[] | ListEnumBatchJobTypeFieldRefInput<$PrismaModel>
+    not?: NestedEnumBatchJobTypeFilter<$PrismaModel> | $Enums.BatchJobType
+  }
+
+  export type EnumBatchJobStatusFilter<$PrismaModel = never> = {
+    equals?: $Enums.BatchJobStatus | EnumBatchJobStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.BatchJobStatus[] | ListEnumBatchJobStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.BatchJobStatus[] | ListEnumBatchJobStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumBatchJobStatusFilter<$PrismaModel> | $Enums.BatchJobStatus
+  }
+
+  export type IntFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel>
+    in?: number[] | ListIntFieldRefInput<$PrismaModel>
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel>
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntFilter<$PrismaModel> | number
+  }
+
+  export type BatchJobHistoryCountOrderByAggregateInput = {
+    jobId?: SortOrder
+    jobType?: SortOrder
+    targetDate?: SortOrder
+    status?: SortOrder
+    startTime?: SortOrder
+    endTime?: SortOrder
+    processedCount?: SortOrder
+    errorMessage?: SortOrder
+  }
+
+  export type BatchJobHistoryAvgOrderByAggregateInput = {
+    processedCount?: SortOrder
+  }
+
+  export type BatchJobHistoryMaxOrderByAggregateInput = {
+    jobId?: SortOrder
+    jobType?: SortOrder
+    targetDate?: SortOrder
+    status?: SortOrder
+    startTime?: SortOrder
+    endTime?: SortOrder
+    processedCount?: SortOrder
+    errorMessage?: SortOrder
+  }
+
+  export type BatchJobHistoryMinOrderByAggregateInput = {
+    jobId?: SortOrder
+    jobType?: SortOrder
+    targetDate?: SortOrder
+    status?: SortOrder
+    startTime?: SortOrder
+    endTime?: SortOrder
+    processedCount?: SortOrder
+    errorMessage?: SortOrder
+  }
+
+  export type BatchJobHistorySumOrderByAggregateInput = {
+    processedCount?: SortOrder
+  }
+
+  export type EnumBatchJobTypeWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.BatchJobType | EnumBatchJobTypeFieldRefInput<$PrismaModel>
+    in?: $Enums.BatchJobType[] | ListEnumBatchJobTypeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.BatchJobType[] | ListEnumBatchJobTypeFieldRefInput<$PrismaModel>
+    not?: NestedEnumBatchJobTypeWithAggregatesFilter<$PrismaModel> | $Enums.BatchJobType
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumBatchJobTypeFilter<$PrismaModel>
+    _max?: NestedEnumBatchJobTypeFilter<$PrismaModel>
+  }
+
+  export type EnumBatchJobStatusWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.BatchJobStatus | EnumBatchJobStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.BatchJobStatus[] | ListEnumBatchJobStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.BatchJobStatus[] | ListEnumBatchJobStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumBatchJobStatusWithAggregatesFilter<$PrismaModel> | $Enums.BatchJobStatus
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumBatchJobStatusFilter<$PrismaModel>
+    _max?: NestedEnumBatchJobStatusFilter<$PrismaModel>
+  }
+
+  export type IntWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel>
+    in?: number[] | ListIntFieldRefInput<$PrismaModel>
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel>
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntWithAggregatesFilter<$PrismaModel> | number
+    _count?: NestedIntFilter<$PrismaModel>
+    _avg?: NestedFloatFilter<$PrismaModel>
+    _sum?: NestedIntFilter<$PrismaModel>
+    _min?: NestedIntFilter<$PrismaModel>
+    _max?: NestedIntFilter<$PrismaModel>
+  }
+
+  export type UserWatchlistCreateNestedManyWithoutUserInput = {
+    create?: XOR<UserWatchlistCreateWithoutUserInput, UserWatchlistUncheckedCreateWithoutUserInput> | UserWatchlistCreateWithoutUserInput[] | UserWatchlistUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: UserWatchlistCreateOrConnectWithoutUserInput | UserWatchlistCreateOrConnectWithoutUserInput[]
+    createMany?: UserWatchlistCreateManyUserInputEnvelope
+    connect?: UserWatchlistWhereUniqueInput | UserWatchlistWhereUniqueInput[]
+  }
+
+  export type RsFilterPresetCreateNestedManyWithoutUserInput = {
+    create?: XOR<RsFilterPresetCreateWithoutUserInput, RsFilterPresetUncheckedCreateWithoutUserInput> | RsFilterPresetCreateWithoutUserInput[] | RsFilterPresetUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: RsFilterPresetCreateOrConnectWithoutUserInput | RsFilterPresetCreateOrConnectWithoutUserInput[]
+    createMany?: RsFilterPresetCreateManyUserInputEnvelope
+    connect?: RsFilterPresetWhereUniqueInput | RsFilterPresetWhereUniqueInput[]
+  }
+
+  export type SearchFilterPresetCreateNestedManyWithoutUserInput = {
+    create?: XOR<SearchFilterPresetCreateWithoutUserInput, SearchFilterPresetUncheckedCreateWithoutUserInput> | SearchFilterPresetCreateWithoutUserInput[] | SearchFilterPresetUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: SearchFilterPresetCreateOrConnectWithoutUserInput | SearchFilterPresetCreateOrConnectWithoutUserInput[]
+    createMany?: SearchFilterPresetCreateManyUserInputEnvelope
+    connect?: SearchFilterPresetWhereUniqueInput | SearchFilterPresetWhereUniqueInput[]
+  }
+
+  export type KiwoomApiCallLogCreateNestedManyWithoutUserInput = {
+    create?: XOR<KiwoomApiCallLogCreateWithoutUserInput, KiwoomApiCallLogUncheckedCreateWithoutUserInput> | KiwoomApiCallLogCreateWithoutUserInput[] | KiwoomApiCallLogUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: KiwoomApiCallLogCreateOrConnectWithoutUserInput | KiwoomApiCallLogCreateOrConnectWithoutUserInput[]
+    createMany?: KiwoomApiCallLogCreateManyUserInputEnvelope
+    connect?: KiwoomApiCallLogWhereUniqueInput | KiwoomApiCallLogWhereUniqueInput[]
+  }
+
+  export type UserWatchlistUncheckedCreateNestedManyWithoutUserInput = {
+    create?: XOR<UserWatchlistCreateWithoutUserInput, UserWatchlistUncheckedCreateWithoutUserInput> | UserWatchlistCreateWithoutUserInput[] | UserWatchlistUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: UserWatchlistCreateOrConnectWithoutUserInput | UserWatchlistCreateOrConnectWithoutUserInput[]
+    createMany?: UserWatchlistCreateManyUserInputEnvelope
+    connect?: UserWatchlistWhereUniqueInput | UserWatchlistWhereUniqueInput[]
+  }
+
+  export type RsFilterPresetUncheckedCreateNestedManyWithoutUserInput = {
+    create?: XOR<RsFilterPresetCreateWithoutUserInput, RsFilterPresetUncheckedCreateWithoutUserInput> | RsFilterPresetCreateWithoutUserInput[] | RsFilterPresetUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: RsFilterPresetCreateOrConnectWithoutUserInput | RsFilterPresetCreateOrConnectWithoutUserInput[]
+    createMany?: RsFilterPresetCreateManyUserInputEnvelope
+    connect?: RsFilterPresetWhereUniqueInput | RsFilterPresetWhereUniqueInput[]
+  }
+
+  export type SearchFilterPresetUncheckedCreateNestedManyWithoutUserInput = {
+    create?: XOR<SearchFilterPresetCreateWithoutUserInput, SearchFilterPresetUncheckedCreateWithoutUserInput> | SearchFilterPresetCreateWithoutUserInput[] | SearchFilterPresetUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: SearchFilterPresetCreateOrConnectWithoutUserInput | SearchFilterPresetCreateOrConnectWithoutUserInput[]
+    createMany?: SearchFilterPresetCreateManyUserInputEnvelope
+    connect?: SearchFilterPresetWhereUniqueInput | SearchFilterPresetWhereUniqueInput[]
+  }
+
+  export type KiwoomApiCallLogUncheckedCreateNestedManyWithoutUserInput = {
+    create?: XOR<KiwoomApiCallLogCreateWithoutUserInput, KiwoomApiCallLogUncheckedCreateWithoutUserInput> | KiwoomApiCallLogCreateWithoutUserInput[] | KiwoomApiCallLogUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: KiwoomApiCallLogCreateOrConnectWithoutUserInput | KiwoomApiCallLogCreateOrConnectWithoutUserInput[]
+    createMany?: KiwoomApiCallLogCreateManyUserInputEnvelope
+    connect?: KiwoomApiCallLogWhereUniqueInput | KiwoomApiCallLogWhereUniqueInput[]
+  }
+
+  export type StringFieldUpdateOperationsInput = {
+    set?: string
+  }
+
+  export type DateTimeFieldUpdateOperationsInput = {
+    set?: Date | string
+  }
+
+  export type NullableDateTimeFieldUpdateOperationsInput = {
+    set?: Date | string | null
+  }
+
+  export type UserWatchlistUpdateManyWithoutUserNestedInput = {
+    create?: XOR<UserWatchlistCreateWithoutUserInput, UserWatchlistUncheckedCreateWithoutUserInput> | UserWatchlistCreateWithoutUserInput[] | UserWatchlistUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: UserWatchlistCreateOrConnectWithoutUserInput | UserWatchlistCreateOrConnectWithoutUserInput[]
+    upsert?: UserWatchlistUpsertWithWhereUniqueWithoutUserInput | UserWatchlistUpsertWithWhereUniqueWithoutUserInput[]
+    createMany?: UserWatchlistCreateManyUserInputEnvelope
+    set?: UserWatchlistWhereUniqueInput | UserWatchlistWhereUniqueInput[]
+    disconnect?: UserWatchlistWhereUniqueInput | UserWatchlistWhereUniqueInput[]
+    delete?: UserWatchlistWhereUniqueInput | UserWatchlistWhereUniqueInput[]
+    connect?: UserWatchlistWhereUniqueInput | UserWatchlistWhereUniqueInput[]
+    update?: UserWatchlistUpdateWithWhereUniqueWithoutUserInput | UserWatchlistUpdateWithWhereUniqueWithoutUserInput[]
+    updateMany?: UserWatchlistUpdateManyWithWhereWithoutUserInput | UserWatchlistUpdateManyWithWhereWithoutUserInput[]
+    deleteMany?: UserWatchlistScalarWhereInput | UserWatchlistScalarWhereInput[]
+  }
+
+  export type RsFilterPresetUpdateManyWithoutUserNestedInput = {
+    create?: XOR<RsFilterPresetCreateWithoutUserInput, RsFilterPresetUncheckedCreateWithoutUserInput> | RsFilterPresetCreateWithoutUserInput[] | RsFilterPresetUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: RsFilterPresetCreateOrConnectWithoutUserInput | RsFilterPresetCreateOrConnectWithoutUserInput[]
+    upsert?: RsFilterPresetUpsertWithWhereUniqueWithoutUserInput | RsFilterPresetUpsertWithWhereUniqueWithoutUserInput[]
+    createMany?: RsFilterPresetCreateManyUserInputEnvelope
+    set?: RsFilterPresetWhereUniqueInput | RsFilterPresetWhereUniqueInput[]
+    disconnect?: RsFilterPresetWhereUniqueInput | RsFilterPresetWhereUniqueInput[]
+    delete?: RsFilterPresetWhereUniqueInput | RsFilterPresetWhereUniqueInput[]
+    connect?: RsFilterPresetWhereUniqueInput | RsFilterPresetWhereUniqueInput[]
+    update?: RsFilterPresetUpdateWithWhereUniqueWithoutUserInput | RsFilterPresetUpdateWithWhereUniqueWithoutUserInput[]
+    updateMany?: RsFilterPresetUpdateManyWithWhereWithoutUserInput | RsFilterPresetUpdateManyWithWhereWithoutUserInput[]
+    deleteMany?: RsFilterPresetScalarWhereInput | RsFilterPresetScalarWhereInput[]
+  }
+
+  export type SearchFilterPresetUpdateManyWithoutUserNestedInput = {
+    create?: XOR<SearchFilterPresetCreateWithoutUserInput, SearchFilterPresetUncheckedCreateWithoutUserInput> | SearchFilterPresetCreateWithoutUserInput[] | SearchFilterPresetUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: SearchFilterPresetCreateOrConnectWithoutUserInput | SearchFilterPresetCreateOrConnectWithoutUserInput[]
+    upsert?: SearchFilterPresetUpsertWithWhereUniqueWithoutUserInput | SearchFilterPresetUpsertWithWhereUniqueWithoutUserInput[]
+    createMany?: SearchFilterPresetCreateManyUserInputEnvelope
+    set?: SearchFilterPresetWhereUniqueInput | SearchFilterPresetWhereUniqueInput[]
+    disconnect?: SearchFilterPresetWhereUniqueInput | SearchFilterPresetWhereUniqueInput[]
+    delete?: SearchFilterPresetWhereUniqueInput | SearchFilterPresetWhereUniqueInput[]
+    connect?: SearchFilterPresetWhereUniqueInput | SearchFilterPresetWhereUniqueInput[]
+    update?: SearchFilterPresetUpdateWithWhereUniqueWithoutUserInput | SearchFilterPresetUpdateWithWhereUniqueWithoutUserInput[]
+    updateMany?: SearchFilterPresetUpdateManyWithWhereWithoutUserInput | SearchFilterPresetUpdateManyWithWhereWithoutUserInput[]
+    deleteMany?: SearchFilterPresetScalarWhereInput | SearchFilterPresetScalarWhereInput[]
+  }
+
+  export type KiwoomApiCallLogUpdateManyWithoutUserNestedInput = {
+    create?: XOR<KiwoomApiCallLogCreateWithoutUserInput, KiwoomApiCallLogUncheckedCreateWithoutUserInput> | KiwoomApiCallLogCreateWithoutUserInput[] | KiwoomApiCallLogUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: KiwoomApiCallLogCreateOrConnectWithoutUserInput | KiwoomApiCallLogCreateOrConnectWithoutUserInput[]
+    upsert?: KiwoomApiCallLogUpsertWithWhereUniqueWithoutUserInput | KiwoomApiCallLogUpsertWithWhereUniqueWithoutUserInput[]
+    createMany?: KiwoomApiCallLogCreateManyUserInputEnvelope
+    set?: KiwoomApiCallLogWhereUniqueInput | KiwoomApiCallLogWhereUniqueInput[]
+    disconnect?: KiwoomApiCallLogWhereUniqueInput | KiwoomApiCallLogWhereUniqueInput[]
+    delete?: KiwoomApiCallLogWhereUniqueInput | KiwoomApiCallLogWhereUniqueInput[]
+    connect?: KiwoomApiCallLogWhereUniqueInput | KiwoomApiCallLogWhereUniqueInput[]
+    update?: KiwoomApiCallLogUpdateWithWhereUniqueWithoutUserInput | KiwoomApiCallLogUpdateWithWhereUniqueWithoutUserInput[]
+    updateMany?: KiwoomApiCallLogUpdateManyWithWhereWithoutUserInput | KiwoomApiCallLogUpdateManyWithWhereWithoutUserInput[]
+    deleteMany?: KiwoomApiCallLogScalarWhereInput | KiwoomApiCallLogScalarWhereInput[]
+  }
+
+  export type UserWatchlistUncheckedUpdateManyWithoutUserNestedInput = {
+    create?: XOR<UserWatchlistCreateWithoutUserInput, UserWatchlistUncheckedCreateWithoutUserInput> | UserWatchlistCreateWithoutUserInput[] | UserWatchlistUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: UserWatchlistCreateOrConnectWithoutUserInput | UserWatchlistCreateOrConnectWithoutUserInput[]
+    upsert?: UserWatchlistUpsertWithWhereUniqueWithoutUserInput | UserWatchlistUpsertWithWhereUniqueWithoutUserInput[]
+    createMany?: UserWatchlistCreateManyUserInputEnvelope
+    set?: UserWatchlistWhereUniqueInput | UserWatchlistWhereUniqueInput[]
+    disconnect?: UserWatchlistWhereUniqueInput | UserWatchlistWhereUniqueInput[]
+    delete?: UserWatchlistWhereUniqueInput | UserWatchlistWhereUniqueInput[]
+    connect?: UserWatchlistWhereUniqueInput | UserWatchlistWhereUniqueInput[]
+    update?: UserWatchlistUpdateWithWhereUniqueWithoutUserInput | UserWatchlistUpdateWithWhereUniqueWithoutUserInput[]
+    updateMany?: UserWatchlistUpdateManyWithWhereWithoutUserInput | UserWatchlistUpdateManyWithWhereWithoutUserInput[]
+    deleteMany?: UserWatchlistScalarWhereInput | UserWatchlistScalarWhereInput[]
+  }
+
+  export type RsFilterPresetUncheckedUpdateManyWithoutUserNestedInput = {
+    create?: XOR<RsFilterPresetCreateWithoutUserInput, RsFilterPresetUncheckedCreateWithoutUserInput> | RsFilterPresetCreateWithoutUserInput[] | RsFilterPresetUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: RsFilterPresetCreateOrConnectWithoutUserInput | RsFilterPresetCreateOrConnectWithoutUserInput[]
+    upsert?: RsFilterPresetUpsertWithWhereUniqueWithoutUserInput | RsFilterPresetUpsertWithWhereUniqueWithoutUserInput[]
+    createMany?: RsFilterPresetCreateManyUserInputEnvelope
+    set?: RsFilterPresetWhereUniqueInput | RsFilterPresetWhereUniqueInput[]
+    disconnect?: RsFilterPresetWhereUniqueInput | RsFilterPresetWhereUniqueInput[]
+    delete?: RsFilterPresetWhereUniqueInput | RsFilterPresetWhereUniqueInput[]
+    connect?: RsFilterPresetWhereUniqueInput | RsFilterPresetWhereUniqueInput[]
+    update?: RsFilterPresetUpdateWithWhereUniqueWithoutUserInput | RsFilterPresetUpdateWithWhereUniqueWithoutUserInput[]
+    updateMany?: RsFilterPresetUpdateManyWithWhereWithoutUserInput | RsFilterPresetUpdateManyWithWhereWithoutUserInput[]
+    deleteMany?: RsFilterPresetScalarWhereInput | RsFilterPresetScalarWhereInput[]
+  }
+
+  export type SearchFilterPresetUncheckedUpdateManyWithoutUserNestedInput = {
+    create?: XOR<SearchFilterPresetCreateWithoutUserInput, SearchFilterPresetUncheckedCreateWithoutUserInput> | SearchFilterPresetCreateWithoutUserInput[] | SearchFilterPresetUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: SearchFilterPresetCreateOrConnectWithoutUserInput | SearchFilterPresetCreateOrConnectWithoutUserInput[]
+    upsert?: SearchFilterPresetUpsertWithWhereUniqueWithoutUserInput | SearchFilterPresetUpsertWithWhereUniqueWithoutUserInput[]
+    createMany?: SearchFilterPresetCreateManyUserInputEnvelope
+    set?: SearchFilterPresetWhereUniqueInput | SearchFilterPresetWhereUniqueInput[]
+    disconnect?: SearchFilterPresetWhereUniqueInput | SearchFilterPresetWhereUniqueInput[]
+    delete?: SearchFilterPresetWhereUniqueInput | SearchFilterPresetWhereUniqueInput[]
+    connect?: SearchFilterPresetWhereUniqueInput | SearchFilterPresetWhereUniqueInput[]
+    update?: SearchFilterPresetUpdateWithWhereUniqueWithoutUserInput | SearchFilterPresetUpdateWithWhereUniqueWithoutUserInput[]
+    updateMany?: SearchFilterPresetUpdateManyWithWhereWithoutUserInput | SearchFilterPresetUpdateManyWithWhereWithoutUserInput[]
+    deleteMany?: SearchFilterPresetScalarWhereInput | SearchFilterPresetScalarWhereInput[]
+  }
+
+  export type KiwoomApiCallLogUncheckedUpdateManyWithoutUserNestedInput = {
+    create?: XOR<KiwoomApiCallLogCreateWithoutUserInput, KiwoomApiCallLogUncheckedCreateWithoutUserInput> | KiwoomApiCallLogCreateWithoutUserInput[] | KiwoomApiCallLogUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: KiwoomApiCallLogCreateOrConnectWithoutUserInput | KiwoomApiCallLogCreateOrConnectWithoutUserInput[]
+    upsert?: KiwoomApiCallLogUpsertWithWhereUniqueWithoutUserInput | KiwoomApiCallLogUpsertWithWhereUniqueWithoutUserInput[]
+    createMany?: KiwoomApiCallLogCreateManyUserInputEnvelope
+    set?: KiwoomApiCallLogWhereUniqueInput | KiwoomApiCallLogWhereUniqueInput[]
+    disconnect?: KiwoomApiCallLogWhereUniqueInput | KiwoomApiCallLogWhereUniqueInput[]
+    delete?: KiwoomApiCallLogWhereUniqueInput | KiwoomApiCallLogWhereUniqueInput[]
+    connect?: KiwoomApiCallLogWhereUniqueInput | KiwoomApiCallLogWhereUniqueInput[]
+    update?: KiwoomApiCallLogUpdateWithWhereUniqueWithoutUserInput | KiwoomApiCallLogUpdateWithWhereUniqueWithoutUserInput[]
+    updateMany?: KiwoomApiCallLogUpdateManyWithWhereWithoutUserInput | KiwoomApiCallLogUpdateManyWithWhereWithoutUserInput[]
+    deleteMany?: KiwoomApiCallLogScalarWhereInput | KiwoomApiCallLogScalarWhereInput[]
+  }
+
+  export type UserWatchlistCreateNestedManyWithoutCompanyInput = {
+    create?: XOR<UserWatchlistCreateWithoutCompanyInput, UserWatchlistUncheckedCreateWithoutCompanyInput> | UserWatchlistCreateWithoutCompanyInput[] | UserWatchlistUncheckedCreateWithoutCompanyInput[]
+    connectOrCreate?: UserWatchlistCreateOrConnectWithoutCompanyInput | UserWatchlistCreateOrConnectWithoutCompanyInput[]
+    createMany?: UserWatchlistCreateManyCompanyInputEnvelope
+    connect?: UserWatchlistWhereUniqueInput | UserWatchlistWhereUniqueInput[]
+  }
+
+  export type StockPriceHistoryCreateNestedManyWithoutCompanyInput = {
+    create?: XOR<StockPriceHistoryCreateWithoutCompanyInput, StockPriceHistoryUncheckedCreateWithoutCompanyInput> | StockPriceHistoryCreateWithoutCompanyInput[] | StockPriceHistoryUncheckedCreateWithoutCompanyInput[]
+    connectOrCreate?: StockPriceHistoryCreateOrConnectWithoutCompanyInput | StockPriceHistoryCreateOrConnectWithoutCompanyInput[]
+    createMany?: StockPriceHistoryCreateManyCompanyInputEnvelope
+    connect?: StockPriceHistoryWhereUniqueInput | StockPriceHistoryWhereUniqueInput[]
+  }
+
+  export type UserWatchlistUncheckedCreateNestedManyWithoutCompanyInput = {
+    create?: XOR<UserWatchlistCreateWithoutCompanyInput, UserWatchlistUncheckedCreateWithoutCompanyInput> | UserWatchlistCreateWithoutCompanyInput[] | UserWatchlistUncheckedCreateWithoutCompanyInput[]
+    connectOrCreate?: UserWatchlistCreateOrConnectWithoutCompanyInput | UserWatchlistCreateOrConnectWithoutCompanyInput[]
+    createMany?: UserWatchlistCreateManyCompanyInputEnvelope
+    connect?: UserWatchlistWhereUniqueInput | UserWatchlistWhereUniqueInput[]
+  }
+
+  export type StockPriceHistoryUncheckedCreateNestedManyWithoutCompanyInput = {
+    create?: XOR<StockPriceHistoryCreateWithoutCompanyInput, StockPriceHistoryUncheckedCreateWithoutCompanyInput> | StockPriceHistoryCreateWithoutCompanyInput[] | StockPriceHistoryUncheckedCreateWithoutCompanyInput[]
+    connectOrCreate?: StockPriceHistoryCreateOrConnectWithoutCompanyInput | StockPriceHistoryCreateOrConnectWithoutCompanyInput[]
+    createMany?: StockPriceHistoryCreateManyCompanyInputEnvelope
+    connect?: StockPriceHistoryWhereUniqueInput | StockPriceHistoryWhereUniqueInput[]
+  }
+
+  export type EnumMarketTypeFieldUpdateOperationsInput = {
+    set?: $Enums.MarketType
+  }
+
+  export type UserWatchlistUpdateManyWithoutCompanyNestedInput = {
+    create?: XOR<UserWatchlistCreateWithoutCompanyInput, UserWatchlistUncheckedCreateWithoutCompanyInput> | UserWatchlistCreateWithoutCompanyInput[] | UserWatchlistUncheckedCreateWithoutCompanyInput[]
+    connectOrCreate?: UserWatchlistCreateOrConnectWithoutCompanyInput | UserWatchlistCreateOrConnectWithoutCompanyInput[]
+    upsert?: UserWatchlistUpsertWithWhereUniqueWithoutCompanyInput | UserWatchlistUpsertWithWhereUniqueWithoutCompanyInput[]
+    createMany?: UserWatchlistCreateManyCompanyInputEnvelope
+    set?: UserWatchlistWhereUniqueInput | UserWatchlistWhereUniqueInput[]
+    disconnect?: UserWatchlistWhereUniqueInput | UserWatchlistWhereUniqueInput[]
+    delete?: UserWatchlistWhereUniqueInput | UserWatchlistWhereUniqueInput[]
+    connect?: UserWatchlistWhereUniqueInput | UserWatchlistWhereUniqueInput[]
+    update?: UserWatchlistUpdateWithWhereUniqueWithoutCompanyInput | UserWatchlistUpdateWithWhereUniqueWithoutCompanyInput[]
+    updateMany?: UserWatchlistUpdateManyWithWhereWithoutCompanyInput | UserWatchlistUpdateManyWithWhereWithoutCompanyInput[]
+    deleteMany?: UserWatchlistScalarWhereInput | UserWatchlistScalarWhereInput[]
+  }
+
+  export type StockPriceHistoryUpdateManyWithoutCompanyNestedInput = {
+    create?: XOR<StockPriceHistoryCreateWithoutCompanyInput, StockPriceHistoryUncheckedCreateWithoutCompanyInput> | StockPriceHistoryCreateWithoutCompanyInput[] | StockPriceHistoryUncheckedCreateWithoutCompanyInput[]
+    connectOrCreate?: StockPriceHistoryCreateOrConnectWithoutCompanyInput | StockPriceHistoryCreateOrConnectWithoutCompanyInput[]
+    upsert?: StockPriceHistoryUpsertWithWhereUniqueWithoutCompanyInput | StockPriceHistoryUpsertWithWhereUniqueWithoutCompanyInput[]
+    createMany?: StockPriceHistoryCreateManyCompanyInputEnvelope
+    set?: StockPriceHistoryWhereUniqueInput | StockPriceHistoryWhereUniqueInput[]
+    disconnect?: StockPriceHistoryWhereUniqueInput | StockPriceHistoryWhereUniqueInput[]
+    delete?: StockPriceHistoryWhereUniqueInput | StockPriceHistoryWhereUniqueInput[]
+    connect?: StockPriceHistoryWhereUniqueInput | StockPriceHistoryWhereUniqueInput[]
+    update?: StockPriceHistoryUpdateWithWhereUniqueWithoutCompanyInput | StockPriceHistoryUpdateWithWhereUniqueWithoutCompanyInput[]
+    updateMany?: StockPriceHistoryUpdateManyWithWhereWithoutCompanyInput | StockPriceHistoryUpdateManyWithWhereWithoutCompanyInput[]
+    deleteMany?: StockPriceHistoryScalarWhereInput | StockPriceHistoryScalarWhereInput[]
+  }
+
+  export type UserWatchlistUncheckedUpdateManyWithoutCompanyNestedInput = {
+    create?: XOR<UserWatchlistCreateWithoutCompanyInput, UserWatchlistUncheckedCreateWithoutCompanyInput> | UserWatchlistCreateWithoutCompanyInput[] | UserWatchlistUncheckedCreateWithoutCompanyInput[]
+    connectOrCreate?: UserWatchlistCreateOrConnectWithoutCompanyInput | UserWatchlistCreateOrConnectWithoutCompanyInput[]
+    upsert?: UserWatchlistUpsertWithWhereUniqueWithoutCompanyInput | UserWatchlistUpsertWithWhereUniqueWithoutCompanyInput[]
+    createMany?: UserWatchlistCreateManyCompanyInputEnvelope
+    set?: UserWatchlistWhereUniqueInput | UserWatchlistWhereUniqueInput[]
+    disconnect?: UserWatchlistWhereUniqueInput | UserWatchlistWhereUniqueInput[]
+    delete?: UserWatchlistWhereUniqueInput | UserWatchlistWhereUniqueInput[]
+    connect?: UserWatchlistWhereUniqueInput | UserWatchlistWhereUniqueInput[]
+    update?: UserWatchlistUpdateWithWhereUniqueWithoutCompanyInput | UserWatchlistUpdateWithWhereUniqueWithoutCompanyInput[]
+    updateMany?: UserWatchlistUpdateManyWithWhereWithoutCompanyInput | UserWatchlistUpdateManyWithWhereWithoutCompanyInput[]
+    deleteMany?: UserWatchlistScalarWhereInput | UserWatchlistScalarWhereInput[]
+  }
+
+  export type StockPriceHistoryUncheckedUpdateManyWithoutCompanyNestedInput = {
+    create?: XOR<StockPriceHistoryCreateWithoutCompanyInput, StockPriceHistoryUncheckedCreateWithoutCompanyInput> | StockPriceHistoryCreateWithoutCompanyInput[] | StockPriceHistoryUncheckedCreateWithoutCompanyInput[]
+    connectOrCreate?: StockPriceHistoryCreateOrConnectWithoutCompanyInput | StockPriceHistoryCreateOrConnectWithoutCompanyInput[]
+    upsert?: StockPriceHistoryUpsertWithWhereUniqueWithoutCompanyInput | StockPriceHistoryUpsertWithWhereUniqueWithoutCompanyInput[]
+    createMany?: StockPriceHistoryCreateManyCompanyInputEnvelope
+    set?: StockPriceHistoryWhereUniqueInput | StockPriceHistoryWhereUniqueInput[]
+    disconnect?: StockPriceHistoryWhereUniqueInput | StockPriceHistoryWhereUniqueInput[]
+    delete?: StockPriceHistoryWhereUniqueInput | StockPriceHistoryWhereUniqueInput[]
+    connect?: StockPriceHistoryWhereUniqueInput | StockPriceHistoryWhereUniqueInput[]
+    update?: StockPriceHistoryUpdateWithWhereUniqueWithoutCompanyInput | StockPriceHistoryUpdateWithWhereUniqueWithoutCompanyInput[]
+    updateMany?: StockPriceHistoryUpdateManyWithWhereWithoutCompanyInput | StockPriceHistoryUpdateManyWithWhereWithoutCompanyInput[]
+    deleteMany?: StockPriceHistoryScalarWhereInput | StockPriceHistoryScalarWhereInput[]
+  }
+
+  export type UserCreateNestedOneWithoutWatchlistInput = {
+    create?: XOR<UserCreateWithoutWatchlistInput, UserUncheckedCreateWithoutWatchlistInput>
+    connectOrCreate?: UserCreateOrConnectWithoutWatchlistInput
+    connect?: UserWhereUniqueInput
+  }
+
+  export type CompanyCreateNestedOneWithoutWatchlistInput = {
+    create?: XOR<CompanyCreateWithoutWatchlistInput, CompanyUncheckedCreateWithoutWatchlistInput>
+    connectOrCreate?: CompanyCreateOrConnectWithoutWatchlistInput
+    connect?: CompanyWhereUniqueInput
+  }
+
+  export type WatchlistTagCreateNestedManyWithoutWatchlistInput = {
+    create?: XOR<WatchlistTagCreateWithoutWatchlistInput, WatchlistTagUncheckedCreateWithoutWatchlistInput> | WatchlistTagCreateWithoutWatchlistInput[] | WatchlistTagUncheckedCreateWithoutWatchlistInput[]
+    connectOrCreate?: WatchlistTagCreateOrConnectWithoutWatchlistInput | WatchlistTagCreateOrConnectWithoutWatchlistInput[]
+    createMany?: WatchlistTagCreateManyWatchlistInputEnvelope
+    connect?: WatchlistTagWhereUniqueInput | WatchlistTagWhereUniqueInput[]
+  }
+
+  export type WatchlistTagUncheckedCreateNestedManyWithoutWatchlistInput = {
+    create?: XOR<WatchlistTagCreateWithoutWatchlistInput, WatchlistTagUncheckedCreateWithoutWatchlistInput> | WatchlistTagCreateWithoutWatchlistInput[] | WatchlistTagUncheckedCreateWithoutWatchlistInput[]
+    connectOrCreate?: WatchlistTagCreateOrConnectWithoutWatchlistInput | WatchlistTagCreateOrConnectWithoutWatchlistInput[]
+    createMany?: WatchlistTagCreateManyWatchlistInputEnvelope
+    connect?: WatchlistTagWhereUniqueInput | WatchlistTagWhereUniqueInput[]
+  }
+
+  export type NullableStringFieldUpdateOperationsInput = {
+    set?: string | null
+  }
+
+  export type UserUpdateOneRequiredWithoutWatchlistNestedInput = {
+    create?: XOR<UserCreateWithoutWatchlistInput, UserUncheckedCreateWithoutWatchlistInput>
+    connectOrCreate?: UserCreateOrConnectWithoutWatchlistInput
+    upsert?: UserUpsertWithoutWatchlistInput
+    connect?: UserWhereUniqueInput
+    update?: XOR<XOR<UserUpdateToOneWithWhereWithoutWatchlistInput, UserUpdateWithoutWatchlistInput>, UserUncheckedUpdateWithoutWatchlistInput>
+  }
+
+  export type CompanyUpdateOneRequiredWithoutWatchlistNestedInput = {
+    create?: XOR<CompanyCreateWithoutWatchlistInput, CompanyUncheckedCreateWithoutWatchlistInput>
+    connectOrCreate?: CompanyCreateOrConnectWithoutWatchlistInput
+    upsert?: CompanyUpsertWithoutWatchlistInput
+    connect?: CompanyWhereUniqueInput
+    update?: XOR<XOR<CompanyUpdateToOneWithWhereWithoutWatchlistInput, CompanyUpdateWithoutWatchlistInput>, CompanyUncheckedUpdateWithoutWatchlistInput>
+  }
+
+  export type WatchlistTagUpdateManyWithoutWatchlistNestedInput = {
+    create?: XOR<WatchlistTagCreateWithoutWatchlistInput, WatchlistTagUncheckedCreateWithoutWatchlistInput> | WatchlistTagCreateWithoutWatchlistInput[] | WatchlistTagUncheckedCreateWithoutWatchlistInput[]
+    connectOrCreate?: WatchlistTagCreateOrConnectWithoutWatchlistInput | WatchlistTagCreateOrConnectWithoutWatchlistInput[]
+    upsert?: WatchlistTagUpsertWithWhereUniqueWithoutWatchlistInput | WatchlistTagUpsertWithWhereUniqueWithoutWatchlistInput[]
+    createMany?: WatchlistTagCreateManyWatchlistInputEnvelope
+    set?: WatchlistTagWhereUniqueInput | WatchlistTagWhereUniqueInput[]
+    disconnect?: WatchlistTagWhereUniqueInput | WatchlistTagWhereUniqueInput[]
+    delete?: WatchlistTagWhereUniqueInput | WatchlistTagWhereUniqueInput[]
+    connect?: WatchlistTagWhereUniqueInput | WatchlistTagWhereUniqueInput[]
+    update?: WatchlistTagUpdateWithWhereUniqueWithoutWatchlistInput | WatchlistTagUpdateWithWhereUniqueWithoutWatchlistInput[]
+    updateMany?: WatchlistTagUpdateManyWithWhereWithoutWatchlistInput | WatchlistTagUpdateManyWithWhereWithoutWatchlistInput[]
+    deleteMany?: WatchlistTagScalarWhereInput | WatchlistTagScalarWhereInput[]
+  }
+
+  export type WatchlistTagUncheckedUpdateManyWithoutWatchlistNestedInput = {
+    create?: XOR<WatchlistTagCreateWithoutWatchlistInput, WatchlistTagUncheckedCreateWithoutWatchlistInput> | WatchlistTagCreateWithoutWatchlistInput[] | WatchlistTagUncheckedCreateWithoutWatchlistInput[]
+    connectOrCreate?: WatchlistTagCreateOrConnectWithoutWatchlistInput | WatchlistTagCreateOrConnectWithoutWatchlistInput[]
+    upsert?: WatchlistTagUpsertWithWhereUniqueWithoutWatchlistInput | WatchlistTagUpsertWithWhereUniqueWithoutWatchlistInput[]
+    createMany?: WatchlistTagCreateManyWatchlistInputEnvelope
+    set?: WatchlistTagWhereUniqueInput | WatchlistTagWhereUniqueInput[]
+    disconnect?: WatchlistTagWhereUniqueInput | WatchlistTagWhereUniqueInput[]
+    delete?: WatchlistTagWhereUniqueInput | WatchlistTagWhereUniqueInput[]
+    connect?: WatchlistTagWhereUniqueInput | WatchlistTagWhereUniqueInput[]
+    update?: WatchlistTagUpdateWithWhereUniqueWithoutWatchlistInput | WatchlistTagUpdateWithWhereUniqueWithoutWatchlistInput[]
+    updateMany?: WatchlistTagUpdateManyWithWhereWithoutWatchlistInput | WatchlistTagUpdateManyWithWhereWithoutWatchlistInput[]
+    deleteMany?: WatchlistTagScalarWhereInput | WatchlistTagScalarWhereInput[]
+  }
+
+  export type WatchlistTagCreateNestedManyWithoutTagInput = {
+    create?: XOR<WatchlistTagCreateWithoutTagInput, WatchlistTagUncheckedCreateWithoutTagInput> | WatchlistTagCreateWithoutTagInput[] | WatchlistTagUncheckedCreateWithoutTagInput[]
+    connectOrCreate?: WatchlistTagCreateOrConnectWithoutTagInput | WatchlistTagCreateOrConnectWithoutTagInput[]
+    createMany?: WatchlistTagCreateManyTagInputEnvelope
+    connect?: WatchlistTagWhereUniqueInput | WatchlistTagWhereUniqueInput[]
+  }
+
+  export type WatchlistTagUncheckedCreateNestedManyWithoutTagInput = {
+    create?: XOR<WatchlistTagCreateWithoutTagInput, WatchlistTagUncheckedCreateWithoutTagInput> | WatchlistTagCreateWithoutTagInput[] | WatchlistTagUncheckedCreateWithoutTagInput[]
+    connectOrCreate?: WatchlistTagCreateOrConnectWithoutTagInput | WatchlistTagCreateOrConnectWithoutTagInput[]
+    createMany?: WatchlistTagCreateManyTagInputEnvelope
+    connect?: WatchlistTagWhereUniqueInput | WatchlistTagWhereUniqueInput[]
+  }
+
+  export type WatchlistTagUpdateManyWithoutTagNestedInput = {
+    create?: XOR<WatchlistTagCreateWithoutTagInput, WatchlistTagUncheckedCreateWithoutTagInput> | WatchlistTagCreateWithoutTagInput[] | WatchlistTagUncheckedCreateWithoutTagInput[]
+    connectOrCreate?: WatchlistTagCreateOrConnectWithoutTagInput | WatchlistTagCreateOrConnectWithoutTagInput[]
+    upsert?: WatchlistTagUpsertWithWhereUniqueWithoutTagInput | WatchlistTagUpsertWithWhereUniqueWithoutTagInput[]
+    createMany?: WatchlistTagCreateManyTagInputEnvelope
+    set?: WatchlistTagWhereUniqueInput | WatchlistTagWhereUniqueInput[]
+    disconnect?: WatchlistTagWhereUniqueInput | WatchlistTagWhereUniqueInput[]
+    delete?: WatchlistTagWhereUniqueInput | WatchlistTagWhereUniqueInput[]
+    connect?: WatchlistTagWhereUniqueInput | WatchlistTagWhereUniqueInput[]
+    update?: WatchlistTagUpdateWithWhereUniqueWithoutTagInput | WatchlistTagUpdateWithWhereUniqueWithoutTagInput[]
+    updateMany?: WatchlistTagUpdateManyWithWhereWithoutTagInput | WatchlistTagUpdateManyWithWhereWithoutTagInput[]
+    deleteMany?: WatchlistTagScalarWhereInput | WatchlistTagScalarWhereInput[]
+  }
+
+  export type WatchlistTagUncheckedUpdateManyWithoutTagNestedInput = {
+    create?: XOR<WatchlistTagCreateWithoutTagInput, WatchlistTagUncheckedCreateWithoutTagInput> | WatchlistTagCreateWithoutTagInput[] | WatchlistTagUncheckedCreateWithoutTagInput[]
+    connectOrCreate?: WatchlistTagCreateOrConnectWithoutTagInput | WatchlistTagCreateOrConnectWithoutTagInput[]
+    upsert?: WatchlistTagUpsertWithWhereUniqueWithoutTagInput | WatchlistTagUpsertWithWhereUniqueWithoutTagInput[]
+    createMany?: WatchlistTagCreateManyTagInputEnvelope
+    set?: WatchlistTagWhereUniqueInput | WatchlistTagWhereUniqueInput[]
+    disconnect?: WatchlistTagWhereUniqueInput | WatchlistTagWhereUniqueInput[]
+    delete?: WatchlistTagWhereUniqueInput | WatchlistTagWhereUniqueInput[]
+    connect?: WatchlistTagWhereUniqueInput | WatchlistTagWhereUniqueInput[]
+    update?: WatchlistTagUpdateWithWhereUniqueWithoutTagInput | WatchlistTagUpdateWithWhereUniqueWithoutTagInput[]
+    updateMany?: WatchlistTagUpdateManyWithWhereWithoutTagInput | WatchlistTagUpdateManyWithWhereWithoutTagInput[]
+    deleteMany?: WatchlistTagScalarWhereInput | WatchlistTagScalarWhereInput[]
+  }
+
+  export type UserWatchlistCreateNestedOneWithoutTagsInput = {
+    create?: XOR<UserWatchlistCreateWithoutTagsInput, UserWatchlistUncheckedCreateWithoutTagsInput>
+    connectOrCreate?: UserWatchlistCreateOrConnectWithoutTagsInput
+    connect?: UserWatchlistWhereUniqueInput
+  }
+
+  export type TagCreateNestedOneWithoutWatchlistTagsInput = {
+    create?: XOR<TagCreateWithoutWatchlistTagsInput, TagUncheckedCreateWithoutWatchlistTagsInput>
+    connectOrCreate?: TagCreateOrConnectWithoutWatchlistTagsInput
+    connect?: TagWhereUniqueInput
+  }
+
+  export type UserWatchlistUpdateOneRequiredWithoutTagsNestedInput = {
+    create?: XOR<UserWatchlistCreateWithoutTagsInput, UserWatchlistUncheckedCreateWithoutTagsInput>
+    connectOrCreate?: UserWatchlistCreateOrConnectWithoutTagsInput
+    upsert?: UserWatchlistUpsertWithoutTagsInput
+    connect?: UserWatchlistWhereUniqueInput
+    update?: XOR<XOR<UserWatchlistUpdateToOneWithWhereWithoutTagsInput, UserWatchlistUpdateWithoutTagsInput>, UserWatchlistUncheckedUpdateWithoutTagsInput>
+  }
+
+  export type TagUpdateOneRequiredWithoutWatchlistTagsNestedInput = {
+    create?: XOR<TagCreateWithoutWatchlistTagsInput, TagUncheckedCreateWithoutWatchlistTagsInput>
+    connectOrCreate?: TagCreateOrConnectWithoutWatchlistTagsInput
+    upsert?: TagUpsertWithoutWatchlistTagsInput
+    connect?: TagWhereUniqueInput
+    update?: XOR<XOR<TagUpdateToOneWithWhereWithoutWatchlistTagsInput, TagUpdateWithoutWatchlistTagsInput>, TagUncheckedUpdateWithoutWatchlistTagsInput>
+  }
+
+  export type UserCreateNestedOneWithoutRsFilterPresetsInput = {
+    create?: XOR<UserCreateWithoutRsFilterPresetsInput, UserUncheckedCreateWithoutRsFilterPresetsInput>
+    connectOrCreate?: UserCreateOrConnectWithoutRsFilterPresetsInput
+    connect?: UserWhereUniqueInput
+  }
+
+  export type RsFilterPeriodCreateNestedManyWithoutPresetInput = {
+    create?: XOR<RsFilterPeriodCreateWithoutPresetInput, RsFilterPeriodUncheckedCreateWithoutPresetInput> | RsFilterPeriodCreateWithoutPresetInput[] | RsFilterPeriodUncheckedCreateWithoutPresetInput[]
+    connectOrCreate?: RsFilterPeriodCreateOrConnectWithoutPresetInput | RsFilterPeriodCreateOrConnectWithoutPresetInput[]
+    createMany?: RsFilterPeriodCreateManyPresetInputEnvelope
+    connect?: RsFilterPeriodWhereUniqueInput | RsFilterPeriodWhereUniqueInput[]
+  }
+
+  export type RsFilterPeriodUncheckedCreateNestedManyWithoutPresetInput = {
+    create?: XOR<RsFilterPeriodCreateWithoutPresetInput, RsFilterPeriodUncheckedCreateWithoutPresetInput> | RsFilterPeriodCreateWithoutPresetInput[] | RsFilterPeriodUncheckedCreateWithoutPresetInput[]
+    connectOrCreate?: RsFilterPeriodCreateOrConnectWithoutPresetInput | RsFilterPeriodCreateOrConnectWithoutPresetInput[]
+    createMany?: RsFilterPeriodCreateManyPresetInputEnvelope
+    connect?: RsFilterPeriodWhereUniqueInput | RsFilterPeriodWhereUniqueInput[]
+  }
+
+  export type UserUpdateOneRequiredWithoutRsFilterPresetsNestedInput = {
+    create?: XOR<UserCreateWithoutRsFilterPresetsInput, UserUncheckedCreateWithoutRsFilterPresetsInput>
+    connectOrCreate?: UserCreateOrConnectWithoutRsFilterPresetsInput
+    upsert?: UserUpsertWithoutRsFilterPresetsInput
+    connect?: UserWhereUniqueInput
+    update?: XOR<XOR<UserUpdateToOneWithWhereWithoutRsFilterPresetsInput, UserUpdateWithoutRsFilterPresetsInput>, UserUncheckedUpdateWithoutRsFilterPresetsInput>
+  }
+
+  export type RsFilterPeriodUpdateManyWithoutPresetNestedInput = {
+    create?: XOR<RsFilterPeriodCreateWithoutPresetInput, RsFilterPeriodUncheckedCreateWithoutPresetInput> | RsFilterPeriodCreateWithoutPresetInput[] | RsFilterPeriodUncheckedCreateWithoutPresetInput[]
+    connectOrCreate?: RsFilterPeriodCreateOrConnectWithoutPresetInput | RsFilterPeriodCreateOrConnectWithoutPresetInput[]
+    upsert?: RsFilterPeriodUpsertWithWhereUniqueWithoutPresetInput | RsFilterPeriodUpsertWithWhereUniqueWithoutPresetInput[]
+    createMany?: RsFilterPeriodCreateManyPresetInputEnvelope
+    set?: RsFilterPeriodWhereUniqueInput | RsFilterPeriodWhereUniqueInput[]
+    disconnect?: RsFilterPeriodWhereUniqueInput | RsFilterPeriodWhereUniqueInput[]
+    delete?: RsFilterPeriodWhereUniqueInput | RsFilterPeriodWhereUniqueInput[]
+    connect?: RsFilterPeriodWhereUniqueInput | RsFilterPeriodWhereUniqueInput[]
+    update?: RsFilterPeriodUpdateWithWhereUniqueWithoutPresetInput | RsFilterPeriodUpdateWithWhereUniqueWithoutPresetInput[]
+    updateMany?: RsFilterPeriodUpdateManyWithWhereWithoutPresetInput | RsFilterPeriodUpdateManyWithWhereWithoutPresetInput[]
+    deleteMany?: RsFilterPeriodScalarWhereInput | RsFilterPeriodScalarWhereInput[]
+  }
+
+  export type RsFilterPeriodUncheckedUpdateManyWithoutPresetNestedInput = {
+    create?: XOR<RsFilterPeriodCreateWithoutPresetInput, RsFilterPeriodUncheckedCreateWithoutPresetInput> | RsFilterPeriodCreateWithoutPresetInput[] | RsFilterPeriodUncheckedCreateWithoutPresetInput[]
+    connectOrCreate?: RsFilterPeriodCreateOrConnectWithoutPresetInput | RsFilterPeriodCreateOrConnectWithoutPresetInput[]
+    upsert?: RsFilterPeriodUpsertWithWhereUniqueWithoutPresetInput | RsFilterPeriodUpsertWithWhereUniqueWithoutPresetInput[]
+    createMany?: RsFilterPeriodCreateManyPresetInputEnvelope
+    set?: RsFilterPeriodWhereUniqueInput | RsFilterPeriodWhereUniqueInput[]
+    disconnect?: RsFilterPeriodWhereUniqueInput | RsFilterPeriodWhereUniqueInput[]
+    delete?: RsFilterPeriodWhereUniqueInput | RsFilterPeriodWhereUniqueInput[]
+    connect?: RsFilterPeriodWhereUniqueInput | RsFilterPeriodWhereUniqueInput[]
+    update?: RsFilterPeriodUpdateWithWhereUniqueWithoutPresetInput | RsFilterPeriodUpdateWithWhereUniqueWithoutPresetInput[]
+    updateMany?: RsFilterPeriodUpdateManyWithWhereWithoutPresetInput | RsFilterPeriodUpdateManyWithWhereWithoutPresetInput[]
+    deleteMany?: RsFilterPeriodScalarWhereInput | RsFilterPeriodScalarWhereInput[]
+  }
+
+  export type RsFilterPresetCreateNestedOneWithoutPeriodsInput = {
+    create?: XOR<RsFilterPresetCreateWithoutPeriodsInput, RsFilterPresetUncheckedCreateWithoutPeriodsInput>
+    connectOrCreate?: RsFilterPresetCreateOrConnectWithoutPeriodsInput
+    connect?: RsFilterPresetWhereUniqueInput
+  }
+
+  export type DecimalFieldUpdateOperationsInput = {
+    set?: Decimal | DecimalJsLike | number | string
+    increment?: Decimal | DecimalJsLike | number | string
+    decrement?: Decimal | DecimalJsLike | number | string
+    multiply?: Decimal | DecimalJsLike | number | string
+    divide?: Decimal | DecimalJsLike | number | string
+  }
+
+  export type RsFilterPresetUpdateOneRequiredWithoutPeriodsNestedInput = {
+    create?: XOR<RsFilterPresetCreateWithoutPeriodsInput, RsFilterPresetUncheckedCreateWithoutPeriodsInput>
+    connectOrCreate?: RsFilterPresetCreateOrConnectWithoutPeriodsInput
+    upsert?: RsFilterPresetUpsertWithoutPeriodsInput
+    connect?: RsFilterPresetWhereUniqueInput
+    update?: XOR<XOR<RsFilterPresetUpdateToOneWithWhereWithoutPeriodsInput, RsFilterPresetUpdateWithoutPeriodsInput>, RsFilterPresetUncheckedUpdateWithoutPeriodsInput>
+  }
+
+  export type UserCreateNestedOneWithoutSearchFilterPresetsInput = {
+    create?: XOR<UserCreateWithoutSearchFilterPresetsInput, UserUncheckedCreateWithoutSearchFilterPresetsInput>
+    connectOrCreate?: UserCreateOrConnectWithoutSearchFilterPresetsInput
+    connect?: UserWhereUniqueInput
+  }
+
+  export type UserUpdateOneRequiredWithoutSearchFilterPresetsNestedInput = {
+    create?: XOR<UserCreateWithoutSearchFilterPresetsInput, UserUncheckedCreateWithoutSearchFilterPresetsInput>
+    connectOrCreate?: UserCreateOrConnectWithoutSearchFilterPresetsInput
+    upsert?: UserUpsertWithoutSearchFilterPresetsInput
+    connect?: UserWhereUniqueInput
+    update?: XOR<XOR<UserUpdateToOneWithWhereWithoutSearchFilterPresetsInput, UserUpdateWithoutSearchFilterPresetsInput>, UserUncheckedUpdateWithoutSearchFilterPresetsInput>
+  }
+
+  export type CompanyCreateNestedOneWithoutPriceHistoryInput = {
+    create?: XOR<CompanyCreateWithoutPriceHistoryInput, CompanyUncheckedCreateWithoutPriceHistoryInput>
+    connectOrCreate?: CompanyCreateOrConnectWithoutPriceHistoryInput
+    connect?: CompanyWhereUniqueInput
+  }
+
+  export type BigIntFieldUpdateOperationsInput = {
+    set?: bigint | number
+    increment?: bigint | number
+    decrement?: bigint | number
+    multiply?: bigint | number
+    divide?: bigint | number
+  }
+
+  export type CompanyUpdateOneRequiredWithoutPriceHistoryNestedInput = {
+    create?: XOR<CompanyCreateWithoutPriceHistoryInput, CompanyUncheckedCreateWithoutPriceHistoryInput>
+    connectOrCreate?: CompanyCreateOrConnectWithoutPriceHistoryInput
+    upsert?: CompanyUpsertWithoutPriceHistoryInput
+    connect?: CompanyWhereUniqueInput
+    update?: XOR<XOR<CompanyUpdateToOneWithWhereWithoutPriceHistoryInput, CompanyUpdateWithoutPriceHistoryInput>, CompanyUncheckedUpdateWithoutPriceHistoryInput>
+  }
+
+  export type EnumMarketIndexTypeFieldUpdateOperationsInput = {
+    set?: $Enums.MarketIndexType
+  }
+
+  export type UserCreateNestedOneWithoutApiCallLogsInput = {
+    create?: XOR<UserCreateWithoutApiCallLogsInput, UserUncheckedCreateWithoutApiCallLogsInput>
+    connectOrCreate?: UserCreateOrConnectWithoutApiCallLogsInput
+    connect?: UserWhereUniqueInput
+  }
+
+  export type NullableIntFieldUpdateOperationsInput = {
+    set?: number | null
+    increment?: number
+    decrement?: number
+    multiply?: number
+    divide?: number
+  }
+
+  export type UserUpdateOneWithoutApiCallLogsNestedInput = {
+    create?: XOR<UserCreateWithoutApiCallLogsInput, UserUncheckedCreateWithoutApiCallLogsInput>
+    connectOrCreate?: UserCreateOrConnectWithoutApiCallLogsInput
+    upsert?: UserUpsertWithoutApiCallLogsInput
+    disconnect?: UserWhereInput | boolean
+    delete?: UserWhereInput | boolean
+    connect?: UserWhereUniqueInput
+    update?: XOR<XOR<UserUpdateToOneWithWhereWithoutApiCallLogsInput, UserUpdateWithoutApiCallLogsInput>, UserUncheckedUpdateWithoutApiCallLogsInput>
+  }
+
+  export type EnumBatchJobTypeFieldUpdateOperationsInput = {
+    set?: $Enums.BatchJobType
+  }
+
+  export type EnumBatchJobStatusFieldUpdateOperationsInput = {
+    set?: $Enums.BatchJobStatus
+  }
+
+  export type IntFieldUpdateOperationsInput = {
+    set?: number
+    increment?: number
+    decrement?: number
+    multiply?: number
+    divide?: number
+  }
+
+  export type NestedUuidFilter<$PrismaModel = never> = {
+    equals?: string | StringFieldRefInput<$PrismaModel>
+    in?: string[] | ListStringFieldRefInput<$PrismaModel>
+    notIn?: string[] | ListStringFieldRefInput<$PrismaModel>
+    lt?: string | StringFieldRefInput<$PrismaModel>
+    lte?: string | StringFieldRefInput<$PrismaModel>
+    gt?: string | StringFieldRefInput<$PrismaModel>
+    gte?: string | StringFieldRefInput<$PrismaModel>
+    not?: NestedUuidFilter<$PrismaModel> | string
+  }
+
+  export type NestedStringFilter<$PrismaModel = never> = {
+    equals?: string | StringFieldRefInput<$PrismaModel>
+    in?: string[] | ListStringFieldRefInput<$PrismaModel>
+    notIn?: string[] | ListStringFieldRefInput<$PrismaModel>
+    lt?: string | StringFieldRefInput<$PrismaModel>
+    lte?: string | StringFieldRefInput<$PrismaModel>
+    gt?: string | StringFieldRefInput<$PrismaModel>
+    gte?: string | StringFieldRefInput<$PrismaModel>
+    contains?: string | StringFieldRefInput<$PrismaModel>
+    startsWith?: string | StringFieldRefInput<$PrismaModel>
+    endsWith?: string | StringFieldRefInput<$PrismaModel>
+    not?: NestedStringFilter<$PrismaModel> | string
+  }
+
+  export type NestedDateTimeFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeFilter<$PrismaModel> | Date | string
+  }
+
+  export type NestedDateTimeNullableFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeNullableFilter<$PrismaModel> | Date | string | null
+  }
+
+  export type NestedUuidWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: string | StringFieldRefInput<$PrismaModel>
+    in?: string[] | ListStringFieldRefInput<$PrismaModel>
+    notIn?: string[] | ListStringFieldRefInput<$PrismaModel>
+    lt?: string | StringFieldRefInput<$PrismaModel>
+    lte?: string | StringFieldRefInput<$PrismaModel>
+    gt?: string | StringFieldRefInput<$PrismaModel>
+    gte?: string | StringFieldRefInput<$PrismaModel>
+    not?: NestedUuidWithAggregatesFilter<$PrismaModel> | string
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedStringFilter<$PrismaModel>
+    _max?: NestedStringFilter<$PrismaModel>
+  }
+
+  export type NestedIntFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel>
+    in?: number[] | ListIntFieldRefInput<$PrismaModel>
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel>
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntFilter<$PrismaModel> | number
+  }
+
+  export type NestedStringWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: string | StringFieldRefInput<$PrismaModel>
+    in?: string[] | ListStringFieldRefInput<$PrismaModel>
+    notIn?: string[] | ListStringFieldRefInput<$PrismaModel>
+    lt?: string | StringFieldRefInput<$PrismaModel>
+    lte?: string | StringFieldRefInput<$PrismaModel>
+    gt?: string | StringFieldRefInput<$PrismaModel>
+    gte?: string | StringFieldRefInput<$PrismaModel>
+    contains?: string | StringFieldRefInput<$PrismaModel>
+    startsWith?: string | StringFieldRefInput<$PrismaModel>
+    endsWith?: string | StringFieldRefInput<$PrismaModel>
+    not?: NestedStringWithAggregatesFilter<$PrismaModel> | string
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedStringFilter<$PrismaModel>
+    _max?: NestedStringFilter<$PrismaModel>
+  }
+
+  export type NestedDateTimeWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeWithAggregatesFilter<$PrismaModel> | Date | string
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedDateTimeFilter<$PrismaModel>
+    _max?: NestedDateTimeFilter<$PrismaModel>
+  }
+
+  export type NestedDateTimeNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeNullableWithAggregatesFilter<$PrismaModel> | Date | string | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedDateTimeNullableFilter<$PrismaModel>
+    _max?: NestedDateTimeNullableFilter<$PrismaModel>
+  }
+
+  export type NestedIntNullableFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel> | null
+    in?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntNullableFilter<$PrismaModel> | number | null
+  }
+
+  export type NestedEnumMarketTypeFilter<$PrismaModel = never> = {
+    equals?: $Enums.MarketType | EnumMarketTypeFieldRefInput<$PrismaModel>
+    in?: $Enums.MarketType[] | ListEnumMarketTypeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.MarketType[] | ListEnumMarketTypeFieldRefInput<$PrismaModel>
+    not?: NestedEnumMarketTypeFilter<$PrismaModel> | $Enums.MarketType
+  }
+
+  export type NestedEnumMarketTypeWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.MarketType | EnumMarketTypeFieldRefInput<$PrismaModel>
+    in?: $Enums.MarketType[] | ListEnumMarketTypeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.MarketType[] | ListEnumMarketTypeFieldRefInput<$PrismaModel>
+    not?: NestedEnumMarketTypeWithAggregatesFilter<$PrismaModel> | $Enums.MarketType
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumMarketTypeFilter<$PrismaModel>
+    _max?: NestedEnumMarketTypeFilter<$PrismaModel>
+  }
+
+  export type NestedStringNullableFilter<$PrismaModel = never> = {
+    equals?: string | StringFieldRefInput<$PrismaModel> | null
+    in?: string[] | ListStringFieldRefInput<$PrismaModel> | null
+    notIn?: string[] | ListStringFieldRefInput<$PrismaModel> | null
+    lt?: string | StringFieldRefInput<$PrismaModel>
+    lte?: string | StringFieldRefInput<$PrismaModel>
+    gt?: string | StringFieldRefInput<$PrismaModel>
+    gte?: string | StringFieldRefInput<$PrismaModel>
+    contains?: string | StringFieldRefInput<$PrismaModel>
+    startsWith?: string | StringFieldRefInput<$PrismaModel>
+    endsWith?: string | StringFieldRefInput<$PrismaModel>
+    not?: NestedStringNullableFilter<$PrismaModel> | string | null
+  }
+
+  export type NestedStringNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: string | StringFieldRefInput<$PrismaModel> | null
+    in?: string[] | ListStringFieldRefInput<$PrismaModel> | null
+    notIn?: string[] | ListStringFieldRefInput<$PrismaModel> | null
+    lt?: string | StringFieldRefInput<$PrismaModel>
+    lte?: string | StringFieldRefInput<$PrismaModel>
+    gt?: string | StringFieldRefInput<$PrismaModel>
+    gte?: string | StringFieldRefInput<$PrismaModel>
+    contains?: string | StringFieldRefInput<$PrismaModel>
+    startsWith?: string | StringFieldRefInput<$PrismaModel>
+    endsWith?: string | StringFieldRefInput<$PrismaModel>
+    not?: NestedStringNullableWithAggregatesFilter<$PrismaModel> | string | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedStringNullableFilter<$PrismaModel>
+    _max?: NestedStringNullableFilter<$PrismaModel>
+  }
+
+  export type NestedDecimalFilter<$PrismaModel = never> = {
+    equals?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    in?: Decimal[] | DecimalJsLike[] | number[] | string[] | ListDecimalFieldRefInput<$PrismaModel>
+    notIn?: Decimal[] | DecimalJsLike[] | number[] | string[] | ListDecimalFieldRefInput<$PrismaModel>
+    lt?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    lte?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    gt?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    gte?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    not?: NestedDecimalFilter<$PrismaModel> | Decimal | DecimalJsLike | number | string
+  }
+
+  export type NestedDecimalWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    in?: Decimal[] | DecimalJsLike[] | number[] | string[] | ListDecimalFieldRefInput<$PrismaModel>
+    notIn?: Decimal[] | DecimalJsLike[] | number[] | string[] | ListDecimalFieldRefInput<$PrismaModel>
+    lt?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    lte?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    gt?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    gte?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    not?: NestedDecimalWithAggregatesFilter<$PrismaModel> | Decimal | DecimalJsLike | number | string
+    _count?: NestedIntFilter<$PrismaModel>
+    _avg?: NestedDecimalFilter<$PrismaModel>
+    _sum?: NestedDecimalFilter<$PrismaModel>
+    _min?: NestedDecimalFilter<$PrismaModel>
+    _max?: NestedDecimalFilter<$PrismaModel>
+  }
+  export type NestedJsonFilter<$PrismaModel = never> =
+    | PatchUndefined<
+        Either<Required<NestedJsonFilterBase<$PrismaModel>>, Exclude<keyof Required<NestedJsonFilterBase<$PrismaModel>>, 'path'>>,
+        Required<NestedJsonFilterBase<$PrismaModel>>
+      >
+    | OptionalFlat<Omit<Required<NestedJsonFilterBase<$PrismaModel>>, 'path'>>
+
+  export type NestedJsonFilterBase<$PrismaModel = never> = {
+    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    path?: string[]
+    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
+    string_contains?: string | StringFieldRefInput<$PrismaModel>
+    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
+    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
+    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+  }
+
+  export type NestedBigIntFilter<$PrismaModel = never> = {
+    equals?: bigint | number | BigIntFieldRefInput<$PrismaModel>
+    in?: bigint[] | number[] | ListBigIntFieldRefInput<$PrismaModel>
+    notIn?: bigint[] | number[] | ListBigIntFieldRefInput<$PrismaModel>
+    lt?: bigint | number | BigIntFieldRefInput<$PrismaModel>
+    lte?: bigint | number | BigIntFieldRefInput<$PrismaModel>
+    gt?: bigint | number | BigIntFieldRefInput<$PrismaModel>
+    gte?: bigint | number | BigIntFieldRefInput<$PrismaModel>
+    not?: NestedBigIntFilter<$PrismaModel> | bigint | number
+  }
+
+  export type NestedBigIntWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: bigint | number | BigIntFieldRefInput<$PrismaModel>
+    in?: bigint[] | number[] | ListBigIntFieldRefInput<$PrismaModel>
+    notIn?: bigint[] | number[] | ListBigIntFieldRefInput<$PrismaModel>
+    lt?: bigint | number | BigIntFieldRefInput<$PrismaModel>
+    lte?: bigint | number | BigIntFieldRefInput<$PrismaModel>
+    gt?: bigint | number | BigIntFieldRefInput<$PrismaModel>
+    gte?: bigint | number | BigIntFieldRefInput<$PrismaModel>
+    not?: NestedBigIntWithAggregatesFilter<$PrismaModel> | bigint | number
+    _count?: NestedIntFilter<$PrismaModel>
+    _avg?: NestedFloatFilter<$PrismaModel>
+    _sum?: NestedBigIntFilter<$PrismaModel>
+    _min?: NestedBigIntFilter<$PrismaModel>
+    _max?: NestedBigIntFilter<$PrismaModel>
+  }
+
+  export type NestedFloatFilter<$PrismaModel = never> = {
+    equals?: number | FloatFieldRefInput<$PrismaModel>
+    in?: number[] | ListFloatFieldRefInput<$PrismaModel>
+    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel>
+    lt?: number | FloatFieldRefInput<$PrismaModel>
+    lte?: number | FloatFieldRefInput<$PrismaModel>
+    gt?: number | FloatFieldRefInput<$PrismaModel>
+    gte?: number | FloatFieldRefInput<$PrismaModel>
+    not?: NestedFloatFilter<$PrismaModel> | number
+  }
+
+  export type NestedEnumMarketIndexTypeFilter<$PrismaModel = never> = {
+    equals?: $Enums.MarketIndexType | EnumMarketIndexTypeFieldRefInput<$PrismaModel>
+    in?: $Enums.MarketIndexType[] | ListEnumMarketIndexTypeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.MarketIndexType[] | ListEnumMarketIndexTypeFieldRefInput<$PrismaModel>
+    not?: NestedEnumMarketIndexTypeFilter<$PrismaModel> | $Enums.MarketIndexType
+  }
+
+  export type NestedEnumMarketIndexTypeWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.MarketIndexType | EnumMarketIndexTypeFieldRefInput<$PrismaModel>
+    in?: $Enums.MarketIndexType[] | ListEnumMarketIndexTypeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.MarketIndexType[] | ListEnumMarketIndexTypeFieldRefInput<$PrismaModel>
+    not?: NestedEnumMarketIndexTypeWithAggregatesFilter<$PrismaModel> | $Enums.MarketIndexType
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumMarketIndexTypeFilter<$PrismaModel>
+    _max?: NestedEnumMarketIndexTypeFilter<$PrismaModel>
+  }
+
+  export type NestedUuidNullableFilter<$PrismaModel = never> = {
+    equals?: string | StringFieldRefInput<$PrismaModel> | null
+    in?: string[] | ListStringFieldRefInput<$PrismaModel> | null
+    notIn?: string[] | ListStringFieldRefInput<$PrismaModel> | null
+    lt?: string | StringFieldRefInput<$PrismaModel>
+    lte?: string | StringFieldRefInput<$PrismaModel>
+    gt?: string | StringFieldRefInput<$PrismaModel>
+    gte?: string | StringFieldRefInput<$PrismaModel>
+    not?: NestedUuidNullableFilter<$PrismaModel> | string | null
+  }
+
+  export type NestedUuidNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: string | StringFieldRefInput<$PrismaModel> | null
+    in?: string[] | ListStringFieldRefInput<$PrismaModel> | null
+    notIn?: string[] | ListStringFieldRefInput<$PrismaModel> | null
+    lt?: string | StringFieldRefInput<$PrismaModel>
+    lte?: string | StringFieldRefInput<$PrismaModel>
+    gt?: string | StringFieldRefInput<$PrismaModel>
+    gte?: string | StringFieldRefInput<$PrismaModel>
+    not?: NestedUuidNullableWithAggregatesFilter<$PrismaModel> | string | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedStringNullableFilter<$PrismaModel>
+    _max?: NestedStringNullableFilter<$PrismaModel>
+  }
+  export type NestedJsonNullableFilter<$PrismaModel = never> =
+    | PatchUndefined<
+        Either<Required<NestedJsonNullableFilterBase<$PrismaModel>>, Exclude<keyof Required<NestedJsonNullableFilterBase<$PrismaModel>>, 'path'>>,
+        Required<NestedJsonNullableFilterBase<$PrismaModel>>
+      >
+    | OptionalFlat<Omit<Required<NestedJsonNullableFilterBase<$PrismaModel>>, 'path'>>
+
+  export type NestedJsonNullableFilterBase<$PrismaModel = never> = {
+    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    path?: string[]
+    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
+    string_contains?: string | StringFieldRefInput<$PrismaModel>
+    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
+    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
+    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+  }
+
+  export type NestedIntNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel> | null
+    in?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntNullableWithAggregatesFilter<$PrismaModel> | number | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _avg?: NestedFloatNullableFilter<$PrismaModel>
+    _sum?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedIntNullableFilter<$PrismaModel>
+    _max?: NestedIntNullableFilter<$PrismaModel>
+  }
+
+  export type NestedFloatNullableFilter<$PrismaModel = never> = {
+    equals?: number | FloatFieldRefInput<$PrismaModel> | null
+    in?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
+    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
+    lt?: number | FloatFieldRefInput<$PrismaModel>
+    lte?: number | FloatFieldRefInput<$PrismaModel>
+    gt?: number | FloatFieldRefInput<$PrismaModel>
+    gte?: number | FloatFieldRefInput<$PrismaModel>
+    not?: NestedFloatNullableFilter<$PrismaModel> | number | null
+  }
+
+  export type NestedEnumBatchJobTypeFilter<$PrismaModel = never> = {
+    equals?: $Enums.BatchJobType | EnumBatchJobTypeFieldRefInput<$PrismaModel>
+    in?: $Enums.BatchJobType[] | ListEnumBatchJobTypeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.BatchJobType[] | ListEnumBatchJobTypeFieldRefInput<$PrismaModel>
+    not?: NestedEnumBatchJobTypeFilter<$PrismaModel> | $Enums.BatchJobType
+  }
+
+  export type NestedEnumBatchJobStatusFilter<$PrismaModel = never> = {
+    equals?: $Enums.BatchJobStatus | EnumBatchJobStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.BatchJobStatus[] | ListEnumBatchJobStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.BatchJobStatus[] | ListEnumBatchJobStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumBatchJobStatusFilter<$PrismaModel> | $Enums.BatchJobStatus
+  }
+
+  export type NestedEnumBatchJobTypeWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.BatchJobType | EnumBatchJobTypeFieldRefInput<$PrismaModel>
+    in?: $Enums.BatchJobType[] | ListEnumBatchJobTypeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.BatchJobType[] | ListEnumBatchJobTypeFieldRefInput<$PrismaModel>
+    not?: NestedEnumBatchJobTypeWithAggregatesFilter<$PrismaModel> | $Enums.BatchJobType
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumBatchJobTypeFilter<$PrismaModel>
+    _max?: NestedEnumBatchJobTypeFilter<$PrismaModel>
+  }
+
+  export type NestedEnumBatchJobStatusWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.BatchJobStatus | EnumBatchJobStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.BatchJobStatus[] | ListEnumBatchJobStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.BatchJobStatus[] | ListEnumBatchJobStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumBatchJobStatusWithAggregatesFilter<$PrismaModel> | $Enums.BatchJobStatus
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumBatchJobStatusFilter<$PrismaModel>
+    _max?: NestedEnumBatchJobStatusFilter<$PrismaModel>
+  }
+
+  export type NestedIntWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel>
+    in?: number[] | ListIntFieldRefInput<$PrismaModel>
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel>
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntWithAggregatesFilter<$PrismaModel> | number
+    _count?: NestedIntFilter<$PrismaModel>
+    _avg?: NestedFloatFilter<$PrismaModel>
+    _sum?: NestedIntFilter<$PrismaModel>
+    _min?: NestedIntFilter<$PrismaModel>
+    _max?: NestedIntFilter<$PrismaModel>
+  }
+
+  export type UserWatchlistCreateWithoutUserInput = {
+    addedDate?: Date | string
+    memo?: string | null
+    deletedAt?: Date | string | null
+    company: CompanyCreateNestedOneWithoutWatchlistInput
+    tags?: WatchlistTagCreateNestedManyWithoutWatchlistInput
+  }
+
+  export type UserWatchlistUncheckedCreateWithoutUserInput = {
+    companyId: string
+    addedDate?: Date | string
+    memo?: string | null
+    deletedAt?: Date | string | null
+    tags?: WatchlistTagUncheckedCreateNestedManyWithoutWatchlistInput
+  }
+
+  export type UserWatchlistCreateOrConnectWithoutUserInput = {
+    where: UserWatchlistWhereUniqueInput
+    create: XOR<UserWatchlistCreateWithoutUserInput, UserWatchlistUncheckedCreateWithoutUserInput>
+  }
+
+  export type UserWatchlistCreateManyUserInputEnvelope = {
+    data: UserWatchlistCreateManyUserInput | UserWatchlistCreateManyUserInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type RsFilterPresetCreateWithoutUserInput = {
+    presetId?: string
+    presetName: string
+    createdAt?: Date | string
+    deletedAt?: Date | string | null
+    periods?: RsFilterPeriodCreateNestedManyWithoutPresetInput
+  }
+
+  export type RsFilterPresetUncheckedCreateWithoutUserInput = {
+    presetId?: string
+    presetName: string
+    createdAt?: Date | string
+    deletedAt?: Date | string | null
+    periods?: RsFilterPeriodUncheckedCreateNestedManyWithoutPresetInput
+  }
+
+  export type RsFilterPresetCreateOrConnectWithoutUserInput = {
+    where: RsFilterPresetWhereUniqueInput
+    create: XOR<RsFilterPresetCreateWithoutUserInput, RsFilterPresetUncheckedCreateWithoutUserInput>
+  }
+
+  export type RsFilterPresetCreateManyUserInputEnvelope = {
+    data: RsFilterPresetCreateManyUserInput | RsFilterPresetCreateManyUserInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type SearchFilterPresetCreateWithoutUserInput = {
+    filterId?: string
+    filterName: string
+    filterConfig: JsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    deletedAt?: Date | string | null
+  }
+
+  export type SearchFilterPresetUncheckedCreateWithoutUserInput = {
+    filterId?: string
+    filterName: string
+    filterConfig: JsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    deletedAt?: Date | string | null
+  }
+
+  export type SearchFilterPresetCreateOrConnectWithoutUserInput = {
+    where: SearchFilterPresetWhereUniqueInput
+    create: XOR<SearchFilterPresetCreateWithoutUserInput, SearchFilterPresetUncheckedCreateWithoutUserInput>
+  }
+
+  export type SearchFilterPresetCreateManyUserInputEnvelope = {
+    data: SearchFilterPresetCreateManyUserInput | SearchFilterPresetCreateManyUserInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type KiwoomApiCallLogCreateWithoutUserInput = {
+    logId?: string
+    apiName: string
+    stockCode?: string | null
+    requestData?: NullableJsonNullValueInput | InputJsonValue
+    responseStatus?: string | null
+    responseMessage?: string | null
+    callTimestamp?: Date | string
+    responseTimeMs?: number | null
+  }
+
+  export type KiwoomApiCallLogUncheckedCreateWithoutUserInput = {
+    logId?: string
+    apiName: string
+    stockCode?: string | null
+    requestData?: NullableJsonNullValueInput | InputJsonValue
+    responseStatus?: string | null
+    responseMessage?: string | null
+    callTimestamp?: Date | string
+    responseTimeMs?: number | null
+  }
+
+  export type KiwoomApiCallLogCreateOrConnectWithoutUserInput = {
+    where: KiwoomApiCallLogWhereUniqueInput
+    create: XOR<KiwoomApiCallLogCreateWithoutUserInput, KiwoomApiCallLogUncheckedCreateWithoutUserInput>
+  }
+
+  export type KiwoomApiCallLogCreateManyUserInputEnvelope = {
+    data: KiwoomApiCallLogCreateManyUserInput | KiwoomApiCallLogCreateManyUserInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type UserWatchlistUpsertWithWhereUniqueWithoutUserInput = {
+    where: UserWatchlistWhereUniqueInput
+    update: XOR<UserWatchlistUpdateWithoutUserInput, UserWatchlistUncheckedUpdateWithoutUserInput>
+    create: XOR<UserWatchlistCreateWithoutUserInput, UserWatchlistUncheckedCreateWithoutUserInput>
+  }
+
+  export type UserWatchlistUpdateWithWhereUniqueWithoutUserInput = {
+    where: UserWatchlistWhereUniqueInput
+    data: XOR<UserWatchlistUpdateWithoutUserInput, UserWatchlistUncheckedUpdateWithoutUserInput>
+  }
+
+  export type UserWatchlistUpdateManyWithWhereWithoutUserInput = {
+    where: UserWatchlistScalarWhereInput
+    data: XOR<UserWatchlistUpdateManyMutationInput, UserWatchlistUncheckedUpdateManyWithoutUserInput>
+  }
+
+  export type UserWatchlistScalarWhereInput = {
+    AND?: UserWatchlistScalarWhereInput | UserWatchlistScalarWhereInput[]
+    OR?: UserWatchlistScalarWhereInput[]
+    NOT?: UserWatchlistScalarWhereInput | UserWatchlistScalarWhereInput[]
+    userId?: UuidFilter<"UserWatchlist"> | string
+    companyId?: UuidFilter<"UserWatchlist"> | string
+    addedDate?: DateTimeFilter<"UserWatchlist"> | Date | string
+    memo?: StringNullableFilter<"UserWatchlist"> | string | null
+    deletedAt?: DateTimeNullableFilter<"UserWatchlist"> | Date | string | null
+  }
+
+  export type RsFilterPresetUpsertWithWhereUniqueWithoutUserInput = {
+    where: RsFilterPresetWhereUniqueInput
+    update: XOR<RsFilterPresetUpdateWithoutUserInput, RsFilterPresetUncheckedUpdateWithoutUserInput>
+    create: XOR<RsFilterPresetCreateWithoutUserInput, RsFilterPresetUncheckedCreateWithoutUserInput>
+  }
+
+  export type RsFilterPresetUpdateWithWhereUniqueWithoutUserInput = {
+    where: RsFilterPresetWhereUniqueInput
+    data: XOR<RsFilterPresetUpdateWithoutUserInput, RsFilterPresetUncheckedUpdateWithoutUserInput>
+  }
+
+  export type RsFilterPresetUpdateManyWithWhereWithoutUserInput = {
+    where: RsFilterPresetScalarWhereInput
+    data: XOR<RsFilterPresetUpdateManyMutationInput, RsFilterPresetUncheckedUpdateManyWithoutUserInput>
+  }
+
+  export type RsFilterPresetScalarWhereInput = {
+    AND?: RsFilterPresetScalarWhereInput | RsFilterPresetScalarWhereInput[]
+    OR?: RsFilterPresetScalarWhereInput[]
+    NOT?: RsFilterPresetScalarWhereInput | RsFilterPresetScalarWhereInput[]
+    presetId?: UuidFilter<"RsFilterPreset"> | string
+    userId?: UuidFilter<"RsFilterPreset"> | string
+    presetName?: StringFilter<"RsFilterPreset"> | string
+    createdAt?: DateTimeFilter<"RsFilterPreset"> | Date | string
+    deletedAt?: DateTimeNullableFilter<"RsFilterPreset"> | Date | string | null
+  }
+
+  export type SearchFilterPresetUpsertWithWhereUniqueWithoutUserInput = {
+    where: SearchFilterPresetWhereUniqueInput
+    update: XOR<SearchFilterPresetUpdateWithoutUserInput, SearchFilterPresetUncheckedUpdateWithoutUserInput>
+    create: XOR<SearchFilterPresetCreateWithoutUserInput, SearchFilterPresetUncheckedCreateWithoutUserInput>
+  }
+
+  export type SearchFilterPresetUpdateWithWhereUniqueWithoutUserInput = {
+    where: SearchFilterPresetWhereUniqueInput
+    data: XOR<SearchFilterPresetUpdateWithoutUserInput, SearchFilterPresetUncheckedUpdateWithoutUserInput>
+  }
+
+  export type SearchFilterPresetUpdateManyWithWhereWithoutUserInput = {
+    where: SearchFilterPresetScalarWhereInput
+    data: XOR<SearchFilterPresetUpdateManyMutationInput, SearchFilterPresetUncheckedUpdateManyWithoutUserInput>
+  }
+
+  export type SearchFilterPresetScalarWhereInput = {
+    AND?: SearchFilterPresetScalarWhereInput | SearchFilterPresetScalarWhereInput[]
+    OR?: SearchFilterPresetScalarWhereInput[]
+    NOT?: SearchFilterPresetScalarWhereInput | SearchFilterPresetScalarWhereInput[]
+    filterId?: UuidFilter<"SearchFilterPreset"> | string
+    userId?: UuidFilter<"SearchFilterPreset"> | string
+    filterName?: StringFilter<"SearchFilterPreset"> | string
+    filterConfig?: JsonFilter<"SearchFilterPreset">
+    createdAt?: DateTimeFilter<"SearchFilterPreset"> | Date | string
+    updatedAt?: DateTimeFilter<"SearchFilterPreset"> | Date | string
+    deletedAt?: DateTimeNullableFilter<"SearchFilterPreset"> | Date | string | null
+  }
+
+  export type KiwoomApiCallLogUpsertWithWhereUniqueWithoutUserInput = {
+    where: KiwoomApiCallLogWhereUniqueInput
+    update: XOR<KiwoomApiCallLogUpdateWithoutUserInput, KiwoomApiCallLogUncheckedUpdateWithoutUserInput>
+    create: XOR<KiwoomApiCallLogCreateWithoutUserInput, KiwoomApiCallLogUncheckedCreateWithoutUserInput>
+  }
+
+  export type KiwoomApiCallLogUpdateWithWhereUniqueWithoutUserInput = {
+    where: KiwoomApiCallLogWhereUniqueInput
+    data: XOR<KiwoomApiCallLogUpdateWithoutUserInput, KiwoomApiCallLogUncheckedUpdateWithoutUserInput>
+  }
+
+  export type KiwoomApiCallLogUpdateManyWithWhereWithoutUserInput = {
+    where: KiwoomApiCallLogScalarWhereInput
+    data: XOR<KiwoomApiCallLogUpdateManyMutationInput, KiwoomApiCallLogUncheckedUpdateManyWithoutUserInput>
+  }
+
+  export type KiwoomApiCallLogScalarWhereInput = {
+    AND?: KiwoomApiCallLogScalarWhereInput | KiwoomApiCallLogScalarWhereInput[]
+    OR?: KiwoomApiCallLogScalarWhereInput[]
+    NOT?: KiwoomApiCallLogScalarWhereInput | KiwoomApiCallLogScalarWhereInput[]
+    logId?: UuidFilter<"KiwoomApiCallLog"> | string
+    userId?: UuidNullableFilter<"KiwoomApiCallLog"> | string | null
+    apiName?: StringFilter<"KiwoomApiCallLog"> | string
+    stockCode?: StringNullableFilter<"KiwoomApiCallLog"> | string | null
+    requestData?: JsonNullableFilter<"KiwoomApiCallLog">
+    responseStatus?: StringNullableFilter<"KiwoomApiCallLog"> | string | null
+    responseMessage?: StringNullableFilter<"KiwoomApiCallLog"> | string | null
+    callTimestamp?: DateTimeFilter<"KiwoomApiCallLog"> | Date | string
+    responseTimeMs?: IntNullableFilter<"KiwoomApiCallLog"> | number | null
+  }
+
+  export type UserWatchlistCreateWithoutCompanyInput = {
+    addedDate?: Date | string
+    memo?: string | null
+    deletedAt?: Date | string | null
+    user: UserCreateNestedOneWithoutWatchlistInput
+    tags?: WatchlistTagCreateNestedManyWithoutWatchlistInput
+  }
+
+  export type UserWatchlistUncheckedCreateWithoutCompanyInput = {
+    userId: string
+    addedDate?: Date | string
+    memo?: string | null
+    deletedAt?: Date | string | null
+    tags?: WatchlistTagUncheckedCreateNestedManyWithoutWatchlistInput
+  }
+
+  export type UserWatchlistCreateOrConnectWithoutCompanyInput = {
+    where: UserWatchlistWhereUniqueInput
+    create: XOR<UserWatchlistCreateWithoutCompanyInput, UserWatchlistUncheckedCreateWithoutCompanyInput>
+  }
+
+  export type UserWatchlistCreateManyCompanyInputEnvelope = {
+    data: UserWatchlistCreateManyCompanyInput | UserWatchlistCreateManyCompanyInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type StockPriceHistoryCreateWithoutCompanyInput = {
+    priceId?: string
+    tradeDate: Date | string
+    openPrice: Decimal | DecimalJsLike | number | string
+    highPrice: Decimal | DecimalJsLike | number | string
+    lowPrice: Decimal | DecimalJsLike | number | string
+    closePrice: Decimal | DecimalJsLike | number | string
+    volume: bigint | number
+    tradingValue: bigint | number
+    createdAt?: Date | string
+  }
+
+  export type StockPriceHistoryUncheckedCreateWithoutCompanyInput = {
+    priceId?: string
+    tradeDate: Date | string
+    openPrice: Decimal | DecimalJsLike | number | string
+    highPrice: Decimal | DecimalJsLike | number | string
+    lowPrice: Decimal | DecimalJsLike | number | string
+    closePrice: Decimal | DecimalJsLike | number | string
+    volume: bigint | number
+    tradingValue: bigint | number
+    createdAt?: Date | string
+  }
+
+  export type StockPriceHistoryCreateOrConnectWithoutCompanyInput = {
+    where: StockPriceHistoryWhereUniqueInput
+    create: XOR<StockPriceHistoryCreateWithoutCompanyInput, StockPriceHistoryUncheckedCreateWithoutCompanyInput>
+  }
+
+  export type StockPriceHistoryCreateManyCompanyInputEnvelope = {
+    data: StockPriceHistoryCreateManyCompanyInput | StockPriceHistoryCreateManyCompanyInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type UserWatchlistUpsertWithWhereUniqueWithoutCompanyInput = {
+    where: UserWatchlistWhereUniqueInput
+    update: XOR<UserWatchlistUpdateWithoutCompanyInput, UserWatchlistUncheckedUpdateWithoutCompanyInput>
+    create: XOR<UserWatchlistCreateWithoutCompanyInput, UserWatchlistUncheckedCreateWithoutCompanyInput>
+  }
+
+  export type UserWatchlistUpdateWithWhereUniqueWithoutCompanyInput = {
+    where: UserWatchlistWhereUniqueInput
+    data: XOR<UserWatchlistUpdateWithoutCompanyInput, UserWatchlistUncheckedUpdateWithoutCompanyInput>
+  }
+
+  export type UserWatchlistUpdateManyWithWhereWithoutCompanyInput = {
+    where: UserWatchlistScalarWhereInput
+    data: XOR<UserWatchlistUpdateManyMutationInput, UserWatchlistUncheckedUpdateManyWithoutCompanyInput>
+  }
+
+  export type StockPriceHistoryUpsertWithWhereUniqueWithoutCompanyInput = {
+    where: StockPriceHistoryWhereUniqueInput
+    update: XOR<StockPriceHistoryUpdateWithoutCompanyInput, StockPriceHistoryUncheckedUpdateWithoutCompanyInput>
+    create: XOR<StockPriceHistoryCreateWithoutCompanyInput, StockPriceHistoryUncheckedCreateWithoutCompanyInput>
+  }
+
+  export type StockPriceHistoryUpdateWithWhereUniqueWithoutCompanyInput = {
+    where: StockPriceHistoryWhereUniqueInput
+    data: XOR<StockPriceHistoryUpdateWithoutCompanyInput, StockPriceHistoryUncheckedUpdateWithoutCompanyInput>
+  }
+
+  export type StockPriceHistoryUpdateManyWithWhereWithoutCompanyInput = {
+    where: StockPriceHistoryScalarWhereInput
+    data: XOR<StockPriceHistoryUpdateManyMutationInput, StockPriceHistoryUncheckedUpdateManyWithoutCompanyInput>
+  }
+
+  export type StockPriceHistoryScalarWhereInput = {
+    AND?: StockPriceHistoryScalarWhereInput | StockPriceHistoryScalarWhereInput[]
+    OR?: StockPriceHistoryScalarWhereInput[]
+    NOT?: StockPriceHistoryScalarWhereInput | StockPriceHistoryScalarWhereInput[]
+    priceId?: UuidFilter<"StockPriceHistory"> | string
+    companyId?: UuidFilter<"StockPriceHistory"> | string
+    tradeDate?: DateTimeFilter<"StockPriceHistory"> | Date | string
+    openPrice?: DecimalFilter<"StockPriceHistory"> | Decimal | DecimalJsLike | number | string
+    highPrice?: DecimalFilter<"StockPriceHistory"> | Decimal | DecimalJsLike | number | string
+    lowPrice?: DecimalFilter<"StockPriceHistory"> | Decimal | DecimalJsLike | number | string
+    closePrice?: DecimalFilter<"StockPriceHistory"> | Decimal | DecimalJsLike | number | string
+    volume?: BigIntFilter<"StockPriceHistory"> | bigint | number
+    tradingValue?: BigIntFilter<"StockPriceHistory"> | bigint | number
+    createdAt?: DateTimeFilter<"StockPriceHistory"> | Date | string
+  }
+
+  export type UserCreateWithoutWatchlistInput = {
+    userId?: string
+    username: string
+    email: string
+    password: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    deletedAt?: Date | string | null
+    rsFilterPresets?: RsFilterPresetCreateNestedManyWithoutUserInput
+    searchFilterPresets?: SearchFilterPresetCreateNestedManyWithoutUserInput
+    apiCallLogs?: KiwoomApiCallLogCreateNestedManyWithoutUserInput
+  }
+
+  export type UserUncheckedCreateWithoutWatchlistInput = {
+    userId?: string
+    username: string
+    email: string
+    password: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    deletedAt?: Date | string | null
+    rsFilterPresets?: RsFilterPresetUncheckedCreateNestedManyWithoutUserInput
+    searchFilterPresets?: SearchFilterPresetUncheckedCreateNestedManyWithoutUserInput
+    apiCallLogs?: KiwoomApiCallLogUncheckedCreateNestedManyWithoutUserInput
+  }
+
+  export type UserCreateOrConnectWithoutWatchlistInput = {
+    where: UserWhereUniqueInput
+    create: XOR<UserCreateWithoutWatchlistInput, UserUncheckedCreateWithoutWatchlistInput>
+  }
+
+  export type CompanyCreateWithoutWatchlistInput = {
+    companyId?: string
+    companyName: string
+    stockCode: string
+    marketType: $Enums.MarketType
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    deletedAt?: Date | string | null
+    priceHistory?: StockPriceHistoryCreateNestedManyWithoutCompanyInput
+  }
+
+  export type CompanyUncheckedCreateWithoutWatchlistInput = {
+    companyId?: string
+    companyName: string
+    stockCode: string
+    marketType: $Enums.MarketType
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    deletedAt?: Date | string | null
+    priceHistory?: StockPriceHistoryUncheckedCreateNestedManyWithoutCompanyInput
+  }
+
+  export type CompanyCreateOrConnectWithoutWatchlistInput = {
+    where: CompanyWhereUniqueInput
+    create: XOR<CompanyCreateWithoutWatchlistInput, CompanyUncheckedCreateWithoutWatchlistInput>
+  }
+
+  export type WatchlistTagCreateWithoutWatchlistInput = {
+    createdAt?: Date | string
+    deletedAt?: Date | string | null
+    tag: TagCreateNestedOneWithoutWatchlistTagsInput
+  }
+
+  export type WatchlistTagUncheckedCreateWithoutWatchlistInput = {
+    tagId: string
+    createdAt?: Date | string
+    deletedAt?: Date | string | null
+  }
+
+  export type WatchlistTagCreateOrConnectWithoutWatchlistInput = {
+    where: WatchlistTagWhereUniqueInput
+    create: XOR<WatchlistTagCreateWithoutWatchlistInput, WatchlistTagUncheckedCreateWithoutWatchlistInput>
+  }
+
+  export type WatchlistTagCreateManyWatchlistInputEnvelope = {
+    data: WatchlistTagCreateManyWatchlistInput | WatchlistTagCreateManyWatchlistInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type UserUpsertWithoutWatchlistInput = {
+    update: XOR<UserUpdateWithoutWatchlistInput, UserUncheckedUpdateWithoutWatchlistInput>
+    create: XOR<UserCreateWithoutWatchlistInput, UserUncheckedCreateWithoutWatchlistInput>
+    where?: UserWhereInput
+  }
+
+  export type UserUpdateToOneWithWhereWithoutWatchlistInput = {
+    where?: UserWhereInput
+    data: XOR<UserUpdateWithoutWatchlistInput, UserUncheckedUpdateWithoutWatchlistInput>
+  }
+
+  export type UserUpdateWithoutWatchlistInput = {
+    userId?: StringFieldUpdateOperationsInput | string
+    username?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    password?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    rsFilterPresets?: RsFilterPresetUpdateManyWithoutUserNestedInput
+    searchFilterPresets?: SearchFilterPresetUpdateManyWithoutUserNestedInput
+    apiCallLogs?: KiwoomApiCallLogUpdateManyWithoutUserNestedInput
+  }
+
+  export type UserUncheckedUpdateWithoutWatchlistInput = {
+    userId?: StringFieldUpdateOperationsInput | string
+    username?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    password?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    rsFilterPresets?: RsFilterPresetUncheckedUpdateManyWithoutUserNestedInput
+    searchFilterPresets?: SearchFilterPresetUncheckedUpdateManyWithoutUserNestedInput
+    apiCallLogs?: KiwoomApiCallLogUncheckedUpdateManyWithoutUserNestedInput
+  }
+
+  export type CompanyUpsertWithoutWatchlistInput = {
+    update: XOR<CompanyUpdateWithoutWatchlistInput, CompanyUncheckedUpdateWithoutWatchlistInput>
+    create: XOR<CompanyCreateWithoutWatchlistInput, CompanyUncheckedCreateWithoutWatchlistInput>
+    where?: CompanyWhereInput
+  }
+
+  export type CompanyUpdateToOneWithWhereWithoutWatchlistInput = {
+    where?: CompanyWhereInput
+    data: XOR<CompanyUpdateWithoutWatchlistInput, CompanyUncheckedUpdateWithoutWatchlistInput>
+  }
+
+  export type CompanyUpdateWithoutWatchlistInput = {
+    companyId?: StringFieldUpdateOperationsInput | string
+    companyName?: StringFieldUpdateOperationsInput | string
+    stockCode?: StringFieldUpdateOperationsInput | string
+    marketType?: EnumMarketTypeFieldUpdateOperationsInput | $Enums.MarketType
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    priceHistory?: StockPriceHistoryUpdateManyWithoutCompanyNestedInput
+  }
+
+  export type CompanyUncheckedUpdateWithoutWatchlistInput = {
+    companyId?: StringFieldUpdateOperationsInput | string
+    companyName?: StringFieldUpdateOperationsInput | string
+    stockCode?: StringFieldUpdateOperationsInput | string
+    marketType?: EnumMarketTypeFieldUpdateOperationsInput | $Enums.MarketType
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    priceHistory?: StockPriceHistoryUncheckedUpdateManyWithoutCompanyNestedInput
+  }
+
+  export type WatchlistTagUpsertWithWhereUniqueWithoutWatchlistInput = {
+    where: WatchlistTagWhereUniqueInput
+    update: XOR<WatchlistTagUpdateWithoutWatchlistInput, WatchlistTagUncheckedUpdateWithoutWatchlistInput>
+    create: XOR<WatchlistTagCreateWithoutWatchlistInput, WatchlistTagUncheckedCreateWithoutWatchlistInput>
+  }
+
+  export type WatchlistTagUpdateWithWhereUniqueWithoutWatchlistInput = {
+    where: WatchlistTagWhereUniqueInput
+    data: XOR<WatchlistTagUpdateWithoutWatchlistInput, WatchlistTagUncheckedUpdateWithoutWatchlistInput>
+  }
+
+  export type WatchlistTagUpdateManyWithWhereWithoutWatchlistInput = {
+    where: WatchlistTagScalarWhereInput
+    data: XOR<WatchlistTagUpdateManyMutationInput, WatchlistTagUncheckedUpdateManyWithoutWatchlistInput>
+  }
+
+  export type WatchlistTagScalarWhereInput = {
+    AND?: WatchlistTagScalarWhereInput | WatchlistTagScalarWhereInput[]
+    OR?: WatchlistTagScalarWhereInput[]
+    NOT?: WatchlistTagScalarWhereInput | WatchlistTagScalarWhereInput[]
+    userId?: UuidFilter<"WatchlistTag"> | string
+    companyId?: UuidFilter<"WatchlistTag"> | string
+    tagId?: UuidFilter<"WatchlistTag"> | string
+    createdAt?: DateTimeFilter<"WatchlistTag"> | Date | string
+    deletedAt?: DateTimeNullableFilter<"WatchlistTag"> | Date | string | null
+  }
+
+  export type WatchlistTagCreateWithoutTagInput = {
+    createdAt?: Date | string
+    deletedAt?: Date | string | null
+    watchlist: UserWatchlistCreateNestedOneWithoutTagsInput
+  }
+
+  export type WatchlistTagUncheckedCreateWithoutTagInput = {
+    userId: string
+    companyId: string
+    createdAt?: Date | string
+    deletedAt?: Date | string | null
+  }
+
+  export type WatchlistTagCreateOrConnectWithoutTagInput = {
+    where: WatchlistTagWhereUniqueInput
+    create: XOR<WatchlistTagCreateWithoutTagInput, WatchlistTagUncheckedCreateWithoutTagInput>
+  }
+
+  export type WatchlistTagCreateManyTagInputEnvelope = {
+    data: WatchlistTagCreateManyTagInput | WatchlistTagCreateManyTagInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type WatchlistTagUpsertWithWhereUniqueWithoutTagInput = {
+    where: WatchlistTagWhereUniqueInput
+    update: XOR<WatchlistTagUpdateWithoutTagInput, WatchlistTagUncheckedUpdateWithoutTagInput>
+    create: XOR<WatchlistTagCreateWithoutTagInput, WatchlistTagUncheckedCreateWithoutTagInput>
+  }
+
+  export type WatchlistTagUpdateWithWhereUniqueWithoutTagInput = {
+    where: WatchlistTagWhereUniqueInput
+    data: XOR<WatchlistTagUpdateWithoutTagInput, WatchlistTagUncheckedUpdateWithoutTagInput>
+  }
+
+  export type WatchlistTagUpdateManyWithWhereWithoutTagInput = {
+    where: WatchlistTagScalarWhereInput
+    data: XOR<WatchlistTagUpdateManyMutationInput, WatchlistTagUncheckedUpdateManyWithoutTagInput>
+  }
+
+  export type UserWatchlistCreateWithoutTagsInput = {
+    addedDate?: Date | string
+    memo?: string | null
+    deletedAt?: Date | string | null
+    user: UserCreateNestedOneWithoutWatchlistInput
+    company: CompanyCreateNestedOneWithoutWatchlistInput
+  }
+
+  export type UserWatchlistUncheckedCreateWithoutTagsInput = {
+    userId: string
+    companyId: string
+    addedDate?: Date | string
+    memo?: string | null
+    deletedAt?: Date | string | null
+  }
+
+  export type UserWatchlistCreateOrConnectWithoutTagsInput = {
+    where: UserWatchlistWhereUniqueInput
+    create: XOR<UserWatchlistCreateWithoutTagsInput, UserWatchlistUncheckedCreateWithoutTagsInput>
+  }
+
+  export type TagCreateWithoutWatchlistTagsInput = {
+    tagId?: string
+    tagName: string
+    createdAt?: Date | string
+    deletedAt?: Date | string | null
+  }
+
+  export type TagUncheckedCreateWithoutWatchlistTagsInput = {
+    tagId?: string
+    tagName: string
+    createdAt?: Date | string
+    deletedAt?: Date | string | null
+  }
+
+  export type TagCreateOrConnectWithoutWatchlistTagsInput = {
+    where: TagWhereUniqueInput
+    create: XOR<TagCreateWithoutWatchlistTagsInput, TagUncheckedCreateWithoutWatchlistTagsInput>
+  }
+
+  export type UserWatchlistUpsertWithoutTagsInput = {
+    update: XOR<UserWatchlistUpdateWithoutTagsInput, UserWatchlistUncheckedUpdateWithoutTagsInput>
+    create: XOR<UserWatchlistCreateWithoutTagsInput, UserWatchlistUncheckedCreateWithoutTagsInput>
+    where?: UserWatchlistWhereInput
+  }
+
+  export type UserWatchlistUpdateToOneWithWhereWithoutTagsInput = {
+    where?: UserWatchlistWhereInput
+    data: XOR<UserWatchlistUpdateWithoutTagsInput, UserWatchlistUncheckedUpdateWithoutTagsInput>
+  }
+
+  export type UserWatchlistUpdateWithoutTagsInput = {
+    addedDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    memo?: NullableStringFieldUpdateOperationsInput | string | null
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    user?: UserUpdateOneRequiredWithoutWatchlistNestedInput
+    company?: CompanyUpdateOneRequiredWithoutWatchlistNestedInput
+  }
+
+  export type UserWatchlistUncheckedUpdateWithoutTagsInput = {
+    userId?: StringFieldUpdateOperationsInput | string
+    companyId?: StringFieldUpdateOperationsInput | string
+    addedDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    memo?: NullableStringFieldUpdateOperationsInput | string | null
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
+  export type TagUpsertWithoutWatchlistTagsInput = {
+    update: XOR<TagUpdateWithoutWatchlistTagsInput, TagUncheckedUpdateWithoutWatchlistTagsInput>
+    create: XOR<TagCreateWithoutWatchlistTagsInput, TagUncheckedCreateWithoutWatchlistTagsInput>
+    where?: TagWhereInput
+  }
+
+  export type TagUpdateToOneWithWhereWithoutWatchlistTagsInput = {
+    where?: TagWhereInput
+    data: XOR<TagUpdateWithoutWatchlistTagsInput, TagUncheckedUpdateWithoutWatchlistTagsInput>
+  }
+
+  export type TagUpdateWithoutWatchlistTagsInput = {
+    tagId?: StringFieldUpdateOperationsInput | string
+    tagName?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
+  export type TagUncheckedUpdateWithoutWatchlistTagsInput = {
+    tagId?: StringFieldUpdateOperationsInput | string
+    tagName?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
+  export type UserCreateWithoutRsFilterPresetsInput = {
+    userId?: string
+    username: string
+    email: string
+    password: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    deletedAt?: Date | string | null
+    watchlist?: UserWatchlistCreateNestedManyWithoutUserInput
+    searchFilterPresets?: SearchFilterPresetCreateNestedManyWithoutUserInput
+    apiCallLogs?: KiwoomApiCallLogCreateNestedManyWithoutUserInput
+  }
+
+  export type UserUncheckedCreateWithoutRsFilterPresetsInput = {
+    userId?: string
+    username: string
+    email: string
+    password: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    deletedAt?: Date | string | null
+    watchlist?: UserWatchlistUncheckedCreateNestedManyWithoutUserInput
+    searchFilterPresets?: SearchFilterPresetUncheckedCreateNestedManyWithoutUserInput
+    apiCallLogs?: KiwoomApiCallLogUncheckedCreateNestedManyWithoutUserInput
+  }
+
+  export type UserCreateOrConnectWithoutRsFilterPresetsInput = {
+    where: UserWhereUniqueInput
+    create: XOR<UserCreateWithoutRsFilterPresetsInput, UserUncheckedCreateWithoutRsFilterPresetsInput>
+  }
+
+  export type RsFilterPeriodCreateWithoutPresetInput = {
+    periodId?: string
+    startDate: Date | string
+    endDate: Date | string
+    weightRatio: Decimal | DecimalJsLike | number | string
+    createdAt?: Date | string
+    deletedAt?: Date | string | null
+  }
+
+  export type RsFilterPeriodUncheckedCreateWithoutPresetInput = {
+    periodId?: string
+    startDate: Date | string
+    endDate: Date | string
+    weightRatio: Decimal | DecimalJsLike | number | string
+    createdAt?: Date | string
+    deletedAt?: Date | string | null
+  }
+
+  export type RsFilterPeriodCreateOrConnectWithoutPresetInput = {
+    where: RsFilterPeriodWhereUniqueInput
+    create: XOR<RsFilterPeriodCreateWithoutPresetInput, RsFilterPeriodUncheckedCreateWithoutPresetInput>
+  }
+
+  export type RsFilterPeriodCreateManyPresetInputEnvelope = {
+    data: RsFilterPeriodCreateManyPresetInput | RsFilterPeriodCreateManyPresetInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type UserUpsertWithoutRsFilterPresetsInput = {
+    update: XOR<UserUpdateWithoutRsFilterPresetsInput, UserUncheckedUpdateWithoutRsFilterPresetsInput>
+    create: XOR<UserCreateWithoutRsFilterPresetsInput, UserUncheckedCreateWithoutRsFilterPresetsInput>
+    where?: UserWhereInput
+  }
+
+  export type UserUpdateToOneWithWhereWithoutRsFilterPresetsInput = {
+    where?: UserWhereInput
+    data: XOR<UserUpdateWithoutRsFilterPresetsInput, UserUncheckedUpdateWithoutRsFilterPresetsInput>
+  }
+
+  export type UserUpdateWithoutRsFilterPresetsInput = {
+    userId?: StringFieldUpdateOperationsInput | string
+    username?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    password?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    watchlist?: UserWatchlistUpdateManyWithoutUserNestedInput
+    searchFilterPresets?: SearchFilterPresetUpdateManyWithoutUserNestedInput
+    apiCallLogs?: KiwoomApiCallLogUpdateManyWithoutUserNestedInput
+  }
+
+  export type UserUncheckedUpdateWithoutRsFilterPresetsInput = {
+    userId?: StringFieldUpdateOperationsInput | string
+    username?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    password?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    watchlist?: UserWatchlistUncheckedUpdateManyWithoutUserNestedInput
+    searchFilterPresets?: SearchFilterPresetUncheckedUpdateManyWithoutUserNestedInput
+    apiCallLogs?: KiwoomApiCallLogUncheckedUpdateManyWithoutUserNestedInput
+  }
+
+  export type RsFilterPeriodUpsertWithWhereUniqueWithoutPresetInput = {
+    where: RsFilterPeriodWhereUniqueInput
+    update: XOR<RsFilterPeriodUpdateWithoutPresetInput, RsFilterPeriodUncheckedUpdateWithoutPresetInput>
+    create: XOR<RsFilterPeriodCreateWithoutPresetInput, RsFilterPeriodUncheckedCreateWithoutPresetInput>
+  }
+
+  export type RsFilterPeriodUpdateWithWhereUniqueWithoutPresetInput = {
+    where: RsFilterPeriodWhereUniqueInput
+    data: XOR<RsFilterPeriodUpdateWithoutPresetInput, RsFilterPeriodUncheckedUpdateWithoutPresetInput>
+  }
+
+  export type RsFilterPeriodUpdateManyWithWhereWithoutPresetInput = {
+    where: RsFilterPeriodScalarWhereInput
+    data: XOR<RsFilterPeriodUpdateManyMutationInput, RsFilterPeriodUncheckedUpdateManyWithoutPresetInput>
+  }
+
+  export type RsFilterPeriodScalarWhereInput = {
+    AND?: RsFilterPeriodScalarWhereInput | RsFilterPeriodScalarWhereInput[]
+    OR?: RsFilterPeriodScalarWhereInput[]
+    NOT?: RsFilterPeriodScalarWhereInput | RsFilterPeriodScalarWhereInput[]
+    periodId?: UuidFilter<"RsFilterPeriod"> | string
+    presetId?: UuidFilter<"RsFilterPeriod"> | string
+    startDate?: DateTimeFilter<"RsFilterPeriod"> | Date | string
+    endDate?: DateTimeFilter<"RsFilterPeriod"> | Date | string
+    weightRatio?: DecimalFilter<"RsFilterPeriod"> | Decimal | DecimalJsLike | number | string
+    createdAt?: DateTimeFilter<"RsFilterPeriod"> | Date | string
+    deletedAt?: DateTimeNullableFilter<"RsFilterPeriod"> | Date | string | null
+  }
+
+  export type RsFilterPresetCreateWithoutPeriodsInput = {
+    presetId?: string
+    presetName: string
+    createdAt?: Date | string
+    deletedAt?: Date | string | null
+    user: UserCreateNestedOneWithoutRsFilterPresetsInput
+  }
+
+  export type RsFilterPresetUncheckedCreateWithoutPeriodsInput = {
+    presetId?: string
+    userId: string
+    presetName: string
+    createdAt?: Date | string
+    deletedAt?: Date | string | null
+  }
+
+  export type RsFilterPresetCreateOrConnectWithoutPeriodsInput = {
+    where: RsFilterPresetWhereUniqueInput
+    create: XOR<RsFilterPresetCreateWithoutPeriodsInput, RsFilterPresetUncheckedCreateWithoutPeriodsInput>
+  }
+
+  export type RsFilterPresetUpsertWithoutPeriodsInput = {
+    update: XOR<RsFilterPresetUpdateWithoutPeriodsInput, RsFilterPresetUncheckedUpdateWithoutPeriodsInput>
+    create: XOR<RsFilterPresetCreateWithoutPeriodsInput, RsFilterPresetUncheckedCreateWithoutPeriodsInput>
+    where?: RsFilterPresetWhereInput
+  }
+
+  export type RsFilterPresetUpdateToOneWithWhereWithoutPeriodsInput = {
+    where?: RsFilterPresetWhereInput
+    data: XOR<RsFilterPresetUpdateWithoutPeriodsInput, RsFilterPresetUncheckedUpdateWithoutPeriodsInput>
+  }
+
+  export type RsFilterPresetUpdateWithoutPeriodsInput = {
+    presetId?: StringFieldUpdateOperationsInput | string
+    presetName?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    user?: UserUpdateOneRequiredWithoutRsFilterPresetsNestedInput
+  }
+
+  export type RsFilterPresetUncheckedUpdateWithoutPeriodsInput = {
+    presetId?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    presetName?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
+  export type UserCreateWithoutSearchFilterPresetsInput = {
+    userId?: string
+    username: string
+    email: string
+    password: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    deletedAt?: Date | string | null
+    watchlist?: UserWatchlistCreateNestedManyWithoutUserInput
+    rsFilterPresets?: RsFilterPresetCreateNestedManyWithoutUserInput
+    apiCallLogs?: KiwoomApiCallLogCreateNestedManyWithoutUserInput
+  }
+
+  export type UserUncheckedCreateWithoutSearchFilterPresetsInput = {
+    userId?: string
+    username: string
+    email: string
+    password: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    deletedAt?: Date | string | null
+    watchlist?: UserWatchlistUncheckedCreateNestedManyWithoutUserInput
+    rsFilterPresets?: RsFilterPresetUncheckedCreateNestedManyWithoutUserInput
+    apiCallLogs?: KiwoomApiCallLogUncheckedCreateNestedManyWithoutUserInput
+  }
+
+  export type UserCreateOrConnectWithoutSearchFilterPresetsInput = {
+    where: UserWhereUniqueInput
+    create: XOR<UserCreateWithoutSearchFilterPresetsInput, UserUncheckedCreateWithoutSearchFilterPresetsInput>
+  }
+
+  export type UserUpsertWithoutSearchFilterPresetsInput = {
+    update: XOR<UserUpdateWithoutSearchFilterPresetsInput, UserUncheckedUpdateWithoutSearchFilterPresetsInput>
+    create: XOR<UserCreateWithoutSearchFilterPresetsInput, UserUncheckedCreateWithoutSearchFilterPresetsInput>
+    where?: UserWhereInput
+  }
+
+  export type UserUpdateToOneWithWhereWithoutSearchFilterPresetsInput = {
+    where?: UserWhereInput
+    data: XOR<UserUpdateWithoutSearchFilterPresetsInput, UserUncheckedUpdateWithoutSearchFilterPresetsInput>
+  }
+
+  export type UserUpdateWithoutSearchFilterPresetsInput = {
+    userId?: StringFieldUpdateOperationsInput | string
+    username?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    password?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    watchlist?: UserWatchlistUpdateManyWithoutUserNestedInput
+    rsFilterPresets?: RsFilterPresetUpdateManyWithoutUserNestedInput
+    apiCallLogs?: KiwoomApiCallLogUpdateManyWithoutUserNestedInput
+  }
+
+  export type UserUncheckedUpdateWithoutSearchFilterPresetsInput = {
+    userId?: StringFieldUpdateOperationsInput | string
+    username?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    password?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    watchlist?: UserWatchlistUncheckedUpdateManyWithoutUserNestedInput
+    rsFilterPresets?: RsFilterPresetUncheckedUpdateManyWithoutUserNestedInput
+    apiCallLogs?: KiwoomApiCallLogUncheckedUpdateManyWithoutUserNestedInput
+  }
+
+  export type CompanyCreateWithoutPriceHistoryInput = {
+    companyId?: string
+    companyName: string
+    stockCode: string
+    marketType: $Enums.MarketType
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    deletedAt?: Date | string | null
+    watchlist?: UserWatchlistCreateNestedManyWithoutCompanyInput
+  }
+
+  export type CompanyUncheckedCreateWithoutPriceHistoryInput = {
+    companyId?: string
+    companyName: string
+    stockCode: string
+    marketType: $Enums.MarketType
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    deletedAt?: Date | string | null
+    watchlist?: UserWatchlistUncheckedCreateNestedManyWithoutCompanyInput
+  }
+
+  export type CompanyCreateOrConnectWithoutPriceHistoryInput = {
+    where: CompanyWhereUniqueInput
+    create: XOR<CompanyCreateWithoutPriceHistoryInput, CompanyUncheckedCreateWithoutPriceHistoryInput>
+  }
+
+  export type CompanyUpsertWithoutPriceHistoryInput = {
+    update: XOR<CompanyUpdateWithoutPriceHistoryInput, CompanyUncheckedUpdateWithoutPriceHistoryInput>
+    create: XOR<CompanyCreateWithoutPriceHistoryInput, CompanyUncheckedCreateWithoutPriceHistoryInput>
+    where?: CompanyWhereInput
+  }
+
+  export type CompanyUpdateToOneWithWhereWithoutPriceHistoryInput = {
+    where?: CompanyWhereInput
+    data: XOR<CompanyUpdateWithoutPriceHistoryInput, CompanyUncheckedUpdateWithoutPriceHistoryInput>
+  }
+
+  export type CompanyUpdateWithoutPriceHistoryInput = {
+    companyId?: StringFieldUpdateOperationsInput | string
+    companyName?: StringFieldUpdateOperationsInput | string
+    stockCode?: StringFieldUpdateOperationsInput | string
+    marketType?: EnumMarketTypeFieldUpdateOperationsInput | $Enums.MarketType
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    watchlist?: UserWatchlistUpdateManyWithoutCompanyNestedInput
+  }
+
+  export type CompanyUncheckedUpdateWithoutPriceHistoryInput = {
+    companyId?: StringFieldUpdateOperationsInput | string
+    companyName?: StringFieldUpdateOperationsInput | string
+    stockCode?: StringFieldUpdateOperationsInput | string
+    marketType?: EnumMarketTypeFieldUpdateOperationsInput | $Enums.MarketType
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    watchlist?: UserWatchlistUncheckedUpdateManyWithoutCompanyNestedInput
+  }
+
+  export type UserCreateWithoutApiCallLogsInput = {
+    userId?: string
+    username: string
+    email: string
+    password: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    deletedAt?: Date | string | null
+    watchlist?: UserWatchlistCreateNestedManyWithoutUserInput
+    rsFilterPresets?: RsFilterPresetCreateNestedManyWithoutUserInput
+    searchFilterPresets?: SearchFilterPresetCreateNestedManyWithoutUserInput
+  }
+
+  export type UserUncheckedCreateWithoutApiCallLogsInput = {
+    userId?: string
+    username: string
+    email: string
+    password: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    deletedAt?: Date | string | null
+    watchlist?: UserWatchlistUncheckedCreateNestedManyWithoutUserInput
+    rsFilterPresets?: RsFilterPresetUncheckedCreateNestedManyWithoutUserInput
+    searchFilterPresets?: SearchFilterPresetUncheckedCreateNestedManyWithoutUserInput
+  }
+
+  export type UserCreateOrConnectWithoutApiCallLogsInput = {
+    where: UserWhereUniqueInput
+    create: XOR<UserCreateWithoutApiCallLogsInput, UserUncheckedCreateWithoutApiCallLogsInput>
+  }
+
+  export type UserUpsertWithoutApiCallLogsInput = {
+    update: XOR<UserUpdateWithoutApiCallLogsInput, UserUncheckedUpdateWithoutApiCallLogsInput>
+    create: XOR<UserCreateWithoutApiCallLogsInput, UserUncheckedCreateWithoutApiCallLogsInput>
+    where?: UserWhereInput
+  }
+
+  export type UserUpdateToOneWithWhereWithoutApiCallLogsInput = {
+    where?: UserWhereInput
+    data: XOR<UserUpdateWithoutApiCallLogsInput, UserUncheckedUpdateWithoutApiCallLogsInput>
+  }
+
+  export type UserUpdateWithoutApiCallLogsInput = {
+    userId?: StringFieldUpdateOperationsInput | string
+    username?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    password?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    watchlist?: UserWatchlistUpdateManyWithoutUserNestedInput
+    rsFilterPresets?: RsFilterPresetUpdateManyWithoutUserNestedInput
+    searchFilterPresets?: SearchFilterPresetUpdateManyWithoutUserNestedInput
+  }
+
+  export type UserUncheckedUpdateWithoutApiCallLogsInput = {
+    userId?: StringFieldUpdateOperationsInput | string
+    username?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    password?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    watchlist?: UserWatchlistUncheckedUpdateManyWithoutUserNestedInput
+    rsFilterPresets?: RsFilterPresetUncheckedUpdateManyWithoutUserNestedInput
+    searchFilterPresets?: SearchFilterPresetUncheckedUpdateManyWithoutUserNestedInput
+  }
+
+  export type UserWatchlistCreateManyUserInput = {
+    companyId: string
+    addedDate?: Date | string
+    memo?: string | null
+    deletedAt?: Date | string | null
+  }
+
+  export type RsFilterPresetCreateManyUserInput = {
+    presetId?: string
+    presetName: string
+    createdAt?: Date | string
+    deletedAt?: Date | string | null
+  }
+
+  export type SearchFilterPresetCreateManyUserInput = {
+    filterId?: string
+    filterName: string
+    filterConfig: JsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    deletedAt?: Date | string | null
+  }
+
+  export type KiwoomApiCallLogCreateManyUserInput = {
+    logId?: string
+    apiName: string
+    stockCode?: string | null
+    requestData?: NullableJsonNullValueInput | InputJsonValue
+    responseStatus?: string | null
+    responseMessage?: string | null
+    callTimestamp?: Date | string
+    responseTimeMs?: number | null
+  }
+
+  export type UserWatchlistUpdateWithoutUserInput = {
+    addedDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    memo?: NullableStringFieldUpdateOperationsInput | string | null
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    company?: CompanyUpdateOneRequiredWithoutWatchlistNestedInput
+    tags?: WatchlistTagUpdateManyWithoutWatchlistNestedInput
+  }
+
+  export type UserWatchlistUncheckedUpdateWithoutUserInput = {
+    companyId?: StringFieldUpdateOperationsInput | string
+    addedDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    memo?: NullableStringFieldUpdateOperationsInput | string | null
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    tags?: WatchlistTagUncheckedUpdateManyWithoutWatchlistNestedInput
+  }
+
+  export type UserWatchlistUncheckedUpdateManyWithoutUserInput = {
+    companyId?: StringFieldUpdateOperationsInput | string
+    addedDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    memo?: NullableStringFieldUpdateOperationsInput | string | null
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
+  export type RsFilterPresetUpdateWithoutUserInput = {
+    presetId?: StringFieldUpdateOperationsInput | string
+    presetName?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    periods?: RsFilterPeriodUpdateManyWithoutPresetNestedInput
+  }
+
+  export type RsFilterPresetUncheckedUpdateWithoutUserInput = {
+    presetId?: StringFieldUpdateOperationsInput | string
+    presetName?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    periods?: RsFilterPeriodUncheckedUpdateManyWithoutPresetNestedInput
+  }
+
+  export type RsFilterPresetUncheckedUpdateManyWithoutUserInput = {
+    presetId?: StringFieldUpdateOperationsInput | string
+    presetName?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
+  export type SearchFilterPresetUpdateWithoutUserInput = {
+    filterId?: StringFieldUpdateOperationsInput | string
+    filterName?: StringFieldUpdateOperationsInput | string
+    filterConfig?: JsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
+  export type SearchFilterPresetUncheckedUpdateWithoutUserInput = {
+    filterId?: StringFieldUpdateOperationsInput | string
+    filterName?: StringFieldUpdateOperationsInput | string
+    filterConfig?: JsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
+  export type SearchFilterPresetUncheckedUpdateManyWithoutUserInput = {
+    filterId?: StringFieldUpdateOperationsInput | string
+    filterName?: StringFieldUpdateOperationsInput | string
+    filterConfig?: JsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
+  export type KiwoomApiCallLogUpdateWithoutUserInput = {
+    logId?: StringFieldUpdateOperationsInput | string
+    apiName?: StringFieldUpdateOperationsInput | string
+    stockCode?: NullableStringFieldUpdateOperationsInput | string | null
+    requestData?: NullableJsonNullValueInput | InputJsonValue
+    responseStatus?: NullableStringFieldUpdateOperationsInput | string | null
+    responseMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    callTimestamp?: DateTimeFieldUpdateOperationsInput | Date | string
+    responseTimeMs?: NullableIntFieldUpdateOperationsInput | number | null
+  }
+
+  export type KiwoomApiCallLogUncheckedUpdateWithoutUserInput = {
+    logId?: StringFieldUpdateOperationsInput | string
+    apiName?: StringFieldUpdateOperationsInput | string
+    stockCode?: NullableStringFieldUpdateOperationsInput | string | null
+    requestData?: NullableJsonNullValueInput | InputJsonValue
+    responseStatus?: NullableStringFieldUpdateOperationsInput | string | null
+    responseMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    callTimestamp?: DateTimeFieldUpdateOperationsInput | Date | string
+    responseTimeMs?: NullableIntFieldUpdateOperationsInput | number | null
+  }
+
+  export type KiwoomApiCallLogUncheckedUpdateManyWithoutUserInput = {
+    logId?: StringFieldUpdateOperationsInput | string
+    apiName?: StringFieldUpdateOperationsInput | string
+    stockCode?: NullableStringFieldUpdateOperationsInput | string | null
+    requestData?: NullableJsonNullValueInput | InputJsonValue
+    responseStatus?: NullableStringFieldUpdateOperationsInput | string | null
+    responseMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    callTimestamp?: DateTimeFieldUpdateOperationsInput | Date | string
+    responseTimeMs?: NullableIntFieldUpdateOperationsInput | number | null
+  }
+
+  export type UserWatchlistCreateManyCompanyInput = {
+    userId: string
+    addedDate?: Date | string
+    memo?: string | null
+    deletedAt?: Date | string | null
+  }
+
+  export type StockPriceHistoryCreateManyCompanyInput = {
+    priceId?: string
+    tradeDate: Date | string
+    openPrice: Decimal | DecimalJsLike | number | string
+    highPrice: Decimal | DecimalJsLike | number | string
+    lowPrice: Decimal | DecimalJsLike | number | string
+    closePrice: Decimal | DecimalJsLike | number | string
+    volume: bigint | number
+    tradingValue: bigint | number
+    createdAt?: Date | string
+  }
+
+  export type UserWatchlistUpdateWithoutCompanyInput = {
+    addedDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    memo?: NullableStringFieldUpdateOperationsInput | string | null
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    user?: UserUpdateOneRequiredWithoutWatchlistNestedInput
+    tags?: WatchlistTagUpdateManyWithoutWatchlistNestedInput
+  }
+
+  export type UserWatchlistUncheckedUpdateWithoutCompanyInput = {
+    userId?: StringFieldUpdateOperationsInput | string
+    addedDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    memo?: NullableStringFieldUpdateOperationsInput | string | null
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    tags?: WatchlistTagUncheckedUpdateManyWithoutWatchlistNestedInput
+  }
+
+  export type UserWatchlistUncheckedUpdateManyWithoutCompanyInput = {
+    userId?: StringFieldUpdateOperationsInput | string
+    addedDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    memo?: NullableStringFieldUpdateOperationsInput | string | null
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
+  export type StockPriceHistoryUpdateWithoutCompanyInput = {
+    priceId?: StringFieldUpdateOperationsInput | string
+    tradeDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    openPrice?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    highPrice?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    lowPrice?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    closePrice?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    volume?: BigIntFieldUpdateOperationsInput | bigint | number
+    tradingValue?: BigIntFieldUpdateOperationsInput | bigint | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type StockPriceHistoryUncheckedUpdateWithoutCompanyInput = {
+    priceId?: StringFieldUpdateOperationsInput | string
+    tradeDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    openPrice?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    highPrice?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    lowPrice?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    closePrice?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    volume?: BigIntFieldUpdateOperationsInput | bigint | number
+    tradingValue?: BigIntFieldUpdateOperationsInput | bigint | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type StockPriceHistoryUncheckedUpdateManyWithoutCompanyInput = {
+    priceId?: StringFieldUpdateOperationsInput | string
+    tradeDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    openPrice?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    highPrice?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    lowPrice?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    closePrice?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    volume?: BigIntFieldUpdateOperationsInput | bigint | number
+    tradingValue?: BigIntFieldUpdateOperationsInput | bigint | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type WatchlistTagCreateManyWatchlistInput = {
+    tagId: string
+    createdAt?: Date | string
+    deletedAt?: Date | string | null
+  }
+
+  export type WatchlistTagUpdateWithoutWatchlistInput = {
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    tag?: TagUpdateOneRequiredWithoutWatchlistTagsNestedInput
+  }
+
+  export type WatchlistTagUncheckedUpdateWithoutWatchlistInput = {
+    tagId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
+  export type WatchlistTagUncheckedUpdateManyWithoutWatchlistInput = {
+    tagId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
+  export type WatchlistTagCreateManyTagInput = {
+    userId: string
+    companyId: string
+    createdAt?: Date | string
+    deletedAt?: Date | string | null
+  }
+
+  export type WatchlistTagUpdateWithoutTagInput = {
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    watchlist?: UserWatchlistUpdateOneRequiredWithoutTagsNestedInput
+  }
+
+  export type WatchlistTagUncheckedUpdateWithoutTagInput = {
+    userId?: StringFieldUpdateOperationsInput | string
+    companyId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
+  export type WatchlistTagUncheckedUpdateManyWithoutTagInput = {
+    userId?: StringFieldUpdateOperationsInput | string
+    companyId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
+  export type RsFilterPeriodCreateManyPresetInput = {
+    periodId?: string
+    startDate: Date | string
+    endDate: Date | string
+    weightRatio: Decimal | DecimalJsLike | number | string
+    createdAt?: Date | string
+    deletedAt?: Date | string | null
+  }
+
+  export type RsFilterPeriodUpdateWithoutPresetInput = {
+    periodId?: StringFieldUpdateOperationsInput | string
+    startDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    endDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    weightRatio?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
+  export type RsFilterPeriodUncheckedUpdateWithoutPresetInput = {
+    periodId?: StringFieldUpdateOperationsInput | string
+    startDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    endDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    weightRatio?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
+  export type RsFilterPeriodUncheckedUpdateManyWithoutPresetInput = {
+    periodId?: StringFieldUpdateOperationsInput | string
+    startDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    endDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    weightRatio?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
+
+
+  /**
+   * Batch Payload for updateMany & deleteMany & createMany
+   */
+
+  export type BatchPayload = {
+    count: number
+  }
+
+  /**
+   * DMMF
+   */
+  export const dmmf: runtime.BaseDMMF
+}

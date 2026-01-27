@@ -1,0 +1,27 @@
+# 실행 방법
+# docker-compose -f docker-compose.yml up -d
+version: '3.4'
+
+services:
+    kiwoom-postgresql:
+        image: postgres:18
+        container_name: kiwoom-postgres
+        environment:
+            POSTGRES_PASSWORD: kiwoom@2026
+            POSTGRES_USER: kiwoom_user
+            POSTGRES_DB: investment_db
+            TZ: Asia/Seoul
+        ports:
+            - 15432:5432
+        restart: always
+        volumes:
+            - kiwoom-postgres-data:/var/lib/postgresql/data
+        networks:
+            - kiwoom-network
+
+volumes:
+    kiwoom-postgres-data:
+
+networks:
+    kiwoom-network:
+        driver: bridge
