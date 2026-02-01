@@ -19,7 +19,7 @@ export class StocksService {
         } );
     }
 
-    async findByCompany( companyId: bigint, limit?: number ) {
+    async findByCompany( companyId: string, limit?: number ) {
         return this.prisma.stockPriceHistory.findMany( {
             where: { companyId },
             orderBy: {
@@ -29,7 +29,7 @@ export class StocksService {
         } );
     }
 
-    async findByCompanyAndDateRange( companyId: bigint, startDate: Date, endDate: Date ) {
+    async findByCompanyAndDateRange( companyId: string, startDate: Date, endDate: Date ) {
         return this.prisma.stockPriceHistory.findMany( {
             where: {
                 companyId,
@@ -44,7 +44,7 @@ export class StocksService {
         } );
     }
 
-    async findLatestByCompany( companyId: bigint ) {
+    async findLatestByCompany( companyId: string ) {
         return this.prisma.stockPriceHistory.findFirst( {
             where: { companyId },
             orderBy: {

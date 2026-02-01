@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../common/prisma/prisma.service';
 import { CreateCompanyDto } from './dto/create-company.dto';
 import { UpdateCompanyDto } from './dto/update-company.dto';
-import { MarketType } from '../../generated/prisma';
+import { MarketType } from '@generated/prisma';
 
 @Injectable()
 export class CompaniesService {
@@ -31,7 +31,7 @@ export class CompaniesService {
         } );
     }
 
-    async findOne( companyId: bigint ) {
+    async findOne( companyId: string ) {
         return this.prisma.company.findUnique( {
             where: { companyId },
         } );
@@ -46,14 +46,14 @@ export class CompaniesService {
         } );
     }
 
-    async update( companyId: bigint, updateCompanyDto: UpdateCompanyDto ) {
+    async update( companyId: string, updateCompanyDto: UpdateCompanyDto ) {
         return this.prisma.company.update( {
             where: { companyId },
             data: updateCompanyDto,
         } );
     }
 
-    async softDelete( companyId: bigint ) {
+    async softDelete( companyId: string ) {
         return this.prisma.company.update( {
             where: { companyId },
             data: {
@@ -62,7 +62,7 @@ export class CompaniesService {
         } );
     }
 
-    async remove( companyId: bigint ) {
+    async remove( companyId: string ) {
         return this.prisma.company.delete( {
             where: { companyId },
         } );

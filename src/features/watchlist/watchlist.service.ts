@@ -16,7 +16,7 @@ export class WatchlistService {
         } );
     }
 
-    async findByUser( userId: bigint ) {
+    async findByUser( userId: string ) {
         return this.prisma.userWatchlist.findMany( {
             where: {
                 userId,
@@ -36,7 +36,7 @@ export class WatchlistService {
         } );
     }
 
-    async findOne( userId: bigint, companyId: bigint ) {
+    async findOne( userId: string, companyId: string ) {
         return this.prisma.userWatchlist.findUnique( {
             where: {
                 userId_companyId: {
@@ -55,7 +55,7 @@ export class WatchlistService {
         } );
     }
 
-    async update( userId: bigint, companyId: bigint, updateWatchlistDto: UpdateWatchlistDto ) {
+    async update( userId: string, companyId: string, updateWatchlistDto: UpdateWatchlistDto ) {
         return this.prisma.userWatchlist.update( {
             where: {
                 userId_companyId: {
@@ -67,7 +67,7 @@ export class WatchlistService {
         } );
     }
 
-    async softDelete( userId: bigint, companyId: bigint ) {
+    async softDelete( userId: string, companyId: string ) {
         return this.prisma.userWatchlist.update( {
             where: {
                 userId_companyId: {
@@ -81,7 +81,7 @@ export class WatchlistService {
         } );
     }
 
-    async remove( userId: bigint, companyId: bigint ) {
+    async remove( userId: string, companyId: string ) {
         return this.prisma.userWatchlist.delete( {
             where: {
                 userId_companyId: {

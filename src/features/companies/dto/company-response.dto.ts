@@ -1,10 +1,10 @@
 import { Exclude, Expose } from 'class-transformer';
-import { MarketType } from '../../../generated/prisma';
+import { MarketType } from '@generated/prisma';
 
 @Exclude()
 export class CompanyResponseDto {
     @Expose()
-        companyId: bigint;
+        companyId: string;
 
     @Expose()
         companyName: string;

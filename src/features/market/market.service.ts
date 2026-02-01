@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../common/prisma/prisma.service';
 import { CreateMarketIndexDto } from './dto/create-market-index.dto';
-import { MarketIndexType } from '../../generated/prisma';
+import { MarketIndexType } from '@generated/prisma';
 
 @Injectable()
 export class MarketService {

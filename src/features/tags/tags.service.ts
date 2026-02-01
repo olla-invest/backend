@@ -21,7 +21,7 @@ export class TagsService {
         } );
     }
 
-    async findOne( tagId: bigint ) {
+    async findOne( tagId: string ) {
         return this.prisma.tag.findUnique( {
             where: { tagId },
         } );
@@ -36,14 +36,14 @@ export class TagsService {
         } );
     }
 
-    async update( tagId: bigint, updateTagDto: UpdateTagDto ) {
+    async update( tagId: string, updateTagDto: UpdateTagDto ) {
         return this.prisma.tag.update( {
             where: { tagId },
             data: updateTagDto,
         } );
     }
 
-    async softDelete( tagId: bigint ) {
+    async softDelete( tagId: string ) {
         return this.prisma.tag.update( {
             where: { tagId },
             data: {
@@ -52,7 +52,7 @@ export class TagsService {
         } );
     }
 
-    async remove( tagId: bigint ) {
+    async remove( tagId: string ) {
         return this.prisma.tag.delete( {
             where: { tagId },
         } );

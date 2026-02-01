@@ -1,5 +1,5 @@
 import { Exclude, Expose } from 'class-transformer';
-import { MarketIndexType } from '../../../generated/prisma';
+import { MarketIndexType } from '@generated/prisma';
 
 @Exclude()
 export class MarketIndexResponseDto {

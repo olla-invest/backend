@@ -1,5 +1,5 @@
 import { IsEnum, IsNotEmpty, IsString, MaxLength } from 'class-validator';
-import { MarketType } from '../../../generated/prisma';
+import { MarketType } from '@generated/prisma';
 
 export class CreateCompanyDto {
     @IsString()
