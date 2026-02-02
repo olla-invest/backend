@@ -235,6 +235,74 @@ exports.Prisma.BatchJobHistoryScalarFieldEnum = {
   errorMessage: 'errorMessage'
 };
 
+exports.Prisma.KiwoomTokenScalarFieldEnum = {
+  tokenId: 'tokenId',
+  token: 'token',
+  tokenType: 'tokenType',
+  expiresAt: 'expiresAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.StockCandleScalarFieldEnum = {
+  candleId: 'candleId',
+  stockCode: 'stockCode',
+  candleType: 'candleType',
+  candleTime: 'candleTime',
+  openPrice: 'openPrice',
+  highPrice: 'highPrice',
+  lowPrice: 'lowPrice',
+  closePrice: 'closePrice',
+  volume: 'volume',
+  tradingValue: 'tradingValue',
+  prevDayCompare: 'prevDayCompare',
+  createdAt: 'createdAt'
+};
+
+exports.Prisma.StockTickScalarFieldEnum = {
+  tickId: 'tickId',
+  stockCode: 'stockCode',
+  tickTime: 'tickTime',
+  price: 'price',
+  volume: 'volume',
+  prevDayCompare: 'prevDayCompare',
+  changeRate: 'changeRate',
+  askPrice: 'askPrice',
+  bidPrice: 'bidPrice',
+  accVolume: 'accVolume',
+  accTradingValue: 'accTradingValue',
+  createdAt: 'createdAt'
+};
+
+exports.Prisma.StockQuoteScalarFieldEnum = {
+  quoteId: 'quoteId',
+  stockCode: 'stockCode',
+  quoteTime: 'quoteTime',
+  askPrice1: 'askPrice1',
+  askVolume1: 'askVolume1',
+  bidPrice1: 'bidPrice1',
+  bidVolume1: 'bidVolume1',
+  askPrice2: 'askPrice2',
+  askVolume2: 'askVolume2',
+  bidPrice2: 'bidPrice2',
+  bidVolume2: 'bidVolume2',
+  askPrice3: 'askPrice3',
+  askVolume3: 'askVolume3',
+  bidPrice3: 'bidPrice3',
+  bidVolume3: 'bidVolume3',
+  askPrice4: 'askPrice4',
+  askVolume4: 'askVolume4',
+  bidPrice4: 'bidPrice4',
+  bidVolume4: 'bidVolume4',
+  askPrice5: 'askPrice5',
+  askVolume5: 'askVolume5',
+  bidPrice5: 'bidPrice5',
+  bidVolume5: 'bidVolume5',
+  totalAskVolume: 'totalAskVolume',
+  totalBidVolume: 'totalBidVolume',
+  createdAt: 'createdAt'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -299,7 +367,11 @@ exports.Prisma.ModelName = {
   StockPriceHistory: 'StockPriceHistory',
   MarketIndexHistory: 'MarketIndexHistory',
   KiwoomApiCallLog: 'KiwoomApiCallLog',
-  BatchJobHistory: 'BatchJobHistory'
+  BatchJobHistory: 'BatchJobHistory',
+  KiwoomToken: 'KiwoomToken',
+  StockCandle: 'StockCandle',
+  StockTick: 'StockTick',
+  StockQuote: 'StockQuote'
 };
 
 /**

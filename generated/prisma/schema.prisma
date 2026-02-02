@@ -280,3 +280,95 @@ model BatchJobHistory {
   @@index([status], map: "idx_batch_status")
   @@map("batch_job_history")
 }
+
+// =============================================
+// Kiwoom API Real-time Chart Tables
+// =============================================
+
+// 13. 키움 OAuth 토큰 테이블
+model KiwoomToken {
+  tokenId   String   @id @default(uuid()) @map("token_id") @db.Uuid
+  token     String   @db.Text
+  tokenType String   @map("token_type") @db.VarChar(20)
+  expiresAt DateTime @map("expires_at")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+
+  @@index([expiresAt], map: "idx_kiwoom_token_expires_at")
+  @@map("kiwoom_tokens")
+}
+
+// 14. 주식 캔들 데이터 테이블 (분봉/틱봉)
+model StockCandle {
+  candleId       String   @id @default(uuid()) @map("candle_id") @db.Uuid
+  stockCode      String   @map("stock_code") @db.VarChar(20)
+  candleType     String   @map("candle_type") @db.VarChar(10) // '1min', '3min', '5min', '1tick', '3tick' etc
+  candleTime     DateTime @map("candle_time")
+  openPrice      Decimal  @map("open_price") @db.Decimal(15, 2)
+  highPrice      Decimal  @map("high_price") @db.Decimal(15, 2)
+  lowPrice       Decimal  @map("low_price") @db.Decimal(15, 2)
+  closePrice     Decimal  @map("close_price") @db.Decimal(15, 2)
+  volume         BigInt
+  tradingValue   BigInt?  @map("trading_value")
+  prevDayCompare Decimal? @map("prev_day_compare") @db.Decimal(15, 2)
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  @@unique([stockCode, candleType, candleTime], map: "uk_stock_candle")
+  @@index([stockCode, candleType, candleTime(sort: Desc)], map: "idx_stock_candle_query")
+  @@index([candleTime], map: "idx_stock_candle_time")
+  @@map("stock_candles")
+}
+
+// 15. 실시간 체결 데이터 테이블 (틱 데이터)
+model StockTick {
+  tickId          String   @id @default(uuid()) @map("tick_id") @db.Uuid
+  stockCode       String   @map("stock_code") @db.VarChar(20)
+  tickTime        DateTime @map("tick_time")
+  price           Decimal  @db.Decimal(15, 2)
+  volume          BigInt
+  prevDayCompare  Decimal? @map("prev_day_compare") @db.Decimal(15, 2)
+  changeRate      Decimal? @map("change_rate") @db.Decimal(10, 4)
+  askPrice        Decimal? @map("ask_price") @db.Decimal(15, 2)
+  bidPrice        Decimal? @map("bid_price") @db.Decimal(15, 2)
+  accVolume       BigInt?  @map("acc_volume")
+  accTradingValue BigInt?  @map("acc_trading_value")
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  @@index([stockCode, tickTime(sort: Desc)], map: "idx_stock_tick_query")
+  @@index([tickTime], map: "idx_stock_tick_time")
+  @@map("stock_ticks")
+}
+
+// 16. 실시간 호가 데이터 테이블
+model StockQuote {
+  quoteId        String   @id @default(uuid()) @map("quote_id") @db.Uuid
+  stockCode      String   @map("stock_code") @db.VarChar(20)
+  quoteTime      DateTime @map("quote_time")
+  askPrice1      Decimal? @map("ask_price_1") @db.Decimal(15, 2)
+  askVolume1     BigInt?  @map("ask_volume_1")
+  bidPrice1      Decimal? @map("bid_price_1") @db.Decimal(15, 2)
+  bidVolume1     BigInt?  @map("bid_volume_1")
+  askPrice2      Decimal? @map("ask_price_2") @db.Decimal(15, 2)
+  askVolume2     BigInt?  @map("ask_volume_2")
+  bidPrice2      Decimal? @map("bid_price_2") @db.Decimal(15, 2)
+  bidVolume2     BigInt?  @map("bid_volume_2")
+  askPrice3      Decimal? @map("ask_price_3") @db.Decimal(15, 2)
+  askVolume3     BigInt?  @map("ask_volume_3")
+  bidPrice3      Decimal? @map("bid_price_3") @db.Decimal(15, 2)
+  bidVolume3     BigInt?  @map("bid_volume_3")
+  askPrice4      Decimal? @map("ask_price_4") @db.Decimal(15, 2)
+  askVolume4     BigInt?  @map("ask_volume_4")
+  bidPrice4      Decimal? @map("bid_price_4") @db.Decimal(15, 2)
+  bidVolume4     BigInt?  @map("bid_volume_4")
+  askPrice5      Decimal? @map("ask_price_5") @db.Decimal(15, 2)
+  askVolume5     BigInt?  @map("ask_volume_5")
+  bidPrice5      Decimal? @map("bid_price_5") @db.Decimal(15, 2)
+  bidVolume5     BigInt?  @map("bid_volume_5")
+  totalAskVolume BigInt?  @map("total_ask_volume")
+  totalBidVolume BigInt?  @map("total_bid_volume")
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  @@index([stockCode, quoteTime(sort: Desc)], map: "idx_stock_quote_query")
+  @@index([quoteTime], map: "idx_stock_quote_time")
+  @@map("stock_quotes")
+}

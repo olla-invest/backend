@@ -1,7 +1,31 @@
 {
   "permissions": {
     "allow": [
-      "Bash(pnpm add:*)"
+      "Bash(pnpm add:*)",
+      "Bash(docker-compose:*)",
+      "Bash(pnpm prisma:generate:*)",
+      "Bash(npx prisma generate)",
+      "Bash(npm install:*)",
+      "Bash(node:*)",
+      "Bash(nvm:*)",
+      "Bash(npm run prisma:generate:*)",
+      "Bash(npx prisma migrate:*)",
+      "Bash(set -a)",
+      "Bash(. ./.env)",
+      "Bash(set +a)",
+      "Bash(npm run build:*)",
+      "Bash(pnpm build:*)",
+      "Bash(netstat:*)",
+      "Bash(timeout 5 tail:*)",
+      "Bash(taskkill:*)",
+      "Bash(findstr:*)",
+      "Bash(tasklist:*)",
+      "Bash(wmic process where \"processid=174136\" get commandline)",
+      "Bash(wmic process where \"processid=16628\" get commandline)",
+      "Bash(wmic process where \"processid=153080\" get commandline)",
+      "Bash(ls:*)",
+      "Bash(npx:*)",
+      "Bash(npm search:*)"
     ]
   }
 }

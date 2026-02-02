@@ -73,6 +73,26 @@ export type KiwoomApiCallLog = $Result.DefaultSelection<Prisma.$KiwoomApiCallLog
  * 
  */
 export type BatchJobHistory = $Result.DefaultSelection<Prisma.$BatchJobHistoryPayload>
+/**
+ * Model KiwoomToken
+ * 
+ */
+export type KiwoomToken = $Result.DefaultSelection<Prisma.$KiwoomTokenPayload>
+/**
+ * Model StockCandle
+ * 
+ */
+export type StockCandle = $Result.DefaultSelection<Prisma.$StockCandlePayload>
+/**
+ * Model StockTick
+ * 
+ */
+export type StockTick = $Result.DefaultSelection<Prisma.$StockTickPayload>
+/**
+ * Model StockQuote
+ * 
+ */
+export type StockQuote = $Result.DefaultSelection<Prisma.$StockQuotePayload>
 
 /**
  * Enums
@@ -366,6 +386,46 @@ export class PrismaClient<
     * ```
     */
   get batchJobHistory(): Prisma.BatchJobHistoryDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.kiwoomToken`: Exposes CRUD operations for the **KiwoomToken** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more KiwoomTokens
+    * const kiwoomTokens = await prisma.kiwoomToken.findMany()
+    * ```
+    */
+  get kiwoomToken(): Prisma.KiwoomTokenDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.stockCandle`: Exposes CRUD operations for the **StockCandle** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more StockCandles
+    * const stockCandles = await prisma.stockCandle.findMany()
+    * ```
+    */
+  get stockCandle(): Prisma.StockCandleDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.stockTick`: Exposes CRUD operations for the **StockTick** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more StockTicks
+    * const stockTicks = await prisma.stockTick.findMany()
+    * ```
+    */
+  get stockTick(): Prisma.StockTickDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.stockQuote`: Exposes CRUD operations for the **StockQuote** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more StockQuotes
+    * const stockQuotes = await prisma.stockQuote.findMany()
+    * ```
+    */
+  get stockQuote(): Prisma.StockQuoteDelegate<ExtArgs, ClientOptions>;
 }
 
 export namespace Prisma {
@@ -811,7 +871,11 @@ export namespace Prisma {
     StockPriceHistory: 'StockPriceHistory',
     MarketIndexHistory: 'MarketIndexHistory',
     KiwoomApiCallLog: 'KiwoomApiCallLog',
-    BatchJobHistory: 'BatchJobHistory'
+    BatchJobHistory: 'BatchJobHistory',
+    KiwoomToken: 'KiwoomToken',
+    StockCandle: 'StockCandle',
+    StockTick: 'StockTick',
+    StockQuote: 'StockQuote'
   };
 
   export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -827,7 +891,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "user" | "company" | "userWatchlist" | "tag" | "watchlistTag" | "rsFilterPreset" | "rsFilterPeriod" | "searchFilterPreset" | "stockPriceHistory" | "marketIndexHistory" | "kiwoomApiCallLog" | "batchJobHistory"
+      modelProps: "user" | "company" | "userWatchlist" | "tag" | "watchlistTag" | "rsFilterPreset" | "rsFilterPeriod" | "searchFilterPreset" | "stockPriceHistory" | "marketIndexHistory" | "kiwoomApiCallLog" | "batchJobHistory" | "kiwoomToken" | "stockCandle" | "stockTick" | "stockQuote"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -1719,6 +1783,302 @@ export namespace Prisma {
           }
         }
       }
+      KiwoomToken: {
+        payload: Prisma.$KiwoomTokenPayload<ExtArgs>
+        fields: Prisma.KiwoomTokenFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.KiwoomTokenFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$KiwoomTokenPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.KiwoomTokenFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$KiwoomTokenPayload>
+          }
+          findFirst: {
+            args: Prisma.KiwoomTokenFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$KiwoomTokenPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.KiwoomTokenFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$KiwoomTokenPayload>
+          }
+          findMany: {
+            args: Prisma.KiwoomTokenFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$KiwoomTokenPayload>[]
+          }
+          create: {
+            args: Prisma.KiwoomTokenCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$KiwoomTokenPayload>
+          }
+          createMany: {
+            args: Prisma.KiwoomTokenCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.KiwoomTokenCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$KiwoomTokenPayload>[]
+          }
+          delete: {
+            args: Prisma.KiwoomTokenDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$KiwoomTokenPayload>
+          }
+          update: {
+            args: Prisma.KiwoomTokenUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$KiwoomTokenPayload>
+          }
+          deleteMany: {
+            args: Prisma.KiwoomTokenDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.KiwoomTokenUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.KiwoomTokenUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$KiwoomTokenPayload>[]
+          }
+          upsert: {
+            args: Prisma.KiwoomTokenUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$KiwoomTokenPayload>
+          }
+          aggregate: {
+            args: Prisma.KiwoomTokenAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateKiwoomToken>
+          }
+          groupBy: {
+            args: Prisma.KiwoomTokenGroupByArgs<ExtArgs>
+            result: $Utils.Optional<KiwoomTokenGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.KiwoomTokenCountArgs<ExtArgs>
+            result: $Utils.Optional<KiwoomTokenCountAggregateOutputType> | number
+          }
+        }
+      }
+      StockCandle: {
+        payload: Prisma.$StockCandlePayload<ExtArgs>
+        fields: Prisma.StockCandleFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.StockCandleFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$StockCandlePayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.StockCandleFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$StockCandlePayload>
+          }
+          findFirst: {
+            args: Prisma.StockCandleFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$StockCandlePayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.StockCandleFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$StockCandlePayload>
+          }
+          findMany: {
+            args: Prisma.StockCandleFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$StockCandlePayload>[]
+          }
+          create: {
+            args: Prisma.StockCandleCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$StockCandlePayload>
+          }
+          createMany: {
+            args: Prisma.StockCandleCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.StockCandleCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$StockCandlePayload>[]
+          }
+          delete: {
+            args: Prisma.StockCandleDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$StockCandlePayload>
+          }
+          update: {
+            args: Prisma.StockCandleUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$StockCandlePayload>
+          }
+          deleteMany: {
+            args: Prisma.StockCandleDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.StockCandleUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.StockCandleUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$StockCandlePayload>[]
+          }
+          upsert: {
+            args: Prisma.StockCandleUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$StockCandlePayload>
+          }
+          aggregate: {
+            args: Prisma.StockCandleAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateStockCandle>
+          }
+          groupBy: {
+            args: Prisma.StockCandleGroupByArgs<ExtArgs>
+            result: $Utils.Optional<StockCandleGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.StockCandleCountArgs<ExtArgs>
+            result: $Utils.Optional<StockCandleCountAggregateOutputType> | number
+          }
+        }
+      }
+      StockTick: {
+        payload: Prisma.$StockTickPayload<ExtArgs>
+        fields: Prisma.StockTickFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.StockTickFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$StockTickPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.StockTickFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$StockTickPayload>
+          }
+          findFirst: {
+            args: Prisma.StockTickFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$StockTickPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.StockTickFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$StockTickPayload>
+          }
+          findMany: {
+            args: Prisma.StockTickFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$StockTickPayload>[]
+          }
+          create: {
+            args: Prisma.StockTickCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$StockTickPayload>
+          }
+          createMany: {
+            args: Prisma.StockTickCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.StockTickCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$StockTickPayload>[]
+          }
+          delete: {
+            args: Prisma.StockTickDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$StockTickPayload>
+          }
+          update: {
+            args: Prisma.StockTickUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$StockTickPayload>
+          }
+          deleteMany: {
+            args: Prisma.StockTickDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.StockTickUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.StockTickUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$StockTickPayload>[]
+          }
+          upsert: {
+            args: Prisma.StockTickUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$StockTickPayload>
+          }
+          aggregate: {
+            args: Prisma.StockTickAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateStockTick>
+          }
+          groupBy: {
+            args: Prisma.StockTickGroupByArgs<ExtArgs>
+            result: $Utils.Optional<StockTickGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.StockTickCountArgs<ExtArgs>
+            result: $Utils.Optional<StockTickCountAggregateOutputType> | number
+          }
+        }
+      }
+      StockQuote: {
+        payload: Prisma.$StockQuotePayload<ExtArgs>
+        fields: Prisma.StockQuoteFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.StockQuoteFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$StockQuotePayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.StockQuoteFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$StockQuotePayload>
+          }
+          findFirst: {
+            args: Prisma.StockQuoteFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$StockQuotePayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.StockQuoteFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$StockQuotePayload>
+          }
+          findMany: {
+            args: Prisma.StockQuoteFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$StockQuotePayload>[]
+          }
+          create: {
+            args: Prisma.StockQuoteCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$StockQuotePayload>
+          }
+          createMany: {
+            args: Prisma.StockQuoteCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.StockQuoteCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$StockQuotePayload>[]
+          }
+          delete: {
+            args: Prisma.StockQuoteDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$StockQuotePayload>
+          }
+          update: {
+            args: Prisma.StockQuoteUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$StockQuotePayload>
+          }
+          deleteMany: {
+            args: Prisma.StockQuoteDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.StockQuoteUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.StockQuoteUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$StockQuotePayload>[]
+          }
+          upsert: {
+            args: Prisma.StockQuoteUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$StockQuotePayload>
+          }
+          aggregate: {
+            args: Prisma.StockQuoteAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateStockQuote>
+          }
+          groupBy: {
+            args: Prisma.StockQuoteGroupByArgs<ExtArgs>
+            result: $Utils.Optional<StockQuoteGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.StockQuoteCountArgs<ExtArgs>
+            result: $Utils.Optional<StockQuoteCountAggregateOutputType> | number
+          }
+        }
+      }
     }
   } & {
     other: {
@@ -1839,6 +2199,10 @@ export namespace Prisma {
     marketIndexHistory?: MarketIndexHistoryOmit
     kiwoomApiCallLog?: KiwoomApiCallLogOmit
     batchJobHistory?: BatchJobHistoryOmit
+    kiwoomToken?: KiwoomTokenOmit
+    stockCandle?: StockCandleOmit
+    stockTick?: StockTickOmit
+    stockQuote?: StockQuoteOmit
   }
 
   /* Types for Logging */
@@ -15352,6 +15716,4692 @@ export namespace Prisma {
 
 
   /**
+   * Model KiwoomToken
+   */
+
+  export type AggregateKiwoomToken = {
+    _count: KiwoomTokenCountAggregateOutputType | null
+    _min: KiwoomTokenMinAggregateOutputType | null
+    _max: KiwoomTokenMaxAggregateOutputType | null
+  }
+
+  export type KiwoomTokenMinAggregateOutputType = {
+    tokenId: string | null
+    token: string | null
+    tokenType: string | null
+    expiresAt: Date | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type KiwoomTokenMaxAggregateOutputType = {
+    tokenId: string | null
+    token: string | null
+    tokenType: string | null
+    expiresAt: Date | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type KiwoomTokenCountAggregateOutputType = {
+    tokenId: number
+    token: number
+    tokenType: number
+    expiresAt: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type KiwoomTokenMinAggregateInputType = {
+    tokenId?: true
+    token?: true
+    tokenType?: true
+    expiresAt?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type KiwoomTokenMaxAggregateInputType = {
+    tokenId?: true
+    token?: true
+    tokenType?: true
+    expiresAt?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type KiwoomTokenCountAggregateInputType = {
+    tokenId?: true
+    token?: true
+    tokenType?: true
+    expiresAt?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type KiwoomTokenAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which KiwoomToken to aggregate.
+     */
+    where?: KiwoomTokenWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of KiwoomTokens to fetch.
+     */
+    orderBy?: KiwoomTokenOrderByWithRelationInput | KiwoomTokenOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: KiwoomTokenWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` KiwoomTokens from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` KiwoomTokens.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned KiwoomTokens
+    **/
+    _count?: true | KiwoomTokenCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: KiwoomTokenMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: KiwoomTokenMaxAggregateInputType
+  }
+
+  export type GetKiwoomTokenAggregateType<T extends KiwoomTokenAggregateArgs> = {
+        [P in keyof T & keyof AggregateKiwoomToken]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateKiwoomToken[P]>
+      : GetScalarType<T[P], AggregateKiwoomToken[P]>
+  }
+
+
+
+
+  export type KiwoomTokenGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: KiwoomTokenWhereInput
+    orderBy?: KiwoomTokenOrderByWithAggregationInput | KiwoomTokenOrderByWithAggregationInput[]
+    by: KiwoomTokenScalarFieldEnum[] | KiwoomTokenScalarFieldEnum
+    having?: KiwoomTokenScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: KiwoomTokenCountAggregateInputType | true
+    _min?: KiwoomTokenMinAggregateInputType
+    _max?: KiwoomTokenMaxAggregateInputType
+  }
+
+  export type KiwoomTokenGroupByOutputType = {
+    tokenId: string
+    token: string
+    tokenType: string
+    expiresAt: Date
+    createdAt: Date
+    updatedAt: Date
+    _count: KiwoomTokenCountAggregateOutputType | null
+    _min: KiwoomTokenMinAggregateOutputType | null
+    _max: KiwoomTokenMaxAggregateOutputType | null
+  }
+
+  type GetKiwoomTokenGroupByPayload<T extends KiwoomTokenGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<KiwoomTokenGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof KiwoomTokenGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], KiwoomTokenGroupByOutputType[P]>
+            : GetScalarType<T[P], KiwoomTokenGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type KiwoomTokenSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    tokenId?: boolean
+    token?: boolean
+    tokenType?: boolean
+    expiresAt?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["kiwoomToken"]>
+
+  export type KiwoomTokenSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    tokenId?: boolean
+    token?: boolean
+    tokenType?: boolean
+    expiresAt?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["kiwoomToken"]>
+
+  export type KiwoomTokenSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    tokenId?: boolean
+    token?: boolean
+    tokenType?: boolean
+    expiresAt?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["kiwoomToken"]>
+
+  export type KiwoomTokenSelectScalar = {
+    tokenId?: boolean
+    token?: boolean
+    tokenType?: boolean
+    expiresAt?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type KiwoomTokenOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"tokenId" | "token" | "tokenType" | "expiresAt" | "createdAt" | "updatedAt", ExtArgs["result"]["kiwoomToken"]>
+
+  export type $KiwoomTokenPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "KiwoomToken"
+    objects: {}
+    scalars: $Extensions.GetPayloadResult<{
+      tokenId: string
+      token: string
+      tokenType: string
+      expiresAt: Date
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["kiwoomToken"]>
+    composites: {}
+  }
+
+  type KiwoomTokenGetPayload<S extends boolean | null | undefined | KiwoomTokenDefaultArgs> = $Result.GetResult<Prisma.$KiwoomTokenPayload, S>
+
+  type KiwoomTokenCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<KiwoomTokenFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: KiwoomTokenCountAggregateInputType | true
+    }
+
+  export interface KiwoomTokenDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['KiwoomToken'], meta: { name: 'KiwoomToken' } }
+    /**
+     * Find zero or one KiwoomToken that matches the filter.
+     * @param {KiwoomTokenFindUniqueArgs} args - Arguments to find a KiwoomToken
+     * @example
+     * // Get one KiwoomToken
+     * const kiwoomToken = await prisma.kiwoomToken.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends KiwoomTokenFindUniqueArgs>(args: SelectSubset<T, KiwoomTokenFindUniqueArgs<ExtArgs>>): Prisma__KiwoomTokenClient<$Result.GetResult<Prisma.$KiwoomTokenPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one KiwoomToken that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {KiwoomTokenFindUniqueOrThrowArgs} args - Arguments to find a KiwoomToken
+     * @example
+     * // Get one KiwoomToken
+     * const kiwoomToken = await prisma.kiwoomToken.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends KiwoomTokenFindUniqueOrThrowArgs>(args: SelectSubset<T, KiwoomTokenFindUniqueOrThrowArgs<ExtArgs>>): Prisma__KiwoomTokenClient<$Result.GetResult<Prisma.$KiwoomTokenPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first KiwoomToken that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {KiwoomTokenFindFirstArgs} args - Arguments to find a KiwoomToken
+     * @example
+     * // Get one KiwoomToken
+     * const kiwoomToken = await prisma.kiwoomToken.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends KiwoomTokenFindFirstArgs>(args?: SelectSubset<T, KiwoomTokenFindFirstArgs<ExtArgs>>): Prisma__KiwoomTokenClient<$Result.GetResult<Prisma.$KiwoomTokenPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first KiwoomToken that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {KiwoomTokenFindFirstOrThrowArgs} args - Arguments to find a KiwoomToken
+     * @example
+     * // Get one KiwoomToken
+     * const kiwoomToken = await prisma.kiwoomToken.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends KiwoomTokenFindFirstOrThrowArgs>(args?: SelectSubset<T, KiwoomTokenFindFirstOrThrowArgs<ExtArgs>>): Prisma__KiwoomTokenClient<$Result.GetResult<Prisma.$KiwoomTokenPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more KiwoomTokens that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {KiwoomTokenFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all KiwoomTokens
+     * const kiwoomTokens = await prisma.kiwoomToken.findMany()
+     * 
+     * // Get first 10 KiwoomTokens
+     * const kiwoomTokens = await prisma.kiwoomToken.findMany({ take: 10 })
+     * 
+     * // Only select the `tokenId`
+     * const kiwoomTokenWithTokenIdOnly = await prisma.kiwoomToken.findMany({ select: { tokenId: true } })
+     * 
+     */
+    findMany<T extends KiwoomTokenFindManyArgs>(args?: SelectSubset<T, KiwoomTokenFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$KiwoomTokenPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a KiwoomToken.
+     * @param {KiwoomTokenCreateArgs} args - Arguments to create a KiwoomToken.
+     * @example
+     * // Create one KiwoomToken
+     * const KiwoomToken = await prisma.kiwoomToken.create({
+     *   data: {
+     *     // ... data to create a KiwoomToken
+     *   }
+     * })
+     * 
+     */
+    create<T extends KiwoomTokenCreateArgs>(args: SelectSubset<T, KiwoomTokenCreateArgs<ExtArgs>>): Prisma__KiwoomTokenClient<$Result.GetResult<Prisma.$KiwoomTokenPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many KiwoomTokens.
+     * @param {KiwoomTokenCreateManyArgs} args - Arguments to create many KiwoomTokens.
+     * @example
+     * // Create many KiwoomTokens
+     * const kiwoomToken = await prisma.kiwoomToken.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends KiwoomTokenCreateManyArgs>(args?: SelectSubset<T, KiwoomTokenCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many KiwoomTokens and returns the data saved in the database.
+     * @param {KiwoomTokenCreateManyAndReturnArgs} args - Arguments to create many KiwoomTokens.
+     * @example
+     * // Create many KiwoomTokens
+     * const kiwoomToken = await prisma.kiwoomToken.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many KiwoomTokens and only return the `tokenId`
+     * const kiwoomTokenWithTokenIdOnly = await prisma.kiwoomToken.createManyAndReturn({
+     *   select: { tokenId: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends KiwoomTokenCreateManyAndReturnArgs>(args?: SelectSubset<T, KiwoomTokenCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$KiwoomTokenPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a KiwoomToken.
+     * @param {KiwoomTokenDeleteArgs} args - Arguments to delete one KiwoomToken.
+     * @example
+     * // Delete one KiwoomToken
+     * const KiwoomToken = await prisma.kiwoomToken.delete({
+     *   where: {
+     *     // ... filter to delete one KiwoomToken
+     *   }
+     * })
+     * 
+     */
+    delete<T extends KiwoomTokenDeleteArgs>(args: SelectSubset<T, KiwoomTokenDeleteArgs<ExtArgs>>): Prisma__KiwoomTokenClient<$Result.GetResult<Prisma.$KiwoomTokenPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one KiwoomToken.
+     * @param {KiwoomTokenUpdateArgs} args - Arguments to update one KiwoomToken.
+     * @example
+     * // Update one KiwoomToken
+     * const kiwoomToken = await prisma.kiwoomToken.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends KiwoomTokenUpdateArgs>(args: SelectSubset<T, KiwoomTokenUpdateArgs<ExtArgs>>): Prisma__KiwoomTokenClient<$Result.GetResult<Prisma.$KiwoomTokenPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more KiwoomTokens.
+     * @param {KiwoomTokenDeleteManyArgs} args - Arguments to filter KiwoomTokens to delete.
+     * @example
+     * // Delete a few KiwoomTokens
+     * const { count } = await prisma.kiwoomToken.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends KiwoomTokenDeleteManyArgs>(args?: SelectSubset<T, KiwoomTokenDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more KiwoomTokens.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {KiwoomTokenUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many KiwoomTokens
+     * const kiwoomToken = await prisma.kiwoomToken.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends KiwoomTokenUpdateManyArgs>(args: SelectSubset<T, KiwoomTokenUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more KiwoomTokens and returns the data updated in the database.
+     * @param {KiwoomTokenUpdateManyAndReturnArgs} args - Arguments to update many KiwoomTokens.
+     * @example
+     * // Update many KiwoomTokens
+     * const kiwoomToken = await prisma.kiwoomToken.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more KiwoomTokens and only return the `tokenId`
+     * const kiwoomTokenWithTokenIdOnly = await prisma.kiwoomToken.updateManyAndReturn({
+     *   select: { tokenId: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends KiwoomTokenUpdateManyAndReturnArgs>(args: SelectSubset<T, KiwoomTokenUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$KiwoomTokenPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one KiwoomToken.
+     * @param {KiwoomTokenUpsertArgs} args - Arguments to update or create a KiwoomToken.
+     * @example
+     * // Update or create a KiwoomToken
+     * const kiwoomToken = await prisma.kiwoomToken.upsert({
+     *   create: {
+     *     // ... data to create a KiwoomToken
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the KiwoomToken we want to update
+     *   }
+     * })
+     */
+    upsert<T extends KiwoomTokenUpsertArgs>(args: SelectSubset<T, KiwoomTokenUpsertArgs<ExtArgs>>): Prisma__KiwoomTokenClient<$Result.GetResult<Prisma.$KiwoomTokenPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of KiwoomTokens.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {KiwoomTokenCountArgs} args - Arguments to filter KiwoomTokens to count.
+     * @example
+     * // Count the number of KiwoomTokens
+     * const count = await prisma.kiwoomToken.count({
+     *   where: {
+     *     // ... the filter for the KiwoomTokens we want to count
+     *   }
+     * })
+    **/
+    count<T extends KiwoomTokenCountArgs>(
+      args?: Subset<T, KiwoomTokenCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], KiwoomTokenCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a KiwoomToken.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {KiwoomTokenAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends KiwoomTokenAggregateArgs>(args: Subset<T, KiwoomTokenAggregateArgs>): Prisma.PrismaPromise<GetKiwoomTokenAggregateType<T>>
+
+    /**
+     * Group by KiwoomToken.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {KiwoomTokenGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends KiwoomTokenGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: KiwoomTokenGroupByArgs['orderBy'] }
+        : { orderBy?: KiwoomTokenGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, KiwoomTokenGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetKiwoomTokenGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the KiwoomToken model
+   */
+  readonly fields: KiwoomTokenFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for KiwoomToken.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__KiwoomTokenClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the KiwoomToken model
+   */
+  interface KiwoomTokenFieldRefs {
+    readonly tokenId: FieldRef<"KiwoomToken", 'String'>
+    readonly token: FieldRef<"KiwoomToken", 'String'>
+    readonly tokenType: FieldRef<"KiwoomToken", 'String'>
+    readonly expiresAt: FieldRef<"KiwoomToken", 'DateTime'>
+    readonly createdAt: FieldRef<"KiwoomToken", 'DateTime'>
+    readonly updatedAt: FieldRef<"KiwoomToken", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * KiwoomToken findUnique
+   */
+  export type KiwoomTokenFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the KiwoomToken
+     */
+    select?: KiwoomTokenSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the KiwoomToken
+     */
+    omit?: KiwoomTokenOmit<ExtArgs> | null
+    /**
+     * Filter, which KiwoomToken to fetch.
+     */
+    where: KiwoomTokenWhereUniqueInput
+  }
+
+  /**
+   * KiwoomToken findUniqueOrThrow
+   */
+  export type KiwoomTokenFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the KiwoomToken
+     */
+    select?: KiwoomTokenSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the KiwoomToken
+     */
+    omit?: KiwoomTokenOmit<ExtArgs> | null
+    /**
+     * Filter, which KiwoomToken to fetch.
+     */
+    where: KiwoomTokenWhereUniqueInput
+  }
+
+  /**
+   * KiwoomToken findFirst
+   */
+  export type KiwoomTokenFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the KiwoomToken
+     */
+    select?: KiwoomTokenSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the KiwoomToken
+     */
+    omit?: KiwoomTokenOmit<ExtArgs> | null
+    /**
+     * Filter, which KiwoomToken to fetch.
+     */
+    where?: KiwoomTokenWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of KiwoomTokens to fetch.
+     */
+    orderBy?: KiwoomTokenOrderByWithRelationInput | KiwoomTokenOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for KiwoomTokens.
+     */
+    cursor?: KiwoomTokenWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` KiwoomTokens from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` KiwoomTokens.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of KiwoomTokens.
+     */
+    distinct?: KiwoomTokenScalarFieldEnum | KiwoomTokenScalarFieldEnum[]
+  }
+
+  /**
+   * KiwoomToken findFirstOrThrow
+   */
+  export type KiwoomTokenFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the KiwoomToken
+     */
+    select?: KiwoomTokenSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the KiwoomToken
+     */
+    omit?: KiwoomTokenOmit<ExtArgs> | null
+    /**
+     * Filter, which KiwoomToken to fetch.
+     */
+    where?: KiwoomTokenWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of KiwoomTokens to fetch.
+     */
+    orderBy?: KiwoomTokenOrderByWithRelationInput | KiwoomTokenOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for KiwoomTokens.
+     */
+    cursor?: KiwoomTokenWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` KiwoomTokens from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` KiwoomTokens.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of KiwoomTokens.
+     */
+    distinct?: KiwoomTokenScalarFieldEnum | KiwoomTokenScalarFieldEnum[]
+  }
+
+  /**
+   * KiwoomToken findMany
+   */
+  export type KiwoomTokenFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the KiwoomToken
+     */
+    select?: KiwoomTokenSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the KiwoomToken
+     */
+    omit?: KiwoomTokenOmit<ExtArgs> | null
+    /**
+     * Filter, which KiwoomTokens to fetch.
+     */
+    where?: KiwoomTokenWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of KiwoomTokens to fetch.
+     */
+    orderBy?: KiwoomTokenOrderByWithRelationInput | KiwoomTokenOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing KiwoomTokens.
+     */
+    cursor?: KiwoomTokenWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` KiwoomTokens from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` KiwoomTokens.
+     */
+    skip?: number
+    distinct?: KiwoomTokenScalarFieldEnum | KiwoomTokenScalarFieldEnum[]
+  }
+
+  /**
+   * KiwoomToken create
+   */
+  export type KiwoomTokenCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the KiwoomToken
+     */
+    select?: KiwoomTokenSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the KiwoomToken
+     */
+    omit?: KiwoomTokenOmit<ExtArgs> | null
+    /**
+     * The data needed to create a KiwoomToken.
+     */
+    data: XOR<KiwoomTokenCreateInput, KiwoomTokenUncheckedCreateInput>
+  }
+
+  /**
+   * KiwoomToken createMany
+   */
+  export type KiwoomTokenCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many KiwoomTokens.
+     */
+    data: KiwoomTokenCreateManyInput | KiwoomTokenCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * KiwoomToken createManyAndReturn
+   */
+  export type KiwoomTokenCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the KiwoomToken
+     */
+    select?: KiwoomTokenSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the KiwoomToken
+     */
+    omit?: KiwoomTokenOmit<ExtArgs> | null
+    /**
+     * The data used to create many KiwoomTokens.
+     */
+    data: KiwoomTokenCreateManyInput | KiwoomTokenCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * KiwoomToken update
+   */
+  export type KiwoomTokenUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the KiwoomToken
+     */
+    select?: KiwoomTokenSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the KiwoomToken
+     */
+    omit?: KiwoomTokenOmit<ExtArgs> | null
+    /**
+     * The data needed to update a KiwoomToken.
+     */
+    data: XOR<KiwoomTokenUpdateInput, KiwoomTokenUncheckedUpdateInput>
+    /**
+     * Choose, which KiwoomToken to update.
+     */
+    where: KiwoomTokenWhereUniqueInput
+  }
+
+  /**
+   * KiwoomToken updateMany
+   */
+  export type KiwoomTokenUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update KiwoomTokens.
+     */
+    data: XOR<KiwoomTokenUpdateManyMutationInput, KiwoomTokenUncheckedUpdateManyInput>
+    /**
+     * Filter which KiwoomTokens to update
+     */
+    where?: KiwoomTokenWhereInput
+    /**
+     * Limit how many KiwoomTokens to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * KiwoomToken updateManyAndReturn
+   */
+  export type KiwoomTokenUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the KiwoomToken
+     */
+    select?: KiwoomTokenSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the KiwoomToken
+     */
+    omit?: KiwoomTokenOmit<ExtArgs> | null
+    /**
+     * The data used to update KiwoomTokens.
+     */
+    data: XOR<KiwoomTokenUpdateManyMutationInput, KiwoomTokenUncheckedUpdateManyInput>
+    /**
+     * Filter which KiwoomTokens to update
+     */
+    where?: KiwoomTokenWhereInput
+    /**
+     * Limit how many KiwoomTokens to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * KiwoomToken upsert
+   */
+  export type KiwoomTokenUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the KiwoomToken
+     */
+    select?: KiwoomTokenSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the KiwoomToken
+     */
+    omit?: KiwoomTokenOmit<ExtArgs> | null
+    /**
+     * The filter to search for the KiwoomToken to update in case it exists.
+     */
+    where: KiwoomTokenWhereUniqueInput
+    /**
+     * In case the KiwoomToken found by the `where` argument doesn't exist, create a new KiwoomToken with this data.
+     */
+    create: XOR<KiwoomTokenCreateInput, KiwoomTokenUncheckedCreateInput>
+    /**
+     * In case the KiwoomToken was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<KiwoomTokenUpdateInput, KiwoomTokenUncheckedUpdateInput>
+  }
+
+  /**
+   * KiwoomToken delete
+   */
+  export type KiwoomTokenDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the KiwoomToken
+     */
+    select?: KiwoomTokenSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the KiwoomToken
+     */
+    omit?: KiwoomTokenOmit<ExtArgs> | null
+    /**
+     * Filter which KiwoomToken to delete.
+     */
+    where: KiwoomTokenWhereUniqueInput
+  }
+
+  /**
+   * KiwoomToken deleteMany
+   */
+  export type KiwoomTokenDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which KiwoomTokens to delete
+     */
+    where?: KiwoomTokenWhereInput
+    /**
+     * Limit how many KiwoomTokens to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * KiwoomToken without action
+   */
+  export type KiwoomTokenDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the KiwoomToken
+     */
+    select?: KiwoomTokenSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the KiwoomToken
+     */
+    omit?: KiwoomTokenOmit<ExtArgs> | null
+  }
+
+
+  /**
+   * Model StockCandle
+   */
+
+  export type AggregateStockCandle = {
+    _count: StockCandleCountAggregateOutputType | null
+    _avg: StockCandleAvgAggregateOutputType | null
+    _sum: StockCandleSumAggregateOutputType | null
+    _min: StockCandleMinAggregateOutputType | null
+    _max: StockCandleMaxAggregateOutputType | null
+  }
+
+  export type StockCandleAvgAggregateOutputType = {
+    openPrice: Decimal | null
+    highPrice: Decimal | null
+    lowPrice: Decimal | null
+    closePrice: Decimal | null
+    volume: number | null
+    tradingValue: number | null
+    prevDayCompare: Decimal | null
+  }
+
+  export type StockCandleSumAggregateOutputType = {
+    openPrice: Decimal | null
+    highPrice: Decimal | null
+    lowPrice: Decimal | null
+    closePrice: Decimal | null
+    volume: bigint | null
+    tradingValue: bigint | null
+    prevDayCompare: Decimal | null
+  }
+
+  export type StockCandleMinAggregateOutputType = {
+    candleId: string | null
+    stockCode: string | null
+    candleType: string | null
+    candleTime: Date | null
+    openPrice: Decimal | null
+    highPrice: Decimal | null
+    lowPrice: Decimal | null
+    closePrice: Decimal | null
+    volume: bigint | null
+    tradingValue: bigint | null
+    prevDayCompare: Decimal | null
+    createdAt: Date | null
+  }
+
+  export type StockCandleMaxAggregateOutputType = {
+    candleId: string | null
+    stockCode: string | null
+    candleType: string | null
+    candleTime: Date | null
+    openPrice: Decimal | null
+    highPrice: Decimal | null
+    lowPrice: Decimal | null
+    closePrice: Decimal | null
+    volume: bigint | null
+    tradingValue: bigint | null
+    prevDayCompare: Decimal | null
+    createdAt: Date | null
+  }
+
+  export type StockCandleCountAggregateOutputType = {
+    candleId: number
+    stockCode: number
+    candleType: number
+    candleTime: number
+    openPrice: number
+    highPrice: number
+    lowPrice: number
+    closePrice: number
+    volume: number
+    tradingValue: number
+    prevDayCompare: number
+    createdAt: number
+    _all: number
+  }
+
+
+  export type StockCandleAvgAggregateInputType = {
+    openPrice?: true
+    highPrice?: true
+    lowPrice?: true
+    closePrice?: true
+    volume?: true
+    tradingValue?: true
+    prevDayCompare?: true
+  }
+
+  export type StockCandleSumAggregateInputType = {
+    openPrice?: true
+    highPrice?: true
+    lowPrice?: true
+    closePrice?: true
+    volume?: true
+    tradingValue?: true
+    prevDayCompare?: true
+  }
+
+  export type StockCandleMinAggregateInputType = {
+    candleId?: true
+    stockCode?: true
+    candleType?: true
+    candleTime?: true
+    openPrice?: true
+    highPrice?: true
+    lowPrice?: true
+    closePrice?: true
+    volume?: true
+    tradingValue?: true
+    prevDayCompare?: true
+    createdAt?: true
+  }
+
+  export type StockCandleMaxAggregateInputType = {
+    candleId?: true
+    stockCode?: true
+    candleType?: true
+    candleTime?: true
+    openPrice?: true
+    highPrice?: true
+    lowPrice?: true
+    closePrice?: true
+    volume?: true
+    tradingValue?: true
+    prevDayCompare?: true
+    createdAt?: true
+  }
+
+  export type StockCandleCountAggregateInputType = {
+    candleId?: true
+    stockCode?: true
+    candleType?: true
+    candleTime?: true
+    openPrice?: true
+    highPrice?: true
+    lowPrice?: true
+    closePrice?: true
+    volume?: true
+    tradingValue?: true
+    prevDayCompare?: true
+    createdAt?: true
+    _all?: true
+  }
+
+  export type StockCandleAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which StockCandle to aggregate.
+     */
+    where?: StockCandleWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of StockCandles to fetch.
+     */
+    orderBy?: StockCandleOrderByWithRelationInput | StockCandleOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: StockCandleWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` StockCandles from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` StockCandles.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned StockCandles
+    **/
+    _count?: true | StockCandleCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: StockCandleAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: StockCandleSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: StockCandleMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: StockCandleMaxAggregateInputType
+  }
+
+  export type GetStockCandleAggregateType<T extends StockCandleAggregateArgs> = {
+        [P in keyof T & keyof AggregateStockCandle]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateStockCandle[P]>
+      : GetScalarType<T[P], AggregateStockCandle[P]>
+  }
+
+
+
+
+  export type StockCandleGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: StockCandleWhereInput
+    orderBy?: StockCandleOrderByWithAggregationInput | StockCandleOrderByWithAggregationInput[]
+    by: StockCandleScalarFieldEnum[] | StockCandleScalarFieldEnum
+    having?: StockCandleScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: StockCandleCountAggregateInputType | true
+    _avg?: StockCandleAvgAggregateInputType
+    _sum?: StockCandleSumAggregateInputType
+    _min?: StockCandleMinAggregateInputType
+    _max?: StockCandleMaxAggregateInputType
+  }
+
+  export type StockCandleGroupByOutputType = {
+    candleId: string
+    stockCode: string
+    candleType: string
+    candleTime: Date
+    openPrice: Decimal
+    highPrice: Decimal
+    lowPrice: Decimal
+    closePrice: Decimal
+    volume: bigint
+    tradingValue: bigint | null
+    prevDayCompare: Decimal | null
+    createdAt: Date
+    _count: StockCandleCountAggregateOutputType | null
+    _avg: StockCandleAvgAggregateOutputType | null
+    _sum: StockCandleSumAggregateOutputType | null
+    _min: StockCandleMinAggregateOutputType | null
+    _max: StockCandleMaxAggregateOutputType | null
+  }
+
+  type GetStockCandleGroupByPayload<T extends StockCandleGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<StockCandleGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof StockCandleGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], StockCandleGroupByOutputType[P]>
+            : GetScalarType<T[P], StockCandleGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type StockCandleSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    candleId?: boolean
+    stockCode?: boolean
+    candleType?: boolean
+    candleTime?: boolean
+    openPrice?: boolean
+    highPrice?: boolean
+    lowPrice?: boolean
+    closePrice?: boolean
+    volume?: boolean
+    tradingValue?: boolean
+    prevDayCompare?: boolean
+    createdAt?: boolean
+  }, ExtArgs["result"]["stockCandle"]>
+
+  export type StockCandleSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    candleId?: boolean
+    stockCode?: boolean
+    candleType?: boolean
+    candleTime?: boolean
+    openPrice?: boolean
+    highPrice?: boolean
+    lowPrice?: boolean
+    closePrice?: boolean
+    volume?: boolean
+    tradingValue?: boolean
+    prevDayCompare?: boolean
+    createdAt?: boolean
+  }, ExtArgs["result"]["stockCandle"]>
+
+  export type StockCandleSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    candleId?: boolean
+    stockCode?: boolean
+    candleType?: boolean
+    candleTime?: boolean
+    openPrice?: boolean
+    highPrice?: boolean
+    lowPrice?: boolean
+    closePrice?: boolean
+    volume?: boolean
+    tradingValue?: boolean
+    prevDayCompare?: boolean
+    createdAt?: boolean
+  }, ExtArgs["result"]["stockCandle"]>
+
+  export type StockCandleSelectScalar = {
+    candleId?: boolean
+    stockCode?: boolean
+    candleType?: boolean
+    candleTime?: boolean
+    openPrice?: boolean
+    highPrice?: boolean
+    lowPrice?: boolean
+    closePrice?: boolean
+    volume?: boolean
+    tradingValue?: boolean
+    prevDayCompare?: boolean
+    createdAt?: boolean
+  }
+
+  export type StockCandleOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"candleId" | "stockCode" | "candleType" | "candleTime" | "openPrice" | "highPrice" | "lowPrice" | "closePrice" | "volume" | "tradingValue" | "prevDayCompare" | "createdAt", ExtArgs["result"]["stockCandle"]>
+
+  export type $StockCandlePayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "StockCandle"
+    objects: {}
+    scalars: $Extensions.GetPayloadResult<{
+      candleId: string
+      stockCode: string
+      candleType: string
+      candleTime: Date
+      openPrice: Prisma.Decimal
+      highPrice: Prisma.Decimal
+      lowPrice: Prisma.Decimal
+      closePrice: Prisma.Decimal
+      volume: bigint
+      tradingValue: bigint | null
+      prevDayCompare: Prisma.Decimal | null
+      createdAt: Date
+    }, ExtArgs["result"]["stockCandle"]>
+    composites: {}
+  }
+
+  type StockCandleGetPayload<S extends boolean | null | undefined | StockCandleDefaultArgs> = $Result.GetResult<Prisma.$StockCandlePayload, S>
+
+  type StockCandleCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<StockCandleFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: StockCandleCountAggregateInputType | true
+    }
+
+  export interface StockCandleDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['StockCandle'], meta: { name: 'StockCandle' } }
+    /**
+     * Find zero or one StockCandle that matches the filter.
+     * @param {StockCandleFindUniqueArgs} args - Arguments to find a StockCandle
+     * @example
+     * // Get one StockCandle
+     * const stockCandle = await prisma.stockCandle.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends StockCandleFindUniqueArgs>(args: SelectSubset<T, StockCandleFindUniqueArgs<ExtArgs>>): Prisma__StockCandleClient<$Result.GetResult<Prisma.$StockCandlePayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one StockCandle that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {StockCandleFindUniqueOrThrowArgs} args - Arguments to find a StockCandle
+     * @example
+     * // Get one StockCandle
+     * const stockCandle = await prisma.stockCandle.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends StockCandleFindUniqueOrThrowArgs>(args: SelectSubset<T, StockCandleFindUniqueOrThrowArgs<ExtArgs>>): Prisma__StockCandleClient<$Result.GetResult<Prisma.$StockCandlePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first StockCandle that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {StockCandleFindFirstArgs} args - Arguments to find a StockCandle
+     * @example
+     * // Get one StockCandle
+     * const stockCandle = await prisma.stockCandle.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends StockCandleFindFirstArgs>(args?: SelectSubset<T, StockCandleFindFirstArgs<ExtArgs>>): Prisma__StockCandleClient<$Result.GetResult<Prisma.$StockCandlePayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first StockCandle that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {StockCandleFindFirstOrThrowArgs} args - Arguments to find a StockCandle
+     * @example
+     * // Get one StockCandle
+     * const stockCandle = await prisma.stockCandle.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends StockCandleFindFirstOrThrowArgs>(args?: SelectSubset<T, StockCandleFindFirstOrThrowArgs<ExtArgs>>): Prisma__StockCandleClient<$Result.GetResult<Prisma.$StockCandlePayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more StockCandles that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {StockCandleFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all StockCandles
+     * const stockCandles = await prisma.stockCandle.findMany()
+     * 
+     * // Get first 10 StockCandles
+     * const stockCandles = await prisma.stockCandle.findMany({ take: 10 })
+     * 
+     * // Only select the `candleId`
+     * const stockCandleWithCandleIdOnly = await prisma.stockCandle.findMany({ select: { candleId: true } })
+     * 
+     */
+    findMany<T extends StockCandleFindManyArgs>(args?: SelectSubset<T, StockCandleFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$StockCandlePayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a StockCandle.
+     * @param {StockCandleCreateArgs} args - Arguments to create a StockCandle.
+     * @example
+     * // Create one StockCandle
+     * const StockCandle = await prisma.stockCandle.create({
+     *   data: {
+     *     // ... data to create a StockCandle
+     *   }
+     * })
+     * 
+     */
+    create<T extends StockCandleCreateArgs>(args: SelectSubset<T, StockCandleCreateArgs<ExtArgs>>): Prisma__StockCandleClient<$Result.GetResult<Prisma.$StockCandlePayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many StockCandles.
+     * @param {StockCandleCreateManyArgs} args - Arguments to create many StockCandles.
+     * @example
+     * // Create many StockCandles
+     * const stockCandle = await prisma.stockCandle.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends StockCandleCreateManyArgs>(args?: SelectSubset<T, StockCandleCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many StockCandles and returns the data saved in the database.
+     * @param {StockCandleCreateManyAndReturnArgs} args - Arguments to create many StockCandles.
+     * @example
+     * // Create many StockCandles
+     * const stockCandle = await prisma.stockCandle.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many StockCandles and only return the `candleId`
+     * const stockCandleWithCandleIdOnly = await prisma.stockCandle.createManyAndReturn({
+     *   select: { candleId: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends StockCandleCreateManyAndReturnArgs>(args?: SelectSubset<T, StockCandleCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$StockCandlePayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a StockCandle.
+     * @param {StockCandleDeleteArgs} args - Arguments to delete one StockCandle.
+     * @example
+     * // Delete one StockCandle
+     * const StockCandle = await prisma.stockCandle.delete({
+     *   where: {
+     *     // ... filter to delete one StockCandle
+     *   }
+     * })
+     * 
+     */
+    delete<T extends StockCandleDeleteArgs>(args: SelectSubset<T, StockCandleDeleteArgs<ExtArgs>>): Prisma__StockCandleClient<$Result.GetResult<Prisma.$StockCandlePayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one StockCandle.
+     * @param {StockCandleUpdateArgs} args - Arguments to update one StockCandle.
+     * @example
+     * // Update one StockCandle
+     * const stockCandle = await prisma.stockCandle.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends StockCandleUpdateArgs>(args: SelectSubset<T, StockCandleUpdateArgs<ExtArgs>>): Prisma__StockCandleClient<$Result.GetResult<Prisma.$StockCandlePayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more StockCandles.
+     * @param {StockCandleDeleteManyArgs} args - Arguments to filter StockCandles to delete.
+     * @example
+     * // Delete a few StockCandles
+     * const { count } = await prisma.stockCandle.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends StockCandleDeleteManyArgs>(args?: SelectSubset<T, StockCandleDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more StockCandles.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {StockCandleUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many StockCandles
+     * const stockCandle = await prisma.stockCandle.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends StockCandleUpdateManyArgs>(args: SelectSubset<T, StockCandleUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more StockCandles and returns the data updated in the database.
+     * @param {StockCandleUpdateManyAndReturnArgs} args - Arguments to update many StockCandles.
+     * @example
+     * // Update many StockCandles
+     * const stockCandle = await prisma.stockCandle.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more StockCandles and only return the `candleId`
+     * const stockCandleWithCandleIdOnly = await prisma.stockCandle.updateManyAndReturn({
+     *   select: { candleId: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends StockCandleUpdateManyAndReturnArgs>(args: SelectSubset<T, StockCandleUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$StockCandlePayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one StockCandle.
+     * @param {StockCandleUpsertArgs} args - Arguments to update or create a StockCandle.
+     * @example
+     * // Update or create a StockCandle
+     * const stockCandle = await prisma.stockCandle.upsert({
+     *   create: {
+     *     // ... data to create a StockCandle
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the StockCandle we want to update
+     *   }
+     * })
+     */
+    upsert<T extends StockCandleUpsertArgs>(args: SelectSubset<T, StockCandleUpsertArgs<ExtArgs>>): Prisma__StockCandleClient<$Result.GetResult<Prisma.$StockCandlePayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of StockCandles.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {StockCandleCountArgs} args - Arguments to filter StockCandles to count.
+     * @example
+     * // Count the number of StockCandles
+     * const count = await prisma.stockCandle.count({
+     *   where: {
+     *     // ... the filter for the StockCandles we want to count
+     *   }
+     * })
+    **/
+    count<T extends StockCandleCountArgs>(
+      args?: Subset<T, StockCandleCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], StockCandleCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a StockCandle.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {StockCandleAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends StockCandleAggregateArgs>(args: Subset<T, StockCandleAggregateArgs>): Prisma.PrismaPromise<GetStockCandleAggregateType<T>>
+
+    /**
+     * Group by StockCandle.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {StockCandleGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends StockCandleGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: StockCandleGroupByArgs['orderBy'] }
+        : { orderBy?: StockCandleGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, StockCandleGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetStockCandleGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the StockCandle model
+   */
+  readonly fields: StockCandleFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for StockCandle.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__StockCandleClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the StockCandle model
+   */
+  interface StockCandleFieldRefs {
+    readonly candleId: FieldRef<"StockCandle", 'String'>
+    readonly stockCode: FieldRef<"StockCandle", 'String'>
+    readonly candleType: FieldRef<"StockCandle", 'String'>
+    readonly candleTime: FieldRef<"StockCandle", 'DateTime'>
+    readonly openPrice: FieldRef<"StockCandle", 'Decimal'>
+    readonly highPrice: FieldRef<"StockCandle", 'Decimal'>
+    readonly lowPrice: FieldRef<"StockCandle", 'Decimal'>
+    readonly closePrice: FieldRef<"StockCandle", 'Decimal'>
+    readonly volume: FieldRef<"StockCandle", 'BigInt'>
+    readonly tradingValue: FieldRef<"StockCandle", 'BigInt'>
+    readonly prevDayCompare: FieldRef<"StockCandle", 'Decimal'>
+    readonly createdAt: FieldRef<"StockCandle", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * StockCandle findUnique
+   */
+  export type StockCandleFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the StockCandle
+     */
+    select?: StockCandleSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the StockCandle
+     */
+    omit?: StockCandleOmit<ExtArgs> | null
+    /**
+     * Filter, which StockCandle to fetch.
+     */
+    where: StockCandleWhereUniqueInput
+  }
+
+  /**
+   * StockCandle findUniqueOrThrow
+   */
+  export type StockCandleFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the StockCandle
+     */
+    select?: StockCandleSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the StockCandle
+     */
+    omit?: StockCandleOmit<ExtArgs> | null
+    /**
+     * Filter, which StockCandle to fetch.
+     */
+    where: StockCandleWhereUniqueInput
+  }
+
+  /**
+   * StockCandle findFirst
+   */
+  export type StockCandleFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the StockCandle
+     */
+    select?: StockCandleSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the StockCandle
+     */
+    omit?: StockCandleOmit<ExtArgs> | null
+    /**
+     * Filter, which StockCandle to fetch.
+     */
+    where?: StockCandleWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of StockCandles to fetch.
+     */
+    orderBy?: StockCandleOrderByWithRelationInput | StockCandleOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for StockCandles.
+     */
+    cursor?: StockCandleWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` StockCandles from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` StockCandles.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of StockCandles.
+     */
+    distinct?: StockCandleScalarFieldEnum | StockCandleScalarFieldEnum[]
+  }
+
+  /**
+   * StockCandle findFirstOrThrow
+   */
+  export type StockCandleFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the StockCandle
+     */
+    select?: StockCandleSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the StockCandle
+     */
+    omit?: StockCandleOmit<ExtArgs> | null
+    /**
+     * Filter, which StockCandle to fetch.
+     */
+    where?: StockCandleWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of StockCandles to fetch.
+     */
+    orderBy?: StockCandleOrderByWithRelationInput | StockCandleOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for StockCandles.
+     */
+    cursor?: StockCandleWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` StockCandles from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` StockCandles.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of StockCandles.
+     */
+    distinct?: StockCandleScalarFieldEnum | StockCandleScalarFieldEnum[]
+  }
+
+  /**
+   * StockCandle findMany
+   */
+  export type StockCandleFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the StockCandle
+     */
+    select?: StockCandleSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the StockCandle
+     */
+    omit?: StockCandleOmit<ExtArgs> | null
+    /**
+     * Filter, which StockCandles to fetch.
+     */
+    where?: StockCandleWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of StockCandles to fetch.
+     */
+    orderBy?: StockCandleOrderByWithRelationInput | StockCandleOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing StockCandles.
+     */
+    cursor?: StockCandleWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` StockCandles from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` StockCandles.
+     */
+    skip?: number
+    distinct?: StockCandleScalarFieldEnum | StockCandleScalarFieldEnum[]
+  }
+
+  /**
+   * StockCandle create
+   */
+  export type StockCandleCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the StockCandle
+     */
+    select?: StockCandleSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the StockCandle
+     */
+    omit?: StockCandleOmit<ExtArgs> | null
+    /**
+     * The data needed to create a StockCandle.
+     */
+    data: XOR<StockCandleCreateInput, StockCandleUncheckedCreateInput>
+  }
+
+  /**
+   * StockCandle createMany
+   */
+  export type StockCandleCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many StockCandles.
+     */
+    data: StockCandleCreateManyInput | StockCandleCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * StockCandle createManyAndReturn
+   */
+  export type StockCandleCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the StockCandle
+     */
+    select?: StockCandleSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the StockCandle
+     */
+    omit?: StockCandleOmit<ExtArgs> | null
+    /**
+     * The data used to create many StockCandles.
+     */
+    data: StockCandleCreateManyInput | StockCandleCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * StockCandle update
+   */
+  export type StockCandleUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the StockCandle
+     */
+    select?: StockCandleSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the StockCandle
+     */
+    omit?: StockCandleOmit<ExtArgs> | null
+    /**
+     * The data needed to update a StockCandle.
+     */
+    data: XOR<StockCandleUpdateInput, StockCandleUncheckedUpdateInput>
+    /**
+     * Choose, which StockCandle to update.
+     */
+    where: StockCandleWhereUniqueInput
+  }
+
+  /**
+   * StockCandle updateMany
+   */
+  export type StockCandleUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update StockCandles.
+     */
+    data: XOR<StockCandleUpdateManyMutationInput, StockCandleUncheckedUpdateManyInput>
+    /**
+     * Filter which StockCandles to update
+     */
+    where?: StockCandleWhereInput
+    /**
+     * Limit how many StockCandles to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * StockCandle updateManyAndReturn
+   */
+  export type StockCandleUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the StockCandle
+     */
+    select?: StockCandleSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the StockCandle
+     */
+    omit?: StockCandleOmit<ExtArgs> | null
+    /**
+     * The data used to update StockCandles.
+     */
+    data: XOR<StockCandleUpdateManyMutationInput, StockCandleUncheckedUpdateManyInput>
+    /**
+     * Filter which StockCandles to update
+     */
+    where?: StockCandleWhereInput
+    /**
+     * Limit how many StockCandles to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * StockCandle upsert
+   */
+  export type StockCandleUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the StockCandle
+     */
+    select?: StockCandleSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the StockCandle
+     */
+    omit?: StockCandleOmit<ExtArgs> | null
+    /**
+     * The filter to search for the StockCandle to update in case it exists.
+     */
+    where: StockCandleWhereUniqueInput
+    /**
+     * In case the StockCandle found by the `where` argument doesn't exist, create a new StockCandle with this data.
+     */
+    create: XOR<StockCandleCreateInput, StockCandleUncheckedCreateInput>
+    /**
+     * In case the StockCandle was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<StockCandleUpdateInput, StockCandleUncheckedUpdateInput>
+  }
+
+  /**
+   * StockCandle delete
+   */
+  export type StockCandleDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the StockCandle
+     */
+    select?: StockCandleSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the StockCandle
+     */
+    omit?: StockCandleOmit<ExtArgs> | null
+    /**
+     * Filter which StockCandle to delete.
+     */
+    where: StockCandleWhereUniqueInput
+  }
+
+  /**
+   * StockCandle deleteMany
+   */
+  export type StockCandleDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which StockCandles to delete
+     */
+    where?: StockCandleWhereInput
+    /**
+     * Limit how many StockCandles to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * StockCandle without action
+   */
+  export type StockCandleDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the StockCandle
+     */
+    select?: StockCandleSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the StockCandle
+     */
+    omit?: StockCandleOmit<ExtArgs> | null
+  }
+
+
+  /**
+   * Model StockTick
+   */
+
+  export type AggregateStockTick = {
+    _count: StockTickCountAggregateOutputType | null
+    _avg: StockTickAvgAggregateOutputType | null
+    _sum: StockTickSumAggregateOutputType | null
+    _min: StockTickMinAggregateOutputType | null
+    _max: StockTickMaxAggregateOutputType | null
+  }
+
+  export type StockTickAvgAggregateOutputType = {
+    price: Decimal | null
+    volume: number | null
+    prevDayCompare: Decimal | null
+    changeRate: Decimal | null
+    askPrice: Decimal | null
+    bidPrice: Decimal | null
+    accVolume: number | null
+    accTradingValue: number | null
+  }
+
+  export type StockTickSumAggregateOutputType = {
+    price: Decimal | null
+    volume: bigint | null
+    prevDayCompare: Decimal | null
+    changeRate: Decimal | null
+    askPrice: Decimal | null
+    bidPrice: Decimal | null
+    accVolume: bigint | null
+    accTradingValue: bigint | null
+  }
+
+  export type StockTickMinAggregateOutputType = {
+    tickId: string | null
+    stockCode: string | null
+    tickTime: Date | null
+    price: Decimal | null
+    volume: bigint | null
+    prevDayCompare: Decimal | null
+    changeRate: Decimal | null
+    askPrice: Decimal | null
+    bidPrice: Decimal | null
+    accVolume: bigint | null
+    accTradingValue: bigint | null
+    createdAt: Date | null
+  }
+
+  export type StockTickMaxAggregateOutputType = {
+    tickId: string | null
+    stockCode: string | null
+    tickTime: Date | null
+    price: Decimal | null
+    volume: bigint | null
+    prevDayCompare: Decimal | null
+    changeRate: Decimal | null
+    askPrice: Decimal | null
+    bidPrice: Decimal | null
+    accVolume: bigint | null
+    accTradingValue: bigint | null
+    createdAt: Date | null
+  }
+
+  export type StockTickCountAggregateOutputType = {
+    tickId: number
+    stockCode: number
+    tickTime: number
+    price: number
+    volume: number
+    prevDayCompare: number
+    changeRate: number
+    askPrice: number
+    bidPrice: number
+    accVolume: number
+    accTradingValue: number
+    createdAt: number
+    _all: number
+  }
+
+
+  export type StockTickAvgAggregateInputType = {
+    price?: true
+    volume?: true
+    prevDayCompare?: true
+    changeRate?: true
+    askPrice?: true
+    bidPrice?: true
+    accVolume?: true
+    accTradingValue?: true
+  }
+
+  export type StockTickSumAggregateInputType = {
+    price?: true
+    volume?: true
+    prevDayCompare?: true
+    changeRate?: true
+    askPrice?: true
+    bidPrice?: true
+    accVolume?: true
+    accTradingValue?: true
+  }
+
+  export type StockTickMinAggregateInputType = {
+    tickId?: true
+    stockCode?: true
+    tickTime?: true
+    price?: true
+    volume?: true
+    prevDayCompare?: true
+    changeRate?: true
+    askPrice?: true
+    bidPrice?: true
+    accVolume?: true
+    accTradingValue?: true
+    createdAt?: true
+  }
+
+  export type StockTickMaxAggregateInputType = {
+    tickId?: true
+    stockCode?: true
+    tickTime?: true
+    price?: true
+    volume?: true
+    prevDayCompare?: true
+    changeRate?: true
+    askPrice?: true
+    bidPrice?: true
+    accVolume?: true
+    accTradingValue?: true
+    createdAt?: true
+  }
+
+  export type StockTickCountAggregateInputType = {
+    tickId?: true
+    stockCode?: true
+    tickTime?: true
+    price?: true
+    volume?: true
+    prevDayCompare?: true
+    changeRate?: true
+    askPrice?: true
+    bidPrice?: true
+    accVolume?: true
+    accTradingValue?: true
+    createdAt?: true
+    _all?: true
+  }
+
+  export type StockTickAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which StockTick to aggregate.
+     */
+    where?: StockTickWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of StockTicks to fetch.
+     */
+    orderBy?: StockTickOrderByWithRelationInput | StockTickOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: StockTickWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` StockTicks from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` StockTicks.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned StockTicks
+    **/
+    _count?: true | StockTickCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: StockTickAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: StockTickSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: StockTickMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: StockTickMaxAggregateInputType
+  }
+
+  export type GetStockTickAggregateType<T extends StockTickAggregateArgs> = {
+        [P in keyof T & keyof AggregateStockTick]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateStockTick[P]>
+      : GetScalarType<T[P], AggregateStockTick[P]>
+  }
+
+
+
+
+  export type StockTickGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: StockTickWhereInput
+    orderBy?: StockTickOrderByWithAggregationInput | StockTickOrderByWithAggregationInput[]
+    by: StockTickScalarFieldEnum[] | StockTickScalarFieldEnum
+    having?: StockTickScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: StockTickCountAggregateInputType | true
+    _avg?: StockTickAvgAggregateInputType
+    _sum?: StockTickSumAggregateInputType
+    _min?: StockTickMinAggregateInputType
+    _max?: StockTickMaxAggregateInputType
+  }
+
+  export type StockTickGroupByOutputType = {
+    tickId: string
+    stockCode: string
+    tickTime: Date
+    price: Decimal
+    volume: bigint
+    prevDayCompare: Decimal | null
+    changeRate: Decimal | null
+    askPrice: Decimal | null
+    bidPrice: Decimal | null
+    accVolume: bigint | null
+    accTradingValue: bigint | null
+    createdAt: Date
+    _count: StockTickCountAggregateOutputType | null
+    _avg: StockTickAvgAggregateOutputType | null
+    _sum: StockTickSumAggregateOutputType | null
+    _min: StockTickMinAggregateOutputType | null
+    _max: StockTickMaxAggregateOutputType | null
+  }
+
+  type GetStockTickGroupByPayload<T extends StockTickGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<StockTickGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof StockTickGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], StockTickGroupByOutputType[P]>
+            : GetScalarType<T[P], StockTickGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type StockTickSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    tickId?: boolean
+    stockCode?: boolean
+    tickTime?: boolean
+    price?: boolean
+    volume?: boolean
+    prevDayCompare?: boolean
+    changeRate?: boolean
+    askPrice?: boolean
+    bidPrice?: boolean
+    accVolume?: boolean
+    accTradingValue?: boolean
+    createdAt?: boolean
+  }, ExtArgs["result"]["stockTick"]>
+
+  export type StockTickSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    tickId?: boolean
+    stockCode?: boolean
+    tickTime?: boolean
+    price?: boolean
+    volume?: boolean
+    prevDayCompare?: boolean
+    changeRate?: boolean
+    askPrice?: boolean
+    bidPrice?: boolean
+    accVolume?: boolean
+    accTradingValue?: boolean
+    createdAt?: boolean
+  }, ExtArgs["result"]["stockTick"]>
+
+  export type StockTickSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    tickId?: boolean
+    stockCode?: boolean
+    tickTime?: boolean
+    price?: boolean
+    volume?: boolean
+    prevDayCompare?: boolean
+    changeRate?: boolean
+    askPrice?: boolean
+    bidPrice?: boolean
+    accVolume?: boolean
+    accTradingValue?: boolean
+    createdAt?: boolean
+  }, ExtArgs["result"]["stockTick"]>
+
+  export type StockTickSelectScalar = {
+    tickId?: boolean
+    stockCode?: boolean
+    tickTime?: boolean
+    price?: boolean
+    volume?: boolean
+    prevDayCompare?: boolean
+    changeRate?: boolean
+    askPrice?: boolean
+    bidPrice?: boolean
+    accVolume?: boolean
+    accTradingValue?: boolean
+    createdAt?: boolean
+  }
+
+  export type StockTickOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"tickId" | "stockCode" | "tickTime" | "price" | "volume" | "prevDayCompare" | "changeRate" | "askPrice" | "bidPrice" | "accVolume" | "accTradingValue" | "createdAt", ExtArgs["result"]["stockTick"]>
+
+  export type $StockTickPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "StockTick"
+    objects: {}
+    scalars: $Extensions.GetPayloadResult<{
+      tickId: string
+      stockCode: string
+      tickTime: Date
+      price: Prisma.Decimal
+      volume: bigint
+      prevDayCompare: Prisma.Decimal | null
+      changeRate: Prisma.Decimal | null
+      askPrice: Prisma.Decimal | null
+      bidPrice: Prisma.Decimal | null
+      accVolume: bigint | null
+      accTradingValue: bigint | null
+      createdAt: Date
+    }, ExtArgs["result"]["stockTick"]>
+    composites: {}
+  }
+
+  type StockTickGetPayload<S extends boolean | null | undefined | StockTickDefaultArgs> = $Result.GetResult<Prisma.$StockTickPayload, S>
+
+  type StockTickCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<StockTickFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: StockTickCountAggregateInputType | true
+    }
+
+  export interface StockTickDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['StockTick'], meta: { name: 'StockTick' } }
+    /**
+     * Find zero or one StockTick that matches the filter.
+     * @param {StockTickFindUniqueArgs} args - Arguments to find a StockTick
+     * @example
+     * // Get one StockTick
+     * const stockTick = await prisma.stockTick.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends StockTickFindUniqueArgs>(args: SelectSubset<T, StockTickFindUniqueArgs<ExtArgs>>): Prisma__StockTickClient<$Result.GetResult<Prisma.$StockTickPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one StockTick that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {StockTickFindUniqueOrThrowArgs} args - Arguments to find a StockTick
+     * @example
+     * // Get one StockTick
+     * const stockTick = await prisma.stockTick.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends StockTickFindUniqueOrThrowArgs>(args: SelectSubset<T, StockTickFindUniqueOrThrowArgs<ExtArgs>>): Prisma__StockTickClient<$Result.GetResult<Prisma.$StockTickPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first StockTick that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {StockTickFindFirstArgs} args - Arguments to find a StockTick
+     * @example
+     * // Get one StockTick
+     * const stockTick = await prisma.stockTick.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends StockTickFindFirstArgs>(args?: SelectSubset<T, StockTickFindFirstArgs<ExtArgs>>): Prisma__StockTickClient<$Result.GetResult<Prisma.$StockTickPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first StockTick that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {StockTickFindFirstOrThrowArgs} args - Arguments to find a StockTick
+     * @example
+     * // Get one StockTick
+     * const stockTick = await prisma.stockTick.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends StockTickFindFirstOrThrowArgs>(args?: SelectSubset<T, StockTickFindFirstOrThrowArgs<ExtArgs>>): Prisma__StockTickClient<$Result.GetResult<Prisma.$StockTickPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more StockTicks that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {StockTickFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all StockTicks
+     * const stockTicks = await prisma.stockTick.findMany()
+     * 
+     * // Get first 10 StockTicks
+     * const stockTicks = await prisma.stockTick.findMany({ take: 10 })
+     * 
+     * // Only select the `tickId`
+     * const stockTickWithTickIdOnly = await prisma.stockTick.findMany({ select: { tickId: true } })
+     * 
+     */
+    findMany<T extends StockTickFindManyArgs>(args?: SelectSubset<T, StockTickFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$StockTickPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a StockTick.
+     * @param {StockTickCreateArgs} args - Arguments to create a StockTick.
+     * @example
+     * // Create one StockTick
+     * const StockTick = await prisma.stockTick.create({
+     *   data: {
+     *     // ... data to create a StockTick
+     *   }
+     * })
+     * 
+     */
+    create<T extends StockTickCreateArgs>(args: SelectSubset<T, StockTickCreateArgs<ExtArgs>>): Prisma__StockTickClient<$Result.GetResult<Prisma.$StockTickPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many StockTicks.
+     * @param {StockTickCreateManyArgs} args - Arguments to create many StockTicks.
+     * @example
+     * // Create many StockTicks
+     * const stockTick = await prisma.stockTick.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends StockTickCreateManyArgs>(args?: SelectSubset<T, StockTickCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many StockTicks and returns the data saved in the database.
+     * @param {StockTickCreateManyAndReturnArgs} args - Arguments to create many StockTicks.
+     * @example
+     * // Create many StockTicks
+     * const stockTick = await prisma.stockTick.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many StockTicks and only return the `tickId`
+     * const stockTickWithTickIdOnly = await prisma.stockTick.createManyAndReturn({
+     *   select: { tickId: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends StockTickCreateManyAndReturnArgs>(args?: SelectSubset<T, StockTickCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$StockTickPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a StockTick.
+     * @param {StockTickDeleteArgs} args - Arguments to delete one StockTick.
+     * @example
+     * // Delete one StockTick
+     * const StockTick = await prisma.stockTick.delete({
+     *   where: {
+     *     // ... filter to delete one StockTick
+     *   }
+     * })
+     * 
+     */
+    delete<T extends StockTickDeleteArgs>(args: SelectSubset<T, StockTickDeleteArgs<ExtArgs>>): Prisma__StockTickClient<$Result.GetResult<Prisma.$StockTickPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one StockTick.
+     * @param {StockTickUpdateArgs} args - Arguments to update one StockTick.
+     * @example
+     * // Update one StockTick
+     * const stockTick = await prisma.stockTick.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends StockTickUpdateArgs>(args: SelectSubset<T, StockTickUpdateArgs<ExtArgs>>): Prisma__StockTickClient<$Result.GetResult<Prisma.$StockTickPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more StockTicks.
+     * @param {StockTickDeleteManyArgs} args - Arguments to filter StockTicks to delete.
+     * @example
+     * // Delete a few StockTicks
+     * const { count } = await prisma.stockTick.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends StockTickDeleteManyArgs>(args?: SelectSubset<T, StockTickDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more StockTicks.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {StockTickUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many StockTicks
+     * const stockTick = await prisma.stockTick.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends StockTickUpdateManyArgs>(args: SelectSubset<T, StockTickUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more StockTicks and returns the data updated in the database.
+     * @param {StockTickUpdateManyAndReturnArgs} args - Arguments to update many StockTicks.
+     * @example
+     * // Update many StockTicks
+     * const stockTick = await prisma.stockTick.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more StockTicks and only return the `tickId`
+     * const stockTickWithTickIdOnly = await prisma.stockTick.updateManyAndReturn({
+     *   select: { tickId: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends StockTickUpdateManyAndReturnArgs>(args: SelectSubset<T, StockTickUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$StockTickPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one StockTick.
+     * @param {StockTickUpsertArgs} args - Arguments to update or create a StockTick.
+     * @example
+     * // Update or create a StockTick
+     * const stockTick = await prisma.stockTick.upsert({
+     *   create: {
+     *     // ... data to create a StockTick
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the StockTick we want to update
+     *   }
+     * })
+     */
+    upsert<T extends StockTickUpsertArgs>(args: SelectSubset<T, StockTickUpsertArgs<ExtArgs>>): Prisma__StockTickClient<$Result.GetResult<Prisma.$StockTickPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of StockTicks.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {StockTickCountArgs} args - Arguments to filter StockTicks to count.
+     * @example
+     * // Count the number of StockTicks
+     * const count = await prisma.stockTick.count({
+     *   where: {
+     *     // ... the filter for the StockTicks we want to count
+     *   }
+     * })
+    **/
+    count<T extends StockTickCountArgs>(
+      args?: Subset<T, StockTickCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], StockTickCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a StockTick.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {StockTickAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends StockTickAggregateArgs>(args: Subset<T, StockTickAggregateArgs>): Prisma.PrismaPromise<GetStockTickAggregateType<T>>
+
+    /**
+     * Group by StockTick.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {StockTickGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends StockTickGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: StockTickGroupByArgs['orderBy'] }
+        : { orderBy?: StockTickGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, StockTickGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetStockTickGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the StockTick model
+   */
+  readonly fields: StockTickFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for StockTick.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__StockTickClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the StockTick model
+   */
+  interface StockTickFieldRefs {
+    readonly tickId: FieldRef<"StockTick", 'String'>
+    readonly stockCode: FieldRef<"StockTick", 'String'>
+    readonly tickTime: FieldRef<"StockTick", 'DateTime'>
+    readonly price: FieldRef<"StockTick", 'Decimal'>
+    readonly volume: FieldRef<"StockTick", 'BigInt'>
+    readonly prevDayCompare: FieldRef<"StockTick", 'Decimal'>
+    readonly changeRate: FieldRef<"StockTick", 'Decimal'>
+    readonly askPrice: FieldRef<"StockTick", 'Decimal'>
+    readonly bidPrice: FieldRef<"StockTick", 'Decimal'>
+    readonly accVolume: FieldRef<"StockTick", 'BigInt'>
+    readonly accTradingValue: FieldRef<"StockTick", 'BigInt'>
+    readonly createdAt: FieldRef<"StockTick", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * StockTick findUnique
+   */
+  export type StockTickFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the StockTick
+     */
+    select?: StockTickSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the StockTick
+     */
+    omit?: StockTickOmit<ExtArgs> | null
+    /**
+     * Filter, which StockTick to fetch.
+     */
+    where: StockTickWhereUniqueInput
+  }
+
+  /**
+   * StockTick findUniqueOrThrow
+   */
+  export type StockTickFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the StockTick
+     */
+    select?: StockTickSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the StockTick
+     */
+    omit?: StockTickOmit<ExtArgs> | null
+    /**
+     * Filter, which StockTick to fetch.
+     */
+    where: StockTickWhereUniqueInput
+  }
+
+  /**
+   * StockTick findFirst
+   */
+  export type StockTickFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the StockTick
+     */
+    select?: StockTickSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the StockTick
+     */
+    omit?: StockTickOmit<ExtArgs> | null
+    /**
+     * Filter, which StockTick to fetch.
+     */
+    where?: StockTickWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of StockTicks to fetch.
+     */
+    orderBy?: StockTickOrderByWithRelationInput | StockTickOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for StockTicks.
+     */
+    cursor?: StockTickWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` StockTicks from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` StockTicks.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of StockTicks.
+     */
+    distinct?: StockTickScalarFieldEnum | StockTickScalarFieldEnum[]
+  }
+
+  /**
+   * StockTick findFirstOrThrow
+   */
+  export type StockTickFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the StockTick
+     */
+    select?: StockTickSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the StockTick
+     */
+    omit?: StockTickOmit<ExtArgs> | null
+    /**
+     * Filter, which StockTick to fetch.
+     */
+    where?: StockTickWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of StockTicks to fetch.
+     */
+    orderBy?: StockTickOrderByWithRelationInput | StockTickOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for StockTicks.
+     */
+    cursor?: StockTickWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` StockTicks from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` StockTicks.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of StockTicks.
+     */
+    distinct?: StockTickScalarFieldEnum | StockTickScalarFieldEnum[]
+  }
+
+  /**
+   * StockTick findMany
+   */
+  export type StockTickFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the StockTick
+     */
+    select?: StockTickSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the StockTick
+     */
+    omit?: StockTickOmit<ExtArgs> | null
+    /**
+     * Filter, which StockTicks to fetch.
+     */
+    where?: StockTickWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of StockTicks to fetch.
+     */
+    orderBy?: StockTickOrderByWithRelationInput | StockTickOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing StockTicks.
+     */
+    cursor?: StockTickWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` StockTicks from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` StockTicks.
+     */
+    skip?: number
+    distinct?: StockTickScalarFieldEnum | StockTickScalarFieldEnum[]
+  }
+
+  /**
+   * StockTick create
+   */
+  export type StockTickCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the StockTick
+     */
+    select?: StockTickSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the StockTick
+     */
+    omit?: StockTickOmit<ExtArgs> | null
+    /**
+     * The data needed to create a StockTick.
+     */
+    data: XOR<StockTickCreateInput, StockTickUncheckedCreateInput>
+  }
+
+  /**
+   * StockTick createMany
+   */
+  export type StockTickCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many StockTicks.
+     */
+    data: StockTickCreateManyInput | StockTickCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * StockTick createManyAndReturn
+   */
+  export type StockTickCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the StockTick
+     */
+    select?: StockTickSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the StockTick
+     */
+    omit?: StockTickOmit<ExtArgs> | null
+    /**
+     * The data used to create many StockTicks.
+     */
+    data: StockTickCreateManyInput | StockTickCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * StockTick update
+   */
+  export type StockTickUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the StockTick
+     */
+    select?: StockTickSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the StockTick
+     */
+    omit?: StockTickOmit<ExtArgs> | null
+    /**
+     * The data needed to update a StockTick.
+     */
+    data: XOR<StockTickUpdateInput, StockTickUncheckedUpdateInput>
+    /**
+     * Choose, which StockTick to update.
+     */
+    where: StockTickWhereUniqueInput
+  }
+
+  /**
+   * StockTick updateMany
+   */
+  export type StockTickUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update StockTicks.
+     */
+    data: XOR<StockTickUpdateManyMutationInput, StockTickUncheckedUpdateManyInput>
+    /**
+     * Filter which StockTicks to update
+     */
+    where?: StockTickWhereInput
+    /**
+     * Limit how many StockTicks to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * StockTick updateManyAndReturn
+   */
+  export type StockTickUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the StockTick
+     */
+    select?: StockTickSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the StockTick
+     */
+    omit?: StockTickOmit<ExtArgs> | null
+    /**
+     * The data used to update StockTicks.
+     */
+    data: XOR<StockTickUpdateManyMutationInput, StockTickUncheckedUpdateManyInput>
+    /**
+     * Filter which StockTicks to update
+     */
+    where?: StockTickWhereInput
+    /**
+     * Limit how many StockTicks to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * StockTick upsert
+   */
+  export type StockTickUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the StockTick
+     */
+    select?: StockTickSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the StockTick
+     */
+    omit?: StockTickOmit<ExtArgs> | null
+    /**
+     * The filter to search for the StockTick to update in case it exists.
+     */
+    where: StockTickWhereUniqueInput
+    /**
+     * In case the StockTick found by the `where` argument doesn't exist, create a new StockTick with this data.
+     */
+    create: XOR<StockTickCreateInput, StockTickUncheckedCreateInput>
+    /**
+     * In case the StockTick was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<StockTickUpdateInput, StockTickUncheckedUpdateInput>
+  }
+
+  /**
+   * StockTick delete
+   */
+  export type StockTickDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the StockTick
+     */
+    select?: StockTickSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the StockTick
+     */
+    omit?: StockTickOmit<ExtArgs> | null
+    /**
+     * Filter which StockTick to delete.
+     */
+    where: StockTickWhereUniqueInput
+  }
+
+  /**
+   * StockTick deleteMany
+   */
+  export type StockTickDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which StockTicks to delete
+     */
+    where?: StockTickWhereInput
+    /**
+     * Limit how many StockTicks to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * StockTick without action
+   */
+  export type StockTickDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the StockTick
+     */
+    select?: StockTickSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the StockTick
+     */
+    omit?: StockTickOmit<ExtArgs> | null
+  }
+
+
+  /**
+   * Model StockQuote
+   */
+
+  export type AggregateStockQuote = {
+    _count: StockQuoteCountAggregateOutputType | null
+    _avg: StockQuoteAvgAggregateOutputType | null
+    _sum: StockQuoteSumAggregateOutputType | null
+    _min: StockQuoteMinAggregateOutputType | null
+    _max: StockQuoteMaxAggregateOutputType | null
+  }
+
+  export type StockQuoteAvgAggregateOutputType = {
+    askPrice1: Decimal | null
+    askVolume1: number | null
+    bidPrice1: Decimal | null
+    bidVolume1: number | null
+    askPrice2: Decimal | null
+    askVolume2: number | null
+    bidPrice2: Decimal | null
+    bidVolume2: number | null
+    askPrice3: Decimal | null
+    askVolume3: number | null
+    bidPrice3: Decimal | null
+    bidVolume3: number | null
+    askPrice4: Decimal | null
+    askVolume4: number | null
+    bidPrice4: Decimal | null
+    bidVolume4: number | null
+    askPrice5: Decimal | null
+    askVolume5: number | null
+    bidPrice5: Decimal | null
+    bidVolume5: number | null
+    totalAskVolume: number | null
+    totalBidVolume: number | null
+  }
+
+  export type StockQuoteSumAggregateOutputType = {
+    askPrice1: Decimal | null
+    askVolume1: bigint | null
+    bidPrice1: Decimal | null
+    bidVolume1: bigint | null
+    askPrice2: Decimal | null
+    askVolume2: bigint | null
+    bidPrice2: Decimal | null
+    bidVolume2: bigint | null
+    askPrice3: Decimal | null
+    askVolume3: bigint | null
+    bidPrice3: Decimal | null
+    bidVolume3: bigint | null
+    askPrice4: Decimal | null
+    askVolume4: bigint | null
+    bidPrice4: Decimal | null
+    bidVolume4: bigint | null
+    askPrice5: Decimal | null
+    askVolume5: bigint | null
+    bidPrice5: Decimal | null
+    bidVolume5: bigint | null
+    totalAskVolume: bigint | null
+    totalBidVolume: bigint | null
+  }
+
+  export type StockQuoteMinAggregateOutputType = {
+    quoteId: string | null
+    stockCode: string | null
+    quoteTime: Date | null
+    askPrice1: Decimal | null
+    askVolume1: bigint | null
+    bidPrice1: Decimal | null
+    bidVolume1: bigint | null
+    askPrice2: Decimal | null
+    askVolume2: bigint | null
+    bidPrice2: Decimal | null
+    bidVolume2: bigint | null
+    askPrice3: Decimal | null
+    askVolume3: bigint | null
+    bidPrice3: Decimal | null
+    bidVolume3: bigint | null
+    askPrice4: Decimal | null
+    askVolume4: bigint | null
+    bidPrice4: Decimal | null
+    bidVolume4: bigint | null
+    askPrice5: Decimal | null
+    askVolume5: bigint | null
+    bidPrice5: Decimal | null
+    bidVolume5: bigint | null
+    totalAskVolume: bigint | null
+    totalBidVolume: bigint | null
+    createdAt: Date | null
+  }
+
+  export type StockQuoteMaxAggregateOutputType = {
+    quoteId: string | null
+    stockCode: string | null
+    quoteTime: Date | null
+    askPrice1: Decimal | null
+    askVolume1: bigint | null
+    bidPrice1: Decimal | null
+    bidVolume1: bigint | null
+    askPrice2: Decimal | null
+    askVolume2: bigint | null
+    bidPrice2: Decimal | null
+    bidVolume2: bigint | null
+    askPrice3: Decimal | null
+    askVolume3: bigint | null
+    bidPrice3: Decimal | null
+    bidVolume3: bigint | null
+    askPrice4: Decimal | null
+    askVolume4: bigint | null
+    bidPrice4: Decimal | null
+    bidVolume4: bigint | null
+    askPrice5: Decimal | null
+    askVolume5: bigint | null
+    bidPrice5: Decimal | null
+    bidVolume5: bigint | null
+    totalAskVolume: bigint | null
+    totalBidVolume: bigint | null
+    createdAt: Date | null
+  }
+
+  export type StockQuoteCountAggregateOutputType = {
+    quoteId: number
+    stockCode: number
+    quoteTime: number
+    askPrice1: number
+    askVolume1: number
+    bidPrice1: number
+    bidVolume1: number
+    askPrice2: number
+    askVolume2: number
+    bidPrice2: number
+    bidVolume2: number
+    askPrice3: number
+    askVolume3: number
+    bidPrice3: number
+    bidVolume3: number
+    askPrice4: number
+    askVolume4: number
+    bidPrice4: number
+    bidVolume4: number
+    askPrice5: number
+    askVolume5: number
+    bidPrice5: number
+    bidVolume5: number
+    totalAskVolume: number
+    totalBidVolume: number
+    createdAt: number
+    _all: number
+  }
+
+
+  export type StockQuoteAvgAggregateInputType = {
+    askPrice1?: true
+    askVolume1?: true
+    bidPrice1?: true
+    bidVolume1?: true
+    askPrice2?: true
+    askVolume2?: true
+    bidPrice2?: true
+    bidVolume2?: true
+    askPrice3?: true
+    askVolume3?: true
+    bidPrice3?: true
+    bidVolume3?: true
+    askPrice4?: true
+    askVolume4?: true
+    bidPrice4?: true
+    bidVolume4?: true
+    askPrice5?: true
+    askVolume5?: true
+    bidPrice5?: true
+    bidVolume5?: true
+    totalAskVolume?: true
+    totalBidVolume?: true
+  }
+
+  export type StockQuoteSumAggregateInputType = {
+    askPrice1?: true
+    askVolume1?: true
+    bidPrice1?: true
+    bidVolume1?: true
+    askPrice2?: true
+    askVolume2?: true
+    bidPrice2?: true
+    bidVolume2?: true
+    askPrice3?: true
+    askVolume3?: true
+    bidPrice3?: true
+    bidVolume3?: true
+    askPrice4?: true
+    askVolume4?: true
+    bidPrice4?: true
+    bidVolume4?: true
+    askPrice5?: true
+    askVolume5?: true
+    bidPrice5?: true
+    bidVolume5?: true
+    totalAskVolume?: true
+    totalBidVolume?: true
+  }
+
+  export type StockQuoteMinAggregateInputType = {
+    quoteId?: true
+    stockCode?: true
+    quoteTime?: true
+    askPrice1?: true
+    askVolume1?: true
+    bidPrice1?: true
+    bidVolume1?: true
+    askPrice2?: true
+    askVolume2?: true
+    bidPrice2?: true
+    bidVolume2?: true
+    askPrice3?: true
+    askVolume3?: true
+    bidPrice3?: true
+    bidVolume3?: true
+    askPrice4?: true
+    askVolume4?: true
+    bidPrice4?: true
+    bidVolume4?: true
+    askPrice5?: true
+    askVolume5?: true
+    bidPrice5?: true
+    bidVolume5?: true
+    totalAskVolume?: true
+    totalBidVolume?: true
+    createdAt?: true
+  }
+
+  export type StockQuoteMaxAggregateInputType = {
+    quoteId?: true
+    stockCode?: true
+    quoteTime?: true
+    askPrice1?: true
+    askVolume1?: true
+    bidPrice1?: true
+    bidVolume1?: true
+    askPrice2?: true
+    askVolume2?: true
+    bidPrice2?: true
+    bidVolume2?: true
+    askPrice3?: true
+    askVolume3?: true
+    bidPrice3?: true
+    bidVolume3?: true
+    askPrice4?: true
+    askVolume4?: true
+    bidPrice4?: true
+    bidVolume4?: true
+    askPrice5?: true
+    askVolume5?: true
+    bidPrice5?: true
+    bidVolume5?: true
+    totalAskVolume?: true
+    totalBidVolume?: true
+    createdAt?: true
+  }
+
+  export type StockQuoteCountAggregateInputType = {
+    quoteId?: true
+    stockCode?: true
+    quoteTime?: true
+    askPrice1?: true
+    askVolume1?: true
+    bidPrice1?: true
+    bidVolume1?: true
+    askPrice2?: true
+    askVolume2?: true
+    bidPrice2?: true
+    bidVolume2?: true
+    askPrice3?: true
+    askVolume3?: true
+    bidPrice3?: true
+    bidVolume3?: true
+    askPrice4?: true
+    askVolume4?: true
+    bidPrice4?: true
+    bidVolume4?: true
+    askPrice5?: true
+    askVolume5?: true
+    bidPrice5?: true
+    bidVolume5?: true
+    totalAskVolume?: true
+    totalBidVolume?: true
+    createdAt?: true
+    _all?: true
+  }
+
+  export type StockQuoteAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which StockQuote to aggregate.
+     */
+    where?: StockQuoteWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of StockQuotes to fetch.
+     */
+    orderBy?: StockQuoteOrderByWithRelationInput | StockQuoteOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: StockQuoteWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` StockQuotes from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` StockQuotes.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned StockQuotes
+    **/
+    _count?: true | StockQuoteCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: StockQuoteAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: StockQuoteSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: StockQuoteMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: StockQuoteMaxAggregateInputType
+  }
+
+  export type GetStockQuoteAggregateType<T extends StockQuoteAggregateArgs> = {
+        [P in keyof T & keyof AggregateStockQuote]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateStockQuote[P]>
+      : GetScalarType<T[P], AggregateStockQuote[P]>
+  }
+
+
+
+
+  export type StockQuoteGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: StockQuoteWhereInput
+    orderBy?: StockQuoteOrderByWithAggregationInput | StockQuoteOrderByWithAggregationInput[]
+    by: StockQuoteScalarFieldEnum[] | StockQuoteScalarFieldEnum
+    having?: StockQuoteScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: StockQuoteCountAggregateInputType | true
+    _avg?: StockQuoteAvgAggregateInputType
+    _sum?: StockQuoteSumAggregateInputType
+    _min?: StockQuoteMinAggregateInputType
+    _max?: StockQuoteMaxAggregateInputType
+  }
+
+  export type StockQuoteGroupByOutputType = {
+    quoteId: string
+    stockCode: string
+    quoteTime: Date
+    askPrice1: Decimal | null
+    askVolume1: bigint | null
+    bidPrice1: Decimal | null
+    bidVolume1: bigint | null
+    askPrice2: Decimal | null
+    askVolume2: bigint | null
+    bidPrice2: Decimal | null
+    bidVolume2: bigint | null
+    askPrice3: Decimal | null
+    askVolume3: bigint | null
+    bidPrice3: Decimal | null
+    bidVolume3: bigint | null
+    askPrice4: Decimal | null
+    askVolume4: bigint | null
+    bidPrice4: Decimal | null
+    bidVolume4: bigint | null
+    askPrice5: Decimal | null
+    askVolume5: bigint | null
+    bidPrice5: Decimal | null
+    bidVolume5: bigint | null
+    totalAskVolume: bigint | null
+    totalBidVolume: bigint | null
+    createdAt: Date
+    _count: StockQuoteCountAggregateOutputType | null
+    _avg: StockQuoteAvgAggregateOutputType | null
+    _sum: StockQuoteSumAggregateOutputType | null
+    _min: StockQuoteMinAggregateOutputType | null
+    _max: StockQuoteMaxAggregateOutputType | null
+  }
+
+  type GetStockQuoteGroupByPayload<T extends StockQuoteGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<StockQuoteGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof StockQuoteGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], StockQuoteGroupByOutputType[P]>
+            : GetScalarType<T[P], StockQuoteGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type StockQuoteSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    quoteId?: boolean
+    stockCode?: boolean
+    quoteTime?: boolean
+    askPrice1?: boolean
+    askVolume1?: boolean
+    bidPrice1?: boolean
+    bidVolume1?: boolean
+    askPrice2?: boolean
+    askVolume2?: boolean
+    bidPrice2?: boolean
+    bidVolume2?: boolean
+    askPrice3?: boolean
+    askVolume3?: boolean
+    bidPrice3?: boolean
+    bidVolume3?: boolean
+    askPrice4?: boolean
+    askVolume4?: boolean
+    bidPrice4?: boolean
+    bidVolume4?: boolean
+    askPrice5?: boolean
+    askVolume5?: boolean
+    bidPrice5?: boolean
+    bidVolume5?: boolean
+    totalAskVolume?: boolean
+    totalBidVolume?: boolean
+    createdAt?: boolean
+  }, ExtArgs["result"]["stockQuote"]>
+
+  export type StockQuoteSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    quoteId?: boolean
+    stockCode?: boolean
+    quoteTime?: boolean
+    askPrice1?: boolean
+    askVolume1?: boolean
+    bidPrice1?: boolean
+    bidVolume1?: boolean
+    askPrice2?: boolean
+    askVolume2?: boolean
+    bidPrice2?: boolean
+    bidVolume2?: boolean
+    askPrice3?: boolean
+    askVolume3?: boolean
+    bidPrice3?: boolean
+    bidVolume3?: boolean
+    askPrice4?: boolean
+    askVolume4?: boolean
+    bidPrice4?: boolean
+    bidVolume4?: boolean
+    askPrice5?: boolean
+    askVolume5?: boolean
+    bidPrice5?: boolean
+    bidVolume5?: boolean
+    totalAskVolume?: boolean
+    totalBidVolume?: boolean
+    createdAt?: boolean
+  }, ExtArgs["result"]["stockQuote"]>
+
+  export type StockQuoteSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    quoteId?: boolean
+    stockCode?: boolean
+    quoteTime?: boolean
+    askPrice1?: boolean
+    askVolume1?: boolean
+    bidPrice1?: boolean
+    bidVolume1?: boolean
+    askPrice2?: boolean
+    askVolume2?: boolean
+    bidPrice2?: boolean
+    bidVolume2?: boolean
+    askPrice3?: boolean
+    askVolume3?: boolean
+    bidPrice3?: boolean
+    bidVolume3?: boolean
+    askPrice4?: boolean
+    askVolume4?: boolean
+    bidPrice4?: boolean
+    bidVolume4?: boolean
+    askPrice5?: boolean
+    askVolume5?: boolean
+    bidPrice5?: boolean
+    bidVolume5?: boolean
+    totalAskVolume?: boolean
+    totalBidVolume?: boolean
+    createdAt?: boolean
+  }, ExtArgs["result"]["stockQuote"]>
+
+  export type StockQuoteSelectScalar = {
+    quoteId?: boolean
+    stockCode?: boolean
+    quoteTime?: boolean
+    askPrice1?: boolean
+    askVolume1?: boolean
+    bidPrice1?: boolean
+    bidVolume1?: boolean
+    askPrice2?: boolean
+    askVolume2?: boolean
+    bidPrice2?: boolean
+    bidVolume2?: boolean
+    askPrice3?: boolean
+    askVolume3?: boolean
+    bidPrice3?: boolean
+    bidVolume3?: boolean
+    askPrice4?: boolean
+    askVolume4?: boolean
+    bidPrice4?: boolean
+    bidVolume4?: boolean
+    askPrice5?: boolean
+    askVolume5?: boolean
+    bidPrice5?: boolean
+    bidVolume5?: boolean
+    totalAskVolume?: boolean
+    totalBidVolume?: boolean
+    createdAt?: boolean
+  }
+
+  export type StockQuoteOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"quoteId" | "stockCode" | "quoteTime" | "askPrice1" | "askVolume1" | "bidPrice1" | "bidVolume1" | "askPrice2" | "askVolume2" | "bidPrice2" | "bidVolume2" | "askPrice3" | "askVolume3" | "bidPrice3" | "bidVolume3" | "askPrice4" | "askVolume4" | "bidPrice4" | "bidVolume4" | "askPrice5" | "askVolume5" | "bidPrice5" | "bidVolume5" | "totalAskVolume" | "totalBidVolume" | "createdAt", ExtArgs["result"]["stockQuote"]>
+
+  export type $StockQuotePayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "StockQuote"
+    objects: {}
+    scalars: $Extensions.GetPayloadResult<{
+      quoteId: string
+      stockCode: string
+      quoteTime: Date
+      askPrice1: Prisma.Decimal | null
+      askVolume1: bigint | null
+      bidPrice1: Prisma.Decimal | null
+      bidVolume1: bigint | null
+      askPrice2: Prisma.Decimal | null
+      askVolume2: bigint | null
+      bidPrice2: Prisma.Decimal | null
+      bidVolume2: bigint | null
+      askPrice3: Prisma.Decimal | null
+      askVolume3: bigint | null
+      bidPrice3: Prisma.Decimal | null
+      bidVolume3: bigint | null
+      askPrice4: Prisma.Decimal | null
+      askVolume4: bigint | null
+      bidPrice4: Prisma.Decimal | null
+      bidVolume4: bigint | null
+      askPrice5: Prisma.Decimal | null
+      askVolume5: bigint | null
+      bidPrice5: Prisma.Decimal | null
+      bidVolume5: bigint | null
+      totalAskVolume: bigint | null
+      totalBidVolume: bigint | null
+      createdAt: Date
+    }, ExtArgs["result"]["stockQuote"]>
+    composites: {}
+  }
+
+  type StockQuoteGetPayload<S extends boolean | null | undefined | StockQuoteDefaultArgs> = $Result.GetResult<Prisma.$StockQuotePayload, S>
+
+  type StockQuoteCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<StockQuoteFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: StockQuoteCountAggregateInputType | true
+    }
+
+  export interface StockQuoteDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['StockQuote'], meta: { name: 'StockQuote' } }
+    /**
+     * Find zero or one StockQuote that matches the filter.
+     * @param {StockQuoteFindUniqueArgs} args - Arguments to find a StockQuote
+     * @example
+     * // Get one StockQuote
+     * const stockQuote = await prisma.stockQuote.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends StockQuoteFindUniqueArgs>(args: SelectSubset<T, StockQuoteFindUniqueArgs<ExtArgs>>): Prisma__StockQuoteClient<$Result.GetResult<Prisma.$StockQuotePayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one StockQuote that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {StockQuoteFindUniqueOrThrowArgs} args - Arguments to find a StockQuote
+     * @example
+     * // Get one StockQuote
+     * const stockQuote = await prisma.stockQuote.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends StockQuoteFindUniqueOrThrowArgs>(args: SelectSubset<T, StockQuoteFindUniqueOrThrowArgs<ExtArgs>>): Prisma__StockQuoteClient<$Result.GetResult<Prisma.$StockQuotePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first StockQuote that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {StockQuoteFindFirstArgs} args - Arguments to find a StockQuote
+     * @example
+     * // Get one StockQuote
+     * const stockQuote = await prisma.stockQuote.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends StockQuoteFindFirstArgs>(args?: SelectSubset<T, StockQuoteFindFirstArgs<ExtArgs>>): Prisma__StockQuoteClient<$Result.GetResult<Prisma.$StockQuotePayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first StockQuote that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {StockQuoteFindFirstOrThrowArgs} args - Arguments to find a StockQuote
+     * @example
+     * // Get one StockQuote
+     * const stockQuote = await prisma.stockQuote.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends StockQuoteFindFirstOrThrowArgs>(args?: SelectSubset<T, StockQuoteFindFirstOrThrowArgs<ExtArgs>>): Prisma__StockQuoteClient<$Result.GetResult<Prisma.$StockQuotePayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more StockQuotes that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {StockQuoteFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all StockQuotes
+     * const stockQuotes = await prisma.stockQuote.findMany()
+     * 
+     * // Get first 10 StockQuotes
+     * const stockQuotes = await prisma.stockQuote.findMany({ take: 10 })
+     * 
+     * // Only select the `quoteId`
+     * const stockQuoteWithQuoteIdOnly = await prisma.stockQuote.findMany({ select: { quoteId: true } })
+     * 
+     */
+    findMany<T extends StockQuoteFindManyArgs>(args?: SelectSubset<T, StockQuoteFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$StockQuotePayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a StockQuote.
+     * @param {StockQuoteCreateArgs} args - Arguments to create a StockQuote.
+     * @example
+     * // Create one StockQuote
+     * const StockQuote = await prisma.stockQuote.create({
+     *   data: {
+     *     // ... data to create a StockQuote
+     *   }
+     * })
+     * 
+     */
+    create<T extends StockQuoteCreateArgs>(args: SelectSubset<T, StockQuoteCreateArgs<ExtArgs>>): Prisma__StockQuoteClient<$Result.GetResult<Prisma.$StockQuotePayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many StockQuotes.
+     * @param {StockQuoteCreateManyArgs} args - Arguments to create many StockQuotes.
+     * @example
+     * // Create many StockQuotes
+     * const stockQuote = await prisma.stockQuote.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends StockQuoteCreateManyArgs>(args?: SelectSubset<T, StockQuoteCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many StockQuotes and returns the data saved in the database.
+     * @param {StockQuoteCreateManyAndReturnArgs} args - Arguments to create many StockQuotes.
+     * @example
+     * // Create many StockQuotes
+     * const stockQuote = await prisma.stockQuote.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many StockQuotes and only return the `quoteId`
+     * const stockQuoteWithQuoteIdOnly = await prisma.stockQuote.createManyAndReturn({
+     *   select: { quoteId: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends StockQuoteCreateManyAndReturnArgs>(args?: SelectSubset<T, StockQuoteCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$StockQuotePayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a StockQuote.
+     * @param {StockQuoteDeleteArgs} args - Arguments to delete one StockQuote.
+     * @example
+     * // Delete one StockQuote
+     * const StockQuote = await prisma.stockQuote.delete({
+     *   where: {
+     *     // ... filter to delete one StockQuote
+     *   }
+     * })
+     * 
+     */
+    delete<T extends StockQuoteDeleteArgs>(args: SelectSubset<T, StockQuoteDeleteArgs<ExtArgs>>): Prisma__StockQuoteClient<$Result.GetResult<Prisma.$StockQuotePayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one StockQuote.
+     * @param {StockQuoteUpdateArgs} args - Arguments to update one StockQuote.
+     * @example
+     * // Update one StockQuote
+     * const stockQuote = await prisma.stockQuote.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends StockQuoteUpdateArgs>(args: SelectSubset<T, StockQuoteUpdateArgs<ExtArgs>>): Prisma__StockQuoteClient<$Result.GetResult<Prisma.$StockQuotePayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more StockQuotes.
+     * @param {StockQuoteDeleteManyArgs} args - Arguments to filter StockQuotes to delete.
+     * @example
+     * // Delete a few StockQuotes
+     * const { count } = await prisma.stockQuote.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends StockQuoteDeleteManyArgs>(args?: SelectSubset<T, StockQuoteDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more StockQuotes.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {StockQuoteUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many StockQuotes
+     * const stockQuote = await prisma.stockQuote.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends StockQuoteUpdateManyArgs>(args: SelectSubset<T, StockQuoteUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more StockQuotes and returns the data updated in the database.
+     * @param {StockQuoteUpdateManyAndReturnArgs} args - Arguments to update many StockQuotes.
+     * @example
+     * // Update many StockQuotes
+     * const stockQuote = await prisma.stockQuote.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more StockQuotes and only return the `quoteId`
+     * const stockQuoteWithQuoteIdOnly = await prisma.stockQuote.updateManyAndReturn({
+     *   select: { quoteId: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends StockQuoteUpdateManyAndReturnArgs>(args: SelectSubset<T, StockQuoteUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$StockQuotePayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one StockQuote.
+     * @param {StockQuoteUpsertArgs} args - Arguments to update or create a StockQuote.
+     * @example
+     * // Update or create a StockQuote
+     * const stockQuote = await prisma.stockQuote.upsert({
+     *   create: {
+     *     // ... data to create a StockQuote
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the StockQuote we want to update
+     *   }
+     * })
+     */
+    upsert<T extends StockQuoteUpsertArgs>(args: SelectSubset<T, StockQuoteUpsertArgs<ExtArgs>>): Prisma__StockQuoteClient<$Result.GetResult<Prisma.$StockQuotePayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of StockQuotes.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {StockQuoteCountArgs} args - Arguments to filter StockQuotes to count.
+     * @example
+     * // Count the number of StockQuotes
+     * const count = await prisma.stockQuote.count({
+     *   where: {
+     *     // ... the filter for the StockQuotes we want to count
+     *   }
+     * })
+    **/
+    count<T extends StockQuoteCountArgs>(
+      args?: Subset<T, StockQuoteCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], StockQuoteCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a StockQuote.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {StockQuoteAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends StockQuoteAggregateArgs>(args: Subset<T, StockQuoteAggregateArgs>): Prisma.PrismaPromise<GetStockQuoteAggregateType<T>>
+
+    /**
+     * Group by StockQuote.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {StockQuoteGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends StockQuoteGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: StockQuoteGroupByArgs['orderBy'] }
+        : { orderBy?: StockQuoteGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, StockQuoteGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetStockQuoteGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the StockQuote model
+   */
+  readonly fields: StockQuoteFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for StockQuote.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__StockQuoteClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the StockQuote model
+   */
+  interface StockQuoteFieldRefs {
+    readonly quoteId: FieldRef<"StockQuote", 'String'>
+    readonly stockCode: FieldRef<"StockQuote", 'String'>
+    readonly quoteTime: FieldRef<"StockQuote", 'DateTime'>
+    readonly askPrice1: FieldRef<"StockQuote", 'Decimal'>
+    readonly askVolume1: FieldRef<"StockQuote", 'BigInt'>
+    readonly bidPrice1: FieldRef<"StockQuote", 'Decimal'>
+    readonly bidVolume1: FieldRef<"StockQuote", 'BigInt'>
+    readonly askPrice2: FieldRef<"StockQuote", 'Decimal'>
+    readonly askVolume2: FieldRef<"StockQuote", 'BigInt'>
+    readonly bidPrice2: FieldRef<"StockQuote", 'Decimal'>
+    readonly bidVolume2: FieldRef<"StockQuote", 'BigInt'>
+    readonly askPrice3: FieldRef<"StockQuote", 'Decimal'>
+    readonly askVolume3: FieldRef<"StockQuote", 'BigInt'>
+    readonly bidPrice3: FieldRef<"StockQuote", 'Decimal'>
+    readonly bidVolume3: FieldRef<"StockQuote", 'BigInt'>
+    readonly askPrice4: FieldRef<"StockQuote", 'Decimal'>
+    readonly askVolume4: FieldRef<"StockQuote", 'BigInt'>
+    readonly bidPrice4: FieldRef<"StockQuote", 'Decimal'>
+    readonly bidVolume4: FieldRef<"StockQuote", 'BigInt'>
+    readonly askPrice5: FieldRef<"StockQuote", 'Decimal'>
+    readonly askVolume5: FieldRef<"StockQuote", 'BigInt'>
+    readonly bidPrice5: FieldRef<"StockQuote", 'Decimal'>
+    readonly bidVolume5: FieldRef<"StockQuote", 'BigInt'>
+    readonly totalAskVolume: FieldRef<"StockQuote", 'BigInt'>
+    readonly totalBidVolume: FieldRef<"StockQuote", 'BigInt'>
+    readonly createdAt: FieldRef<"StockQuote", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * StockQuote findUnique
+   */
+  export type StockQuoteFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the StockQuote
+     */
+    select?: StockQuoteSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the StockQuote
+     */
+    omit?: StockQuoteOmit<ExtArgs> | null
+    /**
+     * Filter, which StockQuote to fetch.
+     */
+    where: StockQuoteWhereUniqueInput
+  }
+
+  /**
+   * StockQuote findUniqueOrThrow
+   */
+  export type StockQuoteFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the StockQuote
+     */
+    select?: StockQuoteSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the StockQuote
+     */
+    omit?: StockQuoteOmit<ExtArgs> | null
+    /**
+     * Filter, which StockQuote to fetch.
+     */
+    where: StockQuoteWhereUniqueInput
+  }
+
+  /**
+   * StockQuote findFirst
+   */
+  export type StockQuoteFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the StockQuote
+     */
+    select?: StockQuoteSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the StockQuote
+     */
+    omit?: StockQuoteOmit<ExtArgs> | null
+    /**
+     * Filter, which StockQuote to fetch.
+     */
+    where?: StockQuoteWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of StockQuotes to fetch.
+     */
+    orderBy?: StockQuoteOrderByWithRelationInput | StockQuoteOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for StockQuotes.
+     */
+    cursor?: StockQuoteWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` StockQuotes from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` StockQuotes.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of StockQuotes.
+     */
+    distinct?: StockQuoteScalarFieldEnum | StockQuoteScalarFieldEnum[]
+  }
+
+  /**
+   * StockQuote findFirstOrThrow
+   */
+  export type StockQuoteFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the StockQuote
+     */
+    select?: StockQuoteSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the StockQuote
+     */
+    omit?: StockQuoteOmit<ExtArgs> | null
+    /**
+     * Filter, which StockQuote to fetch.
+     */
+    where?: StockQuoteWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of StockQuotes to fetch.
+     */
+    orderBy?: StockQuoteOrderByWithRelationInput | StockQuoteOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for StockQuotes.
+     */
+    cursor?: StockQuoteWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` StockQuotes from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` StockQuotes.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of StockQuotes.
+     */
+    distinct?: StockQuoteScalarFieldEnum | StockQuoteScalarFieldEnum[]
+  }
+
+  /**
+   * StockQuote findMany
+   */
+  export type StockQuoteFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the StockQuote
+     */
+    select?: StockQuoteSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the StockQuote
+     */
+    omit?: StockQuoteOmit<ExtArgs> | null
+    /**
+     * Filter, which StockQuotes to fetch.
+     */
+    where?: StockQuoteWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of StockQuotes to fetch.
+     */
+    orderBy?: StockQuoteOrderByWithRelationInput | StockQuoteOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing StockQuotes.
+     */
+    cursor?: StockQuoteWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` StockQuotes from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` StockQuotes.
+     */
+    skip?: number
+    distinct?: StockQuoteScalarFieldEnum | StockQuoteScalarFieldEnum[]
+  }
+
+  /**
+   * StockQuote create
+   */
+  export type StockQuoteCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the StockQuote
+     */
+    select?: StockQuoteSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the StockQuote
+     */
+    omit?: StockQuoteOmit<ExtArgs> | null
+    /**
+     * The data needed to create a StockQuote.
+     */
+    data: XOR<StockQuoteCreateInput, StockQuoteUncheckedCreateInput>
+  }
+
+  /**
+   * StockQuote createMany
+   */
+  export type StockQuoteCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many StockQuotes.
+     */
+    data: StockQuoteCreateManyInput | StockQuoteCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * StockQuote createManyAndReturn
+   */
+  export type StockQuoteCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the StockQuote
+     */
+    select?: StockQuoteSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the StockQuote
+     */
+    omit?: StockQuoteOmit<ExtArgs> | null
+    /**
+     * The data used to create many StockQuotes.
+     */
+    data: StockQuoteCreateManyInput | StockQuoteCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * StockQuote update
+   */
+  export type StockQuoteUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the StockQuote
+     */
+    select?: StockQuoteSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the StockQuote
+     */
+    omit?: StockQuoteOmit<ExtArgs> | null
+    /**
+     * The data needed to update a StockQuote.
+     */
+    data: XOR<StockQuoteUpdateInput, StockQuoteUncheckedUpdateInput>
+    /**
+     * Choose, which StockQuote to update.
+     */
+    where: StockQuoteWhereUniqueInput
+  }
+
+  /**
+   * StockQuote updateMany
+   */
+  export type StockQuoteUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update StockQuotes.
+     */
+    data: XOR<StockQuoteUpdateManyMutationInput, StockQuoteUncheckedUpdateManyInput>
+    /**
+     * Filter which StockQuotes to update
+     */
+    where?: StockQuoteWhereInput
+    /**
+     * Limit how many StockQuotes to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * StockQuote updateManyAndReturn
+   */
+  export type StockQuoteUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the StockQuote
+     */
+    select?: StockQuoteSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the StockQuote
+     */
+    omit?: StockQuoteOmit<ExtArgs> | null
+    /**
+     * The data used to update StockQuotes.
+     */
+    data: XOR<StockQuoteUpdateManyMutationInput, StockQuoteUncheckedUpdateManyInput>
+    /**
+     * Filter which StockQuotes to update
+     */
+    where?: StockQuoteWhereInput
+    /**
+     * Limit how many StockQuotes to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * StockQuote upsert
+   */
+  export type StockQuoteUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the StockQuote
+     */
+    select?: StockQuoteSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the StockQuote
+     */
+    omit?: StockQuoteOmit<ExtArgs> | null
+    /**
+     * The filter to search for the StockQuote to update in case it exists.
+     */
+    where: StockQuoteWhereUniqueInput
+    /**
+     * In case the StockQuote found by the `where` argument doesn't exist, create a new StockQuote with this data.
+     */
+    create: XOR<StockQuoteCreateInput, StockQuoteUncheckedCreateInput>
+    /**
+     * In case the StockQuote was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<StockQuoteUpdateInput, StockQuoteUncheckedUpdateInput>
+  }
+
+  /**
+   * StockQuote delete
+   */
+  export type StockQuoteDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the StockQuote
+     */
+    select?: StockQuoteSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the StockQuote
+     */
+    omit?: StockQuoteOmit<ExtArgs> | null
+    /**
+     * Filter which StockQuote to delete.
+     */
+    where: StockQuoteWhereUniqueInput
+  }
+
+  /**
+   * StockQuote deleteMany
+   */
+  export type StockQuoteDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which StockQuotes to delete
+     */
+    where?: StockQuoteWhereInput
+    /**
+     * Limit how many StockQuotes to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * StockQuote without action
+   */
+  export type StockQuoteDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the StockQuote
+     */
+    select?: StockQuoteSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the StockQuote
+     */
+    omit?: StockQuoteOmit<ExtArgs> | null
+  }
+
+
+  /**
    * Enums
    */
 
@@ -15514,6 +20564,86 @@ export namespace Prisma {
   };
 
   export type BatchJobHistoryScalarFieldEnum = (typeof BatchJobHistoryScalarFieldEnum)[keyof typeof BatchJobHistoryScalarFieldEnum]
+
+
+  export const KiwoomTokenScalarFieldEnum: {
+    tokenId: 'tokenId',
+    token: 'token',
+    tokenType: 'tokenType',
+    expiresAt: 'expiresAt',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type KiwoomTokenScalarFieldEnum = (typeof KiwoomTokenScalarFieldEnum)[keyof typeof KiwoomTokenScalarFieldEnum]
+
+
+  export const StockCandleScalarFieldEnum: {
+    candleId: 'candleId',
+    stockCode: 'stockCode',
+    candleType: 'candleType',
+    candleTime: 'candleTime',
+    openPrice: 'openPrice',
+    highPrice: 'highPrice',
+    lowPrice: 'lowPrice',
+    closePrice: 'closePrice',
+    volume: 'volume',
+    tradingValue: 'tradingValue',
+    prevDayCompare: 'prevDayCompare',
+    createdAt: 'createdAt'
+  };
+
+  export type StockCandleScalarFieldEnum = (typeof StockCandleScalarFieldEnum)[keyof typeof StockCandleScalarFieldEnum]
+
+
+  export const StockTickScalarFieldEnum: {
+    tickId: 'tickId',
+    stockCode: 'stockCode',
+    tickTime: 'tickTime',
+    price: 'price',
+    volume: 'volume',
+    prevDayCompare: 'prevDayCompare',
+    changeRate: 'changeRate',
+    askPrice: 'askPrice',
+    bidPrice: 'bidPrice',
+    accVolume: 'accVolume',
+    accTradingValue: 'accTradingValue',
+    createdAt: 'createdAt'
+  };
+
+  export type StockTickScalarFieldEnum = (typeof StockTickScalarFieldEnum)[keyof typeof StockTickScalarFieldEnum]
+
+
+  export const StockQuoteScalarFieldEnum: {
+    quoteId: 'quoteId',
+    stockCode: 'stockCode',
+    quoteTime: 'quoteTime',
+    askPrice1: 'askPrice1',
+    askVolume1: 'askVolume1',
+    bidPrice1: 'bidPrice1',
+    bidVolume1: 'bidVolume1',
+    askPrice2: 'askPrice2',
+    askVolume2: 'askVolume2',
+    bidPrice2: 'bidPrice2',
+    bidVolume2: 'bidVolume2',
+    askPrice3: 'askPrice3',
+    askVolume3: 'askVolume3',
+    bidPrice3: 'bidPrice3',
+    bidVolume3: 'bidVolume3',
+    askPrice4: 'askPrice4',
+    askVolume4: 'askVolume4',
+    bidPrice4: 'bidPrice4',
+    bidVolume4: 'bidVolume4',
+    askPrice5: 'askPrice5',
+    askVolume5: 'askVolume5',
+    bidPrice5: 'bidPrice5',
+    bidVolume5: 'bidVolume5',
+    totalAskVolume: 'totalAskVolume',
+    totalBidVolume: 'totalBidVolume',
+    createdAt: 'createdAt'
+  };
+
+  export type StockQuoteScalarFieldEnum = (typeof StockQuoteScalarFieldEnum)[keyof typeof StockQuoteScalarFieldEnum]
 
 
   export const SortOrder: {
@@ -16519,6 +21649,401 @@ export namespace Prisma {
     errorMessage?: StringNullableWithAggregatesFilter<"BatchJobHistory"> | string | null
   }
 
+  export type KiwoomTokenWhereInput = {
+    AND?: KiwoomTokenWhereInput | KiwoomTokenWhereInput[]
+    OR?: KiwoomTokenWhereInput[]
+    NOT?: KiwoomTokenWhereInput | KiwoomTokenWhereInput[]
+    tokenId?: UuidFilter<"KiwoomToken"> | string
+    token?: StringFilter<"KiwoomToken"> | string
+    tokenType?: StringFilter<"KiwoomToken"> | string
+    expiresAt?: DateTimeFilter<"KiwoomToken"> | Date | string
+    createdAt?: DateTimeFilter<"KiwoomToken"> | Date | string
+    updatedAt?: DateTimeFilter<"KiwoomToken"> | Date | string
+  }
+
+  export type KiwoomTokenOrderByWithRelationInput = {
+    tokenId?: SortOrder
+    token?: SortOrder
+    tokenType?: SortOrder
+    expiresAt?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type KiwoomTokenWhereUniqueInput = Prisma.AtLeast<{
+    tokenId?: string
+    AND?: KiwoomTokenWhereInput | KiwoomTokenWhereInput[]
+    OR?: KiwoomTokenWhereInput[]
+    NOT?: KiwoomTokenWhereInput | KiwoomTokenWhereInput[]
+    token?: StringFilter<"KiwoomToken"> | string
+    tokenType?: StringFilter<"KiwoomToken"> | string
+    expiresAt?: DateTimeFilter<"KiwoomToken"> | Date | string
+    createdAt?: DateTimeFilter<"KiwoomToken"> | Date | string
+    updatedAt?: DateTimeFilter<"KiwoomToken"> | Date | string
+  }, "tokenId">
+
+  export type KiwoomTokenOrderByWithAggregationInput = {
+    tokenId?: SortOrder
+    token?: SortOrder
+    tokenType?: SortOrder
+    expiresAt?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: KiwoomTokenCountOrderByAggregateInput
+    _max?: KiwoomTokenMaxOrderByAggregateInput
+    _min?: KiwoomTokenMinOrderByAggregateInput
+  }
+
+  export type KiwoomTokenScalarWhereWithAggregatesInput = {
+    AND?: KiwoomTokenScalarWhereWithAggregatesInput | KiwoomTokenScalarWhereWithAggregatesInput[]
+    OR?: KiwoomTokenScalarWhereWithAggregatesInput[]
+    NOT?: KiwoomTokenScalarWhereWithAggregatesInput | KiwoomTokenScalarWhereWithAggregatesInput[]
+    tokenId?: UuidWithAggregatesFilter<"KiwoomToken"> | string
+    token?: StringWithAggregatesFilter<"KiwoomToken"> | string
+    tokenType?: StringWithAggregatesFilter<"KiwoomToken"> | string
+    expiresAt?: DateTimeWithAggregatesFilter<"KiwoomToken"> | Date | string
+    createdAt?: DateTimeWithAggregatesFilter<"KiwoomToken"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"KiwoomToken"> | Date | string
+  }
+
+  export type StockCandleWhereInput = {
+    AND?: StockCandleWhereInput | StockCandleWhereInput[]
+    OR?: StockCandleWhereInput[]
+    NOT?: StockCandleWhereInput | StockCandleWhereInput[]
+    candleId?: UuidFilter<"StockCandle"> | string
+    stockCode?: StringFilter<"StockCandle"> | string
+    candleType?: StringFilter<"StockCandle"> | string
+    candleTime?: DateTimeFilter<"StockCandle"> | Date | string
+    openPrice?: DecimalFilter<"StockCandle"> | Decimal | DecimalJsLike | number | string
+    highPrice?: DecimalFilter<"StockCandle"> | Decimal | DecimalJsLike | number | string
+    lowPrice?: DecimalFilter<"StockCandle"> | Decimal | DecimalJsLike | number | string
+    closePrice?: DecimalFilter<"StockCandle"> | Decimal | DecimalJsLike | number | string
+    volume?: BigIntFilter<"StockCandle"> | bigint | number
+    tradingValue?: BigIntNullableFilter<"StockCandle"> | bigint | number | null
+    prevDayCompare?: DecimalNullableFilter<"StockCandle"> | Decimal | DecimalJsLike | number | string | null
+    createdAt?: DateTimeFilter<"StockCandle"> | Date | string
+  }
+
+  export type StockCandleOrderByWithRelationInput = {
+    candleId?: SortOrder
+    stockCode?: SortOrder
+    candleType?: SortOrder
+    candleTime?: SortOrder
+    openPrice?: SortOrder
+    highPrice?: SortOrder
+    lowPrice?: SortOrder
+    closePrice?: SortOrder
+    volume?: SortOrder
+    tradingValue?: SortOrderInput | SortOrder
+    prevDayCompare?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type StockCandleWhereUniqueInput = Prisma.AtLeast<{
+    candleId?: string
+    stockCode_candleType_candleTime?: StockCandleStockCodeCandleTypeCandleTimeCompoundUniqueInput
+    AND?: StockCandleWhereInput | StockCandleWhereInput[]
+    OR?: StockCandleWhereInput[]
+    NOT?: StockCandleWhereInput | StockCandleWhereInput[]
+    stockCode?: StringFilter<"StockCandle"> | string
+    candleType?: StringFilter<"StockCandle"> | string
+    candleTime?: DateTimeFilter<"StockCandle"> | Date | string
+    openPrice?: DecimalFilter<"StockCandle"> | Decimal | DecimalJsLike | number | string
+    highPrice?: DecimalFilter<"StockCandle"> | Decimal | DecimalJsLike | number | string
+    lowPrice?: DecimalFilter<"StockCandle"> | Decimal | DecimalJsLike | number | string
+    closePrice?: DecimalFilter<"StockCandle"> | Decimal | DecimalJsLike | number | string
+    volume?: BigIntFilter<"StockCandle"> | bigint | number
+    tradingValue?: BigIntNullableFilter<"StockCandle"> | bigint | number | null
+    prevDayCompare?: DecimalNullableFilter<"StockCandle"> | Decimal | DecimalJsLike | number | string | null
+    createdAt?: DateTimeFilter<"StockCandle"> | Date | string
+  }, "candleId" | "stockCode_candleType_candleTime">
+
+  export type StockCandleOrderByWithAggregationInput = {
+    candleId?: SortOrder
+    stockCode?: SortOrder
+    candleType?: SortOrder
+    candleTime?: SortOrder
+    openPrice?: SortOrder
+    highPrice?: SortOrder
+    lowPrice?: SortOrder
+    closePrice?: SortOrder
+    volume?: SortOrder
+    tradingValue?: SortOrderInput | SortOrder
+    prevDayCompare?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    _count?: StockCandleCountOrderByAggregateInput
+    _avg?: StockCandleAvgOrderByAggregateInput
+    _max?: StockCandleMaxOrderByAggregateInput
+    _min?: StockCandleMinOrderByAggregateInput
+    _sum?: StockCandleSumOrderByAggregateInput
+  }
+
+  export type StockCandleScalarWhereWithAggregatesInput = {
+    AND?: StockCandleScalarWhereWithAggregatesInput | StockCandleScalarWhereWithAggregatesInput[]
+    OR?: StockCandleScalarWhereWithAggregatesInput[]
+    NOT?: StockCandleScalarWhereWithAggregatesInput | StockCandleScalarWhereWithAggregatesInput[]
+    candleId?: UuidWithAggregatesFilter<"StockCandle"> | string
+    stockCode?: StringWithAggregatesFilter<"StockCandle"> | string
+    candleType?: StringWithAggregatesFilter<"StockCandle"> | string
+    candleTime?: DateTimeWithAggregatesFilter<"StockCandle"> | Date | string
+    openPrice?: DecimalWithAggregatesFilter<"StockCandle"> | Decimal | DecimalJsLike | number | string
+    highPrice?: DecimalWithAggregatesFilter<"StockCandle"> | Decimal | DecimalJsLike | number | string
+    lowPrice?: DecimalWithAggregatesFilter<"StockCandle"> | Decimal | DecimalJsLike | number | string
+    closePrice?: DecimalWithAggregatesFilter<"StockCandle"> | Decimal | DecimalJsLike | number | string
+    volume?: BigIntWithAggregatesFilter<"StockCandle"> | bigint | number
+    tradingValue?: BigIntNullableWithAggregatesFilter<"StockCandle"> | bigint | number | null
+    prevDayCompare?: DecimalNullableWithAggregatesFilter<"StockCandle"> | Decimal | DecimalJsLike | number | string | null
+    createdAt?: DateTimeWithAggregatesFilter<"StockCandle"> | Date | string
+  }
+
+  export type StockTickWhereInput = {
+    AND?: StockTickWhereInput | StockTickWhereInput[]
+    OR?: StockTickWhereInput[]
+    NOT?: StockTickWhereInput | StockTickWhereInput[]
+    tickId?: UuidFilter<"StockTick"> | string
+    stockCode?: StringFilter<"StockTick"> | string
+    tickTime?: DateTimeFilter<"StockTick"> | Date | string
+    price?: DecimalFilter<"StockTick"> | Decimal | DecimalJsLike | number | string
+    volume?: BigIntFilter<"StockTick"> | bigint | number
+    prevDayCompare?: DecimalNullableFilter<"StockTick"> | Decimal | DecimalJsLike | number | string | null
+    changeRate?: DecimalNullableFilter<"StockTick"> | Decimal | DecimalJsLike | number | string | null
+    askPrice?: DecimalNullableFilter<"StockTick"> | Decimal | DecimalJsLike | number | string | null
+    bidPrice?: DecimalNullableFilter<"StockTick"> | Decimal | DecimalJsLike | number | string | null
+    accVolume?: BigIntNullableFilter<"StockTick"> | bigint | number | null
+    accTradingValue?: BigIntNullableFilter<"StockTick"> | bigint | number | null
+    createdAt?: DateTimeFilter<"StockTick"> | Date | string
+  }
+
+  export type StockTickOrderByWithRelationInput = {
+    tickId?: SortOrder
+    stockCode?: SortOrder
+    tickTime?: SortOrder
+    price?: SortOrder
+    volume?: SortOrder
+    prevDayCompare?: SortOrderInput | SortOrder
+    changeRate?: SortOrderInput | SortOrder
+    askPrice?: SortOrderInput | SortOrder
+    bidPrice?: SortOrderInput | SortOrder
+    accVolume?: SortOrderInput | SortOrder
+    accTradingValue?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type StockTickWhereUniqueInput = Prisma.AtLeast<{
+    tickId?: string
+    AND?: StockTickWhereInput | StockTickWhereInput[]
+    OR?: StockTickWhereInput[]
+    NOT?: StockTickWhereInput | StockTickWhereInput[]
+    stockCode?: StringFilter<"StockTick"> | string
+    tickTime?: DateTimeFilter<"StockTick"> | Date | string
+    price?: DecimalFilter<"StockTick"> | Decimal | DecimalJsLike | number | string
+    volume?: BigIntFilter<"StockTick"> | bigint | number
+    prevDayCompare?: DecimalNullableFilter<"StockTick"> | Decimal | DecimalJsLike | number | string | null
+    changeRate?: DecimalNullableFilter<"StockTick"> | Decimal | DecimalJsLike | number | string | null
+    askPrice?: DecimalNullableFilter<"StockTick"> | Decimal | DecimalJsLike | number | string | null
+    bidPrice?: DecimalNullableFilter<"StockTick"> | Decimal | DecimalJsLike | number | string | null
+    accVolume?: BigIntNullableFilter<"StockTick"> | bigint | number | null
+    accTradingValue?: BigIntNullableFilter<"StockTick"> | bigint | number | null
+    createdAt?: DateTimeFilter<"StockTick"> | Date | string
+  }, "tickId">
+
+  export type StockTickOrderByWithAggregationInput = {
+    tickId?: SortOrder
+    stockCode?: SortOrder
+    tickTime?: SortOrder
+    price?: SortOrder
+    volume?: SortOrder
+    prevDayCompare?: SortOrderInput | SortOrder
+    changeRate?: SortOrderInput | SortOrder
+    askPrice?: SortOrderInput | SortOrder
+    bidPrice?: SortOrderInput | SortOrder
+    accVolume?: SortOrderInput | SortOrder
+    accTradingValue?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    _count?: StockTickCountOrderByAggregateInput
+    _avg?: StockTickAvgOrderByAggregateInput
+    _max?: StockTickMaxOrderByAggregateInput
+    _min?: StockTickMinOrderByAggregateInput
+    _sum?: StockTickSumOrderByAggregateInput
+  }
+
+  export type StockTickScalarWhereWithAggregatesInput = {
+    AND?: StockTickScalarWhereWithAggregatesInput | StockTickScalarWhereWithAggregatesInput[]
+    OR?: StockTickScalarWhereWithAggregatesInput[]
+    NOT?: StockTickScalarWhereWithAggregatesInput | StockTickScalarWhereWithAggregatesInput[]
+    tickId?: UuidWithAggregatesFilter<"StockTick"> | string
+    stockCode?: StringWithAggregatesFilter<"StockTick"> | string
+    tickTime?: DateTimeWithAggregatesFilter<"StockTick"> | Date | string
+    price?: DecimalWithAggregatesFilter<"StockTick"> | Decimal | DecimalJsLike | number | string
+    volume?: BigIntWithAggregatesFilter<"StockTick"> | bigint | number
+    prevDayCompare?: DecimalNullableWithAggregatesFilter<"StockTick"> | Decimal | DecimalJsLike | number | string | null
+    changeRate?: DecimalNullableWithAggregatesFilter<"StockTick"> | Decimal | DecimalJsLike | number | string | null
+    askPrice?: DecimalNullableWithAggregatesFilter<"StockTick"> | Decimal | DecimalJsLike | number | string | null
+    bidPrice?: DecimalNullableWithAggregatesFilter<"StockTick"> | Decimal | DecimalJsLike | number | string | null
+    accVolume?: BigIntNullableWithAggregatesFilter<"StockTick"> | bigint | number | null
+    accTradingValue?: BigIntNullableWithAggregatesFilter<"StockTick"> | bigint | number | null
+    createdAt?: DateTimeWithAggregatesFilter<"StockTick"> | Date | string
+  }
+
+  export type StockQuoteWhereInput = {
+    AND?: StockQuoteWhereInput | StockQuoteWhereInput[]
+    OR?: StockQuoteWhereInput[]
+    NOT?: StockQuoteWhereInput | StockQuoteWhereInput[]
+    quoteId?: UuidFilter<"StockQuote"> | string
+    stockCode?: StringFilter<"StockQuote"> | string
+    quoteTime?: DateTimeFilter<"StockQuote"> | Date | string
+    askPrice1?: DecimalNullableFilter<"StockQuote"> | Decimal | DecimalJsLike | number | string | null
+    askVolume1?: BigIntNullableFilter<"StockQuote"> | bigint | number | null
+    bidPrice1?: DecimalNullableFilter<"StockQuote"> | Decimal | DecimalJsLike | number | string | null
+    bidVolume1?: BigIntNullableFilter<"StockQuote"> | bigint | number | null
+    askPrice2?: DecimalNullableFilter<"StockQuote"> | Decimal | DecimalJsLike | number | string | null
+    askVolume2?: BigIntNullableFilter<"StockQuote"> | bigint | number | null
+    bidPrice2?: DecimalNullableFilter<"StockQuote"> | Decimal | DecimalJsLike | number | string | null
+    bidVolume2?: BigIntNullableFilter<"StockQuote"> | bigint | number | null
+    askPrice3?: DecimalNullableFilter<"StockQuote"> | Decimal | DecimalJsLike | number | string | null
+    askVolume3?: BigIntNullableFilter<"StockQuote"> | bigint | number | null
+    bidPrice3?: DecimalNullableFilter<"StockQuote"> | Decimal | DecimalJsLike | number | string | null
+    bidVolume3?: BigIntNullableFilter<"StockQuote"> | bigint | number | null
+    askPrice4?: DecimalNullableFilter<"StockQuote"> | Decimal | DecimalJsLike | number | string | null
+    askVolume4?: BigIntNullableFilter<"StockQuote"> | bigint | number | null
+    bidPrice4?: DecimalNullableFilter<"StockQuote"> | Decimal | DecimalJsLike | number | string | null
+    bidVolume4?: BigIntNullableFilter<"StockQuote"> | bigint | number | null
+    askPrice5?: DecimalNullableFilter<"StockQuote"> | Decimal | DecimalJsLike | number | string | null
+    askVolume5?: BigIntNullableFilter<"StockQuote"> | bigint | number | null
+    bidPrice5?: DecimalNullableFilter<"StockQuote"> | Decimal | DecimalJsLike | number | string | null
+    bidVolume5?: BigIntNullableFilter<"StockQuote"> | bigint | number | null
+    totalAskVolume?: BigIntNullableFilter<"StockQuote"> | bigint | number | null
+    totalBidVolume?: BigIntNullableFilter<"StockQuote"> | bigint | number | null
+    createdAt?: DateTimeFilter<"StockQuote"> | Date | string
+  }
+
+  export type StockQuoteOrderByWithRelationInput = {
+    quoteId?: SortOrder
+    stockCode?: SortOrder
+    quoteTime?: SortOrder
+    askPrice1?: SortOrderInput | SortOrder
+    askVolume1?: SortOrderInput | SortOrder
+    bidPrice1?: SortOrderInput | SortOrder
+    bidVolume1?: SortOrderInput | SortOrder
+    askPrice2?: SortOrderInput | SortOrder
+    askVolume2?: SortOrderInput | SortOrder
+    bidPrice2?: SortOrderInput | SortOrder
+    bidVolume2?: SortOrderInput | SortOrder
+    askPrice3?: SortOrderInput | SortOrder
+    askVolume3?: SortOrderInput | SortOrder
+    bidPrice3?: SortOrderInput | SortOrder
+    bidVolume3?: SortOrderInput | SortOrder
+    askPrice4?: SortOrderInput | SortOrder
+    askVolume4?: SortOrderInput | SortOrder
+    bidPrice4?: SortOrderInput | SortOrder
+    bidVolume4?: SortOrderInput | SortOrder
+    askPrice5?: SortOrderInput | SortOrder
+    askVolume5?: SortOrderInput | SortOrder
+    bidPrice5?: SortOrderInput | SortOrder
+    bidVolume5?: SortOrderInput | SortOrder
+    totalAskVolume?: SortOrderInput | SortOrder
+    totalBidVolume?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type StockQuoteWhereUniqueInput = Prisma.AtLeast<{
+    quoteId?: string
+    AND?: StockQuoteWhereInput | StockQuoteWhereInput[]
+    OR?: StockQuoteWhereInput[]
+    NOT?: StockQuoteWhereInput | StockQuoteWhereInput[]
+    stockCode?: StringFilter<"StockQuote"> | string
+    quoteTime?: DateTimeFilter<"StockQuote"> | Date | string
+    askPrice1?: DecimalNullableFilter<"StockQuote"> | Decimal | DecimalJsLike | number | string | null
+    askVolume1?: BigIntNullableFilter<"StockQuote"> | bigint | number | null
+    bidPrice1?: DecimalNullableFilter<"StockQuote"> | Decimal | DecimalJsLike | number | string | null
+    bidVolume1?: BigIntNullableFilter<"StockQuote"> | bigint | number | null
+    askPrice2?: DecimalNullableFilter<"StockQuote"> | Decimal | DecimalJsLike | number | string | null
+    askVolume2?: BigIntNullableFilter<"StockQuote"> | bigint | number | null
+    bidPrice2?: DecimalNullableFilter<"StockQuote"> | Decimal | DecimalJsLike | number | string | null
+    bidVolume2?: BigIntNullableFilter<"StockQuote"> | bigint | number | null
+    askPrice3?: DecimalNullableFilter<"StockQuote"> | Decimal | DecimalJsLike | number | string | null
+    askVolume3?: BigIntNullableFilter<"StockQuote"> | bigint | number | null
+    bidPrice3?: DecimalNullableFilter<"StockQuote"> | Decimal | DecimalJsLike | number | string | null
+    bidVolume3?: BigIntNullableFilter<"StockQuote"> | bigint | number | null
+    askPrice4?: DecimalNullableFilter<"StockQuote"> | Decimal | DecimalJsLike | number | string | null
+    askVolume4?: BigIntNullableFilter<"StockQuote"> | bigint | number | null
+    bidPrice4?: DecimalNullableFilter<"StockQuote"> | Decimal | DecimalJsLike | number | string | null
+    bidVolume4?: BigIntNullableFilter<"StockQuote"> | bigint | number | null
+    askPrice5?: DecimalNullableFilter<"StockQuote"> | Decimal | DecimalJsLike | number | string | null
+    askVolume5?: BigIntNullableFilter<"StockQuote"> | bigint | number | null
+    bidPrice5?: DecimalNullableFilter<"StockQuote"> | Decimal | DecimalJsLike | number | string | null
+    bidVolume5?: BigIntNullableFilter<"StockQuote"> | bigint | number | null
+    totalAskVolume?: BigIntNullableFilter<"StockQuote"> | bigint | number | null
+    totalBidVolume?: BigIntNullableFilter<"StockQuote"> | bigint | number | null
+    createdAt?: DateTimeFilter<"StockQuote"> | Date | string
+  }, "quoteId">
+
+  export type StockQuoteOrderByWithAggregationInput = {
+    quoteId?: SortOrder
+    stockCode?: SortOrder
+    quoteTime?: SortOrder
+    askPrice1?: SortOrderInput | SortOrder
+    askVolume1?: SortOrderInput | SortOrder
+    bidPrice1?: SortOrderInput | SortOrder
+    bidVolume1?: SortOrderInput | SortOrder
+    askPrice2?: SortOrderInput | SortOrder
+    askVolume2?: SortOrderInput | SortOrder
+    bidPrice2?: SortOrderInput | SortOrder
+    bidVolume2?: SortOrderInput | SortOrder
+    askPrice3?: SortOrderInput | SortOrder
+    askVolume3?: SortOrderInput | SortOrder
+    bidPrice3?: SortOrderInput | SortOrder
+    bidVolume3?: SortOrderInput | SortOrder
+    askPrice4?: SortOrderInput | SortOrder
+    askVolume4?: SortOrderInput | SortOrder
+    bidPrice4?: SortOrderInput | SortOrder
+    bidVolume4?: SortOrderInput | SortOrder
+    askPrice5?: SortOrderInput | SortOrder
+    askVolume5?: SortOrderInput | SortOrder
+    bidPrice5?: SortOrderInput | SortOrder
+    bidVolume5?: SortOrderInput | SortOrder
+    totalAskVolume?: SortOrderInput | SortOrder
+    totalBidVolume?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    _count?: StockQuoteCountOrderByAggregateInput
+    _avg?: StockQuoteAvgOrderByAggregateInput
+    _max?: StockQuoteMaxOrderByAggregateInput
+    _min?: StockQuoteMinOrderByAggregateInput
+    _sum?: StockQuoteSumOrderByAggregateInput
+  }
+
+  export type StockQuoteScalarWhereWithAggregatesInput = {
+    AND?: StockQuoteScalarWhereWithAggregatesInput | StockQuoteScalarWhereWithAggregatesInput[]
+    OR?: StockQuoteScalarWhereWithAggregatesInput[]
+    NOT?: StockQuoteScalarWhereWithAggregatesInput | StockQuoteScalarWhereWithAggregatesInput[]
+    quoteId?: UuidWithAggregatesFilter<"StockQuote"> | string
+    stockCode?: StringWithAggregatesFilter<"StockQuote"> | string
+    quoteTime?: DateTimeWithAggregatesFilter<"StockQuote"> | Date | string
+    askPrice1?: DecimalNullableWithAggregatesFilter<"StockQuote"> | Decimal | DecimalJsLike | number | string | null
+    askVolume1?: BigIntNullableWithAggregatesFilter<"StockQuote"> | bigint | number | null
+    bidPrice1?: DecimalNullableWithAggregatesFilter<"StockQuote"> | Decimal | DecimalJsLike | number | string | null
+    bidVolume1?: BigIntNullableWithAggregatesFilter<"StockQuote"> | bigint | number | null
+    askPrice2?: DecimalNullableWithAggregatesFilter<"StockQuote"> | Decimal | DecimalJsLike | number | string | null
+    askVolume2?: BigIntNullableWithAggregatesFilter<"StockQuote"> | bigint | number | null
+    bidPrice2?: DecimalNullableWithAggregatesFilter<"StockQuote"> | Decimal | DecimalJsLike | number | string | null
+    bidVolume2?: BigIntNullableWithAggregatesFilter<"StockQuote"> | bigint | number | null
+    askPrice3?: DecimalNullableWithAggregatesFilter<"StockQuote"> | Decimal | DecimalJsLike | number | string | null
+    askVolume3?: BigIntNullableWithAggregatesFilter<"StockQuote"> | bigint | number | null
+    bidPrice3?: DecimalNullableWithAggregatesFilter<"StockQuote"> | Decimal | DecimalJsLike | number | string | null
+    bidVolume3?: BigIntNullableWithAggregatesFilter<"StockQuote"> | bigint | number | null
+    askPrice4?: DecimalNullableWithAggregatesFilter<"StockQuote"> | Decimal | DecimalJsLike | number | string | null
+    askVolume4?: BigIntNullableWithAggregatesFilter<"StockQuote"> | bigint | number | null
+    bidPrice4?: DecimalNullableWithAggregatesFilter<"StockQuote"> | Decimal | DecimalJsLike | number | string | null
+    bidVolume4?: BigIntNullableWithAggregatesFilter<"StockQuote"> | bigint | number | null
+    askPrice5?: DecimalNullableWithAggregatesFilter<"StockQuote"> | Decimal | DecimalJsLike | number | string | null
+    askVolume5?: BigIntNullableWithAggregatesFilter<"StockQuote"> | bigint | number | null
+    bidPrice5?: DecimalNullableWithAggregatesFilter<"StockQuote"> | Decimal | DecimalJsLike | number | string | null
+    bidVolume5?: BigIntNullableWithAggregatesFilter<"StockQuote"> | bigint | number | null
+    totalAskVolume?: BigIntNullableWithAggregatesFilter<"StockQuote"> | bigint | number | null
+    totalBidVolume?: BigIntNullableWithAggregatesFilter<"StockQuote"> | bigint | number | null
+    createdAt?: DateTimeWithAggregatesFilter<"StockQuote"> | Date | string
+  }
+
   export type UserCreateInput = {
     userId?: string
     username: string
@@ -17346,6 +22871,482 @@ export namespace Prisma {
     endTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     processedCount?: IntFieldUpdateOperationsInput | number
     errorMessage?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type KiwoomTokenCreateInput = {
+    tokenId?: string
+    token: string
+    tokenType: string
+    expiresAt: Date | string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type KiwoomTokenUncheckedCreateInput = {
+    tokenId?: string
+    token: string
+    tokenType: string
+    expiresAt: Date | string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type KiwoomTokenUpdateInput = {
+    tokenId?: StringFieldUpdateOperationsInput | string
+    token?: StringFieldUpdateOperationsInput | string
+    tokenType?: StringFieldUpdateOperationsInput | string
+    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type KiwoomTokenUncheckedUpdateInput = {
+    tokenId?: StringFieldUpdateOperationsInput | string
+    token?: StringFieldUpdateOperationsInput | string
+    tokenType?: StringFieldUpdateOperationsInput | string
+    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type KiwoomTokenCreateManyInput = {
+    tokenId?: string
+    token: string
+    tokenType: string
+    expiresAt: Date | string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type KiwoomTokenUpdateManyMutationInput = {
+    tokenId?: StringFieldUpdateOperationsInput | string
+    token?: StringFieldUpdateOperationsInput | string
+    tokenType?: StringFieldUpdateOperationsInput | string
+    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type KiwoomTokenUncheckedUpdateManyInput = {
+    tokenId?: StringFieldUpdateOperationsInput | string
+    token?: StringFieldUpdateOperationsInput | string
+    tokenType?: StringFieldUpdateOperationsInput | string
+    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type StockCandleCreateInput = {
+    candleId?: string
+    stockCode: string
+    candleType: string
+    candleTime: Date | string
+    openPrice: Decimal | DecimalJsLike | number | string
+    highPrice: Decimal | DecimalJsLike | number | string
+    lowPrice: Decimal | DecimalJsLike | number | string
+    closePrice: Decimal | DecimalJsLike | number | string
+    volume: bigint | number
+    tradingValue?: bigint | number | null
+    prevDayCompare?: Decimal | DecimalJsLike | number | string | null
+    createdAt?: Date | string
+  }
+
+  export type StockCandleUncheckedCreateInput = {
+    candleId?: string
+    stockCode: string
+    candleType: string
+    candleTime: Date | string
+    openPrice: Decimal | DecimalJsLike | number | string
+    highPrice: Decimal | DecimalJsLike | number | string
+    lowPrice: Decimal | DecimalJsLike | number | string
+    closePrice: Decimal | DecimalJsLike | number | string
+    volume: bigint | number
+    tradingValue?: bigint | number | null
+    prevDayCompare?: Decimal | DecimalJsLike | number | string | null
+    createdAt?: Date | string
+  }
+
+  export type StockCandleUpdateInput = {
+    candleId?: StringFieldUpdateOperationsInput | string
+    stockCode?: StringFieldUpdateOperationsInput | string
+    candleType?: StringFieldUpdateOperationsInput | string
+    candleTime?: DateTimeFieldUpdateOperationsInput | Date | string
+    openPrice?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    highPrice?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    lowPrice?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    closePrice?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    volume?: BigIntFieldUpdateOperationsInput | bigint | number
+    tradingValue?: NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+    prevDayCompare?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type StockCandleUncheckedUpdateInput = {
+    candleId?: StringFieldUpdateOperationsInput | string
+    stockCode?: StringFieldUpdateOperationsInput | string
+    candleType?: StringFieldUpdateOperationsInput | string
+    candleTime?: DateTimeFieldUpdateOperationsInput | Date | string
+    openPrice?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    highPrice?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    lowPrice?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    closePrice?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    volume?: BigIntFieldUpdateOperationsInput | bigint | number
+    tradingValue?: NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+    prevDayCompare?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type StockCandleCreateManyInput = {
+    candleId?: string
+    stockCode: string
+    candleType: string
+    candleTime: Date | string
+    openPrice: Decimal | DecimalJsLike | number | string
+    highPrice: Decimal | DecimalJsLike | number | string
+    lowPrice: Decimal | DecimalJsLike | number | string
+    closePrice: Decimal | DecimalJsLike | number | string
+    volume: bigint | number
+    tradingValue?: bigint | number | null
+    prevDayCompare?: Decimal | DecimalJsLike | number | string | null
+    createdAt?: Date | string
+  }
+
+  export type StockCandleUpdateManyMutationInput = {
+    candleId?: StringFieldUpdateOperationsInput | string
+    stockCode?: StringFieldUpdateOperationsInput | string
+    candleType?: StringFieldUpdateOperationsInput | string
+    candleTime?: DateTimeFieldUpdateOperationsInput | Date | string
+    openPrice?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    highPrice?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    lowPrice?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    closePrice?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    volume?: BigIntFieldUpdateOperationsInput | bigint | number
+    tradingValue?: NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+    prevDayCompare?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type StockCandleUncheckedUpdateManyInput = {
+    candleId?: StringFieldUpdateOperationsInput | string
+    stockCode?: StringFieldUpdateOperationsInput | string
+    candleType?: StringFieldUpdateOperationsInput | string
+    candleTime?: DateTimeFieldUpdateOperationsInput | Date | string
+    openPrice?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    highPrice?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    lowPrice?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    closePrice?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    volume?: BigIntFieldUpdateOperationsInput | bigint | number
+    tradingValue?: NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+    prevDayCompare?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type StockTickCreateInput = {
+    tickId?: string
+    stockCode: string
+    tickTime: Date | string
+    price: Decimal | DecimalJsLike | number | string
+    volume: bigint | number
+    prevDayCompare?: Decimal | DecimalJsLike | number | string | null
+    changeRate?: Decimal | DecimalJsLike | number | string | null
+    askPrice?: Decimal | DecimalJsLike | number | string | null
+    bidPrice?: Decimal | DecimalJsLike | number | string | null
+    accVolume?: bigint | number | null
+    accTradingValue?: bigint | number | null
+    createdAt?: Date | string
+  }
+
+  export type StockTickUncheckedCreateInput = {
+    tickId?: string
+    stockCode: string
+    tickTime: Date | string
+    price: Decimal | DecimalJsLike | number | string
+    volume: bigint | number
+    prevDayCompare?: Decimal | DecimalJsLike | number | string | null
+    changeRate?: Decimal | DecimalJsLike | number | string | null
+    askPrice?: Decimal | DecimalJsLike | number | string | null
+    bidPrice?: Decimal | DecimalJsLike | number | string | null
+    accVolume?: bigint | number | null
+    accTradingValue?: bigint | number | null
+    createdAt?: Date | string
+  }
+
+  export type StockTickUpdateInput = {
+    tickId?: StringFieldUpdateOperationsInput | string
+    stockCode?: StringFieldUpdateOperationsInput | string
+    tickTime?: DateTimeFieldUpdateOperationsInput | Date | string
+    price?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    volume?: BigIntFieldUpdateOperationsInput | bigint | number
+    prevDayCompare?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    changeRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    askPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    bidPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    accVolume?: NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+    accTradingValue?: NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type StockTickUncheckedUpdateInput = {
+    tickId?: StringFieldUpdateOperationsInput | string
+    stockCode?: StringFieldUpdateOperationsInput | string
+    tickTime?: DateTimeFieldUpdateOperationsInput | Date | string
+    price?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    volume?: BigIntFieldUpdateOperationsInput | bigint | number
+    prevDayCompare?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    changeRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    askPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    bidPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    accVolume?: NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+    accTradingValue?: NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type StockTickCreateManyInput = {
+    tickId?: string
+    stockCode: string
+    tickTime: Date | string
+    price: Decimal | DecimalJsLike | number | string
+    volume: bigint | number
+    prevDayCompare?: Decimal | DecimalJsLike | number | string | null
+    changeRate?: Decimal | DecimalJsLike | number | string | null
+    askPrice?: Decimal | DecimalJsLike | number | string | null
+    bidPrice?: Decimal | DecimalJsLike | number | string | null
+    accVolume?: bigint | number | null
+    accTradingValue?: bigint | number | null
+    createdAt?: Date | string
+  }
+
+  export type StockTickUpdateManyMutationInput = {
+    tickId?: StringFieldUpdateOperationsInput | string
+    stockCode?: StringFieldUpdateOperationsInput | string
+    tickTime?: DateTimeFieldUpdateOperationsInput | Date | string
+    price?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    volume?: BigIntFieldUpdateOperationsInput | bigint | number
+    prevDayCompare?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    changeRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    askPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    bidPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    accVolume?: NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+    accTradingValue?: NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type StockTickUncheckedUpdateManyInput = {
+    tickId?: StringFieldUpdateOperationsInput | string
+    stockCode?: StringFieldUpdateOperationsInput | string
+    tickTime?: DateTimeFieldUpdateOperationsInput | Date | string
+    price?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    volume?: BigIntFieldUpdateOperationsInput | bigint | number
+    prevDayCompare?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    changeRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    askPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    bidPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    accVolume?: NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+    accTradingValue?: NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type StockQuoteCreateInput = {
+    quoteId?: string
+    stockCode: string
+    quoteTime: Date | string
+    askPrice1?: Decimal | DecimalJsLike | number | string | null
+    askVolume1?: bigint | number | null
+    bidPrice1?: Decimal | DecimalJsLike | number | string | null
+    bidVolume1?: bigint | number | null
+    askPrice2?: Decimal | DecimalJsLike | number | string | null
+    askVolume2?: bigint | number | null
+    bidPrice2?: Decimal | DecimalJsLike | number | string | null
+    bidVolume2?: bigint | number | null
+    askPrice3?: Decimal | DecimalJsLike | number | string | null
+    askVolume3?: bigint | number | null
+    bidPrice3?: Decimal | DecimalJsLike | number | string | null
+    bidVolume3?: bigint | number | null
+    askPrice4?: Decimal | DecimalJsLike | number | string | null
+    askVolume4?: bigint | number | null
+    bidPrice4?: Decimal | DecimalJsLike | number | string | null
+    bidVolume4?: bigint | number | null
+    askPrice5?: Decimal | DecimalJsLike | number | string | null
+    askVolume5?: bigint | number | null
+    bidPrice5?: Decimal | DecimalJsLike | number | string | null
+    bidVolume5?: bigint | number | null
+    totalAskVolume?: bigint | number | null
+    totalBidVolume?: bigint | number | null
+    createdAt?: Date | string
+  }
+
+  export type StockQuoteUncheckedCreateInput = {
+    quoteId?: string
+    stockCode: string
+    quoteTime: Date | string
+    askPrice1?: Decimal | DecimalJsLike | number | string | null
+    askVolume1?: bigint | number | null
+    bidPrice1?: Decimal | DecimalJsLike | number | string | null
+    bidVolume1?: bigint | number | null
+    askPrice2?: Decimal | DecimalJsLike | number | string | null
+    askVolume2?: bigint | number | null
+    bidPrice2?: Decimal | DecimalJsLike | number | string | null
+    bidVolume2?: bigint | number | null
+    askPrice3?: Decimal | DecimalJsLike | number | string | null
+    askVolume3?: bigint | number | null
+    bidPrice3?: Decimal | DecimalJsLike | number | string | null
+    bidVolume3?: bigint | number | null
+    askPrice4?: Decimal | DecimalJsLike | number | string | null
+    askVolume4?: bigint | number | null
+    bidPrice4?: Decimal | DecimalJsLike | number | string | null
+    bidVolume4?: bigint | number | null
+    askPrice5?: Decimal | DecimalJsLike | number | string | null
+    askVolume5?: bigint | number | null
+    bidPrice5?: Decimal | DecimalJsLike | number | string | null
+    bidVolume5?: bigint | number | null
+    totalAskVolume?: bigint | number | null
+    totalBidVolume?: bigint | number | null
+    createdAt?: Date | string
+  }
+
+  export type StockQuoteUpdateInput = {
+    quoteId?: StringFieldUpdateOperationsInput | string
+    stockCode?: StringFieldUpdateOperationsInput | string
+    quoteTime?: DateTimeFieldUpdateOperationsInput | Date | string
+    askPrice1?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    askVolume1?: NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+    bidPrice1?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    bidVolume1?: NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+    askPrice2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    askVolume2?: NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+    bidPrice2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    bidVolume2?: NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+    askPrice3?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    askVolume3?: NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+    bidPrice3?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    bidVolume3?: NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+    askPrice4?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    askVolume4?: NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+    bidPrice4?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    bidVolume4?: NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+    askPrice5?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    askVolume5?: NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+    bidPrice5?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    bidVolume5?: NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+    totalAskVolume?: NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+    totalBidVolume?: NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type StockQuoteUncheckedUpdateInput = {
+    quoteId?: StringFieldUpdateOperationsInput | string
+    stockCode?: StringFieldUpdateOperationsInput | string
+    quoteTime?: DateTimeFieldUpdateOperationsInput | Date | string
+    askPrice1?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    askVolume1?: NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+    bidPrice1?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    bidVolume1?: NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+    askPrice2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    askVolume2?: NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+    bidPrice2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    bidVolume2?: NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+    askPrice3?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    askVolume3?: NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+    bidPrice3?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    bidVolume3?: NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+    askPrice4?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    askVolume4?: NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+    bidPrice4?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    bidVolume4?: NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+    askPrice5?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    askVolume5?: NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+    bidPrice5?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    bidVolume5?: NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+    totalAskVolume?: NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+    totalBidVolume?: NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type StockQuoteCreateManyInput = {
+    quoteId?: string
+    stockCode: string
+    quoteTime: Date | string
+    askPrice1?: Decimal | DecimalJsLike | number | string | null
+    askVolume1?: bigint | number | null
+    bidPrice1?: Decimal | DecimalJsLike | number | string | null
+    bidVolume1?: bigint | number | null
+    askPrice2?: Decimal | DecimalJsLike | number | string | null
+    askVolume2?: bigint | number | null
+    bidPrice2?: Decimal | DecimalJsLike | number | string | null
+    bidVolume2?: bigint | number | null
+    askPrice3?: Decimal | DecimalJsLike | number | string | null
+    askVolume3?: bigint | number | null
+    bidPrice3?: Decimal | DecimalJsLike | number | string | null
+    bidVolume3?: bigint | number | null
+    askPrice4?: Decimal | DecimalJsLike | number | string | null
+    askVolume4?: bigint | number | null
+    bidPrice4?: Decimal | DecimalJsLike | number | string | null
+    bidVolume4?: bigint | number | null
+    askPrice5?: Decimal | DecimalJsLike | number | string | null
+    askVolume5?: bigint | number | null
+    bidPrice5?: Decimal | DecimalJsLike | number | string | null
+    bidVolume5?: bigint | number | null
+    totalAskVolume?: bigint | number | null
+    totalBidVolume?: bigint | number | null
+    createdAt?: Date | string
+  }
+
+  export type StockQuoteUpdateManyMutationInput = {
+    quoteId?: StringFieldUpdateOperationsInput | string
+    stockCode?: StringFieldUpdateOperationsInput | string
+    quoteTime?: DateTimeFieldUpdateOperationsInput | Date | string
+    askPrice1?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    askVolume1?: NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+    bidPrice1?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    bidVolume1?: NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+    askPrice2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    askVolume2?: NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+    bidPrice2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    bidVolume2?: NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+    askPrice3?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    askVolume3?: NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+    bidPrice3?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    bidVolume3?: NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+    askPrice4?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    askVolume4?: NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+    bidPrice4?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    bidVolume4?: NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+    askPrice5?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    askVolume5?: NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+    bidPrice5?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    bidVolume5?: NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+    totalAskVolume?: NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+    totalBidVolume?: NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type StockQuoteUncheckedUpdateManyInput = {
+    quoteId?: StringFieldUpdateOperationsInput | string
+    stockCode?: StringFieldUpdateOperationsInput | string
+    quoteTime?: DateTimeFieldUpdateOperationsInput | Date | string
+    askPrice1?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    askVolume1?: NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+    bidPrice1?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    bidVolume1?: NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+    askPrice2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    askVolume2?: NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+    bidPrice2?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    bidVolume2?: NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+    askPrice3?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    askVolume3?: NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+    bidPrice3?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    bidVolume3?: NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+    askPrice4?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    askVolume4?: NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+    bidPrice4?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    bidVolume4?: NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+    askPrice5?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    askVolume5?: NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+    bidPrice5?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    bidVolume5?: NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+    totalAskVolume?: NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+    totalBidVolume?: NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type UuidFilter<$PrismaModel = never> = {
@@ -18341,6 +24342,362 @@ export namespace Prisma {
     _max?: NestedIntFilter<$PrismaModel>
   }
 
+  export type KiwoomTokenCountOrderByAggregateInput = {
+    tokenId?: SortOrder
+    token?: SortOrder
+    tokenType?: SortOrder
+    expiresAt?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type KiwoomTokenMaxOrderByAggregateInput = {
+    tokenId?: SortOrder
+    token?: SortOrder
+    tokenType?: SortOrder
+    expiresAt?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type KiwoomTokenMinOrderByAggregateInput = {
+    tokenId?: SortOrder
+    token?: SortOrder
+    tokenType?: SortOrder
+    expiresAt?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type BigIntNullableFilter<$PrismaModel = never> = {
+    equals?: bigint | number | BigIntFieldRefInput<$PrismaModel> | null
+    in?: bigint[] | number[] | ListBigIntFieldRefInput<$PrismaModel> | null
+    notIn?: bigint[] | number[] | ListBigIntFieldRefInput<$PrismaModel> | null
+    lt?: bigint | number | BigIntFieldRefInput<$PrismaModel>
+    lte?: bigint | number | BigIntFieldRefInput<$PrismaModel>
+    gt?: bigint | number | BigIntFieldRefInput<$PrismaModel>
+    gte?: bigint | number | BigIntFieldRefInput<$PrismaModel>
+    not?: NestedBigIntNullableFilter<$PrismaModel> | bigint | number | null
+  }
+
+  export type DecimalNullableFilter<$PrismaModel = never> = {
+    equals?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel> | null
+    in?: Decimal[] | DecimalJsLike[] | number[] | string[] | ListDecimalFieldRefInput<$PrismaModel> | null
+    notIn?: Decimal[] | DecimalJsLike[] | number[] | string[] | ListDecimalFieldRefInput<$PrismaModel> | null
+    lt?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    lte?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    gt?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    gte?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    not?: NestedDecimalNullableFilter<$PrismaModel> | Decimal | DecimalJsLike | number | string | null
+  }
+
+  export type StockCandleStockCodeCandleTypeCandleTimeCompoundUniqueInput = {
+    stockCode: string
+    candleType: string
+    candleTime: Date | string
+  }
+
+  export type StockCandleCountOrderByAggregateInput = {
+    candleId?: SortOrder
+    stockCode?: SortOrder
+    candleType?: SortOrder
+    candleTime?: SortOrder
+    openPrice?: SortOrder
+    highPrice?: SortOrder
+    lowPrice?: SortOrder
+    closePrice?: SortOrder
+    volume?: SortOrder
+    tradingValue?: SortOrder
+    prevDayCompare?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type StockCandleAvgOrderByAggregateInput = {
+    openPrice?: SortOrder
+    highPrice?: SortOrder
+    lowPrice?: SortOrder
+    closePrice?: SortOrder
+    volume?: SortOrder
+    tradingValue?: SortOrder
+    prevDayCompare?: SortOrder
+  }
+
+  export type StockCandleMaxOrderByAggregateInput = {
+    candleId?: SortOrder
+    stockCode?: SortOrder
+    candleType?: SortOrder
+    candleTime?: SortOrder
+    openPrice?: SortOrder
+    highPrice?: SortOrder
+    lowPrice?: SortOrder
+    closePrice?: SortOrder
+    volume?: SortOrder
+    tradingValue?: SortOrder
+    prevDayCompare?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type StockCandleMinOrderByAggregateInput = {
+    candleId?: SortOrder
+    stockCode?: SortOrder
+    candleType?: SortOrder
+    candleTime?: SortOrder
+    openPrice?: SortOrder
+    highPrice?: SortOrder
+    lowPrice?: SortOrder
+    closePrice?: SortOrder
+    volume?: SortOrder
+    tradingValue?: SortOrder
+    prevDayCompare?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type StockCandleSumOrderByAggregateInput = {
+    openPrice?: SortOrder
+    highPrice?: SortOrder
+    lowPrice?: SortOrder
+    closePrice?: SortOrder
+    volume?: SortOrder
+    tradingValue?: SortOrder
+    prevDayCompare?: SortOrder
+  }
+
+  export type BigIntNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: bigint | number | BigIntFieldRefInput<$PrismaModel> | null
+    in?: bigint[] | number[] | ListBigIntFieldRefInput<$PrismaModel> | null
+    notIn?: bigint[] | number[] | ListBigIntFieldRefInput<$PrismaModel> | null
+    lt?: bigint | number | BigIntFieldRefInput<$PrismaModel>
+    lte?: bigint | number | BigIntFieldRefInput<$PrismaModel>
+    gt?: bigint | number | BigIntFieldRefInput<$PrismaModel>
+    gte?: bigint | number | BigIntFieldRefInput<$PrismaModel>
+    not?: NestedBigIntNullableWithAggregatesFilter<$PrismaModel> | bigint | number | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _avg?: NestedFloatNullableFilter<$PrismaModel>
+    _sum?: NestedBigIntNullableFilter<$PrismaModel>
+    _min?: NestedBigIntNullableFilter<$PrismaModel>
+    _max?: NestedBigIntNullableFilter<$PrismaModel>
+  }
+
+  export type DecimalNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel> | null
+    in?: Decimal[] | DecimalJsLike[] | number[] | string[] | ListDecimalFieldRefInput<$PrismaModel> | null
+    notIn?: Decimal[] | DecimalJsLike[] | number[] | string[] | ListDecimalFieldRefInput<$PrismaModel> | null
+    lt?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    lte?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    gt?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    gte?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    not?: NestedDecimalNullableWithAggregatesFilter<$PrismaModel> | Decimal | DecimalJsLike | number | string | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _avg?: NestedDecimalNullableFilter<$PrismaModel>
+    _sum?: NestedDecimalNullableFilter<$PrismaModel>
+    _min?: NestedDecimalNullableFilter<$PrismaModel>
+    _max?: NestedDecimalNullableFilter<$PrismaModel>
+  }
+
+  export type StockTickCountOrderByAggregateInput = {
+    tickId?: SortOrder
+    stockCode?: SortOrder
+    tickTime?: SortOrder
+    price?: SortOrder
+    volume?: SortOrder
+    prevDayCompare?: SortOrder
+    changeRate?: SortOrder
+    askPrice?: SortOrder
+    bidPrice?: SortOrder
+    accVolume?: SortOrder
+    accTradingValue?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type StockTickAvgOrderByAggregateInput = {
+    price?: SortOrder
+    volume?: SortOrder
+    prevDayCompare?: SortOrder
+    changeRate?: SortOrder
+    askPrice?: SortOrder
+    bidPrice?: SortOrder
+    accVolume?: SortOrder
+    accTradingValue?: SortOrder
+  }
+
+  export type StockTickMaxOrderByAggregateInput = {
+    tickId?: SortOrder
+    stockCode?: SortOrder
+    tickTime?: SortOrder
+    price?: SortOrder
+    volume?: SortOrder
+    prevDayCompare?: SortOrder
+    changeRate?: SortOrder
+    askPrice?: SortOrder
+    bidPrice?: SortOrder
+    accVolume?: SortOrder
+    accTradingValue?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type StockTickMinOrderByAggregateInput = {
+    tickId?: SortOrder
+    stockCode?: SortOrder
+    tickTime?: SortOrder
+    price?: SortOrder
+    volume?: SortOrder
+    prevDayCompare?: SortOrder
+    changeRate?: SortOrder
+    askPrice?: SortOrder
+    bidPrice?: SortOrder
+    accVolume?: SortOrder
+    accTradingValue?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type StockTickSumOrderByAggregateInput = {
+    price?: SortOrder
+    volume?: SortOrder
+    prevDayCompare?: SortOrder
+    changeRate?: SortOrder
+    askPrice?: SortOrder
+    bidPrice?: SortOrder
+    accVolume?: SortOrder
+    accTradingValue?: SortOrder
+  }
+
+  export type StockQuoteCountOrderByAggregateInput = {
+    quoteId?: SortOrder
+    stockCode?: SortOrder
+    quoteTime?: SortOrder
+    askPrice1?: SortOrder
+    askVolume1?: SortOrder
+    bidPrice1?: SortOrder
+    bidVolume1?: SortOrder
+    askPrice2?: SortOrder
+    askVolume2?: SortOrder
+    bidPrice2?: SortOrder
+    bidVolume2?: SortOrder
+    askPrice3?: SortOrder
+    askVolume3?: SortOrder
+    bidPrice3?: SortOrder
+    bidVolume3?: SortOrder
+    askPrice4?: SortOrder
+    askVolume4?: SortOrder
+    bidPrice4?: SortOrder
+    bidVolume4?: SortOrder
+    askPrice5?: SortOrder
+    askVolume5?: SortOrder
+    bidPrice5?: SortOrder
+    bidVolume5?: SortOrder
+    totalAskVolume?: SortOrder
+    totalBidVolume?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type StockQuoteAvgOrderByAggregateInput = {
+    askPrice1?: SortOrder
+    askVolume1?: SortOrder
+    bidPrice1?: SortOrder
+    bidVolume1?: SortOrder
+    askPrice2?: SortOrder
+    askVolume2?: SortOrder
+    bidPrice2?: SortOrder
+    bidVolume2?: SortOrder
+    askPrice3?: SortOrder
+    askVolume3?: SortOrder
+    bidPrice3?: SortOrder
+    bidVolume3?: SortOrder
+    askPrice4?: SortOrder
+    askVolume4?: SortOrder
+    bidPrice4?: SortOrder
+    bidVolume4?: SortOrder
+    askPrice5?: SortOrder
+    askVolume5?: SortOrder
+    bidPrice5?: SortOrder
+    bidVolume5?: SortOrder
+    totalAskVolume?: SortOrder
+    totalBidVolume?: SortOrder
+  }
+
+  export type StockQuoteMaxOrderByAggregateInput = {
+    quoteId?: SortOrder
+    stockCode?: SortOrder
+    quoteTime?: SortOrder
+    askPrice1?: SortOrder
+    askVolume1?: SortOrder
+    bidPrice1?: SortOrder
+    bidVolume1?: SortOrder
+    askPrice2?: SortOrder
+    askVolume2?: SortOrder
+    bidPrice2?: SortOrder
+    bidVolume2?: SortOrder
+    askPrice3?: SortOrder
+    askVolume3?: SortOrder
+    bidPrice3?: SortOrder
+    bidVolume3?: SortOrder
+    askPrice4?: SortOrder
+    askVolume4?: SortOrder
+    bidPrice4?: SortOrder
+    bidVolume4?: SortOrder
+    askPrice5?: SortOrder
+    askVolume5?: SortOrder
+    bidPrice5?: SortOrder
+    bidVolume5?: SortOrder
+    totalAskVolume?: SortOrder
+    totalBidVolume?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type StockQuoteMinOrderByAggregateInput = {
+    quoteId?: SortOrder
+    stockCode?: SortOrder
+    quoteTime?: SortOrder
+    askPrice1?: SortOrder
+    askVolume1?: SortOrder
+    bidPrice1?: SortOrder
+    bidVolume1?: SortOrder
+    askPrice2?: SortOrder
+    askVolume2?: SortOrder
+    bidPrice2?: SortOrder
+    bidVolume2?: SortOrder
+    askPrice3?: SortOrder
+    askVolume3?: SortOrder
+    bidPrice3?: SortOrder
+    bidVolume3?: SortOrder
+    askPrice4?: SortOrder
+    askVolume4?: SortOrder
+    bidPrice4?: SortOrder
+    bidVolume4?: SortOrder
+    askPrice5?: SortOrder
+    askVolume5?: SortOrder
+    bidPrice5?: SortOrder
+    bidVolume5?: SortOrder
+    totalAskVolume?: SortOrder
+    totalBidVolume?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type StockQuoteSumOrderByAggregateInput = {
+    askPrice1?: SortOrder
+    askVolume1?: SortOrder
+    bidPrice1?: SortOrder
+    bidVolume1?: SortOrder
+    askPrice2?: SortOrder
+    askVolume2?: SortOrder
+    bidPrice2?: SortOrder
+    bidVolume2?: SortOrder
+    askPrice3?: SortOrder
+    askVolume3?: SortOrder
+    bidPrice3?: SortOrder
+    bidVolume3?: SortOrder
+    askPrice4?: SortOrder
+    askVolume4?: SortOrder
+    bidPrice4?: SortOrder
+    bidVolume4?: SortOrder
+    askPrice5?: SortOrder
+    askVolume5?: SortOrder
+    bidPrice5?: SortOrder
+    bidVolume5?: SortOrder
+    totalAskVolume?: SortOrder
+    totalBidVolume?: SortOrder
+  }
+
   export type UserWatchlistCreateNestedManyWithoutUserInput = {
     create?: XOR<UserWatchlistCreateWithoutUserInput, UserWatchlistUncheckedCreateWithoutUserInput> | UserWatchlistCreateWithoutUserInput[] | UserWatchlistUncheckedCreateWithoutUserInput[]
     connectOrCreate?: UserWatchlistCreateOrConnectWithoutUserInput | UserWatchlistCreateOrConnectWithoutUserInput[]
@@ -18911,6 +25268,22 @@ export namespace Prisma {
     divide?: number
   }
 
+  export type NullableBigIntFieldUpdateOperationsInput = {
+    set?: bigint | number | null
+    increment?: bigint | number
+    decrement?: bigint | number
+    multiply?: bigint | number
+    divide?: bigint | number
+  }
+
+  export type NullableDecimalFieldUpdateOperationsInput = {
+    set?: Decimal | DecimalJsLike | number | string | null
+    increment?: Decimal | DecimalJsLike | number | string
+    decrement?: Decimal | DecimalJsLike | number | string
+    multiply?: Decimal | DecimalJsLike | number | string
+    divide?: Decimal | DecimalJsLike | number | string
+  }
+
   export type NestedUuidFilter<$PrismaModel = never> = {
     equals?: string | StringFieldRefInput<$PrismaModel>
     in?: string[] | ListStringFieldRefInput<$PrismaModel>
@@ -19315,6 +25688,60 @@ export namespace Prisma {
     _sum?: NestedIntFilter<$PrismaModel>
     _min?: NestedIntFilter<$PrismaModel>
     _max?: NestedIntFilter<$PrismaModel>
+  }
+
+  export type NestedBigIntNullableFilter<$PrismaModel = never> = {
+    equals?: bigint | number | BigIntFieldRefInput<$PrismaModel> | null
+    in?: bigint[] | number[] | ListBigIntFieldRefInput<$PrismaModel> | null
+    notIn?: bigint[] | number[] | ListBigIntFieldRefInput<$PrismaModel> | null
+    lt?: bigint | number | BigIntFieldRefInput<$PrismaModel>
+    lte?: bigint | number | BigIntFieldRefInput<$PrismaModel>
+    gt?: bigint | number | BigIntFieldRefInput<$PrismaModel>
+    gte?: bigint | number | BigIntFieldRefInput<$PrismaModel>
+    not?: NestedBigIntNullableFilter<$PrismaModel> | bigint | number | null
+  }
+
+  export type NestedDecimalNullableFilter<$PrismaModel = never> = {
+    equals?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel> | null
+    in?: Decimal[] | DecimalJsLike[] | number[] | string[] | ListDecimalFieldRefInput<$PrismaModel> | null
+    notIn?: Decimal[] | DecimalJsLike[] | number[] | string[] | ListDecimalFieldRefInput<$PrismaModel> | null
+    lt?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    lte?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    gt?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    gte?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    not?: NestedDecimalNullableFilter<$PrismaModel> | Decimal | DecimalJsLike | number | string | null
+  }
+
+  export type NestedBigIntNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: bigint | number | BigIntFieldRefInput<$PrismaModel> | null
+    in?: bigint[] | number[] | ListBigIntFieldRefInput<$PrismaModel> | null
+    notIn?: bigint[] | number[] | ListBigIntFieldRefInput<$PrismaModel> | null
+    lt?: bigint | number | BigIntFieldRefInput<$PrismaModel>
+    lte?: bigint | number | BigIntFieldRefInput<$PrismaModel>
+    gt?: bigint | number | BigIntFieldRefInput<$PrismaModel>
+    gte?: bigint | number | BigIntFieldRefInput<$PrismaModel>
+    not?: NestedBigIntNullableWithAggregatesFilter<$PrismaModel> | bigint | number | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _avg?: NestedFloatNullableFilter<$PrismaModel>
+    _sum?: NestedBigIntNullableFilter<$PrismaModel>
+    _min?: NestedBigIntNullableFilter<$PrismaModel>
+    _max?: NestedBigIntNullableFilter<$PrismaModel>
+  }
+
+  export type NestedDecimalNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel> | null
+    in?: Decimal[] | DecimalJsLike[] | number[] | string[] | ListDecimalFieldRefInput<$PrismaModel> | null
+    notIn?: Decimal[] | DecimalJsLike[] | number[] | string[] | ListDecimalFieldRefInput<$PrismaModel> | null
+    lt?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    lte?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    gt?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    gte?: Decimal | DecimalJsLike | number | string | DecimalFieldRefInput<$PrismaModel>
+    not?: NestedDecimalNullableWithAggregatesFilter<$PrismaModel> | Decimal | DecimalJsLike | number | string | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _avg?: NestedDecimalNullableFilter<$PrismaModel>
+    _sum?: NestedDecimalNullableFilter<$PrismaModel>
+    _min?: NestedDecimalNullableFilter<$PrismaModel>
+    _max?: NestedDecimalNullableFilter<$PrismaModel>
   }
 
   export type UserWatchlistCreateWithoutUserInput = {
