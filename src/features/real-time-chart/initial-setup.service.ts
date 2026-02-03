@@ -97,7 +97,7 @@ export class InitialSetupService {
       // DB에 이미 있는지 확인
       const existing = await this.prisma.company.findFirst({
         where: {
-          stockCode: stock.stk_cd,
+          stockCode: stock.code,
           deletedAt: null,
         },
       });
@@ -120,8 +120,8 @@ export class InitialSetupService {
       // 새 종목 저장
       await this.prisma.company.create({
         data: {
-          companyName: stock.stk_nm,
-          stockCode: stock.stk_cd,
+          companyName: stock.name,
+          stockCode: stock.code,
           marketType: mappedMarketType,
         },
       });
@@ -191,7 +191,7 @@ export class InitialSetupService {
           baseDate,
         );
 
-        if (response.return_code !== 0 || !response.list) {
+        if (response.return_code !== 0 || !response.stk_dt_pole_chart_qry) {
           this.logger.warn(
             `No candle data for ${company.stockCode}: ${response.return_msg}`,
           );
@@ -199,9 +199,9 @@ export class InitialSetupService {
         }
 
         // DB에 저장
-        for (const candle of response.list) {
+        for (const candle of response.stk_dt_pole_chart_qry) {
           const candleTime = new Date(
-            `${candle.base_dt.slice(0, 4)}-${candle.base_dt.slice(4, 6)}-${candle.base_dt.slice(6, 8)}`,
+            `${candle.dt.slice(0, 4)}-${candle.dt.slice(4, 6)}-${candle.dt.slice(6, 8)}`,
           );
 
           await this.prisma.stockCandle.create({
@@ -209,12 +209,12 @@ export class InitialSetupService {
               stockCode: company.stockCode,
               candleType: 'day',
               candleTime,
-              openPrice: new Prisma.Decimal(candle.open_pc),
-              highPrice: new Prisma.Decimal(candle.high_pc),
-              lowPrice: new Prisma.Decimal(candle.low_pc),
-              closePrice: new Prisma.Decimal(candle.close_pc),
-              volume: BigInt(candle.cumu_vol),
-              prevDayCompare: new Prisma.Decimal(candle.prdy_cmprs || 0),
+              openPrice: new Prisma.Decimal(candle.open_pric),
+              highPrice: new Prisma.Decimal(candle.high_pric),
+              lowPrice: new Prisma.Decimal(candle.low_pric),
+              closePrice: new Prisma.Decimal(candle.cur_prc),
+              volume: BigInt(candle.trde_qty),
+              prevDayCompare: new Prisma.Decimal(candle.pred_pre || 0),
             },
           });
         }
