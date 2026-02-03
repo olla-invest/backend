@@ -1,11 +1,15 @@
 import { Controller, Get, Post, Query, Param, Body } from '@nestjs/common';
 import { RealTimeChartService } from './real-time-chart.service';
+import { InitialSetupService } from './initial-setup.service';
 import { Public } from '../../common/auth/decorators/public.decorator';
 
 @Controller('real-time-chart')
 @Public()
 export class RealTimeChartController {
-  constructor(private readonly chartService: RealTimeChartService) {}
+  constructor(
+    private readonly chartService: RealTimeChartService,
+    private readonly setupService: InitialSetupService,
+  ) {}
 
   /**
    * GET /real-time-chart/candles/minute/:stockCode
@@ -120,5 +124,42 @@ export class RealTimeChartController {
     @Body('tradeDate') tradeDate?: string,
   ) {
     return await this.chartService.calculateDailyMetrics(marketType, tradeDate);
+  }
+
+  /**
+   * POST /real-time-chart/setup/initial
+   * 초기 데이터 설정 (기본 = 빠른 설정)
+   * - 종목 리스트 가져오기
+   * - 과거 일봉 데이터 가져오기 (최근 7일)
+   * - RS 지표 계산 (최근 7일)
+   */
+  @Post('setup/initial')
+  async runInitialSetup(@Body('marketType') marketType: '0' | '10' | '8' = '0') {
+    return await this.setupService.runInitialSetup(marketType);
+  }
+
+  /**
+   * POST /real-time-chart/setup/quick
+   * 빠른 초기 설정 (홈 화면 즉시 사용 가능)
+   * - 종목 리스트 가져오기
+   * - 최근 7일 일봉 데이터
+   * - RS 지표 계산 (최근 7일)
+   */
+  @Post('setup/quick')
+  async runQuickSetup(@Body('marketType') marketType: '0' | '10' | '8' = '0') {
+    return await this.setupService.runQuickSetup(marketType);
+  }
+
+  /**
+   * POST /real-time-chart/setup/full
+   * 전체 데이터 설정 (백그라운드 배치용)
+   * - 종목 리스트 가져오기
+   * - 1년치 일봉 데이터
+   * - RS 지표 계산 (최근 90일)
+   * 주의: 실행 시간이 오래 걸릴 수 있습니다
+   */
+  @Post('setup/full')
+  async runFullSetup(@Body('marketType') marketType: '0' | '10' | '8' = '0') {
+    return await this.setupService.runFullSetup(marketType);
   }
 }
