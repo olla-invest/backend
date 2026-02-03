@@ -244,6 +244,33 @@ export class ChartStorageService {
   }
 
   /**
+   * 여러 종목의 최근 종가 조회 (일봉 기준)
+   */
+  async getLatestClosingPrices(stockCodes: string[]): Promise<Map<string, number>> {
+    const priceMap = new Map<string, number>();
+
+    // 각 종목별 최신 일봉 데이터 조회
+    const latestCandles = await this.prisma.$queryRaw<
+      Array<{ stockCode: string; closePrice: any }>
+    >`
+      SELECT DISTINCT ON (stock_code)
+        stock_code as "stockCode",
+        close_price as "closePrice"
+      FROM stock_candles
+      WHERE stock_code = ANY(${stockCodes})
+        AND candle_type = 'day'
+      ORDER BY stock_code, candle_time DESC
+    `;
+
+    // Map으로 변환
+    latestCandles.forEach((candle) => {
+      priceMap.set(candle.stockCode, Number(candle.closePrice));
+    });
+
+    return priceMap;
+  }
+
+  /**
    * 시간 파싱 (HHmmss -> Date)
    */
   private parseTime(timeStr: string): Date {

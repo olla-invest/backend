@@ -93,6 +93,11 @@ export type StockTick = $Result.DefaultSelection<Prisma.$StockTickPayload>
  * 
  */
 export type StockQuote = $Result.DefaultSelection<Prisma.$StockQuotePayload>
+/**
+ * Model StockDailyMetrics
+ * 
+ */
+export type StockDailyMetrics = $Result.DefaultSelection<Prisma.$StockDailyMetricsPayload>
 
 /**
  * Enums
@@ -426,6 +431,16 @@ export class PrismaClient<
     * ```
     */
   get stockQuote(): Prisma.StockQuoteDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.stockDailyMetrics`: Exposes CRUD operations for the **StockDailyMetrics** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more StockDailyMetrics
+    * const stockDailyMetrics = await prisma.stockDailyMetrics.findMany()
+    * ```
+    */
+  get stockDailyMetrics(): Prisma.StockDailyMetricsDelegate<ExtArgs, ClientOptions>;
 }
 
 export namespace Prisma {
@@ -875,7 +890,8 @@ export namespace Prisma {
     KiwoomToken: 'KiwoomToken',
     StockCandle: 'StockCandle',
     StockTick: 'StockTick',
-    StockQuote: 'StockQuote'
+    StockQuote: 'StockQuote',
+    StockDailyMetrics: 'StockDailyMetrics'
   };
 
   export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -891,7 +907,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "user" | "company" | "userWatchlist" | "tag" | "watchlistTag" | "rsFilterPreset" | "rsFilterPeriod" | "searchFilterPreset" | "stockPriceHistory" | "marketIndexHistory" | "kiwoomApiCallLog" | "batchJobHistory" | "kiwoomToken" | "stockCandle" | "stockTick" | "stockQuote"
+      modelProps: "user" | "company" | "userWatchlist" | "tag" | "watchlistTag" | "rsFilterPreset" | "rsFilterPeriod" | "searchFilterPreset" | "stockPriceHistory" | "marketIndexHistory" | "kiwoomApiCallLog" | "batchJobHistory" | "kiwoomToken" | "stockCandle" | "stockTick" | "stockQuote" | "stockDailyMetrics"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -2079,6 +2095,80 @@ export namespace Prisma {
           }
         }
       }
+      StockDailyMetrics: {
+        payload: Prisma.$StockDailyMetricsPayload<ExtArgs>
+        fields: Prisma.StockDailyMetricsFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.StockDailyMetricsFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$StockDailyMetricsPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.StockDailyMetricsFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$StockDailyMetricsPayload>
+          }
+          findFirst: {
+            args: Prisma.StockDailyMetricsFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$StockDailyMetricsPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.StockDailyMetricsFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$StockDailyMetricsPayload>
+          }
+          findMany: {
+            args: Prisma.StockDailyMetricsFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$StockDailyMetricsPayload>[]
+          }
+          create: {
+            args: Prisma.StockDailyMetricsCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$StockDailyMetricsPayload>
+          }
+          createMany: {
+            args: Prisma.StockDailyMetricsCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.StockDailyMetricsCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$StockDailyMetricsPayload>[]
+          }
+          delete: {
+            args: Prisma.StockDailyMetricsDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$StockDailyMetricsPayload>
+          }
+          update: {
+            args: Prisma.StockDailyMetricsUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$StockDailyMetricsPayload>
+          }
+          deleteMany: {
+            args: Prisma.StockDailyMetricsDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.StockDailyMetricsUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.StockDailyMetricsUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$StockDailyMetricsPayload>[]
+          }
+          upsert: {
+            args: Prisma.StockDailyMetricsUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$StockDailyMetricsPayload>
+          }
+          aggregate: {
+            args: Prisma.StockDailyMetricsAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateStockDailyMetrics>
+          }
+          groupBy: {
+            args: Prisma.StockDailyMetricsGroupByArgs<ExtArgs>
+            result: $Utils.Optional<StockDailyMetricsGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.StockDailyMetricsCountArgs<ExtArgs>
+            result: $Utils.Optional<StockDailyMetricsCountAggregateOutputType> | number
+          }
+        }
+      }
     }
   } & {
     other: {
@@ -2203,6 +2293,7 @@ export namespace Prisma {
     stockCandle?: StockCandleOmit
     stockTick?: StockTickOmit
     stockQuote?: StockQuoteOmit
+    stockDailyMetrics?: StockDailyMetricsOmit
   }
 
   /* Types for Logging */
@@ -20402,6 +20493,1193 @@ export namespace Prisma {
 
 
   /**
+   * Model StockDailyMetrics
+   */
+
+  export type AggregateStockDailyMetrics = {
+    _count: StockDailyMetricsCountAggregateOutputType | null
+    _avg: StockDailyMetricsAvgAggregateOutputType | null
+    _sum: StockDailyMetricsSumAggregateOutputType | null
+    _min: StockDailyMetricsMinAggregateOutputType | null
+    _max: StockDailyMetricsMaxAggregateOutputType | null
+  }
+
+  export type StockDailyMetricsAvgAggregateOutputType = {
+    closePrice: Decimal | null
+    relativeStrengthScore: Decimal | null
+    rank: number | null
+    highPrice52w: Decimal | null
+    lowPrice52w: Decimal | null
+    priceChange1d: Decimal | null
+    priceChangeRate1d: Decimal | null
+    volume1d: number | null
+  }
+
+  export type StockDailyMetricsSumAggregateOutputType = {
+    closePrice: Decimal | null
+    relativeStrengthScore: Decimal | null
+    rank: number | null
+    highPrice52w: Decimal | null
+    lowPrice52w: Decimal | null
+    priceChange1d: Decimal | null
+    priceChangeRate1d: Decimal | null
+    volume1d: bigint | null
+  }
+
+  export type StockDailyMetricsMinAggregateOutputType = {
+    metricId: string | null
+    stockCode: string | null
+    tradeDate: Date | null
+    closePrice: Decimal | null
+    relativeStrengthScore: Decimal | null
+    rank: number | null
+    marketType: string | null
+    isNewHigh: boolean | null
+    highPrice52w: Decimal | null
+    lowPrice52w: Decimal | null
+    priceChange1d: Decimal | null
+    priceChangeRate1d: Decimal | null
+    volume1d: bigint | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type StockDailyMetricsMaxAggregateOutputType = {
+    metricId: string | null
+    stockCode: string | null
+    tradeDate: Date | null
+    closePrice: Decimal | null
+    relativeStrengthScore: Decimal | null
+    rank: number | null
+    marketType: string | null
+    isNewHigh: boolean | null
+    highPrice52w: Decimal | null
+    lowPrice52w: Decimal | null
+    priceChange1d: Decimal | null
+    priceChangeRate1d: Decimal | null
+    volume1d: bigint | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type StockDailyMetricsCountAggregateOutputType = {
+    metricId: number
+    stockCode: number
+    tradeDate: number
+    closePrice: number
+    relativeStrengthScore: number
+    rank: number
+    marketType: number
+    isNewHigh: number
+    highPrice52w: number
+    lowPrice52w: number
+    priceChange1d: number
+    priceChangeRate1d: number
+    volume1d: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type StockDailyMetricsAvgAggregateInputType = {
+    closePrice?: true
+    relativeStrengthScore?: true
+    rank?: true
+    highPrice52w?: true
+    lowPrice52w?: true
+    priceChange1d?: true
+    priceChangeRate1d?: true
+    volume1d?: true
+  }
+
+  export type StockDailyMetricsSumAggregateInputType = {
+    closePrice?: true
+    relativeStrengthScore?: true
+    rank?: true
+    highPrice52w?: true
+    lowPrice52w?: true
+    priceChange1d?: true
+    priceChangeRate1d?: true
+    volume1d?: true
+  }
+
+  export type StockDailyMetricsMinAggregateInputType = {
+    metricId?: true
+    stockCode?: true
+    tradeDate?: true
+    closePrice?: true
+    relativeStrengthScore?: true
+    rank?: true
+    marketType?: true
+    isNewHigh?: true
+    highPrice52w?: true
+    lowPrice52w?: true
+    priceChange1d?: true
+    priceChangeRate1d?: true
+    volume1d?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type StockDailyMetricsMaxAggregateInputType = {
+    metricId?: true
+    stockCode?: true
+    tradeDate?: true
+    closePrice?: true
+    relativeStrengthScore?: true
+    rank?: true
+    marketType?: true
+    isNewHigh?: true
+    highPrice52w?: true
+    lowPrice52w?: true
+    priceChange1d?: true
+    priceChangeRate1d?: true
+    volume1d?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type StockDailyMetricsCountAggregateInputType = {
+    metricId?: true
+    stockCode?: true
+    tradeDate?: true
+    closePrice?: true
+    relativeStrengthScore?: true
+    rank?: true
+    marketType?: true
+    isNewHigh?: true
+    highPrice52w?: true
+    lowPrice52w?: true
+    priceChange1d?: true
+    priceChangeRate1d?: true
+    volume1d?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type StockDailyMetricsAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which StockDailyMetrics to aggregate.
+     */
+    where?: StockDailyMetricsWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of StockDailyMetrics to fetch.
+     */
+    orderBy?: StockDailyMetricsOrderByWithRelationInput | StockDailyMetricsOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: StockDailyMetricsWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` StockDailyMetrics from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` StockDailyMetrics.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned StockDailyMetrics
+    **/
+    _count?: true | StockDailyMetricsCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: StockDailyMetricsAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: StockDailyMetricsSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: StockDailyMetricsMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: StockDailyMetricsMaxAggregateInputType
+  }
+
+  export type GetStockDailyMetricsAggregateType<T extends StockDailyMetricsAggregateArgs> = {
+        [P in keyof T & keyof AggregateStockDailyMetrics]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateStockDailyMetrics[P]>
+      : GetScalarType<T[P], AggregateStockDailyMetrics[P]>
+  }
+
+
+
+
+  export type StockDailyMetricsGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: StockDailyMetricsWhereInput
+    orderBy?: StockDailyMetricsOrderByWithAggregationInput | StockDailyMetricsOrderByWithAggregationInput[]
+    by: StockDailyMetricsScalarFieldEnum[] | StockDailyMetricsScalarFieldEnum
+    having?: StockDailyMetricsScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: StockDailyMetricsCountAggregateInputType | true
+    _avg?: StockDailyMetricsAvgAggregateInputType
+    _sum?: StockDailyMetricsSumAggregateInputType
+    _min?: StockDailyMetricsMinAggregateInputType
+    _max?: StockDailyMetricsMaxAggregateInputType
+  }
+
+  export type StockDailyMetricsGroupByOutputType = {
+    metricId: string
+    stockCode: string
+    tradeDate: Date
+    closePrice: Decimal
+    relativeStrengthScore: Decimal
+    rank: number
+    marketType: string
+    isNewHigh: boolean
+    highPrice52w: Decimal | null
+    lowPrice52w: Decimal | null
+    priceChange1d: Decimal | null
+    priceChangeRate1d: Decimal | null
+    volume1d: bigint | null
+    createdAt: Date
+    updatedAt: Date
+    _count: StockDailyMetricsCountAggregateOutputType | null
+    _avg: StockDailyMetricsAvgAggregateOutputType | null
+    _sum: StockDailyMetricsSumAggregateOutputType | null
+    _min: StockDailyMetricsMinAggregateOutputType | null
+    _max: StockDailyMetricsMaxAggregateOutputType | null
+  }
+
+  type GetStockDailyMetricsGroupByPayload<T extends StockDailyMetricsGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<StockDailyMetricsGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof StockDailyMetricsGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], StockDailyMetricsGroupByOutputType[P]>
+            : GetScalarType<T[P], StockDailyMetricsGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type StockDailyMetricsSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    metricId?: boolean
+    stockCode?: boolean
+    tradeDate?: boolean
+    closePrice?: boolean
+    relativeStrengthScore?: boolean
+    rank?: boolean
+    marketType?: boolean
+    isNewHigh?: boolean
+    highPrice52w?: boolean
+    lowPrice52w?: boolean
+    priceChange1d?: boolean
+    priceChangeRate1d?: boolean
+    volume1d?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["stockDailyMetrics"]>
+
+  export type StockDailyMetricsSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    metricId?: boolean
+    stockCode?: boolean
+    tradeDate?: boolean
+    closePrice?: boolean
+    relativeStrengthScore?: boolean
+    rank?: boolean
+    marketType?: boolean
+    isNewHigh?: boolean
+    highPrice52w?: boolean
+    lowPrice52w?: boolean
+    priceChange1d?: boolean
+    priceChangeRate1d?: boolean
+    volume1d?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["stockDailyMetrics"]>
+
+  export type StockDailyMetricsSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    metricId?: boolean
+    stockCode?: boolean
+    tradeDate?: boolean
+    closePrice?: boolean
+    relativeStrengthScore?: boolean
+    rank?: boolean
+    marketType?: boolean
+    isNewHigh?: boolean
+    highPrice52w?: boolean
+    lowPrice52w?: boolean
+    priceChange1d?: boolean
+    priceChangeRate1d?: boolean
+    volume1d?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["stockDailyMetrics"]>
+
+  export type StockDailyMetricsSelectScalar = {
+    metricId?: boolean
+    stockCode?: boolean
+    tradeDate?: boolean
+    closePrice?: boolean
+    relativeStrengthScore?: boolean
+    rank?: boolean
+    marketType?: boolean
+    isNewHigh?: boolean
+    highPrice52w?: boolean
+    lowPrice52w?: boolean
+    priceChange1d?: boolean
+    priceChangeRate1d?: boolean
+    volume1d?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type StockDailyMetricsOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"metricId" | "stockCode" | "tradeDate" | "closePrice" | "relativeStrengthScore" | "rank" | "marketType" | "isNewHigh" | "highPrice52w" | "lowPrice52w" | "priceChange1d" | "priceChangeRate1d" | "volume1d" | "createdAt" | "updatedAt", ExtArgs["result"]["stockDailyMetrics"]>
+
+  export type $StockDailyMetricsPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "StockDailyMetrics"
+    objects: {}
+    scalars: $Extensions.GetPayloadResult<{
+      metricId: string
+      stockCode: string
+      tradeDate: Date
+      closePrice: Prisma.Decimal
+      relativeStrengthScore: Prisma.Decimal
+      rank: number
+      marketType: string
+      isNewHigh: boolean
+      highPrice52w: Prisma.Decimal | null
+      lowPrice52w: Prisma.Decimal | null
+      priceChange1d: Prisma.Decimal | null
+      priceChangeRate1d: Prisma.Decimal | null
+      volume1d: bigint | null
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["stockDailyMetrics"]>
+    composites: {}
+  }
+
+  type StockDailyMetricsGetPayload<S extends boolean | null | undefined | StockDailyMetricsDefaultArgs> = $Result.GetResult<Prisma.$StockDailyMetricsPayload, S>
+
+  type StockDailyMetricsCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<StockDailyMetricsFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: StockDailyMetricsCountAggregateInputType | true
+    }
+
+  export interface StockDailyMetricsDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['StockDailyMetrics'], meta: { name: 'StockDailyMetrics' } }
+    /**
+     * Find zero or one StockDailyMetrics that matches the filter.
+     * @param {StockDailyMetricsFindUniqueArgs} args - Arguments to find a StockDailyMetrics
+     * @example
+     * // Get one StockDailyMetrics
+     * const stockDailyMetrics = await prisma.stockDailyMetrics.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends StockDailyMetricsFindUniqueArgs>(args: SelectSubset<T, StockDailyMetricsFindUniqueArgs<ExtArgs>>): Prisma__StockDailyMetricsClient<$Result.GetResult<Prisma.$StockDailyMetricsPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one StockDailyMetrics that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {StockDailyMetricsFindUniqueOrThrowArgs} args - Arguments to find a StockDailyMetrics
+     * @example
+     * // Get one StockDailyMetrics
+     * const stockDailyMetrics = await prisma.stockDailyMetrics.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends StockDailyMetricsFindUniqueOrThrowArgs>(args: SelectSubset<T, StockDailyMetricsFindUniqueOrThrowArgs<ExtArgs>>): Prisma__StockDailyMetricsClient<$Result.GetResult<Prisma.$StockDailyMetricsPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first StockDailyMetrics that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {StockDailyMetricsFindFirstArgs} args - Arguments to find a StockDailyMetrics
+     * @example
+     * // Get one StockDailyMetrics
+     * const stockDailyMetrics = await prisma.stockDailyMetrics.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends StockDailyMetricsFindFirstArgs>(args?: SelectSubset<T, StockDailyMetricsFindFirstArgs<ExtArgs>>): Prisma__StockDailyMetricsClient<$Result.GetResult<Prisma.$StockDailyMetricsPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first StockDailyMetrics that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {StockDailyMetricsFindFirstOrThrowArgs} args - Arguments to find a StockDailyMetrics
+     * @example
+     * // Get one StockDailyMetrics
+     * const stockDailyMetrics = await prisma.stockDailyMetrics.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends StockDailyMetricsFindFirstOrThrowArgs>(args?: SelectSubset<T, StockDailyMetricsFindFirstOrThrowArgs<ExtArgs>>): Prisma__StockDailyMetricsClient<$Result.GetResult<Prisma.$StockDailyMetricsPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more StockDailyMetrics that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {StockDailyMetricsFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all StockDailyMetrics
+     * const stockDailyMetrics = await prisma.stockDailyMetrics.findMany()
+     * 
+     * // Get first 10 StockDailyMetrics
+     * const stockDailyMetrics = await prisma.stockDailyMetrics.findMany({ take: 10 })
+     * 
+     * // Only select the `metricId`
+     * const stockDailyMetricsWithMetricIdOnly = await prisma.stockDailyMetrics.findMany({ select: { metricId: true } })
+     * 
+     */
+    findMany<T extends StockDailyMetricsFindManyArgs>(args?: SelectSubset<T, StockDailyMetricsFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$StockDailyMetricsPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a StockDailyMetrics.
+     * @param {StockDailyMetricsCreateArgs} args - Arguments to create a StockDailyMetrics.
+     * @example
+     * // Create one StockDailyMetrics
+     * const StockDailyMetrics = await prisma.stockDailyMetrics.create({
+     *   data: {
+     *     // ... data to create a StockDailyMetrics
+     *   }
+     * })
+     * 
+     */
+    create<T extends StockDailyMetricsCreateArgs>(args: SelectSubset<T, StockDailyMetricsCreateArgs<ExtArgs>>): Prisma__StockDailyMetricsClient<$Result.GetResult<Prisma.$StockDailyMetricsPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many StockDailyMetrics.
+     * @param {StockDailyMetricsCreateManyArgs} args - Arguments to create many StockDailyMetrics.
+     * @example
+     * // Create many StockDailyMetrics
+     * const stockDailyMetrics = await prisma.stockDailyMetrics.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends StockDailyMetricsCreateManyArgs>(args?: SelectSubset<T, StockDailyMetricsCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many StockDailyMetrics and returns the data saved in the database.
+     * @param {StockDailyMetricsCreateManyAndReturnArgs} args - Arguments to create many StockDailyMetrics.
+     * @example
+     * // Create many StockDailyMetrics
+     * const stockDailyMetrics = await prisma.stockDailyMetrics.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many StockDailyMetrics and only return the `metricId`
+     * const stockDailyMetricsWithMetricIdOnly = await prisma.stockDailyMetrics.createManyAndReturn({
+     *   select: { metricId: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends StockDailyMetricsCreateManyAndReturnArgs>(args?: SelectSubset<T, StockDailyMetricsCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$StockDailyMetricsPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a StockDailyMetrics.
+     * @param {StockDailyMetricsDeleteArgs} args - Arguments to delete one StockDailyMetrics.
+     * @example
+     * // Delete one StockDailyMetrics
+     * const StockDailyMetrics = await prisma.stockDailyMetrics.delete({
+     *   where: {
+     *     // ... filter to delete one StockDailyMetrics
+     *   }
+     * })
+     * 
+     */
+    delete<T extends StockDailyMetricsDeleteArgs>(args: SelectSubset<T, StockDailyMetricsDeleteArgs<ExtArgs>>): Prisma__StockDailyMetricsClient<$Result.GetResult<Prisma.$StockDailyMetricsPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one StockDailyMetrics.
+     * @param {StockDailyMetricsUpdateArgs} args - Arguments to update one StockDailyMetrics.
+     * @example
+     * // Update one StockDailyMetrics
+     * const stockDailyMetrics = await prisma.stockDailyMetrics.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends StockDailyMetricsUpdateArgs>(args: SelectSubset<T, StockDailyMetricsUpdateArgs<ExtArgs>>): Prisma__StockDailyMetricsClient<$Result.GetResult<Prisma.$StockDailyMetricsPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more StockDailyMetrics.
+     * @param {StockDailyMetricsDeleteManyArgs} args - Arguments to filter StockDailyMetrics to delete.
+     * @example
+     * // Delete a few StockDailyMetrics
+     * const { count } = await prisma.stockDailyMetrics.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends StockDailyMetricsDeleteManyArgs>(args?: SelectSubset<T, StockDailyMetricsDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more StockDailyMetrics.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {StockDailyMetricsUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many StockDailyMetrics
+     * const stockDailyMetrics = await prisma.stockDailyMetrics.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends StockDailyMetricsUpdateManyArgs>(args: SelectSubset<T, StockDailyMetricsUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more StockDailyMetrics and returns the data updated in the database.
+     * @param {StockDailyMetricsUpdateManyAndReturnArgs} args - Arguments to update many StockDailyMetrics.
+     * @example
+     * // Update many StockDailyMetrics
+     * const stockDailyMetrics = await prisma.stockDailyMetrics.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more StockDailyMetrics and only return the `metricId`
+     * const stockDailyMetricsWithMetricIdOnly = await prisma.stockDailyMetrics.updateManyAndReturn({
+     *   select: { metricId: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends StockDailyMetricsUpdateManyAndReturnArgs>(args: SelectSubset<T, StockDailyMetricsUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$StockDailyMetricsPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one StockDailyMetrics.
+     * @param {StockDailyMetricsUpsertArgs} args - Arguments to update or create a StockDailyMetrics.
+     * @example
+     * // Update or create a StockDailyMetrics
+     * const stockDailyMetrics = await prisma.stockDailyMetrics.upsert({
+     *   create: {
+     *     // ... data to create a StockDailyMetrics
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the StockDailyMetrics we want to update
+     *   }
+     * })
+     */
+    upsert<T extends StockDailyMetricsUpsertArgs>(args: SelectSubset<T, StockDailyMetricsUpsertArgs<ExtArgs>>): Prisma__StockDailyMetricsClient<$Result.GetResult<Prisma.$StockDailyMetricsPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of StockDailyMetrics.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {StockDailyMetricsCountArgs} args - Arguments to filter StockDailyMetrics to count.
+     * @example
+     * // Count the number of StockDailyMetrics
+     * const count = await prisma.stockDailyMetrics.count({
+     *   where: {
+     *     // ... the filter for the StockDailyMetrics we want to count
+     *   }
+     * })
+    **/
+    count<T extends StockDailyMetricsCountArgs>(
+      args?: Subset<T, StockDailyMetricsCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], StockDailyMetricsCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a StockDailyMetrics.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {StockDailyMetricsAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends StockDailyMetricsAggregateArgs>(args: Subset<T, StockDailyMetricsAggregateArgs>): Prisma.PrismaPromise<GetStockDailyMetricsAggregateType<T>>
+
+    /**
+     * Group by StockDailyMetrics.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {StockDailyMetricsGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends StockDailyMetricsGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: StockDailyMetricsGroupByArgs['orderBy'] }
+        : { orderBy?: StockDailyMetricsGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, StockDailyMetricsGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetStockDailyMetricsGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the StockDailyMetrics model
+   */
+  readonly fields: StockDailyMetricsFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for StockDailyMetrics.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__StockDailyMetricsClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the StockDailyMetrics model
+   */
+  interface StockDailyMetricsFieldRefs {
+    readonly metricId: FieldRef<"StockDailyMetrics", 'String'>
+    readonly stockCode: FieldRef<"StockDailyMetrics", 'String'>
+    readonly tradeDate: FieldRef<"StockDailyMetrics", 'DateTime'>
+    readonly closePrice: FieldRef<"StockDailyMetrics", 'Decimal'>
+    readonly relativeStrengthScore: FieldRef<"StockDailyMetrics", 'Decimal'>
+    readonly rank: FieldRef<"StockDailyMetrics", 'Int'>
+    readonly marketType: FieldRef<"StockDailyMetrics", 'String'>
+    readonly isNewHigh: FieldRef<"StockDailyMetrics", 'Boolean'>
+    readonly highPrice52w: FieldRef<"StockDailyMetrics", 'Decimal'>
+    readonly lowPrice52w: FieldRef<"StockDailyMetrics", 'Decimal'>
+    readonly priceChange1d: FieldRef<"StockDailyMetrics", 'Decimal'>
+    readonly priceChangeRate1d: FieldRef<"StockDailyMetrics", 'Decimal'>
+    readonly volume1d: FieldRef<"StockDailyMetrics", 'BigInt'>
+    readonly createdAt: FieldRef<"StockDailyMetrics", 'DateTime'>
+    readonly updatedAt: FieldRef<"StockDailyMetrics", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * StockDailyMetrics findUnique
+   */
+  export type StockDailyMetricsFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the StockDailyMetrics
+     */
+    select?: StockDailyMetricsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the StockDailyMetrics
+     */
+    omit?: StockDailyMetricsOmit<ExtArgs> | null
+    /**
+     * Filter, which StockDailyMetrics to fetch.
+     */
+    where: StockDailyMetricsWhereUniqueInput
+  }
+
+  /**
+   * StockDailyMetrics findUniqueOrThrow
+   */
+  export type StockDailyMetricsFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the StockDailyMetrics
+     */
+    select?: StockDailyMetricsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the StockDailyMetrics
+     */
+    omit?: StockDailyMetricsOmit<ExtArgs> | null
+    /**
+     * Filter, which StockDailyMetrics to fetch.
+     */
+    where: StockDailyMetricsWhereUniqueInput
+  }
+
+  /**
+   * StockDailyMetrics findFirst
+   */
+  export type StockDailyMetricsFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the StockDailyMetrics
+     */
+    select?: StockDailyMetricsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the StockDailyMetrics
+     */
+    omit?: StockDailyMetricsOmit<ExtArgs> | null
+    /**
+     * Filter, which StockDailyMetrics to fetch.
+     */
+    where?: StockDailyMetricsWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of StockDailyMetrics to fetch.
+     */
+    orderBy?: StockDailyMetricsOrderByWithRelationInput | StockDailyMetricsOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for StockDailyMetrics.
+     */
+    cursor?: StockDailyMetricsWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` StockDailyMetrics from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` StockDailyMetrics.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of StockDailyMetrics.
+     */
+    distinct?: StockDailyMetricsScalarFieldEnum | StockDailyMetricsScalarFieldEnum[]
+  }
+
+  /**
+   * StockDailyMetrics findFirstOrThrow
+   */
+  export type StockDailyMetricsFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the StockDailyMetrics
+     */
+    select?: StockDailyMetricsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the StockDailyMetrics
+     */
+    omit?: StockDailyMetricsOmit<ExtArgs> | null
+    /**
+     * Filter, which StockDailyMetrics to fetch.
+     */
+    where?: StockDailyMetricsWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of StockDailyMetrics to fetch.
+     */
+    orderBy?: StockDailyMetricsOrderByWithRelationInput | StockDailyMetricsOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for StockDailyMetrics.
+     */
+    cursor?: StockDailyMetricsWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` StockDailyMetrics from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` StockDailyMetrics.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of StockDailyMetrics.
+     */
+    distinct?: StockDailyMetricsScalarFieldEnum | StockDailyMetricsScalarFieldEnum[]
+  }
+
+  /**
+   * StockDailyMetrics findMany
+   */
+  export type StockDailyMetricsFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the StockDailyMetrics
+     */
+    select?: StockDailyMetricsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the StockDailyMetrics
+     */
+    omit?: StockDailyMetricsOmit<ExtArgs> | null
+    /**
+     * Filter, which StockDailyMetrics to fetch.
+     */
+    where?: StockDailyMetricsWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of StockDailyMetrics to fetch.
+     */
+    orderBy?: StockDailyMetricsOrderByWithRelationInput | StockDailyMetricsOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing StockDailyMetrics.
+     */
+    cursor?: StockDailyMetricsWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` StockDailyMetrics from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` StockDailyMetrics.
+     */
+    skip?: number
+    distinct?: StockDailyMetricsScalarFieldEnum | StockDailyMetricsScalarFieldEnum[]
+  }
+
+  /**
+   * StockDailyMetrics create
+   */
+  export type StockDailyMetricsCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the StockDailyMetrics
+     */
+    select?: StockDailyMetricsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the StockDailyMetrics
+     */
+    omit?: StockDailyMetricsOmit<ExtArgs> | null
+    /**
+     * The data needed to create a StockDailyMetrics.
+     */
+    data: XOR<StockDailyMetricsCreateInput, StockDailyMetricsUncheckedCreateInput>
+  }
+
+  /**
+   * StockDailyMetrics createMany
+   */
+  export type StockDailyMetricsCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many StockDailyMetrics.
+     */
+    data: StockDailyMetricsCreateManyInput | StockDailyMetricsCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * StockDailyMetrics createManyAndReturn
+   */
+  export type StockDailyMetricsCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the StockDailyMetrics
+     */
+    select?: StockDailyMetricsSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the StockDailyMetrics
+     */
+    omit?: StockDailyMetricsOmit<ExtArgs> | null
+    /**
+     * The data used to create many StockDailyMetrics.
+     */
+    data: StockDailyMetricsCreateManyInput | StockDailyMetricsCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * StockDailyMetrics update
+   */
+  export type StockDailyMetricsUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the StockDailyMetrics
+     */
+    select?: StockDailyMetricsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the StockDailyMetrics
+     */
+    omit?: StockDailyMetricsOmit<ExtArgs> | null
+    /**
+     * The data needed to update a StockDailyMetrics.
+     */
+    data: XOR<StockDailyMetricsUpdateInput, StockDailyMetricsUncheckedUpdateInput>
+    /**
+     * Choose, which StockDailyMetrics to update.
+     */
+    where: StockDailyMetricsWhereUniqueInput
+  }
+
+  /**
+   * StockDailyMetrics updateMany
+   */
+  export type StockDailyMetricsUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update StockDailyMetrics.
+     */
+    data: XOR<StockDailyMetricsUpdateManyMutationInput, StockDailyMetricsUncheckedUpdateManyInput>
+    /**
+     * Filter which StockDailyMetrics to update
+     */
+    where?: StockDailyMetricsWhereInput
+    /**
+     * Limit how many StockDailyMetrics to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * StockDailyMetrics updateManyAndReturn
+   */
+  export type StockDailyMetricsUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the StockDailyMetrics
+     */
+    select?: StockDailyMetricsSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the StockDailyMetrics
+     */
+    omit?: StockDailyMetricsOmit<ExtArgs> | null
+    /**
+     * The data used to update StockDailyMetrics.
+     */
+    data: XOR<StockDailyMetricsUpdateManyMutationInput, StockDailyMetricsUncheckedUpdateManyInput>
+    /**
+     * Filter which StockDailyMetrics to update
+     */
+    where?: StockDailyMetricsWhereInput
+    /**
+     * Limit how many StockDailyMetrics to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * StockDailyMetrics upsert
+   */
+  export type StockDailyMetricsUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the StockDailyMetrics
+     */
+    select?: StockDailyMetricsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the StockDailyMetrics
+     */
+    omit?: StockDailyMetricsOmit<ExtArgs> | null
+    /**
+     * The filter to search for the StockDailyMetrics to update in case it exists.
+     */
+    where: StockDailyMetricsWhereUniqueInput
+    /**
+     * In case the StockDailyMetrics found by the `where` argument doesn't exist, create a new StockDailyMetrics with this data.
+     */
+    create: XOR<StockDailyMetricsCreateInput, StockDailyMetricsUncheckedCreateInput>
+    /**
+     * In case the StockDailyMetrics was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<StockDailyMetricsUpdateInput, StockDailyMetricsUncheckedUpdateInput>
+  }
+
+  /**
+   * StockDailyMetrics delete
+   */
+  export type StockDailyMetricsDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the StockDailyMetrics
+     */
+    select?: StockDailyMetricsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the StockDailyMetrics
+     */
+    omit?: StockDailyMetricsOmit<ExtArgs> | null
+    /**
+     * Filter which StockDailyMetrics to delete.
+     */
+    where: StockDailyMetricsWhereUniqueInput
+  }
+
+  /**
+   * StockDailyMetrics deleteMany
+   */
+  export type StockDailyMetricsDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which StockDailyMetrics to delete
+     */
+    where?: StockDailyMetricsWhereInput
+    /**
+     * Limit how many StockDailyMetrics to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * StockDailyMetrics without action
+   */
+  export type StockDailyMetricsDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the StockDailyMetrics
+     */
+    select?: StockDailyMetricsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the StockDailyMetrics
+     */
+    omit?: StockDailyMetricsOmit<ExtArgs> | null
+  }
+
+
+  /**
    * Enums
    */
 
@@ -20646,6 +21924,27 @@ export namespace Prisma {
   export type StockQuoteScalarFieldEnum = (typeof StockQuoteScalarFieldEnum)[keyof typeof StockQuoteScalarFieldEnum]
 
 
+  export const StockDailyMetricsScalarFieldEnum: {
+    metricId: 'metricId',
+    stockCode: 'stockCode',
+    tradeDate: 'tradeDate',
+    closePrice: 'closePrice',
+    relativeStrengthScore: 'relativeStrengthScore',
+    rank: 'rank',
+    marketType: 'marketType',
+    isNewHigh: 'isNewHigh',
+    highPrice52w: 'highPrice52w',
+    lowPrice52w: 'lowPrice52w',
+    priceChange1d: 'priceChange1d',
+    priceChangeRate1d: 'priceChangeRate1d',
+    volume1d: 'volume1d',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type StockDailyMetricsScalarFieldEnum = (typeof StockDailyMetricsScalarFieldEnum)[keyof typeof StockDailyMetricsScalarFieldEnum]
+
+
   export const SortOrder: {
     asc: 'asc',
     desc: 'desc'
@@ -20836,6 +22135,13 @@ export namespace Prisma {
    * Reference to a field of type 'BatchJobStatus[]'
    */
   export type ListEnumBatchJobStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'BatchJobStatus[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'Boolean'
+   */
+  export type BooleanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Boolean'>
     
 
 
@@ -22042,6 +23348,111 @@ export namespace Prisma {
     totalAskVolume?: BigIntNullableWithAggregatesFilter<"StockQuote"> | bigint | number | null
     totalBidVolume?: BigIntNullableWithAggregatesFilter<"StockQuote"> | bigint | number | null
     createdAt?: DateTimeWithAggregatesFilter<"StockQuote"> | Date | string
+  }
+
+  export type StockDailyMetricsWhereInput = {
+    AND?: StockDailyMetricsWhereInput | StockDailyMetricsWhereInput[]
+    OR?: StockDailyMetricsWhereInput[]
+    NOT?: StockDailyMetricsWhereInput | StockDailyMetricsWhereInput[]
+    metricId?: UuidFilter<"StockDailyMetrics"> | string
+    stockCode?: StringFilter<"StockDailyMetrics"> | string
+    tradeDate?: DateTimeFilter<"StockDailyMetrics"> | Date | string
+    closePrice?: DecimalFilter<"StockDailyMetrics"> | Decimal | DecimalJsLike | number | string
+    relativeStrengthScore?: DecimalFilter<"StockDailyMetrics"> | Decimal | DecimalJsLike | number | string
+    rank?: IntFilter<"StockDailyMetrics"> | number
+    marketType?: StringFilter<"StockDailyMetrics"> | string
+    isNewHigh?: BoolFilter<"StockDailyMetrics"> | boolean
+    highPrice52w?: DecimalNullableFilter<"StockDailyMetrics"> | Decimal | DecimalJsLike | number | string | null
+    lowPrice52w?: DecimalNullableFilter<"StockDailyMetrics"> | Decimal | DecimalJsLike | number | string | null
+    priceChange1d?: DecimalNullableFilter<"StockDailyMetrics"> | Decimal | DecimalJsLike | number | string | null
+    priceChangeRate1d?: DecimalNullableFilter<"StockDailyMetrics"> | Decimal | DecimalJsLike | number | string | null
+    volume1d?: BigIntNullableFilter<"StockDailyMetrics"> | bigint | number | null
+    createdAt?: DateTimeFilter<"StockDailyMetrics"> | Date | string
+    updatedAt?: DateTimeFilter<"StockDailyMetrics"> | Date | string
+  }
+
+  export type StockDailyMetricsOrderByWithRelationInput = {
+    metricId?: SortOrder
+    stockCode?: SortOrder
+    tradeDate?: SortOrder
+    closePrice?: SortOrder
+    relativeStrengthScore?: SortOrder
+    rank?: SortOrder
+    marketType?: SortOrder
+    isNewHigh?: SortOrder
+    highPrice52w?: SortOrderInput | SortOrder
+    lowPrice52w?: SortOrderInput | SortOrder
+    priceChange1d?: SortOrderInput | SortOrder
+    priceChangeRate1d?: SortOrderInput | SortOrder
+    volume1d?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type StockDailyMetricsWhereUniqueInput = Prisma.AtLeast<{
+    metricId?: string
+    stockCode_tradeDate?: StockDailyMetricsStockCodeTradeDateCompoundUniqueInput
+    AND?: StockDailyMetricsWhereInput | StockDailyMetricsWhereInput[]
+    OR?: StockDailyMetricsWhereInput[]
+    NOT?: StockDailyMetricsWhereInput | StockDailyMetricsWhereInput[]
+    stockCode?: StringFilter<"StockDailyMetrics"> | string
+    tradeDate?: DateTimeFilter<"StockDailyMetrics"> | Date | string
+    closePrice?: DecimalFilter<"StockDailyMetrics"> | Decimal | DecimalJsLike | number | string
+    relativeStrengthScore?: DecimalFilter<"StockDailyMetrics"> | Decimal | DecimalJsLike | number | string
+    rank?: IntFilter<"StockDailyMetrics"> | number
+    marketType?: StringFilter<"StockDailyMetrics"> | string
+    isNewHigh?: BoolFilter<"StockDailyMetrics"> | boolean
+    highPrice52w?: DecimalNullableFilter<"StockDailyMetrics"> | Decimal | DecimalJsLike | number | string | null
+    lowPrice52w?: DecimalNullableFilter<"StockDailyMetrics"> | Decimal | DecimalJsLike | number | string | null
+    priceChange1d?: DecimalNullableFilter<"StockDailyMetrics"> | Decimal | DecimalJsLike | number | string | null
+    priceChangeRate1d?: DecimalNullableFilter<"StockDailyMetrics"> | Decimal | DecimalJsLike | number | string | null
+    volume1d?: BigIntNullableFilter<"StockDailyMetrics"> | bigint | number | null
+    createdAt?: DateTimeFilter<"StockDailyMetrics"> | Date | string
+    updatedAt?: DateTimeFilter<"StockDailyMetrics"> | Date | string
+  }, "metricId" | "stockCode_tradeDate">
+
+  export type StockDailyMetricsOrderByWithAggregationInput = {
+    metricId?: SortOrder
+    stockCode?: SortOrder
+    tradeDate?: SortOrder
+    closePrice?: SortOrder
+    relativeStrengthScore?: SortOrder
+    rank?: SortOrder
+    marketType?: SortOrder
+    isNewHigh?: SortOrder
+    highPrice52w?: SortOrderInput | SortOrder
+    lowPrice52w?: SortOrderInput | SortOrder
+    priceChange1d?: SortOrderInput | SortOrder
+    priceChangeRate1d?: SortOrderInput | SortOrder
+    volume1d?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: StockDailyMetricsCountOrderByAggregateInput
+    _avg?: StockDailyMetricsAvgOrderByAggregateInput
+    _max?: StockDailyMetricsMaxOrderByAggregateInput
+    _min?: StockDailyMetricsMinOrderByAggregateInput
+    _sum?: StockDailyMetricsSumOrderByAggregateInput
+  }
+
+  export type StockDailyMetricsScalarWhereWithAggregatesInput = {
+    AND?: StockDailyMetricsScalarWhereWithAggregatesInput | StockDailyMetricsScalarWhereWithAggregatesInput[]
+    OR?: StockDailyMetricsScalarWhereWithAggregatesInput[]
+    NOT?: StockDailyMetricsScalarWhereWithAggregatesInput | StockDailyMetricsScalarWhereWithAggregatesInput[]
+    metricId?: UuidWithAggregatesFilter<"StockDailyMetrics"> | string
+    stockCode?: StringWithAggregatesFilter<"StockDailyMetrics"> | string
+    tradeDate?: DateTimeWithAggregatesFilter<"StockDailyMetrics"> | Date | string
+    closePrice?: DecimalWithAggregatesFilter<"StockDailyMetrics"> | Decimal | DecimalJsLike | number | string
+    relativeStrengthScore?: DecimalWithAggregatesFilter<"StockDailyMetrics"> | Decimal | DecimalJsLike | number | string
+    rank?: IntWithAggregatesFilter<"StockDailyMetrics"> | number
+    marketType?: StringWithAggregatesFilter<"StockDailyMetrics"> | string
+    isNewHigh?: BoolWithAggregatesFilter<"StockDailyMetrics"> | boolean
+    highPrice52w?: DecimalNullableWithAggregatesFilter<"StockDailyMetrics"> | Decimal | DecimalJsLike | number | string | null
+    lowPrice52w?: DecimalNullableWithAggregatesFilter<"StockDailyMetrics"> | Decimal | DecimalJsLike | number | string | null
+    priceChange1d?: DecimalNullableWithAggregatesFilter<"StockDailyMetrics"> | Decimal | DecimalJsLike | number | string | null
+    priceChangeRate1d?: DecimalNullableWithAggregatesFilter<"StockDailyMetrics"> | Decimal | DecimalJsLike | number | string | null
+    volume1d?: BigIntNullableWithAggregatesFilter<"StockDailyMetrics"> | bigint | number | null
+    createdAt?: DateTimeWithAggregatesFilter<"StockDailyMetrics"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"StockDailyMetrics"> | Date | string
   }
 
   export type UserCreateInput = {
@@ -23347,6 +24758,132 @@ export namespace Prisma {
     totalAskVolume?: NullableBigIntFieldUpdateOperationsInput | bigint | number | null
     totalBidVolume?: NullableBigIntFieldUpdateOperationsInput | bigint | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type StockDailyMetricsCreateInput = {
+    metricId?: string
+    stockCode: string
+    tradeDate: Date | string
+    closePrice: Decimal | DecimalJsLike | number | string
+    relativeStrengthScore: Decimal | DecimalJsLike | number | string
+    rank: number
+    marketType: string
+    isNewHigh?: boolean
+    highPrice52w?: Decimal | DecimalJsLike | number | string | null
+    lowPrice52w?: Decimal | DecimalJsLike | number | string | null
+    priceChange1d?: Decimal | DecimalJsLike | number | string | null
+    priceChangeRate1d?: Decimal | DecimalJsLike | number | string | null
+    volume1d?: bigint | number | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type StockDailyMetricsUncheckedCreateInput = {
+    metricId?: string
+    stockCode: string
+    tradeDate: Date | string
+    closePrice: Decimal | DecimalJsLike | number | string
+    relativeStrengthScore: Decimal | DecimalJsLike | number | string
+    rank: number
+    marketType: string
+    isNewHigh?: boolean
+    highPrice52w?: Decimal | DecimalJsLike | number | string | null
+    lowPrice52w?: Decimal | DecimalJsLike | number | string | null
+    priceChange1d?: Decimal | DecimalJsLike | number | string | null
+    priceChangeRate1d?: Decimal | DecimalJsLike | number | string | null
+    volume1d?: bigint | number | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type StockDailyMetricsUpdateInput = {
+    metricId?: StringFieldUpdateOperationsInput | string
+    stockCode?: StringFieldUpdateOperationsInput | string
+    tradeDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    closePrice?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    relativeStrengthScore?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    rank?: IntFieldUpdateOperationsInput | number
+    marketType?: StringFieldUpdateOperationsInput | string
+    isNewHigh?: BoolFieldUpdateOperationsInput | boolean
+    highPrice52w?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    lowPrice52w?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    priceChange1d?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    priceChangeRate1d?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    volume1d?: NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type StockDailyMetricsUncheckedUpdateInput = {
+    metricId?: StringFieldUpdateOperationsInput | string
+    stockCode?: StringFieldUpdateOperationsInput | string
+    tradeDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    closePrice?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    relativeStrengthScore?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    rank?: IntFieldUpdateOperationsInput | number
+    marketType?: StringFieldUpdateOperationsInput | string
+    isNewHigh?: BoolFieldUpdateOperationsInput | boolean
+    highPrice52w?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    lowPrice52w?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    priceChange1d?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    priceChangeRate1d?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    volume1d?: NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type StockDailyMetricsCreateManyInput = {
+    metricId?: string
+    stockCode: string
+    tradeDate: Date | string
+    closePrice: Decimal | DecimalJsLike | number | string
+    relativeStrengthScore: Decimal | DecimalJsLike | number | string
+    rank: number
+    marketType: string
+    isNewHigh?: boolean
+    highPrice52w?: Decimal | DecimalJsLike | number | string | null
+    lowPrice52w?: Decimal | DecimalJsLike | number | string | null
+    priceChange1d?: Decimal | DecimalJsLike | number | string | null
+    priceChangeRate1d?: Decimal | DecimalJsLike | number | string | null
+    volume1d?: bigint | number | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type StockDailyMetricsUpdateManyMutationInput = {
+    metricId?: StringFieldUpdateOperationsInput | string
+    stockCode?: StringFieldUpdateOperationsInput | string
+    tradeDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    closePrice?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    relativeStrengthScore?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    rank?: IntFieldUpdateOperationsInput | number
+    marketType?: StringFieldUpdateOperationsInput | string
+    isNewHigh?: BoolFieldUpdateOperationsInput | boolean
+    highPrice52w?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    lowPrice52w?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    priceChange1d?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    priceChangeRate1d?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    volume1d?: NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type StockDailyMetricsUncheckedUpdateManyInput = {
+    metricId?: StringFieldUpdateOperationsInput | string
+    stockCode?: StringFieldUpdateOperationsInput | string
+    tradeDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    closePrice?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    relativeStrengthScore?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    rank?: IntFieldUpdateOperationsInput | number
+    marketType?: StringFieldUpdateOperationsInput | string
+    isNewHigh?: BoolFieldUpdateOperationsInput | boolean
+    highPrice52w?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    lowPrice52w?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    priceChange1d?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    priceChangeRate1d?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    volume1d?: NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type UuidFilter<$PrismaModel = never> = {
@@ -24698,6 +26235,100 @@ export namespace Prisma {
     totalBidVolume?: SortOrder
   }
 
+  export type BoolFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
+    not?: NestedBoolFilter<$PrismaModel> | boolean
+  }
+
+  export type StockDailyMetricsStockCodeTradeDateCompoundUniqueInput = {
+    stockCode: string
+    tradeDate: Date | string
+  }
+
+  export type StockDailyMetricsCountOrderByAggregateInput = {
+    metricId?: SortOrder
+    stockCode?: SortOrder
+    tradeDate?: SortOrder
+    closePrice?: SortOrder
+    relativeStrengthScore?: SortOrder
+    rank?: SortOrder
+    marketType?: SortOrder
+    isNewHigh?: SortOrder
+    highPrice52w?: SortOrder
+    lowPrice52w?: SortOrder
+    priceChange1d?: SortOrder
+    priceChangeRate1d?: SortOrder
+    volume1d?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type StockDailyMetricsAvgOrderByAggregateInput = {
+    closePrice?: SortOrder
+    relativeStrengthScore?: SortOrder
+    rank?: SortOrder
+    highPrice52w?: SortOrder
+    lowPrice52w?: SortOrder
+    priceChange1d?: SortOrder
+    priceChangeRate1d?: SortOrder
+    volume1d?: SortOrder
+  }
+
+  export type StockDailyMetricsMaxOrderByAggregateInput = {
+    metricId?: SortOrder
+    stockCode?: SortOrder
+    tradeDate?: SortOrder
+    closePrice?: SortOrder
+    relativeStrengthScore?: SortOrder
+    rank?: SortOrder
+    marketType?: SortOrder
+    isNewHigh?: SortOrder
+    highPrice52w?: SortOrder
+    lowPrice52w?: SortOrder
+    priceChange1d?: SortOrder
+    priceChangeRate1d?: SortOrder
+    volume1d?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type StockDailyMetricsMinOrderByAggregateInput = {
+    metricId?: SortOrder
+    stockCode?: SortOrder
+    tradeDate?: SortOrder
+    closePrice?: SortOrder
+    relativeStrengthScore?: SortOrder
+    rank?: SortOrder
+    marketType?: SortOrder
+    isNewHigh?: SortOrder
+    highPrice52w?: SortOrder
+    lowPrice52w?: SortOrder
+    priceChange1d?: SortOrder
+    priceChangeRate1d?: SortOrder
+    volume1d?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type StockDailyMetricsSumOrderByAggregateInput = {
+    closePrice?: SortOrder
+    relativeStrengthScore?: SortOrder
+    rank?: SortOrder
+    highPrice52w?: SortOrder
+    lowPrice52w?: SortOrder
+    priceChange1d?: SortOrder
+    priceChangeRate1d?: SortOrder
+    volume1d?: SortOrder
+  }
+
+  export type BoolWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
+    not?: NestedBoolWithAggregatesFilter<$PrismaModel> | boolean
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedBoolFilter<$PrismaModel>
+    _max?: NestedBoolFilter<$PrismaModel>
+  }
+
   export type UserWatchlistCreateNestedManyWithoutUserInput = {
     create?: XOR<UserWatchlistCreateWithoutUserInput, UserWatchlistUncheckedCreateWithoutUserInput> | UserWatchlistCreateWithoutUserInput[] | UserWatchlistUncheckedCreateWithoutUserInput[]
     connectOrCreate?: UserWatchlistCreateOrConnectWithoutUserInput | UserWatchlistCreateOrConnectWithoutUserInput[]
@@ -25284,6 +26915,10 @@ export namespace Prisma {
     divide?: Decimal | DecimalJsLike | number | string
   }
 
+  export type BoolFieldUpdateOperationsInput = {
+    set?: boolean
+  }
+
   export type NestedUuidFilter<$PrismaModel = never> = {
     equals?: string | StringFieldRefInput<$PrismaModel>
     in?: string[] | ListStringFieldRefInput<$PrismaModel>
@@ -25742,6 +27377,19 @@ export namespace Prisma {
     _sum?: NestedDecimalNullableFilter<$PrismaModel>
     _min?: NestedDecimalNullableFilter<$PrismaModel>
     _max?: NestedDecimalNullableFilter<$PrismaModel>
+  }
+
+  export type NestedBoolFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
+    not?: NestedBoolFilter<$PrismaModel> | boolean
+  }
+
+  export type NestedBoolWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
+    not?: NestedBoolWithAggregatesFilter<$PrismaModel> | boolean
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedBoolFilter<$PrismaModel>
+    _max?: NestedBoolFilter<$PrismaModel>
   }
 
   export type UserWatchlistCreateWithoutUserInput = {

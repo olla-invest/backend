@@ -2,15 +2,24 @@ import { Injectable, Logger } from '@nestjs/common';
 import { KiwoomRestService } from '../../integrations/kiwoom/rest/kiwoom-rest.service';
 import { KiwoomWebSocketService } from '../../integrations/kiwoom/websocket/kiwoom-websocket.service';
 import { ChartStorageService } from './chart-storage.service';
+import { StockMetricsService } from './stock-metrics.service';
+
+interface StockListCache {
+  data: any[];
+  timestamp: number;
+}
 
 @Injectable()
 export class RealTimeChartService {
   private readonly logger = new Logger(RealTimeChartService.name);
+  private readonly stockListCache = new Map<string, StockListCache>();
+  private readonly CACHE_TTL = 60 * 60 * 1000; // 1시간 (밀리초)
 
   constructor(
     private readonly kiwoomRest: KiwoomRestService,
     private readonly kiwoomWebSocket: KiwoomWebSocketService,
     private readonly chartStorage: ChartStorageService,
+    private readonly metricsService: StockMetricsService,
   ) {}
 
   /**
@@ -121,34 +130,117 @@ export class RealTimeChartService {
   }
 
   /**
-   * 종목 리스트 조회 (프론트엔드 인터페이스에 맞춰서)
+   * 종목 리스트 조회 (프론트엔드 인터페이스에 맞춰서, 페이지네이션 지원, 캐싱)
    */
-  async getStockList(marketType: '0' | '10' | '8' = '0') {
-    this.logger.log(`Getting stock list for market type: ${marketType}`);
-    const result = await this.kiwoomRest.getStockList(marketType);
+  async getStockList(marketType: '0' | '10' | '8' = '0', page: number = 1, pageSize: number = 50) {
+    this.logger.log(`Getting stock list for market type: ${marketType}, page: ${page}, pageSize: ${pageSize}`);
 
-    // 6자리 숫자 종목코드만 필터
-    const validStocks = result.list.filter((s) => s.code.match(/^\d{6}$/));
+    // 캐시 확인
+    const cached = this.stockListCache.get(marketType);
+    const now = Date.now();
+    let validStocks: any[];
+
+    if (cached && (now - cached.timestamp) < this.CACHE_TTL) {
+      // 캐시 히트
+      this.logger.debug(`Cache hit for market type: ${marketType}`);
+      validStocks = cached.data;
+    } else {
+      // 캐시 미스 - API 호출
+      this.logger.log(`Cache miss for market type: ${marketType}, fetching from API`);
+      const result = await this.kiwoomRest.getStockList(marketType);
+
+      // 6자리 숫자 종목코드만 필터
+      validStocks = result.list.filter((s) => s.code.match(/^\d{6}$/));
+
+      // 캐시 저장
+      this.stockListCache.set(marketType, {
+        data: validStocks,
+        timestamp: now,
+      });
+      this.logger.log(`Cached ${validStocks.length} stocks for market type: ${marketType}`);
+    }
+
+    // 모든 종목 코드 수집
+    const allStockCodes = validStocks.map((s) => s.code);
+
+    // 최신 지표 데이터 조회 (모든 종목)
+    const metricsMap = await this.metricsService.getLatestMetrics(allStockCodes);
+
+    // 종목 리스트와 지표 병합 및 RS 점수 기준 내림차순 정렬
+    const stocksWithMetrics = validStocks
+      .map((s) => {
+        const metrics = metricsMap.get(s.code);
+        return {
+          stock: s,
+          metrics,
+          rsScore: metrics?.relativeStrengthScore || 0,
+        };
+      })
+      .sort((a, b) => b.rsScore - a.rsScore); // RS 점수 내림차순
+
+    // 정렬 후 페이지네이션
+    const totalCount = stocksWithMetrics.length;
+    const totalPages = Math.ceil(totalCount / pageSize);
+    const startIndex = (page - 1) * pageSize;
+    const endIndex = startIndex + pageSize;
+    const paginatedData = stocksWithMetrics.slice(startIndex, endIndex);
+
+    // 페이지네이션된 종목들의 종가 및 순위 변동 조회
+    const pageStockCodes = paginatedData.map((d) => d.stock.code);
+    const closingPrices = await this.chartStorage.getLatestClosingPrices(pageStockCodes);
+
+    const rankingHistories = await Promise.all(
+      pageStockCodes.map(async (code) => ({
+        code,
+        history: await this.metricsService.getRankingHistory(code, 3),
+      })),
+    );
+    const rankingMap = new Map(rankingHistories.map((r) => [r.code, r.history]));
 
     return {
       marketType,
-      count: validStocks.length,
-      stocks: validStocks.map((s, index) => ({
-        id: s.code,
-        rank: index + 1,
-        companyName: s.name,
-        stockCode: s.code,
-        currentPrice: 0, // 실시간 가격은 WebSocket으로 업데이트 예정
-        exchange: s.marketName === '거래소' ? 'KOSPI' : s.marketName === '코스닥' ? 'KOSDAQ' : s.marketName,
-        relativeStrengthScore: 0, // RS 점수 계산 로직 추가 예정
-        isHighPrice: false, // 신고가 여부 판단 로직 추가 예정
-        investmentIndicators: '-',
-        investmentIndicatorsDtl: '-',
-        theme: s.upName || '-',
-        upName: s.upName || '-',
-        rankChange3Days: [], // 순위 변동 추적 로직 추가 예정
-      })),
+      page,
+      pageSize,
+      totalCount,
+      totalPages,
+      count: paginatedData.length,
+      stocks: paginatedData.map((item, index) => {
+        const s = item.stock;
+        const metrics = item.metrics;
+        const rankHistory = rankingMap.get(s.code) || [];
+
+        return {
+          id: s.code,
+          rank: metrics?.rank || startIndex + index + 1,
+          companyName: s.name,
+          stockCode: s.code,
+          currentPrice: closingPrices.get(s.code) || metrics?.closePrice || 0,
+          exchange: s.marketName === '거래소' ? 'KOSPI' : s.marketName === '코스닥' ? 'KOSDAQ' : s.marketName,
+          relativeStrengthScore: metrics?.relativeStrengthScore || 0,
+          isHighPrice: metrics?.isNewHigh || false,
+          investmentIndicators: metrics?.priceChange1d
+            ? `${metrics.priceChange1d > 0 ? '+' : ''}${metrics.priceChangeRate1d?.toFixed(2)}%`
+            : '-',
+          investmentIndicatorsDtl: '-',
+          theme: s.upName || '-',
+          upName: s.upName || '-',
+          rankChange3Days: rankHistory.slice(0, 3),
+        };
+      }),
     };
+  }
+
+  /**
+   * 종목 리스트 캐시 무효화
+   */
+  clearStockListCache(marketType?: '0' | '10' | '8') {
+    if (marketType) {
+      this.stockListCache.delete(marketType);
+      this.logger.log(`Cleared cache for market type: ${marketType}`);
+    } else {
+      this.stockListCache.clear();
+      this.logger.log('Cleared all stock list cache');
+    }
   }
 
   /**
@@ -276,5 +368,14 @@ export class RealTimeChartService {
     const month = parseInt(dateStr.substring(4, 6)) - 1;
     const day = parseInt(dateStr.substring(6, 8));
     return new Date(year, month, day);
+  }
+
+  /**
+   * 일별 지표 계산 (배치 작업)
+   */
+  async calculateDailyMetrics(marketType: '0' | '10' | '8' = '0', tradeDate?: string) {
+    this.logger.log(`Starting daily metrics calculation for market type: ${marketType}, date: ${tradeDate || 'today'}`);
+    const date = tradeDate ? new Date(tradeDate) : undefined;
+    return await this.metricsService.calculateAndSaveDailyMetrics(marketType, date);
   }
 }

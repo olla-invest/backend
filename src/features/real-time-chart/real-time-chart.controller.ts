@@ -2,13 +2,13 @@ import { Controller, Get, Post, Query, Param, Body } from '@nestjs/common';
 import { RealTimeChartService } from './real-time-chart.service';
 import { Public } from '../../common/auth/decorators/public.decorator';
 
-@Controller('chart')
+@Controller('real-time-chart')
 @Public()
 export class RealTimeChartController {
   constructor(private readonly chartService: RealTimeChartService) {}
 
   /**
-   * GET /chart/candles/minute/:stockCode
+   * GET /real-time-chart/candles/minute/:stockCode
    * 분봉 차트 데이터 조회
    */
   @Get('candles/minute/:stockCode')
@@ -20,7 +20,7 @@ export class RealTimeChartController {
   }
 
   /**
-   * GET /chart/candles/tick/:stockCode
+   * GET /real-time-chart/candles/tick/:stockCode
    * 틱 차트 데이터 조회
    */
   @Get('candles/tick/:stockCode')
@@ -32,7 +32,7 @@ export class RealTimeChartController {
   }
 
   /**
-   * GET /chart/candles/day/:stockCode
+   * GET /real-time-chart/candles/day/:stockCode
    * 일봉 차트 데이터 조회
    */
   @Get('candles/day/:stockCode')
@@ -45,7 +45,7 @@ export class RealTimeChartController {
   }
 
   /**
-   * GET /chart/stored/:stockCode
+   * GET /real-time-chart/stored/:stockCode
    * DB에 저장된 캔들 데이터 조회
    */
   @Get('stored/:stockCode')
@@ -64,7 +64,7 @@ export class RealTimeChartController {
   }
 
   /**
-   * POST /chart/realtime/start
+   * POST /real-time-chart/realtime/start
    * 실시간 구독 시작
    */
   @Post('realtime/start')
@@ -73,7 +73,7 @@ export class RealTimeChartController {
   }
 
   /**
-   * POST /chart/realtime/stop
+   * POST /real-time-chart/realtime/stop
    * 실시간 구독 중지
    */
   @Post('realtime/stop')
@@ -82,16 +82,24 @@ export class RealTimeChartController {
   }
 
   /**
-   * GET /chart/stocks
-   * 종목 리스트 조회
+   * GET /real-time-chart/stocks
+   * 종목 리스트 조회 (페이지네이션)
    */
   @Get('stocks')
-  async getStockList(@Query('marketType') marketType: '0' | '10' | '8' = '0') {
-    return await this.chartService.getStockList(marketType);
+  async getStockList(
+    @Query('marketType') marketType: '0' | '10' | '8' = '0',
+    @Query('page') page: string = '1',
+    @Query('pageSize') pageSize: string = '50',
+  ) {
+    return await this.chartService.getStockList(
+      marketType,
+      parseInt(page),
+      parseInt(pageSize),
+    );
   }
 
   /**
-   * POST /chart/collect/day
+   * POST /real-time-chart/collect/day
    * 전체 종목 일봉 수집 (1주일치)
    */
   @Post('collect/day')
@@ -100,5 +108,17 @@ export class RealTimeChartController {
     @Body('days') days = 7,
   ) {
     return await this.chartService.collectAllDayCandles(marketType, days);
+  }
+
+  /**
+   * POST /real-time-chart/metrics/calculate
+   * 일별 지표 계산 (수동 실행)
+   */
+  @Post('metrics/calculate')
+  async calculateMetrics(
+    @Body('marketType') marketType: '0' | '10' | '8' = '0',
+    @Body('tradeDate') tradeDate?: string,
+  ) {
+    return await this.chartService.calculateDailyMetrics(marketType, tradeDate);
   }
 }

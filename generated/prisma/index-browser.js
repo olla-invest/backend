@@ -303,6 +303,24 @@ exports.Prisma.StockQuoteScalarFieldEnum = {
   createdAt: 'createdAt'
 };
 
+exports.Prisma.StockDailyMetricsScalarFieldEnum = {
+  metricId: 'metricId',
+  stockCode: 'stockCode',
+  tradeDate: 'tradeDate',
+  closePrice: 'closePrice',
+  relativeStrengthScore: 'relativeStrengthScore',
+  rank: 'rank',
+  marketType: 'marketType',
+  isNewHigh: 'isNewHigh',
+  highPrice52w: 'highPrice52w',
+  lowPrice52w: 'lowPrice52w',
+  priceChange1d: 'priceChange1d',
+  priceChangeRate1d: 'priceChangeRate1d',
+  volume1d: 'volume1d',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -371,7 +389,8 @@ exports.Prisma.ModelName = {
   KiwoomToken: 'KiwoomToken',
   StockCandle: 'StockCandle',
   StockTick: 'StockTick',
-  StockQuote: 'StockQuote'
+  StockQuote: 'StockQuote',
+  StockDailyMetrics: 'StockDailyMetrics'
 };
 
 /**

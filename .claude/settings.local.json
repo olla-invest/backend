@@ -25,7 +25,17 @@
       "Bash(wmic process where \"processid=153080\" get commandline)",
       "Bash(ls:*)",
       "Bash(npx:*)",
-      "Bash(npm search:*)"
+      "Bash(npm search:*)",
+      "Bash(powershell -Command \"Start-Sleep -Seconds 10; curl.exe -s http://localhost:3000/chart/candles/minute/005930?interval=1\")",
+      "Bash(npm run start:dev:*)",
+      "Bash(curl:*)",
+      "Bash(PGPASSWORD=kiwoom@2026 psql:*)",
+      "Bash(TOKEN=\"utebABgZrmv5-DI6TNrPkkCrYVLBRnOsD-qm5_yyz3ta2caBmhJ4N9ke8PPHEAn0RRWMtbaI8khU2MMWJjdO0A\")",
+      "Bash(npm run dev:*)",
+      "Bash(set:*)"
+    ],
+    "additionalDirectories": [
+      "c:\\Users\\user\\Documents\\front\\frontend\\src\\pages\\home\\components"
     ]
   }
 }

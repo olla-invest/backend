@@ -3,6 +3,7 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
 import { RealTimeChartController } from './real-time-chart.controller';
 import { RealTimeChartService } from './real-time-chart.service';
 import { ChartStorageService } from './chart-storage.service';
+import { StockMetricsService } from './stock-metrics.service';
 import { ChartGateway } from './chart.gateway';
 import { KiwoomModule } from '../../integrations/kiwoom/kiwoom.module';
 import { PrismaModule } from '../../common/prisma/prisma.module';
@@ -17,6 +18,7 @@ import { PrismaModule } from '../../common/prisma/prisma.module';
   providers: [
     RealTimeChartService,
     ChartStorageService,
+    StockMetricsService,
     ChartGateway,
   ],
   exports: [RealTimeChartService],
