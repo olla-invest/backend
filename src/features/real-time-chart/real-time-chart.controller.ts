@@ -1,7 +1,9 @@
 import { Controller, Get, Post, Query, Param, Body } from '@nestjs/common';
 import { RealTimeChartService } from './real-time-chart.service';
+import { Public } from '../../common/auth/decorators/public.decorator';
 
 @Controller('chart')
+@Public()
 export class RealTimeChartController {
   constructor(private readonly chartService: RealTimeChartService) {}
 
@@ -77,5 +79,26 @@ export class RealTimeChartController {
   @Post('realtime/stop')
   async stopRealtime(@Body('stockCode') stockCode: string) {
     return await this.chartService.stopRealtime(stockCode);
+  }
+
+  /**
+   * GET /chart/stocks
+   * 종목 리스트 조회
+   */
+  @Get('stocks')
+  async getStockList(@Query('marketType') marketType: '0' | '10' | '8' = '0') {
+    return await this.chartService.getStockList(marketType);
+  }
+
+  /**
+   * POST /chart/collect/day
+   * 전체 종목 일봉 수집 (1주일치)
+   */
+  @Post('collect/day')
+  async collectAllDayCandles(
+    @Body('marketType') marketType: '0' | '10' = '0',
+    @Body('days') days = 7,
+  ) {
+    return await this.chartService.collectAllDayCandles(marketType, days);
   }
 }

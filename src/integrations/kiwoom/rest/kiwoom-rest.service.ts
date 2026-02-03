@@ -7,6 +7,7 @@ import {
   KiwoomMinCandleResponse,
   KiwoomTickCandleResponse,
   KiwoomDayCandleResponse,
+  KiwoomStockListResponse,
 } from '../types/kiwoom.types';
 
 @Injectable()
@@ -205,6 +206,76 @@ export class KiwoomRestService {
       });
 
       this.logger.error(`Failed to fetch day candles for ${stockCode}`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * 종목 리스트 조회 (ka10099)
+   * @param marketType 시장구분 (0: 코스피, 10: 코스닥, 8: ETF)
+   */
+  async getStockList(marketType: '0' | '10' | '8' = '0'): Promise<KiwoomStockListResponse> {
+    const startTime = Date.now();
+    const allStocks: KiwoomStockListResponse['list'] = [];
+    let contYn = '';
+    let nextKey = '';
+
+    try {
+      const token = await this.authService.ensureValidToken();
+      this.logger.log(`Fetching stock list for market type: ${marketType}`);
+
+      do {
+        const headers: Record<string, string> = {
+          'api-id': 'ka10099',
+          authorization: `Bearer ${token}`,
+        };
+
+        if (contYn === 'Y') {
+          headers['cont-yn'] = contYn;
+          headers['next-key'] = nextKey;
+        }
+
+        const response = await this.httpClient.post<KiwoomStockListResponse>(
+          '/api/dostk/stkinfo',
+          { mrkt_tp: marketType },
+          { headers },
+        );
+
+        allStocks.push(...response.data.list);
+
+        contYn = response.headers['cont-yn'] || '';
+        nextKey = response.headers['next-key'] || '';
+
+        this.logger.debug(`Fetched ${response.data.list.length} stocks, total: ${allStocks.length}, continue: ${contYn}`);
+      } while (contYn === 'Y');
+
+      const responseTime = Date.now() - startTime;
+
+      await this.logApiCall({
+        apiName: 'ka10099',
+        requestData: { mrkt_tp: marketType },
+        responseStatus: 'SUCCESS',
+        responseMessage: `Total ${allStocks.length} stocks`,
+        responseTimeMs: responseTime,
+      });
+
+      return {
+        return_code: 0,
+        return_msg: '정상적으로 처리되었습니다',
+        list: allStocks,
+      };
+    } catch (error) {
+      const responseTime = Date.now() - startTime;
+
+      await this.logApiCall({
+        apiName: 'ka10099',
+        requestData: { mrkt_tp: marketType },
+        responseStatus: 'ERROR',
+        responseMessage: error.message,
+        responseTimeMs: responseTime,
+      });
+
+      this.logger.error(`Failed to fetch stock list`, error);
       throw error;
     }
   }

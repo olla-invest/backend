@@ -124,3 +124,29 @@ export interface KiwoomApiLog {
   responseMessage?: string;
   responseTimeMs?: number;
 }
+
+// 종목 정보 (ka10099)
+export interface KiwoomStockInfo {
+  code: string;
+  name: string;
+  listCount: string;
+  auditInfo: string;
+  regDay: string;
+  lastPrice: string;
+  state: string;
+  marketCode: string;
+  marketName: string;
+  upName: string;
+  upSizeName: string;
+  companyClassName: string;
+  orderWarning: string;
+  nxtEnable: string;
+  kind?: string;
+}
+
+// 종목 리스트 응답 (ka10099)
+export interface KiwoomStockListResponse {
+  return_code: number;
+  return_msg: string;
+  list: KiwoomStockInfo[];
+}
