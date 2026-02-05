@@ -271,6 +271,36 @@ export class ChartStorageService {
   }
 
   /**
+   * DB에 저장된 가장 최근 일봉 날짜 조회
+   */
+  async getLatestDayCandleDate(): Promise<Date | null> {
+    const latest = await this.prisma.stockCandle.findFirst({
+      where: { candleType: 'day' },
+      orderBy: { candleTime: 'desc' },
+      select: { candleTime: true },
+    });
+    return latest?.candleTime || null;
+  }
+
+  /**
+   * 일봉 데이터가 N일 이상 존재하는지 확인
+   */
+  async hasSufficientHistory(days: number): Promise<boolean> {
+    const oldest = await this.prisma.stockCandle.findFirst({
+      where: { candleType: 'day' },
+      orderBy: { candleTime: 'asc' },
+      select: { candleTime: true },
+    });
+
+    if (!oldest) return false;
+
+    const now = new Date();
+    const diffMs = now.getTime() - oldest.candleTime.getTime();
+    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+    return diffDays >= days;
+  }
+
+  /**
    * 시간 파싱 (HHmmss -> Date)
    */
   private parseTime(timeStr: string): Date {

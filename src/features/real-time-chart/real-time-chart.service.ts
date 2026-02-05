@@ -26,6 +26,8 @@ export class RealTimeChartService implements OnModuleInit {
 
   /**
    * 서버 시작 시 데이터 초기화
+   * - 데이터 없음: 52주(365일)치 수집 (신고가 판단용)
+   * - 데이터 있음: 마지막 데이터 ~ 오늘까지 공백만 수집
    */
   async onModuleInit() {
     this.logger.log('Starting data initialization on server startup...');
@@ -38,18 +40,58 @@ export class RealTimeChartService implements OnModuleInit {
 
   /**
    * 데이터 초기화 (일봉 수집 + 지표 계산)
+   * - DB에 데이터가 없으면: 52주(365일)치 수집
+   * - DB에 데이터가 있으면: 마지막 데이터 날짜 ~ 오늘까지 공백 기간만 수집
    */
   async initializeData(marketTypes: ('0' | '10')[] = ['0', '10']) {
     const startTime = Date.now();
     this.logger.log('=== Data Initialization Started ===');
 
     try {
+      // DB에서 마지막 일봉 데이터 날짜 조회
+      const lastCandleDate = await this.chartStorage.getLatestDayCandleDate();
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      let daysToFetch: number;
+
+      if (!lastCandleDate) {
+        // 데이터가 없으면 52주치 수집 (신고가 판단 필요)
+        daysToFetch = 365;
+        this.logger.log('No existing data found. Fetching 52 weeks (365 days)...');
+      } else {
+        // 마지막 데이터 날짜 ~ 오늘까지의 일수 계산
+        const lastDate = new Date(lastCandleDate);
+        lastDate.setHours(0, 0, 0, 0);
+        const diffMs = today.getTime() - lastDate.getTime();
+        const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+
+        if (diffDays <= 0) {
+          this.logger.log('Data is already up to date. Skipping candle collection.');
+          this.initializationComplete = true;
+          this.lastDataUpdate = new Date();
+          return {
+            success: true,
+            duration: '0s',
+            updatedAt: this.lastDataUpdate,
+            skipped: true,
+            message: 'Data already up to date',
+          };
+        }
+
+        // 주말/공휴일 고려하여 여유분 +2일 추가
+        daysToFetch = diffDays + 2;
+        this.logger.log(
+          `Last data date: ${lastDate.toISOString().split('T')[0]}, gap: ${diffDays} days. Fetching ${daysToFetch} days...`,
+        );
+      }
+
       for (const marketType of marketTypes) {
         const marketName = marketType === '0' ? 'KOSPI' : 'KOSDAQ';
-        this.logger.log(`[${marketName}] Collecting day candles...`);
+        this.logger.log(`[${marketName}] Collecting day candles (${daysToFetch} days)...`);
 
-        // 1. 일봉 데이터 수집 (최근 7일)
-        const collectResult = await this.collectAllDayCandles(marketType, 7);
+        // 1. 일봉 데이터 수집
+        const collectResult = await this.collectAllDayCandles(marketType, daysToFetch);
         this.logger.log(`[${marketName}] Day candles collected: ${collectResult.success}/${collectResult.total}`);
 
         // 2. 일별 지표 계산
@@ -70,7 +112,7 @@ export class RealTimeChartService implements OnModuleInit {
         updatedAt: this.lastDataUpdate,
       };
     } catch (error) {
-      this.logger.error(`Data initialization failed: ${error.message}`);
+      this.logger.error(`Data initialization failed: ${(error as Error).message}`);
       throw error;
     }
   }
@@ -316,7 +358,7 @@ export class RealTimeChartService implements OnModuleInit {
   }
 
   /**
-   * 전체 종목 일봉 수집 (1주일치)
+   * 전체 종목 일봉 수집
    */
   async collectAllDayCandles(marketType: '0' | '10' = '0', days = 7) {
     this.logger.log(`Starting bulk day candle collection for market: ${marketType}, days: ${days}`);
@@ -333,24 +375,44 @@ export class RealTimeChartService implements OnModuleInit {
 
     let success = 0;
     let failed = 0;
+    let currentDelay = 500; // 기본 딜레이 500ms
     const errors: { code: string; error: string }[] = [];
 
     for (const stock of stocks) {
       try {
         await this.getDayCandles(stock.code, today, true, days);
         success++;
+        currentDelay = 500; // 성공 시 딜레이 복구
 
-        // API 호출 제한을 위한 딜레이 (100ms)
-        await new Promise((resolve) => setTimeout(resolve, 100));
-
-        if (success % 100 === 0) {
+        if (success % 50 === 0) {
           this.logger.log(`Progress: ${success}/${stocks.length} stocks processed`);
         }
       } catch (error) {
-        failed++;
-        errors.push({ code: stock.code, error: error.message });
-        this.logger.warn(`Failed to fetch day candles for ${stock.code}: ${error.message}`);
+        const axiosError = error as any;
+
+        // 429 (Too Many Requests) → 백오프 후 재시도
+        if (axiosError?.status === 429 || axiosError?.response?.status === 429) {
+          currentDelay = Math.min(currentDelay * 2, 10000); // 최대 10초까지 백오프
+          this.logger.warn(`Rate limited (429). Backing off ${currentDelay}ms...`);
+          await new Promise((resolve) => setTimeout(resolve, currentDelay));
+
+          // 1회 재시도
+          try {
+            await this.getDayCandles(stock.code, today, true, days);
+            success++;
+          } catch (retryError) {
+            failed++;
+            errors.push({ code: stock.code, error: (retryError as Error).message });
+          }
+        } else {
+          failed++;
+          errors.push({ code: stock.code, error: (error as Error).message });
+          this.logger.warn(`Failed to fetch day candles for ${stock.code}: ${(error as Error).message}`);
+        }
       }
+
+      // API 호출 간 딜레이
+      await new Promise((resolve) => setTimeout(resolve, currentDelay));
     }
 
     this.logger.log(`Bulk collection completed: ${success} success, ${failed} failed`);
@@ -361,7 +423,7 @@ export class RealTimeChartService implements OnModuleInit {
       total: stocks.length,
       success,
       failed,
-      errors: errors.slice(0, 10), // 최대 10개 에러만 반환
+      errors: errors.slice(0, 10),
     };
   }
 
