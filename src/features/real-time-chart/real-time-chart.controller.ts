@@ -121,4 +121,24 @@ export class RealTimeChartController {
   ) {
     return await this.chartService.calculateDailyMetrics(marketType, tradeDate);
   }
+
+  /**
+   * GET /real-time-chart/status
+   * 데이터 초기화 상태 조회
+   */
+  @Get('status')
+  getInitializationStatus() {
+    return this.chartService.getInitializationStatus();
+  }
+
+  /**
+   * POST /real-time-chart/initialize
+   * 데이터 수동 초기화 (일봉 수집 + 지표 계산)
+   */
+  @Post('initialize')
+  async initializeData(
+    @Body('marketTypes') marketTypes: ('0' | '10')[] = ['0', '10'],
+  ) {
+    return await this.chartService.initializeData(marketTypes);
+  }
 }

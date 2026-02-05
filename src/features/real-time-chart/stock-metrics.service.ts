@@ -40,21 +40,29 @@ export class StockMetricsService {
   }
 
   /**
-   * 최신 거래일의 종목별 지표 조회 (날짜 상관없이 가장 최근 데이터)
+   * 최신 거래일 조회
    */
-  async getLatestMetrics(stockCodes: string[]): Promise<Map<string, any>> {
-    // 가장 최근 거래일 찾기
+  async getLatestTradeDate(): Promise<Date | null> {
     const latestDate = await this.prisma.stockDailyMetrics.findFirst({
       orderBy: { tradeDate: 'desc' },
       select: { tradeDate: true },
     });
+    return latestDate?.tradeDate || null;
+  }
+
+  /**
+   * 최신 거래일의 종목별 지표 조회 (날짜 상관없이 가장 최근 데이터)
+   */
+  async getLatestMetrics(stockCodes: string[]): Promise<Map<string, any>> {
+    // 가장 최근 거래일 찾기
+    const latestDate = await this.getLatestTradeDate();
 
     if (!latestDate) {
       return new Map();
     }
 
     // 해당 날짜의 모든 종목 지표 조회
-    return this.getMetricsForDate(stockCodes, latestDate.tradeDate);
+    return this.getMetricsForDate(stockCodes, latestDate);
   }
 
   /**

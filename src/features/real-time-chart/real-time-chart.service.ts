@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { KiwoomRestService } from '../../integrations/kiwoom/rest/kiwoom-rest.service';
 import { KiwoomWebSocketService } from '../../integrations/kiwoom/websocket/kiwoom-websocket.service';
 import { ChartStorageService } from './chart-storage.service';
@@ -10,10 +10,12 @@ interface StockListCache {
 }
 
 @Injectable()
-export class RealTimeChartService {
+export class RealTimeChartService implements OnModuleInit {
   private readonly logger = new Logger(RealTimeChartService.name);
   private readonly stockListCache = new Map<string, StockListCache>();
   private readonly CACHE_TTL = 60 * 60 * 1000; // 1시간 (밀리초)
+  private initializationComplete = false;
+  private lastDataUpdate: Date | null = null;
 
   constructor(
     private readonly kiwoomRest: KiwoomRestService,
@@ -21,6 +23,67 @@ export class RealTimeChartService {
     private readonly chartStorage: ChartStorageService,
     private readonly metricsService: StockMetricsService,
   ) {}
+
+  /**
+   * 서버 시작 시 데이터 초기화
+   */
+  async onModuleInit() {
+    this.logger.log('Starting data initialization on server startup...');
+
+    // 백그라운드에서 비동기로 초기화 실행 (서버 시작을 블로킹하지 않음)
+    this.initializeData().catch((error) => {
+      this.logger.error(`Data initialization failed: ${error.message}`, error.stack);
+    });
+  }
+
+  /**
+   * 데이터 초기화 (일봉 수집 + 지표 계산)
+   */
+  async initializeData(marketTypes: ('0' | '10')[] = ['0', '10']) {
+    const startTime = Date.now();
+    this.logger.log('=== Data Initialization Started ===');
+
+    try {
+      for (const marketType of marketTypes) {
+        const marketName = marketType === '0' ? 'KOSPI' : 'KOSDAQ';
+        this.logger.log(`[${marketName}] Collecting day candles...`);
+
+        // 1. 일봉 데이터 수집 (최근 7일)
+        const collectResult = await this.collectAllDayCandles(marketType, 7);
+        this.logger.log(`[${marketName}] Day candles collected: ${collectResult.success}/${collectResult.total}`);
+
+        // 2. 일별 지표 계산
+        this.logger.log(`[${marketName}] Calculating daily metrics...`);
+        const metricsResult = await this.calculateDailyMetrics(marketType);
+        this.logger.log(`[${marketName}] Daily metrics calculated: ${metricsResult?.count || 0} stocks`);
+      }
+
+      this.initializationComplete = true;
+      this.lastDataUpdate = new Date();
+
+      const duration = ((Date.now() - startTime) / 1000).toFixed(1);
+      this.logger.log(`=== Data Initialization Completed in ${duration}s ===`);
+
+      return {
+        success: true,
+        duration: `${duration}s`,
+        updatedAt: this.lastDataUpdate,
+      };
+    } catch (error) {
+      this.logger.error(`Data initialization failed: ${error.message}`);
+      throw error;
+    }
+  }
+
+  /**
+   * 초기화 상태 조회
+   */
+  getInitializationStatus() {
+    return {
+      initialized: this.initializationComplete,
+      lastDataUpdate: this.lastDataUpdate,
+    };
+  }
 
   /**
    * 분봉 차트 데이터 조회 (과거 데이터)
@@ -197,6 +260,9 @@ export class RealTimeChartService {
     );
     const rankingMap = new Map(rankingHistories.map((r) => [r.code, r.history]));
 
+    // 최신 거래일 조회 (메타데이터용)
+    const latestTradeDate = await this.metricsService.getLatestTradeDate();
+
     return {
       marketType,
       page,
@@ -204,6 +270,12 @@ export class RealTimeChartService {
       totalCount,
       totalPages,
       count: paginatedData.length,
+      // 메타데이터: 데이터 기준일 및 갱신 정보
+      meta: {
+        dataDate: latestTradeDate?.toISOString().split('T')[0] || null, // 데이터 기준 거래일
+        lastUpdatedAt: this.lastDataUpdate?.toISOString() || null, // 마지막 데이터 갱신 시간
+        isInitialized: this.initializationComplete, // 초기화 완료 여부
+      },
       stocks: paginatedData.map((item, index) => {
         const s = item.stock;
         const metrics = item.metrics;
