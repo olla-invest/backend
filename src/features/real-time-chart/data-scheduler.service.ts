@@ -19,13 +19,16 @@ export class DataSchedulerService {
     this.logger.log('=== Starting End-of-Day Data Collection ===');
 
     try {
-      // 1. 당일 종가 캔들 데이터 수집
-      this.logger.log('Collecting day candles for all stocks...');
-      await this.realTimeChartService.collectDayCandles();
+      // 1. 당일 종가 캔들 데이터 수집 (KOSPI + KOSDAQ, 1일치)
+      this.logger.log('Collecting day candles for KOSPI...');
+      await this.realTimeChartService.collectAllDayCandles('0', 1);
 
-      // 2. 메트릭 계산 (RS 점수, 랭킹 등)
-      this.logger.log('Calculating stock metrics...');
-      await this.realTimeChartService.calculateStockMetrics();
+      this.logger.log('Collecting day candles for KOSDAQ...');
+      await this.realTimeChartService.collectAllDayCandles('10', 1);
+
+      // 2. 데이터 초기화 및 메트릭 계산 (RS 점수, 랭킹 등)
+      this.logger.log('Calculating stock metrics and rankings...');
+      await this.realTimeChartService.initializeData();
 
       this.logger.log('=== End-of-Day Data Collection Completed Successfully ===');
     } catch (error) {

@@ -212,12 +212,47 @@ export class KiwoomWebSocketService implements OnModuleInit, OnModuleDestroy {
       return;
     }
 
+    // 장 시간 체크 (월~금 09:00 - 15:30)
+    if (!this.isMarketHours()) {
+      this.logger.log('Market is closed. WebSocket reconnection disabled.');
+      return;
+    }
+
     this.logger.log('Scheduling WebSocket reconnect in 5 seconds...');
 
     this.reconnectTimer = setTimeout(() => {
       this.reconnectTimer = null;
       this.connect();
     }, 5000);
+  }
+
+  /**
+   * 장 시간인지 확인 (월~금 09:00 - 15:30)
+   */
+  private isMarketHours(): boolean {
+    const now = new Date();
+    const koreaTime = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Seoul' }));
+
+    const day = koreaTime.getDay(); // 0: Sunday, 1: Monday, ..., 6: Saturday
+    const hour = koreaTime.getHours();
+    const minute = koreaTime.getMinutes();
+
+    // 주말 체크
+    if (day === 0 || day === 6) {
+      return false;
+    }
+
+    // 장 시작 전 (09:00 이전)
+    if (hour < 9) {
+      return false;
+    }
+
+    // 장 마감 후 (15:30 이후)
+    if (hour > 15 || (hour === 15 && minute >= 30)) {
+      return false;
+    }
+
+    return true;
   }
 
   /**
