@@ -3,6 +3,7 @@ import { KiwoomRestService } from '../../integrations/kiwoom/rest/kiwoom-rest.se
 import { KiwoomWebSocketService } from '../../integrations/kiwoom/websocket/kiwoom-websocket.service';
 import { ChartStorageService } from './chart-storage.service';
 import { StockMetricsService } from './stock-metrics.service';
+import { RealtimePriceCacheService } from './realtime-price-cache.service';
 
 interface StockListCache {
   data: any[];
@@ -22,6 +23,7 @@ export class RealTimeChartService implements OnModuleInit {
     private readonly kiwoomWebSocket: KiwoomWebSocketService,
     private readonly chartStorage: ChartStorageService,
     private readonly metricsService: StockMetricsService,
+    private readonly realtimeCache: RealtimePriceCacheService,
   ) {}
 
   /**
@@ -86,6 +88,12 @@ export class RealTimeChartService implements OnModuleInit {
         );
       }
 
+      // 0. 시장 지수 일봉 수집 (KOSPI + KOSDAQ) - RS 계산에 필요
+      this.logger.log('Collecting market index day candles (KOSPI + KOSDAQ)...');
+      await this.collectSectorDayCandles('001', 'INDEX_KOSPI');
+      await this.collectSectorDayCandles('101', 'INDEX_KOSDAQ');
+      this.logger.log('Market index day candles collected.');
+
       for (const marketType of marketTypes) {
         const marketName = marketType === '0' ? 'KOSPI' : 'KOSDAQ';
         this.logger.log(`[${marketName}] Collecting day candles (${daysToFetch} days)...`);
@@ -94,10 +102,11 @@ export class RealTimeChartService implements OnModuleInit {
         const collectResult = await this.collectAllDayCandles(marketType, daysToFetch);
         this.logger.log(`[${marketName}] Day candles collected: ${collectResult.success}/${collectResult.total}`);
 
-        // 2. 일별 지표 계산
-        this.logger.log(`[${marketName}] Calculating daily metrics...`);
-        const metricsResult = await this.calculateDailyMetrics(marketType);
-        this.logger.log(`[${marketName}] Daily metrics calculated: ${metricsResult?.count || 0} stocks`);
+        // 2. 7개 필터 + RS(63) + 랭킹 계산
+        this.logger.log(`[${marketName}] Calculating filters, RS, and rankings...`);
+        const indexCode = marketType === '0' ? 'INDEX_KOSPI' : 'INDEX_KOSDAQ';
+        const metricsResult = await this.metricsService.calculateAndSaveDailyMetrics(marketType, undefined, indexCode);
+        this.logger.log(`[${marketName}] Metrics calculated: ${metricsResult?.count || 0} stocks`);
       }
 
       this.initializationComplete = true;
@@ -281,6 +290,7 @@ export class RealTimeChartService implements OnModuleInit {
           rsScore: metrics?.relativeStrengthScore || 0,
         };
       })
+      .filter((item) => item.rsScore > 0) // 필터 통과 종목만
       .sort((a, b) => b.rsScore - a.rsScore); // RS 점수 내림차순
 
     // 정렬 후 페이지네이션
@@ -293,6 +303,14 @@ export class RealTimeChartService implements OnModuleInit {
     // 페이지네이션된 종목들의 종가 및 순위 변동 조회
     const pageStockCodes = paginatedData.map((d) => d.stock.code);
     const closingPrices = await this.chartStorage.getLatestClosingPrices(pageStockCodes);
+
+    // 자동 실시간 구독 (백그라운드에서 비동기 실행)
+    this.autoSubscribeStocks(pageStockCodes).catch((error) => {
+      this.logger.warn(`Auto-subscribe failed: ${error.message}`);
+    });
+
+    // 실시간 캐시에서 현재가 조회
+    const realtimePrices = this.realtimeCache.getPrices(pageStockCodes);
 
     const rankingHistories = await Promise.all(
       pageStockCodes.map(async (code) => ({
@@ -323,22 +341,31 @@ export class RealTimeChartService implements OnModuleInit {
         const metrics = item.metrics;
         const rankHistory = rankingMap.get(s.code) || [];
 
+        const realtimePrice = realtimePrices.get(s.code);
+        const dbPrice = closingPrices.get(s.code) || metrics?.closePrice || 0;
+
         return {
           id: s.code,
           rank: metrics?.rank || startIndex + index + 1,
           companyName: s.name,
           stockCode: s.code,
-          currentPrice: closingPrices.get(s.code) || metrics?.closePrice || 0,
+          currentPrice: realtimePrice?.currentPrice || dbPrice,
           exchange: s.marketName === '거래소' ? 'KOSPI' : s.marketName === '코스닥' ? 'KOSDAQ' : s.marketName,
           relativeStrengthScore: metrics?.relativeStrengthScore || 0,
           isHighPrice: metrics?.isNewHigh || false,
-          investmentIndicators: metrics?.priceChange1d
+          investmentIndicators: realtimePrice
+            ? `${realtimePrice.changeRate > 0 ? '+' : ''}${realtimePrice.changeRate.toFixed(2)}%`
+            : metrics?.priceChange1d
             ? `${metrics.priceChange1d > 0 ? '+' : ''}${metrics.priceChangeRate1d?.toFixed(2)}%`
             : '-',
           investmentIndicatorsDtl: '-',
           theme: s.upName || '-',
           upName: s.upName || '-',
-          rankChange3Days: rankHistory.slice(0, 3),
+          rankHistory: {
+            today: rankHistory[0] || null,
+            oneDayAgo: rankHistory[1] || null,
+            twoDaysAgo: rankHistory[2] || null,
+          },
         };
       }),
     };
@@ -358,10 +385,50 @@ export class RealTimeChartService implements OnModuleInit {
   }
 
   /**
-   * 전체 종목 일봉 수집
+   * 시장 지수 일봉 수집 (KOSPI/KOSDAQ)
+   * @param sectorCode 업종코드 (001: KOSPI, 101: KOSDAQ)
+   * @param indexStockCode DB 저장용 코드 (INDEX_KOSPI, INDEX_KOSDAQ)
+   */
+  async collectSectorDayCandles(sectorCode: string, indexStockCode: string) {
+    const today = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+
+    try {
+      const data = await this.kiwoomRest.getSectorDayCandles(sectorCode, today);
+      const candles = data.inds_dt_pole_qry;
+
+      this.logger.log(`Fetched ${candles.length} sector day candles for ${sectorCode}`);
+
+      // DB에 저장 (지수값은 ×100 정수로 옴 → 그대로 저장, 계산 시 /100)
+      for (const candle of candles) {
+        await this.chartStorage.saveCandle({
+          stockCode: indexStockCode,
+          candleType: 'day',
+          candleTime: this.parseDateOnly(candle.dt),
+          openPrice: parseFloat(candle.open_pric),
+          highPrice: parseFloat(candle.high_pric),
+          lowPrice: parseFloat(candle.low_pric),
+          closePrice: parseFloat(candle.cur_prc),
+          volume: BigInt(candle.trde_qty || '0'),
+        });
+      }
+
+      return { success: true, count: candles.length };
+    } catch (error) {
+      this.logger.error(`Failed to collect sector day candles for ${sectorCode}: ${(error as Error).message}`);
+      throw error;
+    }
+  }
+
+  /**
+   * 전체 종목 일봉 수집 (배치 병렬 처리)
+   * - BATCH_SIZE개씩 동시 요청, 배치 간 BATCH_DELAY_MS 대기
+   * - 429 발생 시 백오프 후 재시도
    */
   async collectAllDayCandles(marketType: '0' | '10' = '0', days = 7) {
-    this.logger.log(`Starting bulk day candle collection for market: ${marketType}, days: ${days}`);
+    const BATCH_SIZE = 5; // 동시 요청 수
+    const BATCH_DELAY_MS = 600; // 배치 간 대기 (ms)
+
+    this.logger.log(`Starting bulk day candle collection for market: ${marketType}, days: ${days}, batchSize: ${BATCH_SIZE}`);
 
     const stockList = await this.kiwoomRest.getStockList(marketType);
     const today = new Date().toISOString().slice(0, 10).replace(/-/g, '');
@@ -371,51 +438,76 @@ export class RealTimeChartService implements OnModuleInit {
       (s) => s.marketCode === marketType && s.code.match(/^\d{6}$/),
     );
 
-    this.logger.log(`Found ${stocks.length} stocks to process`);
+    this.logger.log(`Found ${stocks.length} stocks to process in batches of ${BATCH_SIZE}`);
 
     let success = 0;
     let failed = 0;
-    let currentDelay = 500; // 기본 딜레이 500ms
+    let currentDelay = BATCH_DELAY_MS;
     const errors: { code: string; error: string }[] = [];
 
-    for (const stock of stocks) {
-      try {
-        await this.getDayCandles(stock.code, today, true, days);
-        success++;
-        currentDelay = 500; // 성공 시 딜레이 복구
+    // 배치 단위로 분할
+    for (let i = 0; i < stocks.length; i += BATCH_SIZE) {
+      const batch = stocks.slice(i, i + BATCH_SIZE);
 
-        if (success % 50 === 0) {
-          this.logger.log(`Progress: ${success}/${stocks.length} stocks processed`);
+      // 배치 내 종목들을 병렬로 처리
+      const results = await Promise.allSettled(
+        batch.map((stock) => this.getDayCandles(stock.code, today, true, days)),
+      );
+
+      // 결과 처리
+      let batchHas429 = false;
+      const retryStocks: typeof batch = [];
+
+      for (let j = 0; j < results.length; j++) {
+        const result = results[j];
+        if (result.status === 'fulfilled') {
+          success++;
+        } else {
+          const axiosError = result.reason as any;
+          if (axiosError?.status === 429 || axiosError?.response?.status === 429) {
+            batchHas429 = true;
+            retryStocks.push(batch[j]);
+          } else {
+            failed++;
+            errors.push({ code: batch[j].code, error: result.reason?.message || 'Unknown error' });
+            this.logger.warn(`Failed: ${batch[j].code} - ${result.reason?.message}`);
+          }
         }
-      } catch (error) {
-        const axiosError = error as any;
+      }
 
-        // 429 (Too Many Requests) → 백오프 후 재시도
-        if (axiosError?.status === 429 || axiosError?.response?.status === 429) {
-          currentDelay = Math.min(currentDelay * 2, 10000); // 최대 10초까지 백오프
-          this.logger.warn(`Rate limited (429). Backing off ${currentDelay}ms...`);
-          await new Promise((resolve) => setTimeout(resolve, currentDelay));
+      // 429 발생 시 백오프 후 재시도 (순차)
+      if (batchHas429) {
+        currentDelay = Math.min(currentDelay * 2, 10000);
+        this.logger.warn(`Rate limited (429) on ${retryStocks.length} stocks. Backing off ${currentDelay}ms...`);
+        await new Promise((resolve) => setTimeout(resolve, currentDelay));
 
-          // 1회 재시도
+        for (const stock of retryStocks) {
           try {
             await this.getDayCandles(stock.code, today, true, days);
             success++;
+            await new Promise((resolve) => setTimeout(resolve, 500));
           } catch (retryError) {
             failed++;
             errors.push({ code: stock.code, error: (retryError as Error).message });
           }
-        } else {
-          failed++;
-          errors.push({ code: stock.code, error: (error as Error).message });
-          this.logger.warn(`Failed to fetch day candles for ${stock.code}: ${(error as Error).message}`);
         }
+      } else {
+        // 성공 시 딜레이 점진적 복구
+        currentDelay = Math.max(BATCH_DELAY_MS, currentDelay - 200);
       }
 
-      // API 호출 간 딜레이
+      // 진행 상황 로깅
+      const processed = Math.min(i + BATCH_SIZE, stocks.length);
+      if (processed % 50 === 0 || processed === stocks.length) {
+        const elapsed = ((processed / stocks.length) * 100).toFixed(1);
+        this.logger.log(`Progress: ${processed}/${stocks.length} (${elapsed}%) - success: ${success}, failed: ${failed}`);
+      }
+
+      // 배치 간 딜레이
       await new Promise((resolve) => setTimeout(resolve, currentDelay));
     }
 
-    this.logger.log(`Bulk collection completed: ${success} success, ${failed} failed`);
+    this.logger.log(`Bulk collection completed: ${success} success, ${failed} failed out of ${stocks.length}`);
 
     return {
       marketType,
@@ -460,7 +552,13 @@ export class RealTimeChartService implements OnModuleInit {
    */
   async startRealtime(stockCode: string) {
     this.logger.log(`Starting realtime subscription for ${stockCode}`);
+
+    // 캐시에 구독 추가
+    this.realtimeCache.addSubscription(stockCode);
+
+    // WebSocket 구독 시작 (0B: 체결, 0D: 호가)
     await this.kiwoomWebSocket.subscribe(stockCode, ['0B', '0D']);
+
     return { success: true, stockCode };
   }
 
@@ -469,8 +567,96 @@ export class RealTimeChartService implements OnModuleInit {
    */
   async stopRealtime(stockCode: string) {
     this.logger.log(`Stopping realtime subscription for ${stockCode}`);
+
+    // WebSocket 구독 해제
     await this.kiwoomWebSocket.unsubscribe(stockCode);
+
+    // 캐시에서 제거
+    this.realtimeCache.removeSubscription(stockCode);
+
     return { success: true, stockCode };
+  }
+
+  /**
+   * 실시간 구독 시작 (여러 종목)
+   */
+  async startRealtimeBatch(stockCodes: string[]) {
+    this.logger.log(`Starting realtime subscription for ${stockCodes.length} stocks`);
+
+    const results = await Promise.allSettled(
+      stockCodes.map((code) => this.startRealtime(code)),
+    );
+
+    const success = results.filter((r) => r.status === 'fulfilled').length;
+    const failed = results.filter((r) => r.status === 'rejected').length;
+
+    return {
+      success: true,
+      total: stockCodes.length,
+      succeeded: success,
+      failed,
+    };
+  }
+
+  /**
+   * 실시간 구독 중지 (여러 종목)
+   */
+  async stopRealtimeBatch(stockCodes: string[]) {
+    this.logger.log(`Stopping realtime subscription for ${stockCodes.length} stocks`);
+
+    const results = await Promise.allSettled(
+      stockCodes.map((code) => this.stopRealtime(code)),
+    );
+
+    const success = results.filter((r) => r.status === 'fulfilled').length;
+    const failed = results.filter((r) => r.status === 'rejected').length;
+
+    return {
+      success: true,
+      total: stockCodes.length,
+      succeeded: success,
+      failed,
+    };
+  }
+
+  /**
+   * 실시간 캐시 상태 조회
+   */
+  async getRealtimeCacheStats() {
+    const stats = this.realtimeCache.getCacheStats();
+    const subscribedStocks = this.realtimeCache.getSubscribedStocks();
+
+    return {
+      ...stats,
+      subscribedStockCodes: subscribedStocks.slice(0, 10), // 처음 10개만
+      totalSubscribed: subscribedStocks.length,
+    };
+  }
+
+  /**
+   * 종목 자동 구독 (아직 구독하지 않은 종목만)
+   */
+  private async autoSubscribeStocks(stockCodes: string[]) {
+    const subscribedStocks = new Set(this.realtimeCache.getSubscribedStocks());
+    const newStocks = stockCodes.filter((code) => !subscribedStocks.has(code));
+
+    if (newStocks.length === 0) {
+      return;
+    }
+
+    this.logger.log(`Auto-subscribing ${newStocks.length} new stocks`);
+
+    // 배치로 구독 (너무 많으면 부하 발생 가능하므로 제한)
+    const MAX_AUTO_SUBSCRIBE = 50;
+    const stocksToSubscribe = newStocks.slice(0, MAX_AUTO_SUBSCRIBE);
+
+    for (const code of stocksToSubscribe) {
+      try {
+        await this.startRealtime(code);
+      } catch (error) {
+        this.logger.warn(`Failed to auto-subscribe ${code}: ${(error as Error).message}`);
+      }
+    }
   }
 
   /**
@@ -510,6 +696,7 @@ export class RealTimeChartService implements OnModuleInit {
   async calculateDailyMetrics(marketType: '0' | '10' | '8' = '0', tradeDate?: string) {
     this.logger.log(`Starting daily metrics calculation for market type: ${marketType}, date: ${tradeDate || 'today'}`);
     const date = tradeDate ? new Date(tradeDate) : undefined;
-    return await this.metricsService.calculateAndSaveDailyMetrics(marketType, date);
+    const indexCode = marketType === '0' ? 'INDEX_KOSPI' : 'INDEX_KOSDAQ';
+    return await this.metricsService.calculateAndSaveDailyMetrics(marketType, date, indexCode);
   }
 }

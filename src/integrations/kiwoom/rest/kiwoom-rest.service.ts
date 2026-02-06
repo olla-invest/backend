@@ -8,6 +8,8 @@ import {
   KiwoomTickCandleResponse,
   KiwoomDayCandleResponse,
   KiwoomStockListResponse,
+  KiwoomSectorDayCandleResponse,
+  KiwoomSectorCurrentPriceResponse,
 } from '../types/kiwoom.types';
 
 @Injectable()
@@ -206,6 +208,124 @@ export class KiwoomRestService {
       });
 
       this.logger.error(`Failed to fetch day candles for ${stockCode}`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * 업종 일봉 차트 조회 (ka20006)
+   * @param sectorCode 업종코드 (001: KOSPI, 101: KOSDAQ)
+   * @param baseDate 기준일자 (YYYYMMDD)
+   */
+  async getSectorDayCandles(
+    sectorCode: string,
+    baseDate: string,
+  ): Promise<KiwoomSectorDayCandleResponse> {
+    const startTime = Date.now();
+
+    try {
+      const token = await this.authService.ensureValidToken();
+
+      this.logger.debug(`Fetching sector day candles for ${sectorCode} from ${baseDate}`);
+
+      const response = await this.httpClient.post<KiwoomSectorDayCandleResponse>(
+        '/api/dostk/chart',
+        {
+          inds_cd: sectorCode,
+          base_dt: baseDate,
+        },
+        {
+          headers: {
+            'api-id': 'ka20006',
+            authorization: `Bearer ${token}`,
+          },
+        },
+      );
+
+      const responseTime = Date.now() - startTime;
+
+      await this.logApiCall({
+        apiName: 'ka20006',
+        stockCode: sectorCode,
+        requestData: { inds_cd: sectorCode, base_dt: baseDate },
+        responseStatus: 'SUCCESS',
+        responseMessage: response.data.return_msg,
+        responseTimeMs: responseTime,
+      });
+
+      return response.data;
+    } catch (error) {
+      const responseTime = Date.now() - startTime;
+
+      await this.logApiCall({
+        apiName: 'ka20006',
+        stockCode: sectorCode,
+        requestData: { inds_cd: sectorCode, base_dt: baseDate },
+        responseStatus: 'ERROR',
+        responseMessage: error.message,
+        responseTimeMs: responseTime,
+      });
+
+      this.logger.error(`Failed to fetch sector day candles for ${sectorCode}`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * 업종 현재가 조회 (ka20001)
+   * @param marketType 시장구분 (0: 코스피, 1: 코스닥)
+   * @param sectorCode 업종코드 (001: KOSPI, 101: KOSDAQ)
+   */
+  async getSectorCurrentPrice(
+    marketType: '0' | '1' | '2',
+    sectorCode: string,
+  ): Promise<KiwoomSectorCurrentPriceResponse> {
+    const startTime = Date.now();
+
+    try {
+      const token = await this.authService.ensureValidToken();
+
+      this.logger.debug(`Fetching sector current price for ${sectorCode}`);
+
+      const response = await this.httpClient.post<KiwoomSectorCurrentPriceResponse>(
+        '/api/dostk/sect',
+        {
+          mrkt_tp: marketType,
+          inds_cd: sectorCode,
+        },
+        {
+          headers: {
+            'api-id': 'ka20001',
+            authorization: `Bearer ${token}`,
+          },
+        },
+      );
+
+      const responseTime = Date.now() - startTime;
+
+      await this.logApiCall({
+        apiName: 'ka20001',
+        stockCode: sectorCode,
+        requestData: { mrkt_tp: marketType, inds_cd: sectorCode },
+        responseStatus: 'SUCCESS',
+        responseMessage: response.data.return_msg,
+        responseTimeMs: responseTime,
+      });
+
+      return response.data;
+    } catch (error) {
+      const responseTime = Date.now() - startTime;
+
+      await this.logApiCall({
+        apiName: 'ka20001',
+        stockCode: sectorCode,
+        requestData: { mrkt_tp: marketType, inds_cd: sectorCode },
+        responseStatus: 'ERROR',
+        responseMessage: error.message,
+        responseTimeMs: responseTime,
+      });
+
+      this.logger.error(`Failed to fetch sector current price for ${sectorCode}`, error);
       throw error;
     }
   }

@@ -115,6 +115,44 @@ export interface KiwoomQuoteData {
   [key: string]: string;
 }
 
+// 업종 일봉 데이터 (ka20006)
+export interface KiwoomSectorDayCandleData {
+  cur_prc: string; // 현재가 (지수 × 100)
+  trde_qty: string; // 거래량
+  dt: string; // 일자 (YYYYMMDD)
+  open_pric: string; // 시가 (지수 × 100)
+  high_pric: string; // 고가 (지수 × 100)
+  low_pric: string; // 저가 (지수 × 100)
+  trde_prica: string; // 거래대금
+}
+
+// 업종 일봉 조회 응답 (ka20006)
+export interface KiwoomSectorDayCandleResponse {
+  inds_cd: string;
+  inds_dt_pole_qry: KiwoomSectorDayCandleData[];
+  return_code: number;
+  return_msg: string;
+}
+
+// 업종 현재가 응답 (ka20001)
+export interface KiwoomSectorCurrentPriceResponse {
+  cur_prc: string; // 현재가
+  pred_pre_sig: string; // 전일대비기호
+  pred_pre: string; // 전일대비
+  flu_rt: string; // 등락률
+  trde_qty: string; // 거래량
+  trde_prica: string; // 거래대금
+  open_pric: string; // 시가
+  high_pric: string; // 고가
+  low_pric: string; // 저가
+  '52wk_hgst_pric': string; // 52주최고가
+  '52wk_hgst_pric_dt': string; // 52주최고가일
+  '52wk_lwst_pric': string; // 52주최저가
+  '52wk_lwst_pric_dt': string; // 52주최저가일
+  return_code: number;
+  return_msg: string;
+}
+
 // API 호출 로그
 export interface KiwoomApiLog {
   apiName: string;

@@ -69,7 +69,7 @@ export class RealTimeChartController {
 
   /**
    * POST /real-time-chart/realtime/start
-   * 실시간 구독 시작
+   * 실시간 구독 시작 (단일 종목)
    */
   @Post('realtime/start')
   async startRealtime(@Body('stockCode') stockCode: string) {
@@ -78,11 +78,38 @@ export class RealTimeChartController {
 
   /**
    * POST /real-time-chart/realtime/stop
-   * 실시간 구독 중지
+   * 실시간 구독 중지 (단일 종목)
    */
   @Post('realtime/stop')
   async stopRealtime(@Body('stockCode') stockCode: string) {
     return await this.chartService.stopRealtime(stockCode);
+  }
+
+  /**
+   * POST /real-time-chart/realtime/start-batch
+   * 실시간 구독 시작 (여러 종목)
+   */
+  @Post('realtime/start-batch')
+  async startRealtimeBatch(@Body('stockCodes') stockCodes: string[]) {
+    return await this.chartService.startRealtimeBatch(stockCodes);
+  }
+
+  /**
+   * POST /real-time-chart/realtime/stop-batch
+   * 실시간 구독 중지 (여러 종목)
+   */
+  @Post('realtime/stop-batch')
+  async stopRealtimeBatch(@Body('stockCodes') stockCodes: string[]) {
+    return await this.chartService.stopRealtimeBatch(stockCodes);
+  }
+
+  /**
+   * GET /real-time-chart/realtime/cache-stats
+   * 실시간 캐시 상태 조회
+   */
+  @Get('realtime/cache-stats')
+  async getCacheStats() {
+    return await this.chartService.getRealtimeCacheStats();
   }
 
   /**
