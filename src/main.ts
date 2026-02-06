@@ -28,7 +28,7 @@ async function bootstrap() {
         origin: corsOrigin.split( ',' ).map( ( origin: string ) => origin.trim() ),
         credentials: corsCredentials,
         methods: [ 'GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS' ],
-        allowedHeaders: [ 'Content-Type', 'Authorization', 'X-Requested-With' ],
+        allowedHeaders: [ 'Content-Type', 'Authorization', 'X-Requested-With', 'ngrok-skip-browser-warning' ],
     } );
 
     // Get port from environment or use default

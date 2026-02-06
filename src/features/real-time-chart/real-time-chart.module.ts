@@ -7,6 +7,7 @@ import { StockMetricsService } from './stock-metrics.service';
 import { InitialSetupService } from './initial-setup.service';
 import { ChartGateway } from './chart.gateway';
 import { RealtimePriceCacheService } from './realtime-price-cache.service';
+import { DataSchedulerService } from './data-scheduler.service';
 import { KiwoomModule } from '../../integrations/kiwoom/kiwoom.module';
 import { PrismaModule } from '../../common/prisma/prisma.module';
 
@@ -24,6 +25,7 @@ import { PrismaModule } from '../../common/prisma/prisma.module';
     InitialSetupService,
     ChartGateway,
     RealtimePriceCacheService,
+    DataSchedulerService,
   ],
   exports: [RealTimeChartService],
 })

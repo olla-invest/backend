@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { ScheduleModule } from '@nestjs/schedule';
 import { APP_GUARD } from '@nestjs/core';
 import { PrismaModule } from './common/prisma/prisma.module';
 import { RedisModule } from './common/redis/redis.module';
@@ -20,6 +21,7 @@ import { RealTimeChartModule } from './features/real-time-chart/real-time-chart.
             isGlobal: true,
             envFilePath: '.env',
         } ),
+        ScheduleModule.forRoot(),
         LoggerModule,
         PrismaModule,
         RedisModule,
