@@ -20513,6 +20513,7 @@ export namespace Prisma {
     priceChange1d: Decimal | null
     priceChangeRate1d: Decimal | null
     volume1d: number | null
+    tradingValue: number | null
   }
 
   export type StockDailyMetricsSumAggregateOutputType = {
@@ -20524,6 +20525,7 @@ export namespace Prisma {
     priceChange1d: Decimal | null
     priceChangeRate1d: Decimal | null
     volume1d: bigint | null
+    tradingValue: bigint | null
   }
 
   export type StockDailyMetricsMinAggregateOutputType = {
@@ -20540,6 +20542,7 @@ export namespace Prisma {
     priceChange1d: Decimal | null
     priceChangeRate1d: Decimal | null
     volume1d: bigint | null
+    tradingValue: bigint | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -20558,6 +20561,7 @@ export namespace Prisma {
     priceChange1d: Decimal | null
     priceChangeRate1d: Decimal | null
     volume1d: bigint | null
+    tradingValue: bigint | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -20576,6 +20580,7 @@ export namespace Prisma {
     priceChange1d: number
     priceChangeRate1d: number
     volume1d: number
+    tradingValue: number
     createdAt: number
     updatedAt: number
     _all: number
@@ -20591,6 +20596,7 @@ export namespace Prisma {
     priceChange1d?: true
     priceChangeRate1d?: true
     volume1d?: true
+    tradingValue?: true
   }
 
   export type StockDailyMetricsSumAggregateInputType = {
@@ -20602,6 +20608,7 @@ export namespace Prisma {
     priceChange1d?: true
     priceChangeRate1d?: true
     volume1d?: true
+    tradingValue?: true
   }
 
   export type StockDailyMetricsMinAggregateInputType = {
@@ -20618,6 +20625,7 @@ export namespace Prisma {
     priceChange1d?: true
     priceChangeRate1d?: true
     volume1d?: true
+    tradingValue?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -20636,6 +20644,7 @@ export namespace Prisma {
     priceChange1d?: true
     priceChangeRate1d?: true
     volume1d?: true
+    tradingValue?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -20654,6 +20663,7 @@ export namespace Prisma {
     priceChange1d?: true
     priceChangeRate1d?: true
     volume1d?: true
+    tradingValue?: true
     createdAt?: true
     updatedAt?: true
     _all?: true
@@ -20759,6 +20769,7 @@ export namespace Prisma {
     priceChange1d: Decimal | null
     priceChangeRate1d: Decimal | null
     volume1d: bigint | null
+    tradingValue: bigint | null
     createdAt: Date
     updatedAt: Date
     _count: StockDailyMetricsCountAggregateOutputType | null
@@ -20796,6 +20807,7 @@ export namespace Prisma {
     priceChange1d?: boolean
     priceChangeRate1d?: boolean
     volume1d?: boolean
+    tradingValue?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }, ExtArgs["result"]["stockDailyMetrics"]>
@@ -20814,6 +20826,7 @@ export namespace Prisma {
     priceChange1d?: boolean
     priceChangeRate1d?: boolean
     volume1d?: boolean
+    tradingValue?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }, ExtArgs["result"]["stockDailyMetrics"]>
@@ -20832,6 +20845,7 @@ export namespace Prisma {
     priceChange1d?: boolean
     priceChangeRate1d?: boolean
     volume1d?: boolean
+    tradingValue?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }, ExtArgs["result"]["stockDailyMetrics"]>
@@ -20850,11 +20864,12 @@ export namespace Prisma {
     priceChange1d?: boolean
     priceChangeRate1d?: boolean
     volume1d?: boolean
+    tradingValue?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type StockDailyMetricsOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"metricId" | "stockCode" | "tradeDate" | "closePrice" | "relativeStrengthScore" | "rank" | "marketType" | "isNewHigh" | "highPrice52w" | "lowPrice52w" | "priceChange1d" | "priceChangeRate1d" | "volume1d" | "createdAt" | "updatedAt", ExtArgs["result"]["stockDailyMetrics"]>
+  export type StockDailyMetricsOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"metricId" | "stockCode" | "tradeDate" | "closePrice" | "relativeStrengthScore" | "rank" | "marketType" | "isNewHigh" | "highPrice52w" | "lowPrice52w" | "priceChange1d" | "priceChangeRate1d" | "volume1d" | "tradingValue" | "createdAt" | "updatedAt", ExtArgs["result"]["stockDailyMetrics"]>
 
   export type $StockDailyMetricsPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "StockDailyMetrics"
@@ -20873,6 +20888,7 @@ export namespace Prisma {
       priceChange1d: Prisma.Decimal | null
       priceChangeRate1d: Prisma.Decimal | null
       volume1d: bigint | null
+      tradingValue: bigint | null
       createdAt: Date
       updatedAt: Date
     }, ExtArgs["result"]["stockDailyMetrics"]>
@@ -21311,6 +21327,7 @@ export namespace Prisma {
     readonly priceChange1d: FieldRef<"StockDailyMetrics", 'Decimal'>
     readonly priceChangeRate1d: FieldRef<"StockDailyMetrics", 'Decimal'>
     readonly volume1d: FieldRef<"StockDailyMetrics", 'BigInt'>
+    readonly tradingValue: FieldRef<"StockDailyMetrics", 'BigInt'>
     readonly createdAt: FieldRef<"StockDailyMetrics", 'DateTime'>
     readonly updatedAt: FieldRef<"StockDailyMetrics", 'DateTime'>
   }
@@ -21938,6 +21955,7 @@ export namespace Prisma {
     priceChange1d: 'priceChange1d',
     priceChangeRate1d: 'priceChangeRate1d',
     volume1d: 'volume1d',
+    tradingValue: 'tradingValue',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
   };
@@ -23367,6 +23385,7 @@ export namespace Prisma {
     priceChange1d?: DecimalNullableFilter<"StockDailyMetrics"> | Decimal | DecimalJsLike | number | string | null
     priceChangeRate1d?: DecimalNullableFilter<"StockDailyMetrics"> | Decimal | DecimalJsLike | number | string | null
     volume1d?: BigIntNullableFilter<"StockDailyMetrics"> | bigint | number | null
+    tradingValue?: BigIntNullableFilter<"StockDailyMetrics"> | bigint | number | null
     createdAt?: DateTimeFilter<"StockDailyMetrics"> | Date | string
     updatedAt?: DateTimeFilter<"StockDailyMetrics"> | Date | string
   }
@@ -23385,6 +23404,7 @@ export namespace Prisma {
     priceChange1d?: SortOrderInput | SortOrder
     priceChangeRate1d?: SortOrderInput | SortOrder
     volume1d?: SortOrderInput | SortOrder
+    tradingValue?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -23407,6 +23427,7 @@ export namespace Prisma {
     priceChange1d?: DecimalNullableFilter<"StockDailyMetrics"> | Decimal | DecimalJsLike | number | string | null
     priceChangeRate1d?: DecimalNullableFilter<"StockDailyMetrics"> | Decimal | DecimalJsLike | number | string | null
     volume1d?: BigIntNullableFilter<"StockDailyMetrics"> | bigint | number | null
+    tradingValue?: BigIntNullableFilter<"StockDailyMetrics"> | bigint | number | null
     createdAt?: DateTimeFilter<"StockDailyMetrics"> | Date | string
     updatedAt?: DateTimeFilter<"StockDailyMetrics"> | Date | string
   }, "metricId" | "stockCode_tradeDate">
@@ -23425,6 +23446,7 @@ export namespace Prisma {
     priceChange1d?: SortOrderInput | SortOrder
     priceChangeRate1d?: SortOrderInput | SortOrder
     volume1d?: SortOrderInput | SortOrder
+    tradingValue?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     _count?: StockDailyMetricsCountOrderByAggregateInput
@@ -23451,6 +23473,7 @@ export namespace Prisma {
     priceChange1d?: DecimalNullableWithAggregatesFilter<"StockDailyMetrics"> | Decimal | DecimalJsLike | number | string | null
     priceChangeRate1d?: DecimalNullableWithAggregatesFilter<"StockDailyMetrics"> | Decimal | DecimalJsLike | number | string | null
     volume1d?: BigIntNullableWithAggregatesFilter<"StockDailyMetrics"> | bigint | number | null
+    tradingValue?: BigIntNullableWithAggregatesFilter<"StockDailyMetrics"> | bigint | number | null
     createdAt?: DateTimeWithAggregatesFilter<"StockDailyMetrics"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"StockDailyMetrics"> | Date | string
   }
@@ -24774,6 +24797,7 @@ export namespace Prisma {
     priceChange1d?: Decimal | DecimalJsLike | number | string | null
     priceChangeRate1d?: Decimal | DecimalJsLike | number | string | null
     volume1d?: bigint | number | null
+    tradingValue?: bigint | number | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -24792,6 +24816,7 @@ export namespace Prisma {
     priceChange1d?: Decimal | DecimalJsLike | number | string | null
     priceChangeRate1d?: Decimal | DecimalJsLike | number | string | null
     volume1d?: bigint | number | null
+    tradingValue?: bigint | number | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -24810,6 +24835,7 @@ export namespace Prisma {
     priceChange1d?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     priceChangeRate1d?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     volume1d?: NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+    tradingValue?: NullableBigIntFieldUpdateOperationsInput | bigint | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -24828,6 +24854,7 @@ export namespace Prisma {
     priceChange1d?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     priceChangeRate1d?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     volume1d?: NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+    tradingValue?: NullableBigIntFieldUpdateOperationsInput | bigint | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -24846,6 +24873,7 @@ export namespace Prisma {
     priceChange1d?: Decimal | DecimalJsLike | number | string | null
     priceChangeRate1d?: Decimal | DecimalJsLike | number | string | null
     volume1d?: bigint | number | null
+    tradingValue?: bigint | number | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -24864,6 +24892,7 @@ export namespace Prisma {
     priceChange1d?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     priceChangeRate1d?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     volume1d?: NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+    tradingValue?: NullableBigIntFieldUpdateOperationsInput | bigint | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -24882,6 +24911,7 @@ export namespace Prisma {
     priceChange1d?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     priceChangeRate1d?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     volume1d?: NullableBigIntFieldUpdateOperationsInput | bigint | number | null
+    tradingValue?: NullableBigIntFieldUpdateOperationsInput | bigint | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -26259,6 +26289,7 @@ export namespace Prisma {
     priceChange1d?: SortOrder
     priceChangeRate1d?: SortOrder
     volume1d?: SortOrder
+    tradingValue?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -26272,6 +26303,7 @@ export namespace Prisma {
     priceChange1d?: SortOrder
     priceChangeRate1d?: SortOrder
     volume1d?: SortOrder
+    tradingValue?: SortOrder
   }
 
   export type StockDailyMetricsMaxOrderByAggregateInput = {
@@ -26288,6 +26320,7 @@ export namespace Prisma {
     priceChange1d?: SortOrder
     priceChangeRate1d?: SortOrder
     volume1d?: SortOrder
+    tradingValue?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -26306,6 +26339,7 @@ export namespace Prisma {
     priceChange1d?: SortOrder
     priceChangeRate1d?: SortOrder
     volume1d?: SortOrder
+    tradingValue?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -26319,6 +26353,7 @@ export namespace Prisma {
     priceChange1d?: SortOrder
     priceChangeRate1d?: SortOrder
     volume1d?: SortOrder
+    tradingValue?: SortOrder
   }
 
   export type BoolWithAggregatesFilter<$PrismaModel = never> = {

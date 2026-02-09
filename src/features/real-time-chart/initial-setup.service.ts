@@ -80,6 +80,69 @@ export class InitialSetupService {
   }
 
   /**
+   * 확장 데이터 수집 (10년치 등 장기 데이터)
+   */
+  async runExtendedDataCollection(
+    marketType: '0' | '10' | '8' = '0',
+    days: number = 3650,
+  ) {
+    this.logger.log(
+      `Starting EXTENDED data collection for market type: ${marketType}, days: ${days}`,
+    );
+
+    const startTime = Date.now();
+
+    try {
+      // 1. 종목 리스트 확인 (없으면 먼저 가져오기)
+      let mappedMarketType: 'KOSPI' | 'KOSDAQ' | 'OTHER';
+      if (marketType === '0') {
+        mappedMarketType = 'KOSPI';
+      } else if (marketType === '10') {
+        mappedMarketType = 'KOSDAQ';
+      } else {
+        mappedMarketType = 'OTHER';
+      }
+
+      const stockCount = await this.prisma.company.count({
+        where: {
+          marketType: mappedMarketType,
+          deletedAt: null,
+        },
+      });
+
+      if (stockCount === 0) {
+        this.logger.log('No stocks found, fetching stock list first...');
+        await this.fetchAndSaveStockList(marketType);
+      } else {
+        this.logger.log(`Found ${stockCount} stocks in ${mappedMarketType}`);
+      }
+
+      // 2. 장기 일봉 데이터 수집 (forceUpdate = true)
+      const result = await this.fetchHistoricalCandles(marketType, days, true);
+
+      const duration = ((Date.now() - startTime) / 1000).toFixed(1);
+
+      this.logger.log(
+        `Extended data collection completed in ${duration}s - Processed: ${result.processedCount}, Updated: ${result.updatedCount}, Skipped: ${result.skippedCount}`,
+      );
+
+      return {
+        success: true,
+        message: `${days}일치 데이터 수집 완료`,
+        duration: `${duration}s`,
+        stats: {
+          processed: result.processedCount,
+          updated: result.updatedCount,
+          skipped: result.skippedCount,
+        },
+      };
+    } catch (error) {
+      this.logger.error('Extended data collection failed', error);
+      throw error;
+    }
+  }
+
+  /**
    * 1. 종목 리스트 가져와서 DB에 저장
    */
   private async fetchAndSaveStockList(marketType: '0' | '10' | '8') {
@@ -139,7 +202,11 @@ export class InitialSetupService {
   /**
    * 2. 과거 일봉 데이터 가져오기
    */
-  private async fetchHistoricalCandles(marketType: '0' | '10' | '8', days: number = 365) {
+  private async fetchHistoricalCandles(
+    marketType: '0' | '10' | '8',
+    days: number = 365,
+    forceUpdate: boolean = false,
+  ) {
     this.logger.log(`Fetching historical candle data (last ${days} days)`);
 
     // 지정된 일수만큼 이전 날짜 계산
@@ -167,6 +234,8 @@ export class InitialSetupService {
     this.logger.log(`Processing ${companies.length} companies`);
 
     let processedCount = 0;
+    let skippedCount = 0;
+    let updatedCount = 0;
 
     for (const company of companies) {
       try {
@@ -178,10 +247,12 @@ export class InitialSetupService {
           },
         });
 
-        if (existingCandles > 0) {
+        // forceUpdate가 false이고 이미 데이터가 있으면 스킵
+        if (!forceUpdate && existingCandles > 0) {
           this.logger.debug(
             `Skipping ${company.stockCode} - already has ${existingCandles} candles`,
           );
+          skippedCount++;
           continue;
         }
 
@@ -198,11 +269,26 @@ export class InitialSetupService {
           continue;
         }
 
-        // DB에 저장
+        let insertedCount = 0;
+
+        // DB에 저장 (중복 체크)
         for (const candle of response.stk_dt_pole_chart_qry) {
           const candleTime = new Date(
             `${candle.dt.slice(0, 4)}-${candle.dt.slice(4, 6)}-${candle.dt.slice(6, 8)}`,
           );
+
+          // 중복 체크 (이미 해당 날짜 데이터가 있는지)
+          const existing = await this.prisma.stockCandle.findFirst({
+            where: {
+              stockCode: company.stockCode,
+              candleType: 'day',
+              candleTime,
+            },
+          });
+
+          if (existing) {
+            continue; // 이미 있는 데이터는 스킵
+          }
 
           await this.prisma.stockCandle.create({
             data: {
@@ -214,15 +300,27 @@ export class InitialSetupService {
               lowPrice: new Prisma.Decimal(candle.low_pric),
               closePrice: new Prisma.Decimal(candle.cur_prc),
               volume: BigInt(candle.trde_qty),
+              tradingValue: candle.trde_prica ? BigInt(candle.trde_prica) : null,
               prevDayCompare: new Prisma.Decimal(candle.pred_pre || 0),
             },
           });
+
+          insertedCount++;
+        }
+
+        if (insertedCount > 0) {
+          updatedCount++;
+          this.logger.log(
+            `${company.stockCode}: inserted ${insertedCount} new candles`,
+          );
         }
 
         processedCount++;
 
         if (processedCount % 10 === 0) {
-          this.logger.log(`Processed ${processedCount}/${companies.length} companies`);
+          this.logger.log(
+            `Progress: ${processedCount}/${companies.length} (updated: ${updatedCount}, skipped: ${skippedCount})`,
+          );
         }
 
         // API 호출 제한 고려 (100ms 대기)
@@ -236,10 +334,10 @@ export class InitialSetupService {
     }
 
     this.logger.log(
-      `Historical candles fetch completed: ${processedCount} companies processed`,
+      `Historical candles fetch completed: ${processedCount} processed, ${updatedCount} updated, ${skippedCount} skipped`,
     );
 
-    return { processedCount };
+    return { processedCount, updatedCount, skippedCount };
   }
 
   /**

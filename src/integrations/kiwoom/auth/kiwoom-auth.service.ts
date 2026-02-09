@@ -183,6 +183,20 @@ export class KiwoomAuthService implements OnModuleInit {
   }
 
   /**
+   * DB의 모든 토큰 무효화 (인증 실패 시 사용)
+   */
+  async invalidateAllTokens(): Promise<void> {
+    try {
+      this.logger.warn('Invalidating all tokens in database...');
+      await this.prisma.kiwoomToken.deleteMany({});
+      this.logger.log('All tokens invalidated');
+    } catch (error) {
+      this.logger.error('Failed to invalidate tokens', error);
+      throw error;
+    }
+  }
+
+  /**
    * 키움 날짜시간 문자열 파싱 (YYYYMMDDHHmmss)
    */
   private parseKiwoomDateTime(dateTimeStr: string): Date {

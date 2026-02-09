@@ -379,7 +379,7 @@ model StockDailyMetrics {
   stockCode             String   @map("stock_code") @db.VarChar(20)
   tradeDate             DateTime @map("trade_date") @db.Date
   closePrice            Decimal  @map("close_price") @db.Decimal(15, 2)
-  relativeStrengthScore Decimal  @map("relative_strength_score") @db.Decimal(5, 2)
+  relativeStrengthScore Decimal  @map("relative_strength_score") @db.Decimal(5, 2) // RS 점수 (디폴트 63일)
   rank                  Int      @map("rank")
   marketType            String   @map("market_type") @db.VarChar(10) // '0' (KOSPI), '10' (KOSDAQ), '8' (ETF)
   isNewHigh             Boolean  @default(false) @map("is_new_high")
@@ -388,6 +388,7 @@ model StockDailyMetrics {
   priceChange1d         Decimal? @map("price_change_1d") @db.Decimal(15, 2)
   priceChangeRate1d     Decimal? @map("price_change_rate_1d") @db.Decimal(10, 4)
   volume1d              BigInt?  @map("volume_1d")
+  tradingValue          BigInt?  @map("trading_value")
   createdAt             DateTime @default(now()) @map("created_at")
   updatedAt             DateTime @updatedAt @map("updated_at")
 

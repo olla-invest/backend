@@ -334,7 +334,10 @@ export class KiwoomRestService {
    * 종목 리스트 조회 (ka10099)
    * @param marketType 시장구분 (0: 코스피, 10: 코스닥, 8: ETF)
    */
-  async getStockList(marketType: '0' | '10' | '8' = '0'): Promise<KiwoomStockListResponse> {
+  async getStockList(
+    marketType: '0' | '10' | '8' = '0',
+    retryOnAuthError = true,
+  ): Promise<KiwoomStockListResponse> {
     const startTime = Date.now();
     const allStocks: KiwoomStockListResponse['list'] = [];
     let contYn = '';
@@ -360,6 +363,22 @@ export class KiwoomRestService {
           { mrkt_tp: marketType },
           { headers },
         );
+
+        // 토큰 인증 실패 감지 (return_code: 3)
+        if (response.data.return_code === 3 && retryOnAuthError) {
+          this.logger.warn(
+            `Token authentication failed (${response.data.return_msg}). Invalidating tokens and retrying...`,
+          );
+          await this.authService.invalidateAllTokens();
+          return this.getStockList(marketType, false); // 재시도 (1회만)
+        }
+
+        if (!response.data.list || !Array.isArray(response.data.list)) {
+          this.logger.error(
+            `Invalid stock list response. Response: ${JSON.stringify(response.data)}`,
+          );
+          throw new Error('Invalid stock list response format');
+        }
 
         allStocks.push(...response.data.list);
 

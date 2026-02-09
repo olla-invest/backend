@@ -69,23 +69,18 @@ export class RealTimeChartService implements OnModuleInit {
         const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
 
         if (diffDays <= 0) {
-          this.logger.log('Data is already up to date. Skipping candle collection.');
-          this.initializationComplete = true;
-          this.lastDataUpdate = new Date();
-          return {
-            success: true,
-            duration: '0s',
-            updatedAt: this.lastDataUpdate,
-            skipped: true,
-            message: 'Data already up to date',
-          };
+          // 데이터가 최신이지만, 오늘 종가 업데이트를 위해 1일만 가져옴
+          daysToFetch = 1;
+          this.logger.log(
+            `Last data date: ${lastDate.toISOString().split('T')[0]}, up to date. Fetching 1 day (today) for latest closing prices...`,
+          );
+        } else {
+          // 공백이 있으면 정확히 그 일수만큼만 가져옴 (API는 거래일만 반환하므로 주말/공휴일 자동 제외)
+          daysToFetch = diffDays;
+          this.logger.log(
+            `Last data date: ${lastDate.toISOString().split('T')[0]}, gap: ${diffDays} days. Fetching ${daysToFetch} days (trading days only)...`,
+          );
         }
-
-        // 주말/공휴일 고려하여 여유분 +2일 추가
-        daysToFetch = diffDays + 2;
-        this.logger.log(
-          `Last data date: ${lastDate.toISOString().split('T')[0]}, gap: ${diffDays} days. Fetching ${daysToFetch} days...`,
-        );
       }
 
       // 0. 시장 지수 일봉 수집 (KOSPI + KOSDAQ) - RS 계산에 필요
@@ -244,10 +239,39 @@ export class RealTimeChartService implements OnModuleInit {
   }
 
   /**
-   * 종목 리스트 조회 (프론트엔드 인터페이스에 맞춰서, 페이지네이션 지원, 캐싱)
+   * 종목 리스트 조회 (프론트엔드 인터페이스에 맞춰서, 페이지네이션 지원, 캐싱, 필터링)
+   *
+   * @param rsPeriods - RS 계산 기간 (예: "63,126,252"), 없으면 디폴트 RS(63일) 사용
+   * @param rsWeights - RS 가중치 (예: "50,30,20"), rsPeriods와 함께 사용
    */
-  async getStockList(marketType: '0' | '10' | '8' = '0', page: number = 1, pageSize: number = 50) {
-    this.logger.log(`Getting stock list for market type: ${marketType}, page: ${page}, pageSize: ${pageSize}`);
+  async getStockList(
+    marketType: '0' | '10' | '8' = '0',
+    page: number = 1,
+    pageSize: number = 50,
+    filters?: {
+      isHighPrice?: boolean;
+      minTradingValue?: number;
+    },
+    rsPeriods?: string,
+    rsWeights?: string,
+  ) {
+    this.logger.log(
+      `Getting stock list for market type: ${marketType}, page: ${page}, pageSize: ${pageSize}, filters: ${JSON.stringify(filters)}, rsPeriods: ${rsPeriods}, rsWeights: ${rsWeights}`,
+    );
+
+    // 커스텀 RS 요청인 경우 런타임 계산
+    if (rsPeriods && rsWeights) {
+      return this.getStockListWithCustomRS(
+        marketType,
+        page,
+        pageSize,
+        filters,
+        rsPeriods,
+        rsWeights,
+      );
+    }
+
+    // 디폴트 RS(63일) - 기존 로직
 
     // 캐시 확인
     const cached = this.stockListCache.get(marketType);
@@ -278,9 +302,9 @@ export class RealTimeChartService implements OnModuleInit {
     const allStockCodes = validStocks.map((s) => s.code);
 
     // 최신 지표 데이터 조회 (모든 종목)
-    const metricsMap = await this.metricsService.getLatestMetrics(allStockCodes);
+    const metricsMap = await this.metricsService.getLatestMetrics(allStockCodes, marketType);
 
-    // 종목 리스트와 지표 병합 및 RS 점수 기준 내림차순 정렬
+    // 종목 리스트와 지표 병합 및 필터링
     const stocksWithMetrics = validStocks
       .map((s) => {
         const metrics = metricsMap.get(s.code);
@@ -290,7 +314,23 @@ export class RealTimeChartService implements OnModuleInit {
           rsScore: metrics?.relativeStrengthScore || 0,
         };
       })
-      .filter((item) => item.rsScore > 0) // 필터 통과 종목만
+      .filter((item) => {
+        // 기본 필터: RS 점수 > 0
+        if (item.rsScore <= 0) return false;
+
+        // 신고가 필터
+        if (filters?.isHighPrice !== undefined) {
+          if (item.metrics?.isHighPrice !== filters.isHighPrice) return false;
+        }
+
+        // 최소 거래대금 필터
+        if (filters?.minTradingValue !== undefined) {
+          const tradingValue = item.metrics?.tradingValue || 0;
+          if (tradingValue < filters.minTradingValue) return false;
+        }
+
+        return true;
+      })
       .sort((a, b) => b.rsScore - a.rsScore); // RS 점수 내림차순
 
     // 정렬 후 페이지네이션
@@ -372,6 +412,165 @@ export class RealTimeChartService implements OnModuleInit {
   }
 
   /**
+   * 커스텀 RS 설정으로 종목 리스트 조회 (런타임 계산)
+   */
+  async getStockListWithCustomRS(
+    marketType: '0' | '10' | '8' = '0',
+    page: number = 1,
+    pageSize: number = 50,
+    filters?: {
+      isHighPrice?: boolean;
+      minTradingValue?: number;
+    },
+    rsPeriods?: string,
+    rsWeights?: string,
+  ) {
+    this.logger.log(`Getting stock list with custom RS: periods=${rsPeriods}, weights=${rsWeights}`);
+
+    // RS 파라미터 파싱
+    const periods = rsPeriods?.split(',').map((p) => parseInt(p.trim())) || [63];
+    const weights = rsWeights?.split(',').map((w) => parseFloat(w.trim())) || [100];
+
+    if (periods.length !== weights.length) {
+      throw new Error('RS periods and weights must have the same length');
+    }
+
+    // 종목 리스트 가져오기 (캐시 or API)
+    const cached = this.stockListCache.get(marketType);
+    const now = Date.now();
+    let validStocks: any[];
+
+    if (cached && (now - cached.timestamp) < this.CACHE_TTL) {
+      validStocks = cached.data;
+    } else {
+      const result = await this.kiwoomRest.getStockList(marketType);
+      validStocks = result.list.filter((s) => s.code.match(/^\d{6}$/));
+      this.stockListCache.set(marketType, { data: validStocks, timestamp: now });
+    }
+
+    const allStockCodes = validStocks.map((s) => s.code);
+    const indexCode = marketType === '0' ? 'INDEX_KOSPI' : 'INDEX_KOSDAQ';
+
+    // 런타임 RS 계산 (최근 4개 거래일: 당일, D-1, D-2, D-3)
+    const rsHistoryMap = await this.metricsService.calculateRuntimeRS(
+      allStockCodes,
+      periods,
+      weights,
+      indexCode,
+      4,
+    );
+
+    // 기본 지표 데이터 조회 (필터링용: isNewHigh, tradingValue 등)
+    const metricsMap = await this.metricsService.getLatestMetrics(allStockCodes, marketType);
+
+    // 종목 리스트와 RS 병합 및 필터링
+    const stocksWithRS = validStocks
+      .map((s) => {
+        const rsHistory = rsHistoryMap.get(s.code);
+        const metrics = metricsMap.get(s.code);
+
+        // 당일 (첫 번째) RS와 랭크
+        const todayRS = rsHistory && rsHistory.length > 0 ? rsHistory[0] : null;
+
+        return {
+          stock: s,
+          metrics,
+          rsScore: todayRS?.rsScore || 0,
+          rank: todayRS?.rank || 0,
+          rankHistory: rsHistory || [],
+        };
+      })
+      .filter((item) => {
+        // 기본 필터: RS 점수 > 0
+        if (item.rsScore <= 0) return false;
+
+        // 신고가 필터
+        if (filters?.isHighPrice !== undefined) {
+          if (item.metrics?.isNewHigh !== filters.isHighPrice) return false;
+        }
+
+        // 최소 거래대금 필터
+        if (filters?.minTradingValue !== undefined) {
+          const tradingValue = item.metrics?.tradingValue || 0;
+          if (tradingValue < filters.minTradingValue) return false;
+        }
+
+        return true;
+      })
+      .sort((a, b) => a.rank - b.rank); // 랭크 오름차순 (이미 계산됨)
+
+    // 페이지네이션
+    const totalCount = stocksWithRS.length;
+    const totalPages = Math.ceil(totalCount / pageSize);
+    const startIndex = (page - 1) * pageSize;
+    const endIndex = startIndex + pageSize;
+    const paginatedData = stocksWithRS.slice(startIndex, endIndex);
+
+    // 페이지네이션된 종목들의 종가 조회
+    const pageStockCodes = paginatedData.map((d) => d.stock.code);
+    const closingPrices = await this.chartStorage.getLatestClosingPrices(pageStockCodes);
+
+    // 자동 실시간 구독
+    this.autoSubscribeStocks(pageStockCodes).catch((error) => {
+      this.logger.warn(`Auto-subscribe failed: ${error.message}`);
+    });
+
+    // 실시간 캐시에서 현재가 조회
+    const realtimePrices = this.realtimeCache.getPrices(pageStockCodes);
+
+    // 최신 거래일 조회
+    const latestTradeDate = await this.metricsService.getLatestTradeDate();
+
+    return {
+      marketType,
+      page,
+      pageSize,
+      totalCount,
+      totalPages,
+      count: paginatedData.length,
+      meta: {
+        dataDate: latestTradeDate?.toISOString().split('T')[0] || null,
+        lastUpdatedAt: this.lastDataUpdate?.toISOString() || null,
+        isInitialized: this.initializationComplete,
+        customRS: { periods, weights },
+      },
+      stocks: paginatedData.map((item) => {
+        const s = item.stock;
+        const metrics = item.metrics;
+        const rankHistory = item.rankHistory;
+
+        const realtimePrice = realtimePrices.get(s.code);
+        const dbPrice = closingPrices.get(s.code) || metrics?.closePrice || 0;
+
+        return {
+          id: s.code,
+          rank: item.rank,
+          companyName: s.name,
+          stockCode: s.code,
+          currentPrice: realtimePrice?.currentPrice || dbPrice,
+          exchange: s.marketName === '거래소' ? 'KOSPI' : s.marketName === '코스닥' ? 'KOSDAQ' : s.marketName,
+          relativeStrengthScore: item.rsScore,
+          isHighPrice: metrics?.isNewHigh || false,
+          investmentIndicators: realtimePrice
+            ? `${realtimePrice.changeRate > 0 ? '+' : ''}${realtimePrice.changeRate.toFixed(2)}%`
+            : metrics?.priceChange1d
+            ? `${metrics.priceChange1d > 0 ? '+' : ''}${metrics.priceChangeRate1d?.toFixed(2)}%`
+            : '-',
+          investmentIndicatorsDtl: '-',
+          theme: s.upName || '-',
+          upName: s.upName || '-',
+          rankHistory: {
+            today: rankHistory[0]?.rank || null,
+            oneDayAgo: rankHistory[1]?.rank || null,
+            twoDaysAgo: rankHistory[2]?.rank || null,
+            threeDaysAgo: rankHistory[3]?.rank || null,
+          },
+        };
+      }),
+    };
+  }
+
+  /**
    * 종목 리스트 캐시 무효화
    */
   clearStockListCache(marketType?: '0' | '10' | '8') {
@@ -395,6 +594,13 @@ export class RealTimeChartService implements OnModuleInit {
     try {
       const data = await this.kiwoomRest.getSectorDayCandles(sectorCode, today);
       const candles = data.inds_dt_pole_qry;
+
+      if (!candles || !Array.isArray(candles)) {
+        this.logger.warn(
+          `No candles data received for sector ${sectorCode}. Response: ${JSON.stringify(data)}`,
+        );
+        return { success: false, count: 0 };
+      }
 
       this.logger.log(`Fetched ${candles.length} sector day candles for ${sectorCode}`);
 

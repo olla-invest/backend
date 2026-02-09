@@ -114,18 +114,34 @@ export class RealTimeChartController {
 
   /**
    * GET /real-time-chart/stocks
-   * 종목 리스트 조회 (페이지네이션)
+   * 종목 리스트 조회 (페이지네이션 + 필터 + 커스텀 RS)
+   *
+   * RS 커스터마이징 파라미터:
+   * - rsPeriods: RS 계산 기간 (예: "63,126,252")
+   * - rsWeights: RS 가중치 (예: "50,30,20")
+   *
+   * 파라미터 없으면 디폴트 RS(63일) 사용
    */
   @Get('stocks')
   async getStockList(
     @Query('marketType') marketType: '0' | '10' | '8' = '0',
     @Query('page') page: string = '1',
     @Query('pageSize') pageSize: string = '50',
+    @Query('isHighPrice') isHighPrice?: string,
+    @Query('minTradingValue') minTradingValue?: string,
+    @Query('rsPeriods') rsPeriods?: string,
+    @Query('rsWeights') rsWeights?: string,
   ) {
     return await this.chartService.getStockList(
       marketType,
       parseInt(page),
       parseInt(pageSize),
+      {
+        isHighPrice: isHighPrice === 'true' ? true : undefined,
+        minTradingValue: minTradingValue ? parseFloat(minTradingValue) : undefined,
+      },
+      rsPeriods,
+      rsWeights,
     );
   }
 
@@ -198,5 +214,25 @@ export class RealTimeChartController {
   @Post('setup/full')
   async runFullSetup(@Body('marketType') marketType: '0' | '10' | '8' = '0') {
     return await this.setupService.runFullSetup(marketType);
+  }
+
+  /**
+   * POST /real-time-chart/setup/extended
+   * 확장 데이터 수집 (10년치 등 장기 데이터)
+   *
+   * @param marketType - 시장 타입 ('0': KOSPI, '10': KOSDAQ, '8': ETF)
+   * @param days - 수집할 일수 (기본: 3650일 = 약 10년)
+   *
+   * @example
+   * curl -X POST http://localhost:3000/real-time-chart/setup/extended \
+   *   -H "Content-Type: application/json" \
+   *   -d '{"marketType":"0","days":3650}'
+   */
+  @Post('setup/extended')
+  async runExtendedDataCollection(
+    @Body('marketType') marketType: '0' | '10' | '8' = '0',
+    @Body('days') days: number = 3650,
+  ) {
+    return await this.setupService.runExtendedDataCollection(marketType, days);
   }
 }

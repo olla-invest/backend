@@ -33,6 +33,7 @@ export class StockMetricsService {
         priceChangeRate1d: metric.priceChangeRate1d
           ? Number(metric.priceChangeRate1d)
           : null,
+        tradingValue: metric.tradingValue ? Number(metric.tradingValue) : 0,
       });
     });
 
@@ -42,8 +43,10 @@ export class StockMetricsService {
   /**
    * 최신 거래일 조회
    */
-  async getLatestTradeDate(): Promise<Date | null> {
+  async getLatestTradeDate(marketType?: string): Promise<Date | null> {
+    const where = marketType ? { marketType } : {};
     const latestDate = await this.prisma.stockDailyMetrics.findFirst({
+      where,
       orderBy: { tradeDate: 'desc' },
       select: { tradeDate: true },
     });
@@ -53,8 +56,8 @@ export class StockMetricsService {
   /**
    * 최신 거래일의 종목별 지표 조회 (날짜 상관없이 가장 최근 데이터)
    */
-  async getLatestMetrics(stockCodes: string[]): Promise<Map<string, any>> {
-    const latestDate = await this.getLatestTradeDate();
+  async getLatestMetrics(stockCodes: string[], marketType?: string): Promise<Map<string, any>> {
+    const latestDate = await this.getLatestTradeDate(marketType);
 
     if (!latestDate) {
       return new Map();
@@ -78,6 +81,228 @@ export class StockMetricsService {
     });
 
     return metrics.map((m) => m.rank);
+  }
+
+  /**
+   * 여러 종목의 최근 N개 거래일 지표 이력 조회
+   * 반환: Map<stockCode, Array<{tradeDate, rank, rsScore}>>
+   */
+  async getRecentMetricsHistory(
+    stockCodes: string[],
+    days: number = 4,
+  ): Promise<Map<string, Array<{ tradeDate: Date; rank: number; rsScore: number }>>> {
+    // 최근 N개 거래일 조회
+    const recentDates = await this.prisma.stockDailyMetrics.findMany({
+      orderBy: { tradeDate: 'desc' },
+      take: days,
+      distinct: ['tradeDate'],
+      select: { tradeDate: true },
+    });
+
+    if (recentDates.length === 0) {
+      return new Map();
+    }
+
+    const tradeDates = recentDates.map((d) => d.tradeDate);
+
+    // 해당 종목들의 최근 N개 거래일 지표 조회
+    const metrics = await this.prisma.stockDailyMetrics.findMany({
+      where: {
+        stockCode: { in: stockCodes },
+        tradeDate: { in: tradeDates },
+      },
+      orderBy: [
+        { stockCode: 'asc' },
+        { tradeDate: 'desc' },
+      ],
+      select: {
+        stockCode: true,
+        tradeDate: true,
+        rank: true,
+        relativeStrengthScore: true,
+      },
+    });
+
+    // 종목별로 그룹핑
+    const historyMap = new Map<string, Array<{ tradeDate: Date; rank: number; rsScore: number }>>();
+
+    for (const metric of metrics) {
+      if (!historyMap.has(metric.stockCode)) {
+        historyMap.set(metric.stockCode, []);
+      }
+      historyMap.get(metric.stockCode)!.push({
+        tradeDate: metric.tradeDate,
+        rank: metric.rank,
+        rsScore: Number(metric.relativeStrengthScore),
+      });
+    }
+
+    return historyMap;
+  }
+
+  /**
+   * 런타임에 커스텀 RS 계산 (사용자 설정 기간 + 가중치)
+   *
+   * @param stockCodes - 대상 종목 코드 목록
+   * @param periods - RS 계산 기간 배열 (예: [63, 126, 252])
+   * @param weights - RS 가중치 배열 (예: [50, 30, 20])
+   * @param indexCode - 지수 코드 (INDEX_KOSPI, INDEX_KOSDAQ)
+   * @param tradingDays - 계산할 거래일 수 (기본 4: 당일, D-1, D-2, D-3)
+   *
+   * @returns Map<stockCode, Array<{tradeDate, rank, rsScore}>> - 종목별 최근 N일 랭크 이력
+   */
+  async calculateRuntimeRS(
+    stockCodes: string[],
+    periods: number[],
+    weights: number[],
+    indexCode: string,
+    tradingDays: number = 4,
+  ): Promise<Map<string, Array<{ tradeDate: Date; rank: number; rsScore: number }>>> {
+    this.logger.log(
+      `Calculating runtime RS for ${stockCodes.length} stocks, periods: ${periods}, weights: ${weights}, index: ${indexCode}`,
+    );
+
+    // 최근 N개 거래일 조회
+    const recentDates = await this.prisma.stockCandle.findMany({
+      where: {
+        candleType: 'day',
+        stockCode: { not: { startsWith: 'INDEX_' } },
+      },
+      orderBy: { candleTime: 'desc' },
+      take: tradingDays,
+      distinct: ['candleTime'],
+      select: { candleTime: true },
+    });
+
+    if (recentDates.length === 0) {
+      this.logger.warn('No trading days found');
+      return new Map();
+    }
+
+    const tradeDates = recentDates.map((d) => d.candleTime);
+    this.logger.log(`Found ${tradeDates.length} recent trading days`);
+
+    // 최대 기간 계산 (52주 = 365일)
+    const maxPeriod = Math.max(...periods);
+    const historicalCutoff = new Date(tradeDates[0]);
+    historicalCutoff.setDate(historicalCutoff.getDate() - Math.max(365, maxPeriod + 10));
+
+    // 일봉 데이터 조회
+    const [stockCandles, indexCandles] = await Promise.all([
+      this.prisma.stockCandle.findMany({
+        where: {
+          candleType: 'day',
+          stockCode: { in: stockCodes },
+          candleTime: { gte: historicalCutoff },
+        },
+        orderBy: [{ stockCode: 'asc' }, { candleTime: 'asc' }],
+      }),
+      this.prisma.stockCandle.findMany({
+        where: {
+          stockCode: indexCode,
+          candleType: 'day',
+          candleTime: { gte: historicalCutoff },
+        },
+        orderBy: { candleTime: 'asc' },
+      }),
+    ]);
+
+    this.logger.log(`Loaded ${stockCandles.length} stock candles, ${indexCandles.length} index candles`);
+
+    // 종목별 그룹핑
+    const candlesByStock = new Map<string, typeof stockCandles>();
+    for (const candle of stockCandles) {
+      if (!candlesByStock.has(candle.stockCode)) {
+        candlesByStock.set(candle.stockCode, []);
+      }
+      candlesByStock.get(candle.stockCode)!.push(candle);
+    }
+
+    // 각 거래일별로 RS 계산 및 랭킹
+    const resultMap = new Map<string, Array<{ tradeDate: Date; rank: number; rsScore: number }>>();
+
+    for (const tradeDate of tradeDates) {
+      const tradeDateOnly = new Date(tradeDate);
+      tradeDateOnly.setHours(0, 0, 0, 0);
+
+      // 해당 거래일의 지수 데이터 찾기
+      const indexCandlesUpToDate = indexCandles.filter((c) => c.candleTime <= tradeDate);
+      if (indexCandlesUpToDate.length === 0) continue;
+
+      const latestIndexCandle = indexCandlesUpToDate[indexCandlesUpToDate.length - 1];
+      const indexCloseNow = latestIndexCandle.closePrice.toNumber();
+
+      // 각 종목별 RS 계산
+      const stockRS: Array<{ stockCode: string; rsScore: number }> = [];
+
+      for (const [stockCode, candles] of candlesByStock) {
+        const candlesUpToDate = candles.filter((c) => c.candleTime <= tradeDate);
+        if (candlesUpToDate.length === 0) continue;
+
+        // 여러 기간의 RS 계산
+        const rsValues: number[] = [];
+        for (const period of periods) {
+          if (candlesUpToDate.length <= period) {
+            rsValues.push(0);
+            continue;
+          }
+
+          const currentPrice = candlesUpToDate[candlesUpToDate.length - 1].closePrice.toNumber();
+          const pastPrice = candlesUpToDate[candlesUpToDate.length - 1 - period].closePrice.toNumber();
+
+          // 해당 기간의 지수 과거가
+          const indexPastCandles = indexCandles.filter((c) => c.candleTime <= tradeDate);
+          if (indexPastCandles.length <= period) {
+            rsValues.push(0);
+            continue;
+          }
+          const indexPastPrice = indexPastCandles[indexPastCandles.length - 1 - period].closePrice.toNumber();
+
+          if (pastPrice > 0 && indexPastPrice > 0) {
+            const stockReturn = currentPrice / pastPrice;
+            const indexReturn = indexCloseNow / indexPastPrice;
+            rsValues.push(stockReturn / indexReturn);
+          } else {
+            rsValues.push(0);
+          }
+        }
+
+        // 가중 평균 계산
+        let weightedRS = 0;
+        let totalWeight = 0;
+        for (let i = 0; i < rsValues.length; i++) {
+          if (rsValues[i] > 0) {
+            weightedRS += rsValues[i] * weights[i];
+            totalWeight += weights[i];
+          }
+        }
+
+        if (totalWeight > 0) {
+          weightedRS /= totalWeight;
+          stockRS.push({ stockCode, rsScore: weightedRS });
+        }
+      }
+
+      // RS 기준 정렬 및 랭킹
+      stockRS.sort((a, b) => b.rsScore - a.rsScore);
+
+      for (let i = 0; i < stockRS.length; i++) {
+        const { stockCode, rsScore } = stockRS[i];
+        const rank = i + 1;
+
+        if (!resultMap.has(stockCode)) {
+          resultMap.set(stockCode, []);
+        }
+        resultMap.get(stockCode)!.push({
+          tradeDate: tradeDateOnly,
+          rank,
+          rsScore,
+        });
+      }
+    }
+
+    this.logger.log(`Runtime RS calculation completed for ${resultMap.size} stocks`);
+    return resultMap;
   }
 
   /**
@@ -160,6 +385,7 @@ export class StockMetricsService {
       priceChange1d: number;
       priceChangeRate1d: number;
       volume: bigint;
+      tradingValue: bigint;
       rsRaw: number;
       passedFilters: boolean;
       candleTime: Date;
@@ -240,6 +466,7 @@ export class StockMetricsService {
         priceChange1d: closePrice - prevClose,
         priceChangeRate1d: prevClose > 0 ? ((closePrice - prevClose) / prevClose) * 100 : 0,
         volume: latest.volume,
+        tradingValue: BigInt(Math.floor(tradingValue)),
         rsRaw,
         passedFilters,
         candleTime: latest.candleTime,
@@ -289,6 +516,7 @@ export class StockMetricsService {
             priceChange1d: new Prisma.Decimal(calc.priceChange1d),
             priceChangeRate1d: new Prisma.Decimal(calc.priceChangeRate1d),
             volume1d: calc.volume,
+            tradingValue: calc.tradingValue,
           };
 
           // tradeDate를 날짜만 사용 (시간 제거)

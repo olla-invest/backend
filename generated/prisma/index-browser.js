@@ -317,6 +317,7 @@ exports.Prisma.StockDailyMetricsScalarFieldEnum = {
   priceChange1d: 'priceChange1d',
   priceChangeRate1d: 'priceChangeRate1d',
   volume1d: 'volume1d',
+  tradingValue: 'tradingValue',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };

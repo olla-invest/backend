@@ -25,7 +25,7 @@ async function bootstrap() {
     const corsCredentials = configService.get( 'CORS_CREDENTIALS', 'true' ) === 'true';
 
     app.enableCors( {
-        origin: corsOrigin.split( ',' ).map( ( origin: string ) => origin.trim() ),
+        origin: corsOrigin === '*' ? true : corsOrigin.split( ',' ).map( ( origin: string ) => origin.trim() ),
         credentials: corsCredentials,
         methods: [ 'GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS' ],
         allowedHeaders: [ 'Content-Type', 'Authorization', 'X-Requested-With', 'ngrok-skip-browser-warning' ],
