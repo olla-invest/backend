@@ -7,9 +7,10 @@ import {
   KiwoomRealtimeRequest,
   KiwoomRealtimeResponse,
 } from '../types/kiwoom.types';
+import { IRealtimeSource } from './realtime-source.interface';
 
 @Injectable()
-export class KiwoomWebSocketService implements OnModuleInit, OnModuleDestroy {
+export class KiwoomWebSocketService implements IRealtimeSource, OnModuleInit, OnModuleDestroy {
   private readonly logger = new Logger(KiwoomWebSocketService.name);
   private ws: WebSocket | null = null;
   private readonly wsUrl: string;
@@ -34,6 +35,12 @@ export class KiwoomWebSocketService implements OnModuleInit, OnModuleDestroy {
   }
 
   async onModuleInit() {
+    const realtimeSource = this.configService.get('REALTIME_SOURCE', 'websocket');
+    if (realtimeSource === 'redis') {
+      this.logger.log('REALTIME_SOURCE=redis, skipping Kiwoom WebSocket connection');
+      return;
+    }
+
     this.logger.log('Kiwoom WebSocket Service initialized');
     await this.connect();
   }

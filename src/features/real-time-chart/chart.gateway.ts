@@ -8,10 +8,10 @@ import {
   ConnectedSocket,
   MessageBody,
 } from '@nestjs/websockets';
-import { Logger } from '@nestjs/common';
+import { Logger, Inject } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
 import { Server, Socket } from 'socket.io';
-import { KiwoomWebSocketService } from '../../integrations/kiwoom/websocket/kiwoom-websocket.service';
+import { IRealtimeSource, REALTIME_SOURCE_TOKEN } from '../../integrations/kiwoom/websocket/realtime-source.interface';
 
 @WebSocketGateway({
   cors: {
@@ -28,7 +28,10 @@ export class ChartGateway
   private readonly logger = new Logger(ChartGateway.name);
   private clientSubscriptions = new Map<string, Set<string>>(); // clientId -> Set<stockCode>
 
-  constructor(private readonly kiwoomWebSocket: KiwoomWebSocketService) {}
+  constructor(
+    @Inject(REALTIME_SOURCE_TOKEN)
+    private readonly realtimeSource: IRealtimeSource,
+  ) {}
 
   afterInit(server: Server) {
     this.logger.log('Chart WebSocket Gateway initialized');
@@ -52,8 +55,8 @@ export class ChartGateway
         );
 
         if (!hasOtherSubscribers) {
-          // 마지막 구독자인 경우에만 키움 WebSocket 구독 해제
-          this.kiwoomWebSocket.unsubscribe(stockCode);
+          // 마지막 구독자인 경우에만 실시간 소스 구독 해제
+          this.realtimeSource.unsubscribe(stockCode);
         }
       });
 
@@ -77,8 +80,8 @@ export class ChartGateway
     const stockCodes = this.clientSubscriptions.get(client.id)!;
     stockCodes.add(stockCode);
 
-    // 키움 WebSocket 구독 (실시간 체결 + 호가)
-    await this.kiwoomWebSocket.subscribe(stockCode, ['0B', '0D']);
+    // 실시간 소스 구독 (실시간 체결 + 호가)
+    await this.realtimeSource.subscribe(stockCode, ['0B', '0D']);
 
     // 클라이언트에게 구독 성공 응답
     client.emit('subscribed', { stockCode });
@@ -108,8 +111,8 @@ export class ChartGateway
     );
 
     if (!hasOtherSubscribers) {
-      // 마지막 구독자인 경우에만 키움 WebSocket 구독 해제
-      await this.kiwoomWebSocket.unsubscribe(stockCode);
+      // 마지막 구독자인 경우에만 실시간 소스 구독 해제
+      await this.realtimeSource.unsubscribe(stockCode);
     }
 
     // 클라이언트에게 구독 해제 응답
