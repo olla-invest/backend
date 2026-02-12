@@ -1,6 +1,6 @@
-import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import { Injectable, Logger, OnModuleInit, Inject } from '@nestjs/common';
 import { KiwoomRestService } from '../../integrations/kiwoom/rest/kiwoom-rest.service';
-import { KiwoomWebSocketService } from '../../integrations/kiwoom/websocket/kiwoom-websocket.service';
+import { IRealtimeSource, REALTIME_SOURCE_TOKEN } from '../../integrations/kiwoom/websocket/realtime-source.interface';
 import { ChartStorageService } from './chart-storage.service';
 import { StockMetricsService } from './stock-metrics.service';
 import { RealtimePriceCacheService } from './realtime-price-cache.service';
@@ -20,7 +20,8 @@ export class RealTimeChartService implements OnModuleInit {
 
   constructor(
     private readonly kiwoomRest: KiwoomRestService,
-    private readonly kiwoomWebSocket: KiwoomWebSocketService,
+    @Inject(REALTIME_SOURCE_TOKEN)
+    private readonly realtimeSource: IRealtimeSource,
     private readonly chartStorage: ChartStorageService,
     private readonly metricsService: StockMetricsService,
     private readonly realtimeCache: RealtimePriceCacheService,
@@ -762,8 +763,8 @@ export class RealTimeChartService implements OnModuleInit {
     // 캐시에 구독 추가
     this.realtimeCache.addSubscription(stockCode);
 
-    // WebSocket 구독 시작 (0B: 체결, 0D: 호가)
-    await this.kiwoomWebSocket.subscribe(stockCode, ['0B', '0D']);
+    // 실시간 소스 구독 시작 (0B: 체결, 0D: 호가)
+    await this.realtimeSource.subscribe(stockCode, ['0B', '0D']);
 
     return { success: true, stockCode };
   }
@@ -774,8 +775,8 @@ export class RealTimeChartService implements OnModuleInit {
   async stopRealtime(stockCode: string) {
     this.logger.log(`Stopping realtime subscription for ${stockCode}`);
 
-    // WebSocket 구독 해제
-    await this.kiwoomWebSocket.unsubscribe(stockCode);
+    // 실시간 소스 구독 해제
+    await this.realtimeSource.unsubscribe(stockCode);
 
     // 캐시에서 제거
     this.realtimeCache.removeSubscription(stockCode);
