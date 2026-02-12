@@ -306,6 +306,207 @@ export class StockMetricsService {
   }
 
   /**
+   * 기간 기반 RS 계산 (rsStartDate와 rsEndDate 사용)
+   * endDate 종가를 기준으로 startDate 가격까지의 수익률 계산
+   */
+  async calculateRangeRS(
+    stockCodes: string[],
+    rsFilters: Array<{
+      rsStartDate: string;
+      rsEndDate: string;
+      strength: number;
+    }>,
+    indexCode: string,
+    tradingDays: number = 4,
+  ): Promise<Map<string, Array<{ tradeDate: Date; rank: number; rsScore: number }>>> {
+    this.logger.log(
+      `Calculating range RS for ${stockCodes.length} stocks, filters: ${JSON.stringify(rsFilters)}, index: ${indexCode}`,
+    );
+
+    // 최근 N개 거래일 조회
+    const recentDates = await this.prisma.stockCandle.findMany({
+      where: {
+        candleType: 'day',
+        stockCode: { not: { startsWith: 'INDEX_' } },
+      },
+      orderBy: { candleTime: 'desc' },
+      take: tradingDays,
+      distinct: ['candleTime'],
+      select: { candleTime: true },
+    });
+
+    if (recentDates.length === 0) {
+      this.logger.warn('No trading days found');
+      return new Map();
+    }
+
+    const tradeDates = recentDates.map((d) => d.candleTime);
+    this.logger.log(`Found ${tradeDates.length} recent trading days`);
+
+    // 날짜를 일수로 변환
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const periodsData: Array<{ startDays: number; endDays: number; weight: number }> = [];
+    let maxDays = 0;
+
+    for (const filter of rsFilters) {
+      const startDays = this.convertDateToDays(filter.rsStartDate, today);
+      const endDays = this.convertDateToDays(filter.rsEndDate, today);
+      periodsData.push({ startDays, endDays, weight: filter.strength });
+      maxDays = Math.max(maxDays, endDays);
+    }
+
+    // 과거 데이터 조회 범위
+    const historicalCutoff = new Date(tradeDates[0]);
+    historicalCutoff.setDate(historicalCutoff.getDate() - Math.max(365, maxDays + 10));
+
+    // 일봉 데이터 조회
+    const [stockCandles, indexCandles] = await Promise.all([
+      this.prisma.stockCandle.findMany({
+        where: {
+          candleType: 'day',
+          stockCode: { in: stockCodes },
+          candleTime: { gte: historicalCutoff },
+        },
+        orderBy: [{ stockCode: 'asc' }, { candleTime: 'asc' }],
+      }),
+      this.prisma.stockCandle.findMany({
+        where: {
+          stockCode: indexCode,
+          candleType: 'day',
+          candleTime: { gte: historicalCutoff },
+        },
+        orderBy: { candleTime: 'asc' },
+      }),
+    ]);
+
+    this.logger.log(`Loaded ${stockCandles.length} stock candles, ${indexCandles.length} index candles`);
+
+    // 종목별 그룹핑
+    const candlesByStock = new Map<string, typeof stockCandles>();
+    for (const candle of stockCandles) {
+      if (!candlesByStock.has(candle.stockCode)) {
+        candlesByStock.set(candle.stockCode, []);
+      }
+      candlesByStock.get(candle.stockCode)!.push(candle);
+    }
+
+    // 각 거래일별로 RS 계산 및 랭킹
+    const resultMap = new Map<string, Array<{ tradeDate: Date; rank: number; rsScore: number }>>();
+
+    for (const tradeDate of tradeDates) {
+      const tradeDateOnly = new Date(tradeDate);
+      tradeDateOnly.setHours(0, 0, 0, 0);
+
+      // 해당 거래일의 지수 데이터
+      const indexCandlesUpToDate = indexCandles.filter((c) => c.candleTime <= tradeDate);
+      if (indexCandlesUpToDate.length === 0) continue;
+
+      // 각 종목별 RS 계산
+      const stockRS: Array<{ stockCode: string; rsScore: number }> = [];
+
+      for (const [stockCode, candles] of candlesByStock) {
+        const candlesUpToDate = candles.filter((c) => c.candleTime <= tradeDate);
+        if (candlesUpToDate.length === 0) continue;
+
+        // 여러 기간의 RS 계산
+        const rsValues: number[] = [];
+        const weights: number[] = [];
+
+        for (const periodData of periodsData) {
+          const { startDays, endDays, weight } = periodData;
+
+          // 데이터 충분한지 확인
+          if (candlesUpToDate.length <= endDays || indexCandlesUpToDate.length <= endDays) {
+            continue;
+          }
+
+          // startDays 전의 가격 (분자)
+          const startPrice = candlesUpToDate[candlesUpToDate.length - 1 - startDays].closePrice.toNumber();
+          // endDays 전의 종가 (분모, 기준가)
+          const endPrice = candlesUpToDate[candlesUpToDate.length - 1 - endDays].closePrice.toNumber();
+
+          // 지수도 동일한 기간
+          const indexStartPrice = indexCandlesUpToDate[indexCandlesUpToDate.length - 1 - startDays].closePrice.toNumber();
+          const indexEndPrice = indexCandlesUpToDate[indexCandlesUpToDate.length - 1 - endDays].closePrice.toNumber();
+
+          if (endPrice > 0 && indexEndPrice > 0) {
+            // endDate 종가 기준으로 startDate까지의 수익률
+            const stockReturn = startPrice / endPrice;
+            const indexReturn = indexStartPrice / indexEndPrice;
+            const rs = stockReturn / indexReturn;
+
+            rsValues.push(rs);
+            weights.push(weight);
+          }
+        }
+
+        // 가중 평균 계산
+        let weightedRS = 0;
+        let totalWeight = 0;
+        for (let i = 0; i < rsValues.length; i++) {
+          if (rsValues[i] > 0) {
+            weightedRS += rsValues[i] * weights[i];
+            totalWeight += weights[i];
+          }
+        }
+
+        if (totalWeight > 0) {
+          weightedRS /= totalWeight;
+          stockRS.push({ stockCode, rsScore: weightedRS });
+        }
+      }
+
+      // RS 기준 정렬 및 랭킹
+      stockRS.sort((a, b) => b.rsScore - a.rsScore);
+
+      for (let i = 0; i < stockRS.length; i++) {
+        const { stockCode, rsScore } = stockRS[i];
+        const rank = i + 1;
+
+        if (!resultMap.has(stockCode)) {
+          resultMap.set(stockCode, []);
+        }
+        resultMap.get(stockCode)!.push({
+          tradeDate: tradeDateOnly,
+          rank,
+          rsScore,
+        });
+      }
+    }
+
+    this.logger.log(`Range RS calculation completed for ${resultMap.size} stocks`);
+    return resultMap;
+  }
+
+  /**
+   * 날짜 문자열을 오늘로부터 며칠 전인지 계산
+   */
+  private convertDateToDays(dateStr: string, today: Date): number {
+    let date: Date;
+    if (dateStr.includes('-')) {
+      date = new Date(dateStr);
+    } else if (dateStr.length === 8) {
+      const year = dateStr.substring(0, 4);
+      const month = dateStr.substring(4, 6);
+      const day = dateStr.substring(6, 8);
+      date = new Date(`${year}-${month}-${day}`);
+    } else {
+      return 63;
+    }
+
+    if (isNaN(date.getTime())) {
+      return 63;
+    }
+
+    date.setHours(0, 0, 0, 0);
+    const diffMs = today.getTime() - date.getTime();
+    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+    return diffDays > 0 ? diffDays : 1;
+  }
+
+  /**
    * 전체 종목의 일별 지표 계산 및 저장
    *
    * 처리 순서:

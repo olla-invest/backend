@@ -119,6 +119,8 @@ export class RealTimeChartController {
    * RS 커스터마이징 파라미터:
    * - rsPeriods: RS 계산 기간 (예: "63,126,252")
    * - rsWeights: RS 가중치 (예: "50,30,20")
+   * - rsDates: RS 계산 날짜 (예: "2026-02-09,2026-01-15,2025-11-10" 또는 "20260209,20260115,20251110")
+   *   * rsDates를 사용하면 오늘로부터 며칠 전인지 자동 계산됩니다
    *
    * 파라미터 없으면 디폴트 RS(63일) 사용
    */
@@ -131,6 +133,7 @@ export class RealTimeChartController {
     @Query('minTradingValue') minTradingValue?: string,
     @Query('rsPeriods') rsPeriods?: string,
     @Query('rsWeights') rsWeights?: string,
+    @Query('rsDates') rsDates?: string,
   ) {
     return await this.chartService.getStockList(
       marketType,
@@ -142,6 +145,51 @@ export class RealTimeChartController {
       },
       rsPeriods,
       rsWeights,
+      rsDates,
+    );
+  }
+
+  /**
+   * POST /real-time-chart/stocks
+   * 종목 리스트 조회 (기간 기반 RS 필터)
+   *
+   * Body:
+   * {
+   *   "marketType": "0",
+   *   "page": 1,
+   *   "pageSize": 50,
+   *   "filters": {
+   *     "isHighPrice": true,
+   *     "minTradingValue": 100000000
+   *   },
+   *   "rsFilters": [
+   *     { "rsStartDate": "2026-02-09", "rsEndDate": "2026-01-15", "strength": 50 },
+   *     { "rsStartDate": "2026-01-15", "rsEndDate": "2025-12-01", "strength": 30 },
+   *     { "rsStartDate": "2025-12-01", "rsEndDate": "2025-11-10", "strength": 20 }
+   *   ]
+   * }
+   */
+  @Post('stocks')
+  async getStockListWithRangeRS(
+    @Body('marketType') marketType: '0' | '10' | '8' = '0',
+    @Body('page') page: number = 1,
+    @Body('pageSize') pageSize: number = 50,
+    @Body('filters') filters?: {
+      isHighPrice?: boolean;
+      minTradingValue?: number;
+    },
+    @Body('rsFilters') rsFilters?: Array<{
+      rsStartDate: string;
+      rsEndDate: string;
+      strength: number;
+    }>,
+  ) {
+    return await this.chartService.getStockListWithRangeRS(
+      marketType,
+      page,
+      pageSize,
+      filters,
+      rsFilters,
     );
   }
 

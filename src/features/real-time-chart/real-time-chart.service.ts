@@ -254,19 +254,27 @@ export class RealTimeChartService implements OnModuleInit {
     },
     rsPeriods?: string,
     rsWeights?: string,
+    rsDates?: string,
   ) {
     this.logger.log(
-      `Getting stock list for market type: ${marketType}, page: ${page}, pageSize: ${pageSize}, filters: ${JSON.stringify(filters)}, rsPeriods: ${rsPeriods}, rsWeights: ${rsWeights}`,
+      `Getting stock list for market type: ${marketType}, page: ${page}, pageSize: ${pageSize}, filters: ${JSON.stringify(filters)}, rsPeriods: ${rsPeriods}, rsWeights: ${rsWeights}, rsDates: ${rsDates}`,
     );
 
+    // rsDates가 있으면 날짜를 일수로 변환
+    let calculatedPeriods = rsPeriods;
+    if (rsDates && rsWeights) {
+      calculatedPeriods = this.convertDatesToPeriods(rsDates);
+      this.logger.log(`Converted dates ${rsDates} to periods: ${calculatedPeriods}`);
+    }
+
     // 커스텀 RS 요청인 경우 런타임 계산
-    if (rsPeriods && rsWeights) {
+    if (calculatedPeriods && rsWeights) {
       return this.getStockListWithCustomRS(
         marketType,
         page,
         pageSize,
         filters,
-        rsPeriods,
+        calculatedPeriods,
         rsWeights,
       );
     }
@@ -571,6 +579,170 @@ export class RealTimeChartService implements OnModuleInit {
   }
 
   /**
+   * 종목 리스트 조회 (기간 기반 RS 필터)
+   * rsFilters 배열을 받아서 각 기간의 RS를 계산하고 가중치를 적용
+   */
+  async getStockListWithRangeRS(
+    marketType: '0' | '10' | '8' = '0',
+    page: number = 1,
+    pageSize: number = 50,
+    filters?: {
+      isHighPrice?: boolean;
+      minTradingValue?: number;
+    },
+    rsFilters?: Array<{
+      rsStartDate: string;
+      rsEndDate: string;
+      strength: number;
+    }>,
+  ) {
+    this.logger.log(`Getting stock list with range RS filters: ${JSON.stringify(rsFilters)}`);
+
+    // rsFilters가 없으면 기본 로직 사용
+    if (!rsFilters || rsFilters.length === 0) {
+      return this.getStockList(marketType, page, pageSize, filters);
+    }
+
+    // 종목 리스트 가져오기 (캐시 or API)
+    const cached = this.stockListCache.get(marketType);
+    const now = Date.now();
+    let validStocks: any[];
+
+    if (cached && (now - cached.timestamp) < this.CACHE_TTL) {
+      validStocks = cached.data;
+    } else {
+      const result = await this.kiwoomRest.getStockList(marketType);
+      validStocks = result.list.filter((s) => s.code.match(/^\d{6}$/));
+      this.stockListCache.set(marketType, { data: validStocks, timestamp: now });
+    }
+
+    const allStockCodes = validStocks.map((s) => s.code);
+    const indexCode = marketType === '0' ? 'INDEX_KOSPI' : 'INDEX_KOSDAQ';
+
+    // rsFilters를 periods와 weights로 변환
+    const periods: number[] = [];
+    const weights: number[] = [];
+
+    for (const filter of rsFilters) {
+      // endDate를 일수로 변환 (endDate 종가 기준으로 계산)
+      const endDays = this.convertSingleDateToDays(filter.rsEndDate);
+      periods.push(endDays);
+      weights.push(filter.strength);
+    }
+
+    this.logger.log(`Converted range filters to periods: ${periods}, weights: ${weights}`);
+
+    // 기간 기반 RS 계산 (최근 4개 거래일)
+    const rsHistoryMap = await this.metricsService.calculateRangeRS(
+      allStockCodes,
+      rsFilters,
+      indexCode,
+      4,
+    );
+
+    // 기본 지표 데이터 조회 (필터링용)
+    const metricsMap = await this.metricsService.getLatestMetrics(allStockCodes, marketType);
+
+    // 종목 리스트와 RS 병합 및 필터링
+    const stocksWithRS = validStocks
+      .map((s) => {
+        const rsHistory = rsHistoryMap.get(s.code);
+        const metrics = metricsMap.get(s.code);
+
+        const todayRS = rsHistory && rsHistory.length > 0 ? rsHistory[0] : null;
+
+        return {
+          stock: s,
+          metrics,
+          rsScore: todayRS?.rsScore || 0,
+          rank: todayRS?.rank || 0,
+          rankHistory: rsHistory || [],
+        };
+      })
+      .filter((item) => {
+        if (item.rsScore <= 0) return false;
+
+        if (filters?.isHighPrice !== undefined) {
+          if (item.metrics?.isNewHigh !== filters.isHighPrice) return false;
+        }
+
+        if (filters?.minTradingValue !== undefined) {
+          const tradingValue = item.metrics?.tradingValue || 0;
+          if (tradingValue < filters.minTradingValue) return false;
+        }
+
+        return true;
+      })
+      .sort((a, b) => a.rank - b.rank);
+
+    // 페이지네이션
+    const totalCount = stocksWithRS.length;
+    const totalPages = Math.ceil(totalCount / pageSize);
+    const startIndex = (page - 1) * pageSize;
+    const endIndex = startIndex + pageSize;
+    const paginatedData = stocksWithRS.slice(startIndex, endIndex);
+
+    // 종가 및 실시간 가격 조회
+    const pageStockCodes = paginatedData.map((d) => d.stock.code);
+    const closingPrices = await this.chartStorage.getLatestClosingPrices(pageStockCodes);
+
+    this.autoSubscribeStocks(pageStockCodes).catch((error) => {
+      this.logger.warn(`Auto-subscribe failed: ${error.message}`);
+    });
+
+    const realtimePrices = this.realtimeCache.getPrices(pageStockCodes);
+    const latestTradeDate = await this.metricsService.getLatestTradeDate();
+
+    return {
+      marketType,
+      page,
+      pageSize,
+      totalCount,
+      totalPages,
+      count: paginatedData.length,
+      meta: {
+        dataDate: latestTradeDate?.toISOString().split('T')[0] || null,
+        lastUpdatedAt: this.lastDataUpdate?.toISOString() || null,
+        isInitialized: this.initializationComplete,
+        rangeRS: { filters: rsFilters, periods, weights },
+      },
+      stocks: paginatedData.map((item) => {
+        const s = item.stock;
+        const metrics = item.metrics;
+        const rankHistory = item.rankHistory;
+
+        const realtimePrice = realtimePrices.get(s.code);
+        const dbPrice = closingPrices.get(s.code) || metrics?.closePrice || 0;
+
+        return {
+          id: s.code,
+          rank: item.rank,
+          companyName: s.name,
+          stockCode: s.code,
+          currentPrice: realtimePrice?.currentPrice || dbPrice,
+          exchange: s.marketName === '거래소' ? 'KOSPI' : s.marketName === '코스닥' ? 'KOSDAQ' : s.marketName,
+          relativeStrengthScore: item.rsScore,
+          isHighPrice: metrics?.isNewHigh || false,
+          investmentIndicators: realtimePrice
+            ? `${realtimePrice.changeRate > 0 ? '+' : ''}${realtimePrice.changeRate.toFixed(2)}%`
+            : metrics?.priceChange1d
+            ? `${metrics.priceChange1d > 0 ? '+' : ''}${metrics.priceChangeRate1d?.toFixed(2)}%`
+            : '-',
+          investmentIndicatorsDtl: '-',
+          theme: s.upName || '-',
+          upName: s.upName || '-',
+          rankHistory: {
+            today: rankHistory[0]?.rank || null,
+            oneDayAgo: rankHistory[1]?.rank || null,
+            twoDaysAgo: rankHistory[2]?.rank || null,
+            threeDaysAgo: rankHistory[3]?.rank || null,
+          },
+        };
+      }),
+    };
+  }
+
+  /**
    * 종목 리스트 캐시 무효화
    */
   clearStockListCache(marketType?: '0' | '10' | '8') {
@@ -581,6 +753,66 @@ export class RealTimeChartService implements OnModuleInit {
       this.stockListCache.clear();
       this.logger.log('Cleared all stock list cache');
     }
+  }
+
+  /**
+   * 날짜 문자열을 오늘로부터 며칠 전인지 계산하여 일수로 변환
+   * @param rsDates 쉼표로 구분된 날짜 문자열 (예: "2026-02-09,2026-01-15" 또는 "20260209,20260115")
+   * @returns 쉼표로 구분된 일수 문자열 (예: "1,26")
+   */
+  private convertDatesToPeriods(rsDates: string): string {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const dates = rsDates.split(',').map((d) => d.trim());
+    const periods = dates.map((dateStr) => {
+      return this.convertSingleDateToDays(dateStr);
+    });
+
+    return periods.join(',');
+  }
+
+  /**
+   * 단일 날짜 문자열을 오늘로부터 며칠 전인지 계산
+   * @param dateStr 날짜 문자열 (예: "2026-02-09" 또는 "20260209")
+   * @returns 오늘로부터 며칠 전인지 (예: 1)
+   */
+  private convertSingleDateToDays(dateStr: string): number {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    // 날짜 형식 파싱: "2026-02-09" 또는 "20260209"
+    let date: Date;
+    if (dateStr.includes('-')) {
+      // "2026-02-09" 형식
+      date = new Date(dateStr);
+    } else if (dateStr.length === 8) {
+      // "20260209" 형식
+      const year = dateStr.substring(0, 4);
+      const month = dateStr.substring(4, 6);
+      const day = dateStr.substring(6, 8);
+      date = new Date(`${year}-${month}-${day}`);
+    } else {
+      this.logger.warn(`Invalid date format: ${dateStr}, using 63 as default`);
+      return 63;
+    }
+
+    // 날짜 유효성 검사
+    if (isNaN(date.getTime())) {
+      this.logger.warn(`Invalid date: ${dateStr}, using 63 as default`);
+      return 63;
+    }
+
+    date.setHours(0, 0, 0, 0);
+
+    // 오늘로부터 며칠 전인지 계산
+    const diffMs = today.getTime() - date.getTime();
+    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+    this.logger.log(`Date ${dateStr} is ${diffDays} days ago from today`);
+
+    // 음수이거나 0이면 기본값 사용
+    return diffDays > 0 ? diffDays : 1;
   }
 
   /**

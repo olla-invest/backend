@@ -16,6 +16,7 @@
 | isHighPrice       | boolean | X    | -      | 신고가 필터 (true: 신고가 종목만)                 |
 | minTradingValue   | number  | X    | -      | 최소 거래대금 필터 (단위: 원)                     |
 | rsPeriods         | string  | X    | -      | 커스텀 RS 기간 (쉼표 구분, 예: "63,126,252")      |
+| rsDates           | string  | X    | -      | 커스텀 RS 날짜 (쉼표 구분, 예: "2026-02-09,2026-01-15" 또는 "20260209,20260115") |
 | rsWeights         | string  | X    | -      | 커스텀 RS 가중치 (쉼표 구분, 예: "50,30,20")      |
 
 ### 응답 형식
