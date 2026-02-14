@@ -4,6 +4,7 @@ import { IRealtimeSource, REALTIME_SOURCE_TOKEN } from '../../integrations/kiwoo
 import { ChartStorageService } from './chart-storage.service';
 import { StockMetricsService } from './stock-metrics.service';
 import { RealtimePriceCacheService } from './realtime-price-cache.service';
+import { mapUpNameToThemeCode } from '../../common/constants/theme-codes';
 
 interface StockListCache {
   data: any[];
@@ -133,6 +134,29 @@ export class RealTimeChartService implements OnModuleInit {
   }
 
   /**
+   * 실시간 데이터 소스 연결 보장
+   * (장시작 시간에 WebSocket 연결 확인 및 재연결)
+   */
+  async ensureRealtimeConnection(): Promise<void> {
+    this.logger.log('Ensuring realtime data source connection...');
+
+    try {
+      const isConnected = this.realtimeSource.isConnected();
+
+      if (isConnected) {
+        this.logger.log('Realtime source already connected');
+      } else {
+        this.logger.log('Realtime source not connected, attempting to connect...');
+        await this.realtimeSource.ensureConnection();
+        this.logger.log('Realtime source connection established');
+      }
+    } catch (error) {
+      this.logger.error(`Failed to ensure realtime connection: ${(error as Error).message}`, (error as Error).stack);
+      throw error;
+    }
+  }
+
+  /**
    * 분봉 차트 데이터 조회 (과거 데이터)
    */
   async getMinuteCandles(stockCode: string, interval: '1' | '3' | '5' | '10' | '15' | '30' | '45' | '60') {
@@ -252,6 +276,7 @@ export class RealTimeChartService implements OnModuleInit {
     filters?: {
       isHighPrice?: boolean;
       minTradingValue?: number;
+      theme?: number[];
     },
     rsPeriods?: string,
     rsWeights?: string,
@@ -329,13 +354,20 @@ export class RealTimeChartService implements OnModuleInit {
 
         // 신고가 필터
         if (filters?.isHighPrice !== undefined) {
-          if (item.metrics?.isHighPrice !== filters.isHighPrice) return false;
+          if (item.metrics?.isNewHigh !== filters.isHighPrice) return false;
         }
 
         // 최소 거래대금 필터
         if (filters?.minTradingValue !== undefined) {
           const tradingValue = item.metrics?.tradingValue || 0;
           if (tradingValue < filters.minTradingValue) return false;
+        }
+
+        // 테마 필터
+        if (filters?.theme) {
+          const stockTheme = item.stock.upName || '';
+          // 테마명 부분 매칭 (키움 API의 upName과 비교)
+          if (!this.matchesTheme(stockTheme, filters.theme)) return false;
         }
 
         return true;
@@ -430,6 +462,7 @@ export class RealTimeChartService implements OnModuleInit {
     filters?: {
       isHighPrice?: boolean;
       minTradingValue?: number;
+      theme?: number[];
     },
     rsPeriods?: string,
     rsWeights?: string,
@@ -502,6 +535,12 @@ export class RealTimeChartService implements OnModuleInit {
         if (filters?.minTradingValue !== undefined) {
           const tradingValue = item.metrics?.tradingValue || 0;
           if (tradingValue < filters.minTradingValue) return false;
+        }
+
+        // 테마 필터
+        if (filters?.theme) {
+          const stockTheme = item.stock.upName || '';
+          if (!this.matchesTheme(stockTheme, filters.theme)) return false;
         }
 
         return true;
@@ -590,6 +629,7 @@ export class RealTimeChartService implements OnModuleInit {
     filters?: {
       isHighPrice?: boolean;
       minTradingValue?: number;
+      theme?: number[];
     },
     rsFilters?: Array<{
       rsStartDate: string;
@@ -670,6 +710,12 @@ export class RealTimeChartService implements OnModuleInit {
         if (filters?.minTradingValue !== undefined) {
           const tradingValue = item.metrics?.tradingValue || 0;
           if (tradingValue < filters.minTradingValue) return false;
+        }
+
+        // 테마 필터
+        if (filters?.theme) {
+          const stockTheme = item.stock.upName || '';
+          if (!this.matchesTheme(stockTheme, filters.theme)) return false;
         }
 
         return true;
@@ -814,6 +860,29 @@ export class RealTimeChartService implements OnModuleInit {
 
     // 음수이거나 0이면 기본값 사용
     return diffDays > 0 ? diffDays : 1;
+  }
+
+  /**
+   * 테마 매칭 함수
+   * @param stockUpName 종목의 업종명 (키움 API upName)
+   * @param themeFilters 필터링할 테마 코드 배열 (숫자 배열, 예: [101, 102, 302] = 제약, 금속, 반도체)
+   * @returns 매칭 여부
+   */
+  private matchesTheme(stockUpName: string, themeFilters: number[]): boolean {
+    if (!stockUpName || stockUpName === '-') {
+      return false;
+    }
+
+    // 0(전체) 테마가 포함되어 있으면 모든 종목 허용
+    if (themeFilters.includes(0)) {
+      return true;
+    }
+
+    // upName을 테마 코드로 변환
+    const stockThemeCode = mapUpNameToThemeCode(stockUpName);
+
+    // 변환된 테마 코드가 필터 배열에 포함되어 있는지 확인
+    return stockThemeCode !== null && themeFilters.includes(stockThemeCode);
   }
 
   /**

@@ -113,6 +113,16 @@ export class RealTimeChartController {
   }
 
   /**
+   * POST /real-time-chart/realtime/ensure-connection
+   * 실시간 연결 확인 및 재연결
+   */
+  @Post('realtime/ensure-connection')
+  async ensureRealtimeConnection() {
+    await this.chartService.ensureRealtimeConnection();
+    return { success: true, message: 'Connection ensured' };
+  }
+
+  /**
    * GET /real-time-chart/stocks
    * 종목 리스트 조회 (페이지네이션 + 필터 + 커스텀 RS)
    *
@@ -123,6 +133,9 @@ export class RealTimeChartController {
    *   * rsDates를 사용하면 오늘로부터 며칠 전인지 자동 계산됩니다
    *
    * 파라미터 없으면 디폴트 RS(63일) 사용
+   *
+   * 테마 필터:
+   * - theme: 테마 코드 (숫자, 쉼표로 구분, 예: "101,102,302" = 제약,금속,반도체)
    */
   @Get('stocks')
   async getStockList(
@@ -131,6 +144,7 @@ export class RealTimeChartController {
     @Query('pageSize') pageSize: string = '50',
     @Query('isHighPrice') isHighPrice?: string,
     @Query('minTradingValue') minTradingValue?: string,
+    @Query('theme') theme?: string,
     @Query('rsPeriods') rsPeriods?: string,
     @Query('rsWeights') rsWeights?: string,
     @Query('rsDates') rsDates?: string,
@@ -142,6 +156,7 @@ export class RealTimeChartController {
       {
         isHighPrice: isHighPrice === 'true' ? true : undefined,
         minTradingValue: minTradingValue ? parseFloat(minTradingValue) : undefined,
+        theme: theme ? theme.split(',').map(t => parseInt(t.trim())) : undefined,
       },
       rsPeriods,
       rsWeights,
@@ -160,7 +175,8 @@ export class RealTimeChartController {
    *   "pageSize": 50,
    *   "filters": {
    *     "isHighPrice": true,
-   *     "minTradingValue": 100000000
+   *     "minTradingValue": 100000000,
+   *     "theme": [101, 102, 302]
    *   },
    *   "rsFilters": [
    *     { "rsStartDate": "2026-02-09", "rsEndDate": "2026-01-15", "strength": 50 },
@@ -177,6 +193,7 @@ export class RealTimeChartController {
     @Body('filters') filters?: {
       isHighPrice?: boolean;
       minTradingValue?: number;
+      theme?: number[];
     },
     @Body('rsFilters') rsFilters?: Array<{
       rsStartDate: string;

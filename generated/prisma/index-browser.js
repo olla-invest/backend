@@ -120,6 +120,14 @@ exports.Prisma.TransactionIsolationLevel = makeStrictEnum({
   Serializable: 'Serializable'
 });
 
+exports.Prisma.ThemeScalarFieldEnum = {
+  themeCode: 'themeCode',
+  themeName: 'themeName',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  deletedAt: 'deletedAt'
+};
+
 exports.Prisma.UserScalarFieldEnum = {
   userId: 'userId',
   username: 'username',
@@ -135,6 +143,7 @@ exports.Prisma.CompanyScalarFieldEnum = {
   companyName: 'companyName',
   stockCode: 'stockCode',
   marketType: 'marketType',
+  themeCode: 'themeCode',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   deletedAt: 'deletedAt'
@@ -375,6 +384,7 @@ exports.BatchJobStatus = exports.$Enums.BatchJobStatus = {
 };
 
 exports.Prisma.ModelName = {
+  Theme: 'Theme',
   User: 'User',
   Company: 'Company',
   UserWatchlist: 'UserWatchlist',

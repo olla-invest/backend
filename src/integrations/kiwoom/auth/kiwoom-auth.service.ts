@@ -19,7 +19,8 @@ export class KiwoomAuthService implements OnModuleInit {
   ) {
     this.appKey = this.configService.get<string>('KIWOOM_APP_KEY');
     this.secretKey = this.configService.get<string>('KIWOOM_SECRET_KEY');
-    this.useMock = this.configService.get<boolean>('KIWOOM_USE_MOCK') === true;
+    const useMockValue = this.configService.get('KIWOOM_USE_MOCK');
+    this.useMock = useMockValue === true || useMockValue === 'true';
 
     this.apiUrl = this.useMock
       ? this.configService.get<string>('KIWOOM_MOCK_API_URL')

@@ -21,6 +21,11 @@ export interface IRealtimeSource {
    * 연결 상태 확인
    */
   isConnected(): boolean;
+
+  /**
+   * 연결 보장 (연결되어 있지 않으면 연결 시도)
+   */
+  ensureConnection(): Promise<void>;
 }
 
 /**

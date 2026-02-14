@@ -51,6 +51,10 @@ export class DataSchedulerService {
       this.logger.log('Verifying data is up to date...');
       await this.realTimeChartService.initializeData();
 
+      // 실시간 데이터 소스 연결 확인
+      this.logger.log('Ensuring realtime connection...');
+      await this.realTimeChartService.ensureRealtimeConnection();
+
       this.logger.log('=== Market Open Preparation Completed ===');
     } catch (error) {
       this.logger.error('Market Open Preparation failed', error);

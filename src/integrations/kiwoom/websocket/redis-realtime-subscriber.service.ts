@@ -177,4 +177,15 @@ export class RedisRealtimeSubscriberService implements IRealtimeSource, OnModule
   isConnected(): boolean {
     return this.enabled && this.redisPubSub.isConnected();
   }
+
+  /**
+   * 연결 보장 (Redis는 자동 관리되므로 no-op)
+   */
+  async ensureConnection(): Promise<void> {
+    if (!this.enabled) {
+      return;
+    }
+    // Redis 연결은 RedisPubSubService에서 자동 관리
+    this.logger.debug('Redis connection is managed automatically');
+  }
 }

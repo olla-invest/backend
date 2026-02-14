@@ -27,7 +27,8 @@ export class KiwoomWebSocketService implements IRealtimeSource, OnModuleInit, On
     private readonly authService: KiwoomAuthService,
     private readonly eventEmitter: EventEmitter2,
   ) {
-    const useMock = this.configService.get<boolean>('KIWOOM_USE_MOCK') === true;
+    const useMockValue = this.configService.get('KIWOOM_USE_MOCK');
+    const useMock = useMockValue === true || useMockValue === 'true';
 
     this.wsUrl = useMock
       ? this.configService.get<string>('KIWOOM_MOCK_WS_URL')
@@ -47,6 +48,13 @@ export class KiwoomWebSocketService implements IRealtimeSource, OnModuleInit, On
 
   onModuleDestroy() {
     this.disconnect();
+  }
+
+  /**
+   * 연결 보장 (public 인터페이스)
+   */
+  async ensureConnection(): Promise<void> {
+    await this.connect();
   }
 
   /**
