@@ -52,37 +52,79 @@ export class RealTimeChartService implements OnModuleInit {
     this.logger.log('=== Data Initialization Started ===');
 
     try {
+      // 장 운영 시간 체크 (한국 시간 기준: 평일 09:00 ~ 15:30)
+      const now = new Date();
+      const currentHour = now.getHours();
+      const currentMinute = now.getMinutes();
+      const dayOfWeek = now.getDay();
+      const isWeekday = dayOfWeek >= 1 && dayOfWeek <= 5; // 월~금
+      const isMarketHours = isWeekday && (currentHour === 9 || (currentHour >= 10 && currentHour < 15) || (currentHour === 15 && currentMinute <= 30));
+
       // DB에서 마지막 일봉 데이터 날짜 조회
       const lastCandleDate = await this.chartStorage.getLatestDayCandleDate();
       const today = new Date();
       today.setHours(0, 0, 0, 0);
 
       let daysToFetch: number;
+      let shouldSkipCollection = false;
+
+      // 가장 최근 거래일 계산 (주말 제외, 공휴일은 API 레벨에서 처리)
+      const getLastTradingDay = (): Date => {
+        const d = new Date();
+        d.setHours(0, 0, 0, 0);
+        const day = d.getDay();
+        if (day === 0) d.setDate(d.getDate() - 2); // 일요일 -> 금요일
+        else if (day === 6) d.setDate(d.getDate() - 1); // 토요일 -> 금요일
+        return d;
+      };
 
       if (!lastCandleDate) {
         // 데이터가 없으면 52주치 수집 (신고가 판단 필요)
         daysToFetch = 365;
         this.logger.log('No existing data found. Fetching 52 weeks (365 days)...');
       } else {
-        // 마지막 데이터 날짜 ~ 오늘까지의 일수 계산
+        // 마지막 데이터 날짜 ~ 가장 최근 거래일까지 비교
         const lastDate = new Date(lastCandleDate);
         lastDate.setHours(0, 0, 0, 0);
-        const diffMs = today.getTime() - lastDate.getTime();
+        const lastTradingDay = getLastTradingDay();
+        const diffMs = lastTradingDay.getTime() - lastDate.getTime();
         const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
 
         if (diffDays <= 0) {
-          // 데이터가 최신이지만, 오늘 종가 업데이트를 위해 1일만 가져옴
-          daysToFetch = 1;
-          this.logger.log(
-            `Last data date: ${lastDate.toISOString().split('T')[0]}, up to date. Fetching 1 day (today) for latest closing prices...`,
-          );
+          // 데이터가 최신 상태 (마지막 데이터 >= 가장 최근 거래일)
+          if (!isMarketHours) {
+            // 장 마감 후이고 데이터가 최신이면 수집 스킵
+            this.logger.log(
+              `Market is closed and data is up to date (last: ${lastDate.toISOString().split('T')[0]}, lastTradingDay: ${lastTradingDay.toISOString().split('T')[0]}). Skipping data collection.`,
+            );
+            shouldSkipCollection = true;
+          } else {
+            // 장 운영 중이면 최신 종가 업데이트를 위해 1일치 가져옴
+            daysToFetch = 1;
+            this.logger.log(
+              `Market is open. Fetching 1 day for latest prices (last: ${lastDate.toISOString().split('T')[0]})...`,
+            );
+          }
         } else {
           // 공백이 있으면 정확히 그 일수만큼만 가져옴 (API는 거래일만 반환하므로 주말/공휴일 자동 제외)
           daysToFetch = diffDays;
           this.logger.log(
-            `Last data date: ${lastDate.toISOString().split('T')[0]}, gap: ${diffDays} days. Fetching ${daysToFetch} days (trading days only)...`,
+            `Last data date: ${lastDate.toISOString().split('T')[0]}, gap: ${diffDays} days to lastTradingDay: ${lastTradingDay.toISOString().split('T')[0]}. Fetching ${daysToFetch} days...`,
           );
         }
+      }
+
+      // 데이터 수집을 스킵해야 하는 경우
+      if (shouldSkipCollection) {
+        this.initializationComplete = true;
+        this.lastDataUpdate = lastCandleDate;
+        this.logger.log('=== Data Initialization Skipped (Already up to date) ===');
+        return {
+          success: true,
+          skipped: true,
+          reason: 'Market closed and data is up to date',
+          lastDataUpdate: this.lastDataUpdate,
+        };
       }
 
       // 0. 시장 지수 일봉 수집 (KOSPI + KOSDAQ) - RS 계산에 필요
@@ -432,7 +474,7 @@ export class RealTimeChartService implements OnModuleInit {
           stockCode: s.code,
           currentPrice: realtimePrice?.currentPrice || dbPrice,
           exchange: s.marketName === '거래소' ? 'KOSPI' : s.marketName === '코스닥' ? 'KOSDAQ' : s.marketName,
-          relativeStrengthScore: metrics?.relativeStrengthScore || 0,
+          relativeStrengthScore: Number((metrics?.relativeStrengthScore || 0).toFixed(4)),
           isHighPrice: metrics?.isNewHigh || false,
           investmentIndicators: realtimePrice
             ? `${realtimePrice.changeRate > 0 ? '+' : ''}${realtimePrice.changeRate.toFixed(2)}%`
@@ -491,16 +533,39 @@ export class RealTimeChartService implements OnModuleInit {
     }
 
     const allStockCodes = validStocks.map((s) => s.code);
-    const indexCode = marketType === '0' ? 'INDEX_KOSPI' : 'INDEX_KOSDAQ';
 
     // 런타임 RS 계산 (최근 4개 거래일: 당일, D-1, D-2, D-3)
-    const rsHistoryMap = await this.metricsService.calculateRuntimeRS(
-      allStockCodes,
-      periods,
-      weights,
-      indexCode,
-      4,
-    );
+    let rsHistoryMap: Map<string, Array<{ tradeDate: Date; rank: number; rsScore: number }>>;
+
+    if (marketType === '8') {
+      // 전체 조회: KOSPI/KOSDAQ 각각 해당 지수로 RS 계산 후 합치기
+      const kospiStocks = validStocks.filter((s) => s.marketName === '거래소').map((s) => s.code);
+      const kosdaqStocks = validStocks.filter((s) => s.marketName === '코스닥').map((s) => s.code);
+
+      this.logger.log(`Split stocks for custom RS: KOSPI=${kospiStocks.length}, KOSDAQ=${kosdaqStocks.length}`);
+
+      const [kospiRS, kosdaqRS] = await Promise.all([
+        kospiStocks.length > 0
+          ? this.metricsService.calculateRuntimeRS(kospiStocks, periods, weights, 'INDEX_KOSPI', 4)
+          : new Map(),
+        kosdaqStocks.length > 0
+          ? this.metricsService.calculateRuntimeRS(kosdaqStocks, periods, weights, 'INDEX_KOSDAQ', 4)
+          : new Map(),
+      ]);
+
+      // 두 결과 합치기
+      rsHistoryMap = new Map([...kospiRS, ...kosdaqRS]);
+    } else {
+      // 단일 시장 조회
+      const indexCode = marketType === '0' ? 'INDEX_KOSPI' : 'INDEX_KOSDAQ';
+      rsHistoryMap = await this.metricsService.calculateRuntimeRS(
+        allStockCodes,
+        periods,
+        weights,
+        indexCode,
+        4,
+      );
+    }
 
     // 기본 지표 데이터 조회 (필터링용: isNewHigh, tradingValue 등)
     const metricsMap = await this.metricsService.getLatestMetrics(allStockCodes, marketType);
@@ -597,7 +662,7 @@ export class RealTimeChartService implements OnModuleInit {
           stockCode: s.code,
           currentPrice: realtimePrice?.currentPrice || dbPrice,
           exchange: s.marketName === '거래소' ? 'KOSPI' : s.marketName === '코스닥' ? 'KOSDAQ' : s.marketName,
-          relativeStrengthScore: item.rsScore,
+          relativeStrengthScore: Number(item.rsScore.toFixed(4)),
           isHighPrice: metrics?.isNewHigh || false,
           investmentIndicators: realtimePrice
             ? `${realtimePrice.changeRate > 0 ? '+' : ''}${realtimePrice.changeRate.toFixed(2)}%`
@@ -658,7 +723,6 @@ export class RealTimeChartService implements OnModuleInit {
     }
 
     const allStockCodes = validStocks.map((s) => s.code);
-    const indexCode = marketType === '0' ? 'INDEX_KOSPI' : 'INDEX_KOSDAQ';
 
     // rsFilters를 periods와 weights로 변환
     const periods: number[] = [];
@@ -674,12 +738,36 @@ export class RealTimeChartService implements OnModuleInit {
     this.logger.log(`Converted range filters to periods: ${periods}, weights: ${weights}`);
 
     // 기간 기반 RS 계산 (최근 4개 거래일)
-    const rsHistoryMap = await this.metricsService.calculateRangeRS(
-      allStockCodes,
-      rsFilters,
-      indexCode,
-      4,
-    );
+    let rsHistoryMap: Map<string, Array<{ tradeDate: Date; rank: number; rsScore: number }>>;
+
+    if (marketType === '8') {
+      // 전체 조회: KOSPI/KOSDAQ 각각 해당 지수로 RS 계산 후 합치기
+      const kospiStocks = validStocks.filter((s) => s.marketName === '거래소').map((s) => s.code);
+      const kosdaqStocks = validStocks.filter((s) => s.marketName === '코스닥').map((s) => s.code);
+
+      this.logger.log(`Split stocks: KOSPI=${kospiStocks.length}, KOSDAQ=${kosdaqStocks.length}`);
+
+      const [kospiRS, kosdaqRS] = await Promise.all([
+        kospiStocks.length > 0
+          ? this.metricsService.calculateRangeRS(kospiStocks, rsFilters, 'INDEX_KOSPI', 4)
+          : new Map(),
+        kosdaqStocks.length > 0
+          ? this.metricsService.calculateRangeRS(kosdaqStocks, rsFilters, 'INDEX_KOSDAQ', 4)
+          : new Map(),
+      ]);
+
+      // 두 결과 합치기
+      rsHistoryMap = new Map([...kospiRS, ...kosdaqRS]);
+    } else {
+      // 단일 시장 조회
+      const indexCode = marketType === '0' ? 'INDEX_KOSPI' : 'INDEX_KOSDAQ';
+      rsHistoryMap = await this.metricsService.calculateRangeRS(
+        allStockCodes,
+        rsFilters,
+        indexCode,
+        4,
+      );
+    }
 
     // 기본 지표 데이터 조회 (필터링용)
     const metricsMap = await this.metricsService.getLatestMetrics(allStockCodes, marketType);
@@ -768,7 +856,7 @@ export class RealTimeChartService implements OnModuleInit {
           stockCode: s.code,
           currentPrice: realtimePrice?.currentPrice || dbPrice,
           exchange: s.marketName === '거래소' ? 'KOSPI' : s.marketName === '코스닥' ? 'KOSDAQ' : s.marketName,
-          relativeStrengthScore: item.rsScore,
+          relativeStrengthScore: Number(item.rsScore.toFixed(4)),
           isHighPrice: metrics?.isNewHigh || false,
           investmentIndicators: realtimePrice
             ? `${realtimePrice.changeRate > 0 ? '+' : ''}${realtimePrice.changeRate.toFixed(2)}%`

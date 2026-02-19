@@ -232,12 +232,45 @@ export class StockMetricsService {
       const latestIndexCandle = indexCandlesUpToDate[indexCandlesUpToDate.length - 1];
       const indexCloseNow = latestIndexCandle.closePrice.toNumber();
 
-      // 각 종목별 RS 계산
-      const stockRS: Array<{ stockCode: string; rsScore: number }> = [];
+      // 각 종목별 RS 계산 + 필터 적용
+      const stockData: Array<{ stockCode: string; rsRaw: number; passedFilters: boolean }> = [];
+      const MIN_TRADING_VALUE = 1_000_000_000; // 10억
 
       for (const [stockCode, candles] of candlesByStock) {
         const candlesUpToDate = candles.filter((c) => c.candleTime <= tradeDate);
         if (candlesUpToDate.length === 0) continue;
+
+        const latest = candlesUpToDate[candlesUpToDate.length - 1];
+        const closePrice = latest.closePrice.toNumber();
+
+        // 52주 고/저가
+        let high52w = -Infinity;
+        let low52w = Infinity;
+        for (const c of candlesUpToDate) {
+          const h = c.highPrice.toNumber();
+          const l = c.lowPrice.toNumber();
+          if (h > high52w) high52w = h;
+          if (l < low52w) low52w = l;
+        }
+
+        // MA200 (현재)
+        const ma200Slice = candlesUpToDate.slice(-200);
+        const ma200 = ma200Slice.length >= 200
+          ? ma200Slice.reduce((sum, c) => sum + c.closePrice.toNumber(), 0) / 200
+          : null;
+
+        // MA200 (20일 전)
+        const ma200_20dSlice = candlesUpToDate.length >= 220
+          ? candlesUpToDate.slice(-(200 + 20), -20)
+          : [];
+        const ma200_20d = ma200_20dSlice.length >= 200
+          ? ma200_20dSlice.reduce((sum, c) => sum + c.closePrice.toNumber(), 0) / 200
+          : null;
+
+        // 거래대금
+        const tradingValue = latest.tradingValue
+          ? Number(latest.tradingValue)
+          : closePrice * Number(latest.volume);
 
         // 여러 기간의 RS 계산
         const rsValues: number[] = [];
@@ -247,7 +280,6 @@ export class StockMetricsService {
             continue;
           }
 
-          const currentPrice = candlesUpToDate[candlesUpToDate.length - 1].closePrice.toNumber();
           const pastPrice = candlesUpToDate[candlesUpToDate.length - 1 - period].closePrice.toNumber();
 
           // 해당 기간의 지수 과거가
@@ -259,7 +291,7 @@ export class StockMetricsService {
           const indexPastPrice = indexPastCandles[indexPastCandles.length - 1 - period].closePrice.toNumber();
 
           if (pastPrice > 0 && indexPastPrice > 0) {
-            const stockReturn = currentPrice / pastPrice;
+            const stockReturn = closePrice / pastPrice;
             const indexReturn = indexCloseNow / indexPastPrice;
             rsValues.push(stockReturn / indexReturn);
           } else {
@@ -279,16 +311,30 @@ export class StockMetricsService {
 
         if (totalWeight > 0) {
           weightedRS /= totalWeight;
-          stockRS.push({ stockCode, rsScore: weightedRS });
+
+          // 5가지 필터
+          const f1 = closePrice >= low52w * 1.3;                          // 현재가 >= 52주저 × 1.3
+          const f2 = closePrice >= 0.75 * high52w;                        // 현재가 >= 0.75 × 52주고
+          const f3 = ma200 !== null && ma200_20d !== null && ma200 > ma200_20d; // MA200 상승추세
+          const f4 = weightedRS > 0;                                      // RS 계산 가능
+          const f5 = tradingValue >= MIN_TRADING_VALUE;                   // 거래대금 >= 10억
+
+          const passedFilters = f1 && f2 && f3 && f4 && f5;
+          stockData.push({ stockCode, rsRaw: weightedRS, passedFilters });
         }
       }
 
-      // RS 기준 정렬 및 랭킹
-      stockRS.sort((a, b) => b.rsScore - a.rsScore);
+      // 필터 통과 종목만 RS 기준 정렬 및 랭킹
+      const filtered = stockData.filter((s) => s.passedFilters);
+      filtered.sort((a, b) => b.rsRaw - a.rsRaw);
 
-      for (let i = 0; i < stockRS.length; i++) {
-        const { stockCode, rsScore } = stockRS[i];
+      const totalStocks = filtered.length;
+      for (let i = 0; i < totalStocks; i++) {
+        const { stockCode } = filtered[i];
         const rank = i + 1;
+        // 상위 % 계산 → 1~99 점수 변환
+        const topPercent = (rank / totalStocks) * 100;
+        const score = this.percentileToScore(topPercent);
 
         if (!resultMap.has(stockCode)) {
           resultMap.set(stockCode, []);
@@ -296,7 +342,7 @@ export class StockMetricsService {
         resultMap.get(stockCode)!.push({
           tradeDate: tradeDateOnly,
           rank,
-          rsScore,
+          rsScore: score,
         });
       }
     }
@@ -354,7 +400,7 @@ export class StockMetricsService {
       const startDays = this.convertDateToDays(filter.rsStartDate, today);
       const endDays = this.convertDateToDays(filter.rsEndDate, today);
       periodsData.push({ startDays, endDays, weight: filter.strength });
-      maxDays = Math.max(maxDays, endDays);
+      maxDays = Math.max(maxDays, startDays); // startDays가 더 크므로 (더 과거)
     }
 
     // 과거 데이터 조회 범위
@@ -403,8 +449,15 @@ export class StockMetricsService {
       const indexCandlesUpToDate = indexCandles.filter((c) => c.candleTime <= tradeDate);
       if (indexCandlesUpToDate.length === 0) continue;
 
-      // 각 종목별 RS 계산
-      const stockRS: Array<{ stockCode: string; rsScore: number }> = [];
+      const MIN_TRADING_VALUE = 1_000_000_000; // 10억
+
+      // 필터 통과 종목 Set (여러 필터 중 하나라도 통과하면 포함)
+      const passedStockCodes = new Set<string>();
+      // 종목별 RS 값 저장
+      const stockRSMap = new Map<string, number>();
+
+      // 디버그: 필터별 탈락 카운트
+      const filterStats = { total: 0, f1Fail: 0, f2Fail: 0, f3Fail: 0, f4Fail: 0, f5Fail: 0, noData: 0, passed: 0 };
 
       for (const [stockCode, candles] of candlesByStock) {
         const candlesUpToDate = candles.filter((c) => c.candleTime <= tradeDate);
@@ -413,36 +466,101 @@ export class StockMetricsService {
         // 여러 기간의 RS 계산
         const rsValues: number[] = [];
         const weights: number[] = [];
+        let anyFilterPassed = false;
 
         for (const periodData of periodsData) {
           const { startDays, endDays, weight } = periodData;
 
-          // 데이터 충분한지 확인
-          if (candlesUpToDate.length <= endDays || indexCandlesUpToDate.length <= endDays) {
-            continue;
+          // 목표 날짜 계산 (달력 기준)
+          const targetStartDate = new Date(tradeDateOnly);
+          targetStartDate.setDate(tradeDateOnly.getDate() - startDays);
+          const targetEndDate = new Date(tradeDateOnly);
+          targetEndDate.setDate(tradeDateOnly.getDate() - endDays);
+
+          // startDate: 목표일 이상의 가장 가까운 거래일 (미래 방향)
+          const startCandle = candlesUpToDate.find((c) => c.candleTime >= targetStartDate);
+          // endDate: 목표일 이하의 가장 최근 거래일 (과거 방향)
+          const endCandle = [...candlesUpToDate].reverse().find((c) => c.candleTime <= targetEndDate);
+
+          if (!startCandle || !endCandle) continue;
+
+          // 지수도 동일한 방식으로 찾기
+          const indexStartCandle = indexCandlesUpToDate.find((c) => c.candleTime >= targetStartDate);
+          const indexEndCandle = [...indexCandlesUpToDate].reverse().find((c) => c.candleTime <= targetEndDate);
+
+          if (!indexStartCandle || !indexEndCandle) continue;
+
+          // === endDate 기준으로 필터 조건 계산 ===
+          const candlesUpToEndDate = candlesUpToDate.filter((c) => c.candleTime <= endCandle.candleTime);
+          const closePrice = endCandle.closePrice.toNumber();
+
+          // 52주 고/저가 (endDate 기준)
+          let high52w = -Infinity;
+          let low52w = Infinity;
+          for (const c of candlesUpToEndDate) {
+            const h = c.highPrice.toNumber();
+            const l = c.lowPrice.toNumber();
+            if (h > high52w) high52w = h;
+            if (l < low52w) low52w = l;
           }
 
-          // startDays 전의 가격 (분자)
-          const startPrice = candlesUpToDate[candlesUpToDate.length - 1 - startDays].closePrice.toNumber();
-          // endDays 전의 종가 (분모, 기준가)
-          const endPrice = candlesUpToDate[candlesUpToDate.length - 1 - endDays].closePrice.toNumber();
+          // MA200 (endDate 기준)
+          const ma200Slice = candlesUpToEndDate.slice(-200);
+          const ma200 = ma200Slice.length >= 200
+            ? ma200Slice.reduce((sum, c) => sum + c.closePrice.toNumber(), 0) / 200
+            : null;
 
-          // 지수도 동일한 기간
-          const indexStartPrice = indexCandlesUpToDate[indexCandlesUpToDate.length - 1 - startDays].closePrice.toNumber();
-          const indexEndPrice = indexCandlesUpToDate[indexCandlesUpToDate.length - 1 - endDays].closePrice.toNumber();
+          // MA200 (20일 전, endDate 기준)
+          const ma200_20dSlice = candlesUpToEndDate.length >= 220
+            ? candlesUpToEndDate.slice(-(200 + 20), -20)
+            : [];
+          const ma200_20d = ma200_20dSlice.length >= 200
+            ? ma200_20dSlice.reduce((sum, c) => sum + c.closePrice.toNumber(), 0) / 200
+            : null;
+
+          // 거래대금 (endDate 기준)
+          const tradingValue = endCandle.tradingValue
+            ? Number(endCandle.tradingValue)
+            : closePrice * Number(endCandle.volume);
+
+          // RS 계산
+          const startPrice = startCandle.closePrice.toNumber();
+          const endPrice = endCandle.closePrice.toNumber();
+          const indexStartPrice = indexStartCandle.closePrice.toNumber();
+          const indexEndPrice = indexEndCandle.closePrice.toNumber();
 
           if (endPrice > 0 && indexEndPrice > 0) {
-            // endDate 종가 기준으로 startDate까지의 수익률
             const stockReturn = startPrice / endPrice;
             const indexReturn = indexStartPrice / indexEndPrice;
             const rs = stockReturn / indexReturn;
 
             rsValues.push(rs);
             weights.push(weight);
+
+            // 이 필터(endDate) 기준 5가지 조건 체크
+            const f1 = closePrice >= low52w * 1.3;                          // 현재가 >= 52주저 × 1.3
+            const f2 = closePrice >= 0.75 * high52w;                        // 현재가 >= 0.75 × 52주고
+            const f3 = ma200 !== null && ma200_20d !== null && ma200 > ma200_20d; // MA200 상승추세
+            const f4 = rs > 0;                                              // RS 계산 가능
+            const f5 = tradingValue >= MIN_TRADING_VALUE;                   // 거래대금 >= 10억
+
+            filterStats.total++;
+            if (!f1) filterStats.f1Fail++;
+            if (!f2) filterStats.f2Fail++;
+            if (!f3) filterStats.f3Fail++;
+            if (!f4) filterStats.f4Fail++;
+            if (!f5) filterStats.f5Fail++;
+
+            if (f1 && f2 && f3 && f4 && f5) {
+              anyFilterPassed = true;
+              filterStats.passed++;
+            }
+          } else {
+            filterStats.noData++;
           }
         }
 
-        // 가중 평균 계산
+        // 가중 평균 RS 계산
         let weightedRS = 0;
         let totalWeight = 0;
         for (let i = 0; i < rsValues.length; i++) {
@@ -454,16 +572,35 @@ export class StockMetricsService {
 
         if (totalWeight > 0) {
           weightedRS /= totalWeight;
-          stockRS.push({ stockCode, rsScore: weightedRS });
+          stockRSMap.set(stockCode, weightedRS);
+
+          if (anyFilterPassed) {
+            passedStockCodes.add(stockCode);
+          }
         }
       }
 
-      // RS 기준 정렬 및 랭킹
-      stockRS.sort((a, b) => b.rsScore - a.rsScore);
+      // 디버그 로그: 필터별 탈락 현황
+      this.logger.log(
+        `[Range RS Filter Stats] Total: ${filterStats.total}, Passed: ${filterStats.passed}, ` +
+        `F1(52w low): ${filterStats.f1Fail}, F2(52w high): ${filterStats.f2Fail}, ` +
+        `F3(MA200): ${filterStats.f3Fail}, F4(RS>0): ${filterStats.f4Fail}, F5(거래대금): ${filterStats.f5Fail}, NoData: ${filterStats.noData}`,
+      );
 
-      for (let i = 0; i < stockRS.length; i++) {
-        const { stockCode, rsScore } = stockRS[i];
+      // 필터 통과 종목만 RS 기준 정렬 및 랭킹
+      const filtered = Array.from(passedStockCodes).map((code) => ({
+        stockCode: code,
+        rsRaw: stockRSMap.get(code) || 0,
+      }));
+      filtered.sort((a, b) => b.rsRaw - a.rsRaw);
+
+      const totalStocks = filtered.length;
+      for (let i = 0; i < totalStocks; i++) {
+        const { stockCode } = filtered[i];
         const rank = i + 1;
+        // 상위 % 계산 → 1~99 점수 변환
+        const topPercent = (rank / totalStocks) * 100;
+        const score = this.percentileToScore(topPercent);
 
         if (!resultMap.has(stockCode)) {
           resultMap.set(stockCode, []);
@@ -471,7 +608,7 @@ export class StockMetricsService {
         resultMap.get(stockCode)!.push({
           tradeDate: tradeDateOnly,
           rank,
-          rsScore,
+          rsScore: score,
         });
       }
     }
