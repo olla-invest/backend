@@ -18,6 +18,7 @@ export class KiwoomWebSocketService implements IRealtimeSource, OnModuleInit, On
   private pingTimer: NodeJS.Timeout | null = null;
   private isConnecting = false;
   private isLoggedIn = false;
+  private currentToken: string = '';
   private pendingSubscriptions = false;
   private subscriptions = new Map<string, Set<string>>(); // stockCode -> Set<type>
   private subscriptionQueue: Array<{ stockCode: string; types: string[]; action: 'REG' | 'REMOVE' }> = [];
@@ -68,16 +69,12 @@ export class KiwoomWebSocketService implements IRealtimeSource, OnModuleInit, On
     this.isConnecting = true;
 
     try {
-      const token = await this.authService.ensureValidToken();
+      this.currentToken = await this.authService.ensureValidToken();
       const wsFullUrl = `${this.wsUrl}/api/dostk/websocket`;
 
       this.logger.log(`Connecting to Kiwoom WebSocket: ${wsFullUrl}`);
 
-      this.ws = new WebSocket(wsFullUrl, {
-        headers: {
-          authorization: `Bearer ${token}`,
-        },
-      });
+      this.ws = new WebSocket(wsFullUrl);
 
       this.ws.on('open', () => this.onOpen());
       this.ws.on('message', (data) => this.onMessage(data));
@@ -92,14 +89,22 @@ export class KiwoomWebSocketService implements IRealtimeSource, OnModuleInit, On
   }
 
   /**
-   * WebSocket 연결 성공
+   * WebSocket 연결 성공 → LOGIN 메시지 전송
    */
   private onOpen(): void {
-    this.logger.log('Kiwoom WebSocket connected, waiting for login confirmation...');
+    this.logger.log('Kiwoom WebSocket connected, sending LOGIN message...');
     this.startPing();
     this.isLoggedIn = false;
     this.pendingSubscriptions = true;
     this.subscriptionQueue = []; // 새 연결 시 큐 초기화
+
+    // LOGIN 메시지 전송 (키움 WebSocket 인증 필수)
+    const loginMessage = JSON.stringify({
+      trnm: 'LOGIN',
+      token: this.currentToken,
+    });
+    this.ws?.send(loginMessage);
+    this.logger.log('LOGIN message sent');
   }
 
   /**

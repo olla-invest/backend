@@ -5,8 +5,42 @@ import { RealTimeChartService } from './real-time-chart.service';
 @Injectable()
 export class DataSchedulerService {
   private readonly logger = new Logger(DataSchedulerService.name);
+  private isMetricsCalculating = false;
 
   constructor(private readonly realTimeChartService: RealTimeChartService) {}
+
+  /**
+   * 장중 3분마다 랭킹 재계산
+   * 월~금 09:00 ~ 15:30
+   */
+  @Cron('*/3 9-15 * * 1-5', {
+    timeZone: 'Asia/Seoul',
+  })
+  async recalculateMetricsDuringMarket() {
+    // 15:30 이후 실행 방지
+    const now = new Date();
+    const hours = now.getHours();
+    const minutes = now.getMinutes();
+    if (hours === 15 && minutes > 30) return;
+
+    // 중복 실행 방지 (이전 계산이 아직 진행 중이면 스킵)
+    if (this.isMetricsCalculating) {
+      this.logger.warn('Metrics calculation already in progress, skipping');
+      return;
+    }
+
+    this.isMetricsCalculating = true;
+    this.logger.log('[장중] Recalculating metrics...');
+
+    try {
+      await this.realTimeChartService.calculateDailyMetrics('all');
+      this.logger.log('[장중] Metrics recalculation completed');
+    } catch (error) {
+      this.logger.error('[장중] Metrics recalculation failed', error);
+    } finally {
+      this.isMetricsCalculating = false;
+    }
+  }
 
   /**
    * 매일 장 마감 후 종가 데이터 수집 및 랭킹 계산

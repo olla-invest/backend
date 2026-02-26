@@ -1,6 +1,7 @@
 import { Controller, Get, Post, Query, Param, Body } from '@nestjs/common';
 import { RealTimeChartService } from './real-time-chart.service';
 import { InitialSetupService } from './initial-setup.service';
+import { StockMetricsService } from './stock-metrics.service';
 import { Public } from '../../common/auth/decorators/public.decorator';
 
 @Controller('real-time-chart')
@@ -9,6 +10,7 @@ export class RealTimeChartController {
   constructor(
     private readonly chartService: RealTimeChartService,
     private readonly setupService: InitialSetupService,
+    private readonly metricsService: StockMetricsService,
   ) {}
 
   /**
@@ -139,7 +141,7 @@ export class RealTimeChartController {
    */
   @Get('stocks')
   async getStockList(
-    @Query('marketType') marketType: '0' | '10' | '8' = '0',
+    @Query('marketType') marketType: '0' | '10' | 'all' = 'all',
     @Query('page') page: string = '1',
     @Query('pageSize') pageSize: string = '50',
     @Query('isHighPrice') isHighPrice?: string,
@@ -187,7 +189,7 @@ export class RealTimeChartController {
    */
   @Post('stocks')
   async getStockListWithRangeRS(
-    @Body('marketType') marketType: '0' | '10' | '8' = '0',
+    @Body('marketType') marketType: '0' | '10' | 'all' = 'all',
     @Body('page') page: number = 1,
     @Body('pageSize') pageSize: number = 50,
     @Body('filters') filters?: {
@@ -228,7 +230,7 @@ export class RealTimeChartController {
    */
   @Post('metrics/calculate')
   async calculateMetrics(
-    @Body('marketType') marketType: '0' | '10' | '8' = '0',
+    @Body('marketType') marketType: '0' | '10' | 'all' = 'all',
     @Body('tradeDate') tradeDate?: string,
   ) {
     return await this.chartService.calculateDailyMetrics(marketType, tradeDate);
@@ -241,6 +243,15 @@ export class RealTimeChartController {
   @Get('status')
   getInitializationStatus() {
     return this.chartService.getInitializationStatus();
+  }
+
+  /**
+   * GET /real-time-chart/debug/stocks
+   * 디버그: 필터 없이 종목 리스트 Raw 조회
+   */
+  @Get('debug/stocks')
+  async debugGetStockList(@Query('marketType') marketType: '0' | '10' | 'all' = 'all') {
+    return await this.chartService.debugGetStockList(marketType);
   }
 
   /**
@@ -259,7 +270,7 @@ export class RealTimeChartController {
    * 초기 데이터 설정 (기본 = 빠른 설정)
    */
   @Post('setup/initial')
-  async runInitialSetup(@Body('marketType') marketType: '0' | '10' | '8' = '0') {
+  async runInitialSetup(@Body('marketType') marketType: '0' | '10' | 'all' = 'all') {
     return await this.setupService.runInitialSetup(marketType);
   }
 
@@ -268,7 +279,7 @@ export class RealTimeChartController {
    * 빠른 초기 설정 (홈 화면 즉시 사용 가능)
    */
   @Post('setup/quick')
-  async runQuickSetup(@Body('marketType') marketType: '0' | '10' | '8' = '0') {
+  async runQuickSetup(@Body('marketType') marketType: '0' | '10' | 'all' = 'all') {
     return await this.setupService.runQuickSetup(marketType);
   }
 
@@ -277,7 +288,7 @@ export class RealTimeChartController {
    * 전체 데이터 설정 (백그라운드 배치용)
    */
   @Post('setup/full')
-  async runFullSetup(@Body('marketType') marketType: '0' | '10' | '8' = '0') {
+  async runFullSetup(@Body('marketType') marketType: '0' | '10' | 'all' = 'all') {
     return await this.setupService.runFullSetup(marketType);
   }
 
@@ -295,9 +306,34 @@ export class RealTimeChartController {
    */
   @Post('setup/extended')
   async runExtendedDataCollection(
-    @Body('marketType') marketType: '0' | '10' | '8' = '0',
+    @Body('marketType') marketType: '0' | '10' | 'all' = 'all',
     @Body('days') days: number = 3650,
   ) {
-    return await this.setupService.runExtendedDataCollection(marketType, days);
+    // Fire-and-forget: 즉시 응답 후 백그라운드에서 처리
+    this.setupService.runExtendedDataCollection(marketType, days)
+      .then(result => {
+        console.log('Extended data collection completed:', result);
+      })
+      .catch(error => {
+        console.error('Extended data collection failed:', error);
+      });
+
+    return {
+      success: true,
+      message: `Extended data collection started (${days} days, market: ${marketType}). Check server logs for progress.`,
+    };
+  }
+
+  /**
+   * POST /real-time-chart/debug/filter-check
+   * 디버그: 특정 종목들의 5개 필터 통과/실패 상세 조회
+   *
+   * Body: { "stockCodes": ["043260", "347700", "041920", ...] }
+   */
+  @Post('debug/filter-check')
+  async debugFilterCheck(
+    @Body('stockCodes') stockCodes: string[],
+  ) {
+    return await this.metricsService.debugFilterCheck(stockCodes);
   }
 }

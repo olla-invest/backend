@@ -114,38 +114,46 @@ export class RealTimeChartService implements OnModuleInit {
         }
       }
 
-      // 데이터 수집을 스킵해야 하는 경우
-      if (shouldSkipCollection) {
-        this.initializationComplete = true;
-        this.lastDataUpdate = lastCandleDate;
-        this.logger.log('=== Data Initialization Skipped (Already up to date) ===');
-        return {
-          success: true,
-          skipped: true,
-          reason: 'Market closed and data is up to date',
-          lastDataUpdate: this.lastDataUpdate,
-        };
+      // 데이터 수집 (스킵하지 않는 경우만)
+      if (!shouldSkipCollection) {
+        // 0. 시장 지수 일봉 수집 (KOSPI + KOSDAQ) - RS 계산에 필요
+        this.logger.log('Collecting market index day candles (KOSPI + KOSDAQ)...');
+        await this.collectSectorDayCandles('001', 'INDEX_KOSPI');
+        await this.collectSectorDayCandles('101', 'INDEX_KOSDAQ');
+        this.logger.log('Market index day candles collected.');
+
+        for (const marketType of marketTypes) {
+          const marketName = marketType === '0' ? 'KOSPI' : 'KOSDAQ';
+          this.logger.log(`[${marketName}] Collecting day candles (${daysToFetch} days)...`);
+
+          // 1. 일봉 데이터 수집
+          const collectResult = await this.collectAllDayCandles(marketType, daysToFetch);
+          this.logger.log(`[${marketName}] Day candles collected: ${collectResult.success}/${collectResult.total}`);
+        }
+      } else {
+        this.logger.log('Data collection skipped (already up to date). Recalculating metrics only...');
       }
 
-      // 0. 시장 지수 일봉 수집 (KOSPI + KOSDAQ) - RS 계산에 필요
-      this.logger.log('Collecting market index day candles (KOSPI + KOSDAQ)...');
-      await this.collectSectorDayCandles('001', 'INDEX_KOSPI');
-      await this.collectSectorDayCandles('101', 'INDEX_KOSDAQ');
-      this.logger.log('Market index day candles collected.');
+      // 2. 7개 필터 + RS(63) + 통합 랭킹 계산 (최근 4거래일 - 항상 실행)
+      // KOSPI + KOSDAQ 합쳐서 하나의 풀로 순위 매기기 (RS는 각 시장 지수 사용)
+      const [kospiStockList, kosdaqStockList] = await Promise.all([
+        this.fetchStockList('0'),
+        this.fetchStockList('10'),
+      ]);
+      const allStockCodes = [
+        ...kospiStockList.map((s: any) => s.code),
+        ...kosdaqStockList.map((s: any) => s.code),
+      ];
+      const stockIndexMap = new Map<string, string>();
+      for (const s of kospiStockList) stockIndexMap.set(s.code, 'INDEX_KOSPI');
+      for (const s of kosdaqStockList) stockIndexMap.set(s.code, 'INDEX_KOSDAQ');
 
-      for (const marketType of marketTypes) {
-        const marketName = marketType === '0' ? 'KOSPI' : 'KOSDAQ';
-        this.logger.log(`[${marketName}] Collecting day candles (${daysToFetch} days)...`);
+      const recentDates = await this.metricsService.getRecentTradingDates(4);
+      this.logger.log(`Calculating unified metrics for ${recentDates.length} trading days (KOSPI: ${kospiStockList.length}, KOSDAQ: ${kosdaqStockList.length}, total: ${allStockCodes.length})...`);
 
-        // 1. 일봉 데이터 수집
-        const collectResult = await this.collectAllDayCandles(marketType, daysToFetch);
-        this.logger.log(`[${marketName}] Day candles collected: ${collectResult.success}/${collectResult.total}`);
-
-        // 2. 7개 필터 + RS(63) + 랭킹 계산
-        this.logger.log(`[${marketName}] Calculating filters, RS, and rankings...`);
-        const indexCode = marketType === '0' ? 'INDEX_KOSPI' : 'INDEX_KOSDAQ';
-        const metricsResult = await this.metricsService.calculateAndSaveDailyMetrics(marketType, undefined, indexCode);
-        this.logger.log(`[${marketName}] Metrics calculated: ${metricsResult?.count || 0} stocks`);
+      for (const tradeDate of recentDates) {
+        const metricsResult = await this.metricsService.calculateAndSaveDailyMetrics('all', tradeDate, 'INDEX_KOSPI', allStockCodes, stockIndexMap);
+        this.logger.log(`Metrics for ${tradeDate.toISOString().split('T')[0]}: ${metricsResult?.count || 0} stocks, filtered: ${metricsResult?.filtered || 0}`);
       }
 
       this.initializationComplete = true;
@@ -312,7 +320,7 @@ export class RealTimeChartService implements OnModuleInit {
    * @param rsWeights - RS 가중치 (예: "50,30,20"), rsPeriods와 함께 사용
    */
   async getStockList(
-    marketType: '0' | '10' | '8' = '0',
+    marketType: '0' | '10' | 'all' = 'all',
     page: number = 1,
     pageSize: number = 50,
     filters?: {
@@ -349,36 +357,11 @@ export class RealTimeChartService implements OnModuleInit {
 
     // 디폴트 RS(63일) - 기존 로직
 
-    // 캐시 확인
-    const cached = this.stockListCache.get(marketType);
-    const now = Date.now();
-    let validStocks: any[];
-
-    if (cached && (now - cached.timestamp) < this.CACHE_TTL) {
-      // 캐시 히트
-      this.logger.debug(`Cache hit for market type: ${marketType}`);
-      validStocks = cached.data;
-    } else {
-      // 캐시 미스 - API 호출
-      this.logger.log(`Cache miss for market type: ${marketType}, fetching from API`);
-      const result = await this.kiwoomRest.getStockList(marketType);
-
-      // 6자리 숫자 종목코드만 필터
-      validStocks = result.list.filter((s) => s.code.match(/^\d{6}$/));
-
-      // 캐시 저장
-      this.stockListCache.set(marketType, {
-        data: validStocks,
-        timestamp: now,
-      });
-      this.logger.log(`Cached ${validStocks.length} stocks for market type: ${marketType}`);
-    }
-
-    // 모든 종목 코드 수집
+    const validStocks = await this.fetchStockList(marketType);
     const allStockCodes = validStocks.map((s) => s.code);
 
     // 최신 지표 데이터 조회 (모든 종목)
-    const metricsMap = await this.metricsService.getLatestMetrics(allStockCodes, marketType);
+    const metricsMap = await this.metricsService.getLatestMetrics(allStockCodes);
 
     // 종목 리스트와 지표 병합 및 필터링
     const stocksWithMetrics = validStocks
@@ -414,7 +397,13 @@ export class RealTimeChartService implements OnModuleInit {
 
         return true;
       })
-      .sort((a, b) => b.rsScore - a.rsScore); // RS 점수 내림차순
+      .sort((a, b) => {
+        // 1차: rank 오름차순 (낮은 순위가 먼저)
+        const rankDiff = (a.metrics?.rank || 999999) - (b.metrics?.rank || 999999);
+        if (rankDiff !== 0) return rankDiff;
+        // 2차: rsScore 내림차순 (동일 순위는 점수 높은게 먼저)
+        return b.rsScore - a.rsScore;
+      });
 
     // 정렬 후 페이지네이션
     const totalCount = stocksWithMetrics.length;
@@ -438,7 +427,7 @@ export class RealTimeChartService implements OnModuleInit {
     const rankingHistories = await Promise.all(
       pageStockCodes.map(async (code) => ({
         code,
-        history: await this.metricsService.getRankingHistory(code, 3),
+        history: await this.metricsService.getRankingHistory(code, 4), // 오늘 + D-1 + D-2 + D-3
       })),
     );
     const rankingMap = new Map(rankingHistories.map((r) => [r.code, r.history]));
@@ -488,6 +477,7 @@ export class RealTimeChartService implements OnModuleInit {
             today: rankHistory[0] || null,
             oneDayAgo: rankHistory[1] || null,
             twoDaysAgo: rankHistory[2] || null,
+            threeDaysAgo: rankHistory[3] || null,
           },
         };
       }),
@@ -498,7 +488,7 @@ export class RealTimeChartService implements OnModuleInit {
    * 커스텀 RS 설정으로 종목 리스트 조회 (런타임 계산)
    */
   async getStockListWithCustomRS(
-    marketType: '0' | '10' | '8' = '0',
+    marketType: '0' | '10' | 'all' = 'all',
     page: number = 1,
     pageSize: number = 50,
     filters?: {
@@ -520,24 +510,13 @@ export class RealTimeChartService implements OnModuleInit {
     }
 
     // 종목 리스트 가져오기 (캐시 or API)
-    const cached = this.stockListCache.get(marketType);
-    const now = Date.now();
-    let validStocks: any[];
-
-    if (cached && (now - cached.timestamp) < this.CACHE_TTL) {
-      validStocks = cached.data;
-    } else {
-      const result = await this.kiwoomRest.getStockList(marketType);
-      validStocks = result.list.filter((s) => s.code.match(/^\d{6}$/));
-      this.stockListCache.set(marketType, { data: validStocks, timestamp: now });
-    }
-
+    const validStocks = await this.fetchStockList(marketType);
     const allStockCodes = validStocks.map((s) => s.code);
 
     // 런타임 RS 계산 (최근 4개 거래일: 당일, D-1, D-2, D-3)
     let rsHistoryMap: Map<string, Array<{ tradeDate: Date; rank: number; rsScore: number }>>;
 
-    if (marketType === '8') {
+    if (marketType === 'all') {
       // 전체 조회: KOSPI/KOSDAQ 각각 해당 지수로 RS 계산 후 합치기
       const kospiStocks = validStocks.filter((s) => s.marketName === '거래소').map((s) => s.code);
       const kosdaqStocks = validStocks.filter((s) => s.marketName === '코스닥').map((s) => s.code);
@@ -568,7 +547,7 @@ export class RealTimeChartService implements OnModuleInit {
     }
 
     // 기본 지표 데이터 조회 (필터링용: isNewHigh, tradingValue 등)
-    const metricsMap = await this.metricsService.getLatestMetrics(allStockCodes, marketType);
+    const metricsMap = await this.metricsService.getLatestMetrics(allStockCodes);
 
     // 종목 리스트와 RS 병합 및 필터링
     const stocksWithRS = validStocks
@@ -688,7 +667,7 @@ export class RealTimeChartService implements OnModuleInit {
    * rsFilters 배열을 받아서 각 기간의 RS를 계산하고 가중치를 적용
    */
   async getStockListWithRangeRS(
-    marketType: '0' | '10' | '8' = '0',
+    marketType: '0' | '10' | 'all' = 'all',
     page: number = 1,
     pageSize: number = 50,
     filters?: {
@@ -709,19 +688,8 @@ export class RealTimeChartService implements OnModuleInit {
       return this.getStockList(marketType, page, pageSize, filters);
     }
 
-    // 종목 리스트 가져오기 (캐시 or API)
-    const cached = this.stockListCache.get(marketType);
-    const now = Date.now();
-    let validStocks: any[];
-
-    if (cached && (now - cached.timestamp) < this.CACHE_TTL) {
-      validStocks = cached.data;
-    } else {
-      const result = await this.kiwoomRest.getStockList(marketType);
-      validStocks = result.list.filter((s) => s.code.match(/^\d{6}$/));
-      this.stockListCache.set(marketType, { data: validStocks, timestamp: now });
-    }
-
+    // 종목 리스트 가져오기
+    const validStocks = await this.fetchStockList(marketType);
     const allStockCodes = validStocks.map((s) => s.code);
 
     // rsFilters를 periods와 weights로 변환
@@ -740,7 +708,7 @@ export class RealTimeChartService implements OnModuleInit {
     // 기간 기반 RS 계산 (최근 4개 거래일)
     let rsHistoryMap: Map<string, Array<{ tradeDate: Date; rank: number; rsScore: number }>>;
 
-    if (marketType === '8') {
+    if (marketType === 'all') {
       // 전체 조회: KOSPI/KOSDAQ 각각 해당 지수로 RS 계산 후 합치기
       const kospiStocks = validStocks.filter((s) => s.marketName === '거래소').map((s) => s.code);
       const kosdaqStocks = validStocks.filter((s) => s.marketName === '코스닥').map((s) => s.code);
@@ -770,7 +738,7 @@ export class RealTimeChartService implements OnModuleInit {
     }
 
     // 기본 지표 데이터 조회 (필터링용)
-    const metricsMap = await this.metricsService.getLatestMetrics(allStockCodes, marketType);
+    const metricsMap = await this.metricsService.getLatestMetrics(allStockCodes);
 
     // 종목 리스트와 RS 병합 및 필터링
     const stocksWithRS = validStocks
@@ -878,9 +846,46 @@ export class RealTimeChartService implements OnModuleInit {
   }
 
   /**
+   * 종목 리스트 가져오기 (캐시 사용)
+   * 'all'인 경우 KOSPI + KOSDAQ 모두 가져와서 병합
+   *
+   * marketType 정의:
+   *   '0'   = KOSPI (키움 API 그대로)
+   *   '10'  = KOSDAQ (키움 API 그대로)
+   *   'all' = 전체 (KOSPI + KOSDAQ 병합)
+   */
+  private async fetchStockList(marketType: '0' | '10' | 'all'): Promise<any[]> {
+    const cached = this.stockListCache.get(marketType);
+    const now = Date.now();
+
+    if (cached && (now - cached.timestamp) < this.CACHE_TTL) {
+      return cached.data;
+    }
+
+    let validStocks: any[];
+
+    if (marketType === 'all') {
+      const [kospiResult, kosdaqResult] = await Promise.all([
+        this.kiwoomRest.getStockList('0'),
+        this.kiwoomRest.getStockList('10'),
+      ]);
+      validStocks = [
+        ...kospiResult.list.filter((s: any) => s.code.match(/^\d{6}$/)),
+        ...kosdaqResult.list.filter((s: any) => s.code.match(/^\d{6}$/)),
+      ];
+    } else {
+      const result = await this.kiwoomRest.getStockList(marketType);
+      validStocks = result.list.filter((s: any) => s.code.match(/^\d{6}$/));
+    }
+
+    this.stockListCache.set(marketType, { data: validStocks, timestamp: now });
+    return validStocks;
+  }
+
+  /**
    * 종목 리스트 캐시 무효화
    */
-  clearStockListCache(marketType?: '0' | '10' | '8') {
+  clearStockListCache(marketType?: '0' | '10' | 'all') {
     if (marketType) {
       this.stockListCache.delete(marketType);
       this.logger.log(`Cleared cache for market type: ${marketType}`);
@@ -948,6 +953,23 @@ export class RealTimeChartService implements OnModuleInit {
 
     // 음수이거나 0이면 기본값 사용
     return diffDays > 0 ? diffDays : 1;
+  }
+
+  /**
+   * 디버그: 종목 리스트 Raw 조회 (필터 없음)
+   */
+  async debugGetStockList(marketType: '0' | '10' | 'all' = 'all') {
+    const validStocks = await this.fetchStockList(marketType);
+
+    return {
+      marketType,
+      totalStocks: validStocks.length,
+      sampleStocks: validStocks.slice(0, 5).map(s => ({
+        code: s.code,
+        name: s.name,
+        marketName: s.marketName,
+      })),
+    };
   }
 
   /**
@@ -1029,9 +1051,9 @@ export class RealTimeChartService implements OnModuleInit {
     const stockList = await this.kiwoomRest.getStockList(marketType);
     const today = new Date().toISOString().slice(0, 10).replace(/-/g, '');
 
-    // 일반 주식만 필터 (6자리 숫자 종목코드, 거래소 종목)
+    // 해당 시장 종목 필터 (우선주 등 비정규 코드 포함)
     const stocks = stockList.list.filter(
-      (s) => s.marketCode === marketType && s.code.match(/^\d{6}$/),
+      (s) => s.marketCode === marketType,
     );
 
     this.logger.log(`Found ${stocks.length} stocks to process in batches of ${BATCH_SIZE}`);
@@ -1289,10 +1311,23 @@ export class RealTimeChartService implements OnModuleInit {
   /**
    * 일별 지표 계산 (배치 작업)
    */
-  async calculateDailyMetrics(marketType: '0' | '10' | '8' = '0', tradeDate?: string) {
+  async calculateDailyMetrics(marketType: '0' | '10' | 'all' = 'all', tradeDate?: string) {
     this.logger.log(`Starting daily metrics calculation for market type: ${marketType}, date: ${tradeDate || 'today'}`);
     const date = tradeDate ? new Date(tradeDate) : undefined;
-    const indexCode = marketType === '0' ? 'INDEX_KOSPI' : 'INDEX_KOSDAQ';
-    return await this.metricsService.calculateAndSaveDailyMetrics(marketType, date, indexCode);
+
+    // 항상 KOSPI + KOSDAQ 통합 랭킹 (순위는 전체 풀에서 매기고, 시장별 조회 시 필터링)
+    const [kospiStocks, kosdaqStocks] = await Promise.all([
+      this.fetchStockList('0'),
+      this.fetchStockList('10'),
+    ]);
+    const allCodes = [
+      ...kospiStocks.map((s: any) => s.code),
+      ...kosdaqStocks.map((s: any) => s.code),
+    ];
+    const stockIndexMap = new Map<string, string>();
+    for (const s of kospiStocks) stockIndexMap.set(s.code, 'INDEX_KOSPI');
+    for (const s of kosdaqStocks) stockIndexMap.set(s.code, 'INDEX_KOSDAQ');
+
+    return this.metricsService.calculateAndSaveDailyMetrics('all', date, 'INDEX_KOSPI', allCodes, stockIndexMap);
   }
 }

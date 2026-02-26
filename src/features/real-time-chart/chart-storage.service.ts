@@ -57,13 +57,13 @@ export class ChartStorageService {
   private async saveTickData(stockCode: string, values: KiwoomTickData): Promise<void> {
     const tickTime = this.parseTime(values['20']); // 체결시간 (HHmmss)
     const price = this.parseDecimal(values['10']); // 현재가
-    const volume = BigInt(values['15']); // 거래량
+    const volume = this.parseBigInt(values['15']); // 거래량
     const prevDayCompare = this.parseDecimal(values['11']); // 전일대비
     const changeRate = this.parseDecimal(values['12']); // 등락율
     const askPrice = this.parseDecimal(values['27']); // 매도호가
     const bidPrice = this.parseDecimal(values['28']); // 매수호가
-    const accVolume = BigInt(values['13']); // 누적거래량
-    const accTradingValue = BigInt(values['14']); // 누적거래대금
+    const accVolume = this.parseBigInt(values['13']); // 누적거래량
+    const accTradingValue = this.parseBigInt(values['14']); // 누적거래대금
 
     await this.prisma.stockTick.create({
       data: {
@@ -94,27 +94,27 @@ export class ChartStorageService {
         stockCode,
         quoteTime,
         askPrice1: this.parseDecimal(values['41']),
-        askVolume1: BigInt(values['61']),
+        askVolume1: this.parseBigInt(values['61']),
         bidPrice1: this.parseDecimal(values['51']),
-        bidVolume1: BigInt(values['71']),
+        bidVolume1: this.parseBigInt(values['71']),
         askPrice2: this.parseDecimal(values['42']),
-        askVolume2: BigInt(values['62']),
+        askVolume2: this.parseBigInt(values['62']),
         bidPrice2: this.parseDecimal(values['52']),
-        bidVolume2: BigInt(values['72']),
+        bidVolume2: this.parseBigInt(values['72']),
         askPrice3: this.parseDecimal(values['43']),
-        askVolume3: BigInt(values['63']),
+        askVolume3: this.parseBigInt(values['63']),
         bidPrice3: this.parseDecimal(values['53']),
-        bidVolume3: BigInt(values['73']),
+        bidVolume3: this.parseBigInt(values['73']),
         askPrice4: this.parseDecimal(values['44']),
-        askVolume4: BigInt(values['64']),
+        askVolume4: this.parseBigInt(values['64']),
         bidPrice4: this.parseDecimal(values['54']),
-        bidVolume4: BigInt(values['74']),
+        bidVolume4: this.parseBigInt(values['74']),
         askPrice5: this.parseDecimal(values['45']),
-        askVolume5: BigInt(values['65']),
+        askVolume5: this.parseBigInt(values['65']),
         bidPrice5: this.parseDecimal(values['55']),
-        bidVolume5: BigInt(values['75']),
-        totalAskVolume: BigInt(values['121']),
-        totalBidVolume: BigInt(values['125']),
+        bidVolume5: this.parseBigInt(values['75']),
+        totalAskVolume: this.parseBigInt(values['121']),
+        totalBidVolume: this.parseBigInt(values['125']),
       },
     });
 
@@ -127,7 +127,7 @@ export class ChartStorageService {
   private async updateMinuteCandle(stockCode: string, values: KiwoomTickData): Promise<void> {
     const tickTime = this.parseTime(values['20']);
     const price = this.parseDecimal(values['10']);
-    const volume = BigInt(values['15']);
+    const volume = this.parseBigInt(values['15']);
 
     // 1분 단위로 캔들 시간 정규화 (초 제거)
     const candleTime = new Date(tickTime);
@@ -316,8 +316,16 @@ export class ChartStorageService {
    * Decimal 파싱 (부호 제거)
    */
   private parseDecimal(value: string): Decimal {
-    const cleaned = value.replace(/[+\-]/g, '');
-    return new Decimal(cleaned);
+    const cleaned = (value || '0').replace(/[+\-,\s]/g, '').trim();
+    return new Decimal(cleaned || '0');
+  }
+
+  /**
+   * BigInt 파싱 (부호/공백/소수점 제거)
+   */
+  private parseBigInt(value: string): bigint {
+    const cleaned = (value || '0').replace(/[+\-,\s]/g, '').trim().split('.')[0];
+    return BigInt(cleaned || '0');
   }
 
   /**

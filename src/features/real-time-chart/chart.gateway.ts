@@ -147,6 +147,23 @@ export class ChartGateway
     };
 
     this.server.to(`stock:${stockCode}`).emit('tick', tickData);
+
+    // 전체 클라이언트에게 가격 업데이트 브로드캐스트 (테이블 currentPrice 갱신용)
+    this.server.emit('priceUpdated', {
+      stockCode,
+      price: values['10'],       // 현재가
+      changeRate: values['12'],  // 등락율
+      prevDayCompare: values['11'], // 전일대비
+    });
+  }
+
+  /**
+   * metrics 재계산 완료 시 전체 클라이언트에게 알림
+   */
+  @OnEvent('metrics.updated')
+  handleMetricsUpdated(event: { tradeDate: string; filteredCount: number }): void {
+    this.server.emit('metricsUpdated', event);
+    this.logger.log(`Broadcast metricsUpdated: ${event.tradeDate}, ${event.filteredCount} stocks`);
   }
 
   /**
