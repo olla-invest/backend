@@ -12,6 +12,8 @@ export class KiwoomAuthService implements OnModuleInit {
   private readonly secretKey: string;
   private readonly apiUrl: string;
   private readonly useMock: boolean;
+  // 동시 토큰 발급 방지 락 (Node.js 싱글스레드 활용)
+  private tokenIssuancePromise: Promise<string> | null = null;
 
   constructor(
     private readonly configService: ConfigService,
@@ -49,6 +51,7 @@ export class KiwoomAuthService implements OnModuleInit {
 
   /**
    * 유효한 토큰을 보장 (없거나 만료되면 새로 발급)
+   * 동시에 여러 호출이 오면 하나의 발급 요청만 실행하고 나머지는 대기
    */
   async ensureValidToken(): Promise<string> {
     const existingToken = await this.getValidToken();
@@ -57,7 +60,16 @@ export class KiwoomAuthService implements OnModuleInit {
       return existingToken;
     }
 
-    return await this.issueToken();
+    // 이미 발급 중인 요청이 있으면 그것을 공유 (동시 발급 방지)
+    if (!this.tokenIssuancePromise) {
+      this.tokenIssuancePromise = this.issueToken().finally(() => {
+        this.tokenIssuancePromise = null;
+      });
+    } else {
+      this.logger.debug('Token issuance already in progress, waiting...');
+    }
+
+    return this.tokenIssuancePromise;
   }
 
   /**
@@ -201,14 +213,16 @@ export class KiwoomAuthService implements OnModuleInit {
    * 키움 날짜시간 문자열 파싱 (YYYYMMDDHHmmss)
    */
   private parseKiwoomDateTime(dateTimeStr: string): Date {
-    const year = parseInt(dateTimeStr.substring(0, 4));
-    const month = parseInt(dateTimeStr.substring(4, 6)) - 1;
-    const day = parseInt(dateTimeStr.substring(6, 8));
-    const hour = parseInt(dateTimeStr.substring(8, 10));
-    const minute = parseInt(dateTimeStr.substring(10, 12));
-    const second = parseInt(dateTimeStr.substring(12, 14));
+    // 키움 expires_dt는 KST(UTC+9) 기준 → ISO 형식으로 변환하여 정확히 파싱
+    const year = dateTimeStr.substring(0, 4);
+    const month = dateTimeStr.substring(4, 6);
+    const day = dateTimeStr.substring(6, 8);
+    const hour = dateTimeStr.substring(8, 10);
+    const minute = dateTimeStr.substring(10, 12);
+    const second = dateTimeStr.substring(12, 14);
 
-    return new Date(year, month, day, hour, minute, second);
+    // KST = UTC+9 → +09:00 suffix 붙여서 파싱
+    return new Date(`${year}-${month}-${day}T${hour}:${minute}:${second}+09:00`);
   }
 
   /**

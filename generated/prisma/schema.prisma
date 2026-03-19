@@ -59,7 +59,8 @@ model Theme {
   deletedAt DateTime? @map("deleted_at")
 
   // Relations
-  companies Company[]
+  companies      Company[]
+  dailySnapshots ThemeDailySnapshot[]
 
   @@unique([themeName, deletedAt], map: "uk_themes_name")
   @@index([themeName], map: "idx_themes_name")
@@ -98,6 +99,7 @@ model Company {
   stockCode   String     @map("stock_code") @db.VarChar(20)
   marketType  MarketType @map("market_type")
   themeCode   Int?       @map("theme_code")
+  corpCode    String?    @map("corp_code") @db.VarChar(8)
   createdAt   DateTime   @default(now()) @map("created_at")
   updatedAt   DateTime   @default(now()) @updatedAt @map("updated_at")
   deletedAt   DateTime?  @map("deleted_at")
@@ -393,7 +395,44 @@ model StockQuote {
   @@map("stock_quotes")
 }
 
-// 17. 일별 종목 지표 테이블 (계산된 값 저장)
+// 17. 테마 일별 스냅샷 테이블 (이슈테마 순위변동/인사이트 계산용)
+model ThemeDailySnapshot {
+  snapshotId      String   @id @default(uuid()) @map("snapshot_id") @db.Uuid
+  themeCode       Int      @map("theme_code")
+  snapshotDate    DateTime @map("snapshot_date") @db.Date
+  rank            Int      @map("rank") // 당일 순위 (상승비율 기준)
+  risingCount     Int      @map("rising_count") // 상승 종목 수
+  totalCount      Int      @map("total_count") // 전체 종목 수 (실시간차트 기준)
+  risingRatio     Decimal  @map("rising_ratio") @db.Decimal(5, 2) // 상승 비율 (%)
+  avgChangeRate   Decimal  @map("avg_change_rate") @db.Decimal(8, 4) // 평균 등락률 (%)
+  highVolumeCount Int      @default(0) @map("high_volume_count") // 거래대금 급증 종목 수
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  // Relations
+  theme Theme @relation(fields: [themeCode], references: [themeCode])
+
+  @@unique([themeCode, snapshotDate], map: "uk_theme_snapshot_code_date")
+  @@index([snapshotDate, rank], map: "idx_theme_snapshot_date_rank")
+  @@index([themeCode, snapshotDate(sort: Desc)], map: "idx_theme_snapshot_code_date")
+  @@map("theme_daily_snapshots")
+}
+
+// 18. 종목 장중 누적 거래대금 스냅샷 테이블 (전일 동시간 비교용)
+model StockTradingValueSnapshot {
+  snapshotId      String   @id @default(uuid()) @map("snapshot_id") @db.Uuid
+  stockCode       String   @map("stock_code") @db.VarChar(20)
+  snapshotDate    DateTime @map("snapshot_date") @db.Date
+  snapshotTime    String   @map("snapshot_time") @db.VarChar(4) // HHmm (10분 단위, ex: "1030")
+  accTradingValue BigInt   @map("acc_trading_value") // 해당 시점 누적 거래대금
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  @@unique([stockCode, snapshotDate, snapshotTime], map: "uk_trading_snapshot")
+  @@index([snapshotDate, snapshotTime], map: "idx_trading_snapshot_date_time")
+  @@index([stockCode, snapshotDate(sort: Desc)], map: "idx_trading_snapshot_code_date")
+  @@map("stock_trading_value_snapshots")
+}
+
+// 19. 일별 종목 지표 테이블 (계산된 값 저장)
 model StockDailyMetrics {
   metricId              String   @id @default(uuid()) @map("metric_id") @db.Uuid
   stockCode             String   @map("stock_code") @db.VarChar(20)
@@ -409,6 +448,8 @@ model StockDailyMetrics {
   priceChangeRate1d     Decimal? @map("price_change_rate_1d") @db.Decimal(10, 4)
   volume1d              BigInt?  @map("volume_1d")
   tradingValue          BigInt?  @map("trading_value")
+  ma50                  Decimal? @map("ma_50") @db.Decimal(15, 2)
+  passedStaticFilters   Boolean  @default(false) @map("passed_static_filters")
   createdAt             DateTime @default(now()) @map("created_at")
   updatedAt             DateTime @updatedAt @map("updated_at")
 

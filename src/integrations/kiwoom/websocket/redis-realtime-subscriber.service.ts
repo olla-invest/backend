@@ -120,6 +120,12 @@ export class RedisRealtimeSubscriberService implements IRealtimeSource, OnModule
    * 종목 실시간 구독
    * Windows 프로그램에 구독 요청 발행
    */
+  async subscribeBatch(stockCodes: string[], types: string[]): Promise<void> {
+    for (const stockCode of stockCodes) {
+      await this.subscribe(stockCode, types);
+    }
+  }
+
   async subscribe(stockCode: string, types: string[]): Promise<void> {
     if (!this.subscriptions.has(stockCode)) {
       this.subscriptions.set(stockCode, new Set());

@@ -6,7 +6,10 @@ import { PrismaService } from '../../../common/prisma/prisma.service';
 import {
   KiwoomMinCandleResponse,
   KiwoomTickCandleResponse,
+  KiwoomDayCandleData,
   KiwoomDayCandleResponse,
+  KiwoomWeekCandleResponse,
+  KiwoomMonthCandleResponse,
   KiwoomStockListResponse,
   KiwoomSectorDayCandleResponse,
   KiwoomSectorCurrentPriceResponse,
@@ -208,6 +211,216 @@ export class KiwoomRestService {
       });
 
       this.logger.error(`Failed to fetch day candles for ${stockCode}`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * 일봉 차트 연속조회 (종목상세용, ka10081)
+   * maxCandles 기본값 750 ≈ 3년치
+   */
+  async getDayCandlesWithHistory(
+    stockCode: string,
+    baseDate: string,
+    maxCandles = 750,
+  ): Promise<KiwoomDayCandleResponse> {
+    const startTime = Date.now();
+    const allCandles: KiwoomDayCandleData[] = [];
+    let contYn = '';
+    let nextKey = '';
+
+    try {
+      const token = await this.authService.ensureValidToken();
+
+      do {
+        const headers: Record<string, string> = {
+          'api-id': 'ka10081',
+          authorization: `Bearer ${token}`,
+        };
+        if (contYn === 'Y') {
+          headers['cont-yn'] = contYn;
+          headers['next-key'] = nextKey;
+        }
+
+        const response = await this.httpClient.post<KiwoomDayCandleResponse>(
+          '/api/dostk/chart',
+          { stk_cd: stockCode, base_dt: baseDate, upd_stkpc_tp: '1' },
+          { headers },
+        );
+
+        allCandles.push(...response.data.stk_dt_pole_chart_qry);
+        contYn = response.headers['cont-yn'] || '';
+        nextKey = response.headers['next-key'] || '';
+
+        this.logger.debug(`Day candles: ${allCandles.length}/${maxCandles}, cont: ${contYn}`);
+      } while (contYn === 'Y' && allCandles.length < maxCandles);
+
+      await this.logApiCall({
+        apiName: 'ka10081',
+        stockCode,
+        requestData: { base_dt: baseDate },
+        responseStatus: 'SUCCESS',
+        responseMessage: `${allCandles.length} candles`,
+        responseTimeMs: Date.now() - startTime,
+      });
+
+      return {
+        stk_cd: stockCode,
+        stk_dt_pole_chart_qry: allCandles.slice(0, maxCandles),
+        return_code: 0,
+        return_msg: '정상적으로 처리되었습니다',
+      };
+    } catch (error) {
+      await this.logApiCall({
+        apiName: 'ka10081',
+        stockCode,
+        requestData: { base_dt: baseDate },
+        responseStatus: 'ERROR',
+        responseMessage: error.message,
+        responseTimeMs: Date.now() - startTime,
+      });
+
+      this.logger.error(`Failed to fetch day candles history for ${stockCode}`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * 주봉 차트 연속조회 (ka10082)
+   * maxCandles 기본값 260 ≈ 5년치
+   */
+  async getWeekCandles(
+    stockCode: string,
+    baseDate: string,
+    maxCandles = 260,
+  ): Promise<KiwoomWeekCandleResponse> {
+    const startTime = Date.now();
+    const allCandles: KiwoomDayCandleData[] = [];
+    let contYn = '';
+    let nextKey = '';
+
+    try {
+      const token = await this.authService.ensureValidToken();
+
+      do {
+        const headers: Record<string, string> = {
+          'api-id': 'ka10082',
+          authorization: `Bearer ${token}`,
+        };
+        if (contYn === 'Y') {
+          headers['cont-yn'] = contYn;
+          headers['next-key'] = nextKey;
+        }
+
+        const response = await this.httpClient.post<KiwoomWeekCandleResponse>(
+          '/api/dostk/chart',
+          { stk_cd: stockCode, base_dt: baseDate, upd_stkpc_tp: '1' },
+          { headers },
+        );
+
+        allCandles.push(...response.data.stk_stk_pole_chart_qry);
+        contYn = response.headers['cont-yn'] || '';
+        nextKey = response.headers['next-key'] || '';
+
+        this.logger.debug(`Week candles: ${allCandles.length}/${maxCandles}, cont: ${contYn}`);
+      } while (contYn === 'Y' && allCandles.length < maxCandles);
+
+      await this.logApiCall({
+        apiName: 'ka10082',
+        stockCode,
+        requestData: { base_dt: baseDate },
+        responseStatus: 'SUCCESS',
+        responseMessage: `${allCandles.length} candles`,
+        responseTimeMs: Date.now() - startTime,
+      });
+
+      return {
+        stk_cd: stockCode,
+        stk_stk_pole_chart_qry: allCandles.slice(0, maxCandles),
+        return_code: 0,
+        return_msg: '정상적으로 처리되었습니다',
+      };
+    } catch (error) {
+      await this.logApiCall({
+        apiName: 'ka10082',
+        stockCode,
+        requestData: { base_dt: baseDate },
+        responseStatus: 'ERROR',
+        responseMessage: error.message,
+        responseTimeMs: Date.now() - startTime,
+      });
+
+      this.logger.error(`Failed to fetch week candles for ${stockCode}`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * 월봉 차트 연속조회 (ka10083)
+   * maxCandles 기본값 120 ≈ 10년치
+   */
+  async getMonthCandles(
+    stockCode: string,
+    baseDate: string,
+    maxCandles = 120,
+  ): Promise<KiwoomMonthCandleResponse> {
+    const startTime = Date.now();
+    const allCandles: KiwoomDayCandleData[] = [];
+    let contYn = '';
+    let nextKey = '';
+
+    try {
+      const token = await this.authService.ensureValidToken();
+
+      do {
+        const headers: Record<string, string> = {
+          'api-id': 'ka10083',
+          authorization: `Bearer ${token}`,
+        };
+        if (contYn === 'Y') {
+          headers['cont-yn'] = contYn;
+          headers['next-key'] = nextKey;
+        }
+
+        const response = await this.httpClient.post<KiwoomMonthCandleResponse>(
+          '/api/dostk/chart',
+          { stk_cd: stockCode, base_dt: baseDate, upd_stkpc_tp: '1' },
+          { headers },
+        );
+
+        allCandles.push(...response.data.stk_mth_pole_chart_qry);
+        contYn = response.headers['cont-yn'] || '';
+        nextKey = response.headers['next-key'] || '';
+
+        this.logger.debug(`Month candles: ${allCandles.length}/${maxCandles}, cont: ${contYn}`);
+      } while (contYn === 'Y' && allCandles.length < maxCandles);
+
+      await this.logApiCall({
+        apiName: 'ka10083',
+        stockCode,
+        requestData: { base_dt: baseDate },
+        responseStatus: 'SUCCESS',
+        responseMessage: `${allCandles.length} candles`,
+        responseTimeMs: Date.now() - startTime,
+      });
+
+      return {
+        stk_cd: stockCode,
+        stk_mth_pole_chart_qry: allCandles.slice(0, maxCandles),
+        return_code: 0,
+        return_msg: '정상적으로 처리되었습니다',
+      };
+    } catch (error) {
+      await this.logApiCall({
+        apiName: 'ka10083',
+        stockCode,
+        requestData: { base_dt: baseDate },
+        responseStatus: 'ERROR',
+        responseMessage: error.message,
+        responseTimeMs: Date.now() - startTime,
+      });
+
+      this.logger.error(`Failed to fetch month candles for ${stockCode}`, error);
       throw error;
     }
   }

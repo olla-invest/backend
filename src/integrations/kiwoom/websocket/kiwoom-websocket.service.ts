@@ -314,7 +314,7 @@ export class KiwoomWebSocketService implements IRealtimeSource, OnModuleInit, On
   }
 
   /**
-   * 실시간 시세 구독
+   * 실시간 시세 구독 (단일 종목)
    */
   async subscribe(stockCode: string, types: string[]): Promise<void> {
     if (!this.subscriptions.has(stockCode)) {
@@ -332,6 +332,61 @@ export class KiwoomWebSocketService implements IRealtimeSource, OnModuleInit, On
     }
 
     await this.sendSubscription(stockCode, types, 'REG');
+  }
+
+  /**
+   * 여러 종목 일괄 구독 (REG 요청을 최소화하여 건수 초과 방지)
+   * 100종목씩 묶어 단일 REG 요청으로 전송, 배치 간 500ms 대기
+   */
+  async subscribeBatch(stockCodes: string[], types: string[]): Promise<void> {
+    // subscriptions 맵에 등록
+    for (const stockCode of stockCodes) {
+      if (!this.subscriptions.has(stockCode)) {
+        this.subscriptions.set(stockCode, new Set());
+      }
+      types.forEach((t) => this.subscriptions.get(stockCode)!.add(t));
+    }
+
+    if (!this.isLoggedIn) {
+      // 로그인 전이면 개별 항목으로 큐에 추가
+      for (const stockCode of stockCodes) {
+        this.subscriptionQueue.push({ stockCode, types, action: 'REG' });
+      }
+      return;
+    }
+
+    const CHUNK_SIZE = 100;
+    for (let i = 0; i < stockCodes.length; i += CHUNK_SIZE) {
+      const chunk = stockCodes.slice(i, i + CHUNK_SIZE);
+      await this.sendBatchSubscription(chunk, types, 'REG');
+      this.logger.log(`Batch REG sent: ${chunk.length} stocks (${i + chunk.length}/${stockCodes.length})`);
+      if (i + CHUNK_SIZE < stockCodes.length) {
+        await new Promise((resolve) => setTimeout(resolve, 500));
+      }
+    }
+  }
+
+  /**
+   * 배치 구독 요청 전송 (여러 종목을 item 배열에 담아 단일 요청)
+   */
+  private async sendBatchSubscription(
+    stockCodes: string[],
+    types: string[],
+    action: 'REG' | 'REMOVE',
+  ): Promise<void> {
+    if (!this.ws || this.ws.readyState !== WebSocket.OPEN) {
+      this.logger.warn(`WebSocket not connected, cannot send batch subscription`);
+      return;
+    }
+
+    const request = {
+      trnm: action,
+      grp_no: '1',
+      refresh: '1',
+      data: [{ item: stockCodes, type: types }],
+    };
+
+    this.ws.send(JSON.stringify(request));
   }
 
   /**
@@ -408,11 +463,30 @@ export class KiwoomWebSocketService implements IRealtimeSource, OnModuleInit, On
   }
 
   /**
-   * 모든 구독 재등록 (재연결 시)
+   * 모든 구독 재등록 (재연결 시) - 타입별로 묶어 배치 전송
    */
   private async resubscribeAll(): Promise<void> {
+    if (this.subscriptions.size === 0) return;
+
+    // 타입 조합별로 종목 그룹핑
+    const typeGroupMap = new Map<string, string[]>(); // typeKey -> stockCodes
     for (const [stockCode, types] of this.subscriptions.entries()) {
-      await this.sendSubscription(stockCode, Array.from(types), 'REG');
+      const typeKey = Array.from(types).sort().join(',');
+      if (!typeGroupMap.has(typeKey)) typeGroupMap.set(typeKey, []);
+      typeGroupMap.get(typeKey)!.push(stockCode);
+    }
+
+    for (const [typeKey, stockCodes] of typeGroupMap.entries()) {
+      const types = typeKey.split(',');
+      const CHUNK_SIZE = 100;
+      for (let i = 0; i < stockCodes.length; i += CHUNK_SIZE) {
+        const chunk = stockCodes.slice(i, i + CHUNK_SIZE);
+        await this.sendBatchSubscription(chunk, types, 'REG');
+        this.logger.log(`Re-subscribe batch: ${chunk.length} stocks (${i + chunk.length}/${stockCodes.length})`);
+        if (i + CHUNK_SIZE < stockCodes.length) {
+          await new Promise((resolve) => setTimeout(resolve, 500));
+        }
+      }
     }
   }
 

@@ -14,6 +14,8 @@ import { TagsModule } from './features/tags/tags.module';
 import { StocksModule } from './features/stocks/stocks.module';
 import { MarketModule } from './features/market/market.module';
 import { RealTimeChartModule } from './features/real-time-chart/real-time-chart.module';
+import { StockInfoModule } from './features/stock-info/stock-info.module';
+import { IssueThemeModule } from './features/issue-theme/issue-theme.module';
 
 @Module( {
     imports: [
@@ -33,6 +35,8 @@ import { RealTimeChartModule } from './features/real-time-chart/real-time-chart.
         StocksModule,
         MarketModule,
         RealTimeChartModule,
+        StockInfoModule,
+        IssueThemeModule,
     ],
     providers: [
         {

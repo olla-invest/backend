@@ -84,6 +84,22 @@ export interface KiwoomDayCandleResponse {
   return_msg: string;
 }
 
+// 차트 조회 응답 (주봉)
+export interface KiwoomWeekCandleResponse {
+  stk_cd: string;
+  stk_stk_pole_chart_qry: KiwoomDayCandleData[];
+  return_code: number;
+  return_msg: string;
+}
+
+// 차트 조회 응답 (월봉)
+export interface KiwoomMonthCandleResponse {
+  stk_cd: string;
+  stk_mth_pole_chart_qry: KiwoomDayCandleData[];
+  return_code: number;
+  return_msg: string;
+}
+
 // 실시간 체결 데이터 (0B)
 export interface KiwoomTickData {
   '20': string; // 체결시간

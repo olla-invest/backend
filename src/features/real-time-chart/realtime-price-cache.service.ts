@@ -106,15 +106,15 @@ export class RealtimePriceCacheService {
       // 키움 실시간 체결 데이터 파싱
       const realtimePrice: RealtimePrice = {
         stockCode,
-        currentPrice: this.parseNumber(values['10']),      // 현재가
-        changeAmount: this.parseNumber(values['11']),      // 전일대비
-        changeRate: this.parseNumber(values['12']),        // 등락률
-        volume: this.parseNumber(values['15']),            // 거래량
-        accVolume: this.parseNumber(values['13']),         // 누적거래량
-        accAmount: this.parseNumber(values['14']),         // 누적거래대금
-        openPrice: this.parseNumber(values['16']),         // 시가
-        highPrice: this.parseNumber(values['17']),         // 고가
-        lowPrice: this.parseNumber(values['18']),          // 저가
+        currentPrice: this.parseAbsolute(values['10']),   // 현재가 (부호 제거, 항상 양수)
+        changeAmount: this.parseSigned(values['11']),      // 전일대비 (부호 유지)
+        changeRate: this.parseSigned(values['12']),        // 등락률 (부호 유지, 예: -1.25)
+        volume: this.parseAbsolute(values['15']),          // 거래량
+        accVolume: this.parseAbsolute(values['13']),       // 누적거래량
+        accAmount: this.parseAbsolute(values['14']),       // 누적거래대금
+        openPrice: this.parseAbsolute(values['16']),       // 시가
+        highPrice: this.parseAbsolute(values['17']),       // 고가
+        lowPrice: this.parseAbsolute(values['18']),        // 저가
         timestamp: new Date(),
       };
 
@@ -130,11 +130,26 @@ export class RealtimePriceCacheService {
   }
 
   /**
-   * 숫자 파싱 헬퍼 (부호 제거)
+   * 절대값 파싱 (부호 제거) - 현재가, 거래량 등 항상 양수인 필드용
    */
-  private parseNumber(value: string | undefined): number {
+  private parseAbsolute(value: string | undefined): number {
     if (!value) return 0;
-    return parseFloat(value.replace(/[+\-]/g, ''));
+    return parseFloat(value.replace(/[+\-]/g, '')) || 0;
+  }
+
+  /**
+   * 부호 보존 파싱 - 등락률, 전일대비 등 음수가 의미 있는 필드용
+   */
+  private parseSigned(value: string | undefined): number {
+    if (!value) return 0;
+    return parseFloat(value) || 0;
+  }
+
+  /**
+   * 전체 캐시 반환
+   */
+  getAllPrices(): Map<string, RealtimePrice> {
+    return new Map(this.priceCache);
   }
 
   /**

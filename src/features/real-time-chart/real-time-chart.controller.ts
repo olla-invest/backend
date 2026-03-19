@@ -51,6 +51,54 @@ export class RealTimeChartController {
   }
 
   /**
+   * GET /real-time-chart/candles/day-detail/:stockCode
+   * 일봉 차트 데이터 조회 (종목상세용, 연속조회 ~3년치)
+   */
+  @Get('candles/day-detail/:stockCode')
+  async getDayCandlesDetail(
+    @Param('stockCode') stockCode: string,
+    @Query('baseDate') baseDate: string,
+  ) {
+    const formattedDate = baseDate || new Date().toISOString().split('T')[0].replace(/-/g, '');
+    return await this.chartService.getDayCandlesDetail(stockCode, formattedDate);
+  }
+
+  /**
+   * GET /real-time-chart/candles/week/:stockCode
+   * 주봉 차트 데이터 조회
+   */
+  @Get('candles/week/:stockCode')
+  async getWeekCandles(
+    @Param('stockCode') stockCode: string,
+    @Query('baseDate') baseDate: string,
+  ) {
+    const formattedDate = baseDate || new Date().toISOString().split('T')[0].replace(/-/g, '');
+    return await this.chartService.getWeekCandles(stockCode, formattedDate);
+  }
+
+  /**
+   * GET /real-time-chart/candles/month/:stockCode
+   * 월봉 차트 데이터 조회
+   */
+  @Get('candles/month/:stockCode')
+  async getMonthCandles(
+    @Param('stockCode') stockCode: string,
+    @Query('baseDate') baseDate: string,
+  ) {
+    const formattedDate = baseDate || new Date().toISOString().split('T')[0].replace(/-/g, '');
+    return await this.chartService.getMonthCandles(stockCode, formattedDate);
+  }
+
+  /**
+   * GET /real-time-chart/summary/:stockCode
+   * 종목 상세 요약 (현재가, 전일대비, 거래량, 거래대금, 1일 고저, 52주 고저)
+   */
+  @Get('summary/:stockCode')
+  async getStockSummary(@Param('stockCode') stockCode: string) {
+    return await this.chartService.getStockSummary(stockCode);
+  }
+
+  /**
    * GET /real-time-chart/stored/:stockCode
    * DB에 저장된 캔들 데이터 조회
    */
@@ -112,6 +160,15 @@ export class RealTimeChartController {
   @Get('realtime/cache-stats')
   async getCacheStats() {
     return await this.chartService.getRealtimeCacheStats();
+  }
+
+  /**
+   * GET /real-time-chart/realtime/status
+   * 실시간 WebSocket 연결 상태 조회
+   */
+  @Get('realtime/status')
+  getRealtimeStatus() {
+    return this.chartService.getRealtimeStatus();
   }
 
   /**
@@ -225,6 +282,26 @@ export class RealTimeChartController {
   }
 
   /**
+   * POST /real-time-chart/collect/index
+   * 시장 지수 일봉 수집 (KOSPI + KOSDAQ)
+   * 장 마감 후 지수 종가 갱신 시 사용
+   */
+  @Post('collect/index')
+  async collectIndexCandles() {
+    return await this.chartService.collectIndexCandles();
+  }
+
+  /**
+   * POST /real-time-chart/collect/index-close
+   * 오늘 지수 종가만 수집 (ka20001 업종현재가)
+   * 장 마감 후 가볍게 호출 — ka20006 일봉 API는 당일 포함 안 함
+   */
+  @Post('collect/index-close')
+  async collectTodayIndexClose() {
+    return await this.chartService.collectTodayIndexClose();
+  }
+
+  /**
    * POST /real-time-chart/metrics/calculate
    * 일별 지표 계산 (수동 실행)
    */
@@ -325,6 +402,36 @@ export class RealTimeChartController {
   }
 
   /**
+   * POST /real-time-chart/rs-history/:stockCode
+   * 단일 종목 RS 추이 조회 (그래프용), 날짜는 모두 YYYYMMDD
+   *
+   * Body:
+   * {
+   *   "startDate": "20250304",
+   *   "endDate": "20260304",            // 생략 시 오늘
+   *   "rsFilters": [                    // 생략 시 디폴트 RS(63일)
+   *     { "rsStartDate": "20260209", "rsEndDate": "20260115", "strength": 50 },
+   *     { "rsStartDate": "20260115", "rsEndDate": "20251110", "strength": 50 }
+   *   ]
+   * }
+   */
+  @Post('rs-history/:stockCode')
+  async getRsHistory(
+    @Param('stockCode') stockCode: string,
+    @Body('startDate') startDate: string,
+    @Body('endDate') endDate: string,
+    @Body('rsFilters') rsFilters?: Array<{
+      rsStartDate: string;
+      rsEndDate: string;
+      strength: number;
+    }>,
+  ) {
+    const today = new Date();
+    const end = endDate || `${today.getFullYear()}${String(today.getMonth() + 1).padStart(2, '0')}${String(today.getDate()).padStart(2, '0')}`;
+    return await this.chartService.getRsHistory(stockCode, startDate, end, rsFilters);
+  }
+
+  /**
    * POST /real-time-chart/debug/filter-check
    * 디버그: 특정 종목들의 5개 필터 통과/실패 상세 조회
    *
@@ -335,5 +442,24 @@ export class RealTimeChartController {
     @Body('stockCodes') stockCodes: string[],
   ) {
     return await this.metricsService.debugFilterCheck(stockCodes);
+  }
+
+  /**
+   * POST /real-time-chart/metrics/custom-rs
+   * 특정 종목코드 리스트의 RS 상세 로그 생성
+   * 필터 통과 여부와 관계없이 모든 종목의 값을 custom-rs-scores-*.log 로 저장
+   *
+   * Body:
+   * {
+   *   "stockCodes": ["043260", "272210", "006800"],
+   *   "tradeDate": "20260303"  // 생략 시 오늘
+   * }
+   */
+  @Post('metrics/custom-rs')
+  async calculateCustomRsLog(
+    @Body('stockCodes') stockCodes: string[],
+    @Body('tradeDate') tradeDate?: string,
+  ) {
+    return await this.metricsService.calculateCustomRsLog(stockCodes, tradeDate);
   }
 }

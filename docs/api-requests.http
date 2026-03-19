@@ -1,0 +1,159 @@
+@baseUrl = http://localhost:3000/real-time-chart
+@today = 20260306
+
+
+### ───────────────────────────────────────────────
+### 1. 상태 조회
+### ───────────────────────────────────────────────
+
+# 데이터 초기화 상태
+GET {{baseUrl}}/status
+
+###
+
+# 실시간 WebSocket 연결 상태
+GET {{baseUrl}}/realtime/status
+
+###
+
+# 실시간 캐시 상태
+GET {{baseUrl}}/realtime/cache-stats
+
+
+### ───────────────────────────────────────────────
+### 2. 지수 수집
+### ───────────────────────────────────────────────
+
+# 오늘 지수 종가 수집 (ka20001 — 장 마감 후 호출)
+POST {{baseUrl}}/collect/index-close
+
+###
+
+# KOSPI + KOSDAQ 지수 일봉 전체 수집
+POST {{baseUrl}}/collect/index
+
+
+### ───────────────────────────────────────────────
+### 3. RS 지표 계산 (로그 생성)
+### ───────────────────────────────────────────────
+
+# 전체 종목 RS 계산 → rs-scores-*.log
+POST {{baseUrl}}/metrics/calculate
+Content-Type: application/json
+
+{
+  "marketType": "all"
+}
+
+###
+
+# 특정 날짜 지정 RS 계산
+POST {{baseUrl}}/metrics/calculate
+Content-Type: application/json
+
+{
+  "marketType": "all",
+  "tradeDate": "{{today}}"
+}
+
+
+### ───────────────────────────────────────────────
+### 4. 커스텀 RS 조회 → custom-rs-scores-*.log
+### ───────────────────────────────────────────────
+
+# 특정 종목 RS 상세 (종목코드 수정 후 실행)
+POST {{baseUrl}}/metrics/custom-rs
+Content-Type: application/json
+
+{
+  "stockCodes": [
+    "040160",
+    "357580",
+    "090470",
+    "187790",
+    "230360",
+    "106240",
+    "092070",
+    "236200"
+  ],
+  "tradeDate": "{{today}}"
+}
+
+###
+
+# 필터 실패 종목 분석용 (어제 조회 종목)
+POST {{baseUrl}}/metrics/custom-rs
+Content-Type: application/json
+
+{
+  "stockCodes": [
+    "272210",
+    "006800",
+    "042700",
+    "452260",
+    "047040",
+    "033240",
+    "010820",
+    "322000",
+    "457190",
+    "130660",
+    "402340",
+    "012450"
+  ],
+  "tradeDate": "{{today}}"
+}
+
+
+### ───────────────────────────────────────────────
+### 5. 필터 디버그
+### ───────────────────────────────────────────────
+
+# 특정 종목 5개 필터 통과/실패 상세 확인
+POST {{baseUrl}}/debug/filter-check
+Content-Type: application/json
+
+{
+  "stockCodes": ["272210", "006800", "042700"]
+}
+
+
+### ───────────────────────────────────────────────
+### 6. 종목 리스트 조회
+### ───────────────────────────────────────────────
+
+# 디폴트 RS 종목 리스트 (필터 통과 종목)
+GET {{baseUrl}}/stocks?marketType=all&page=1&pageSize=50
+
+###
+
+# KOSDAQ 종목만
+GET {{baseUrl}}/stocks?marketType=10&page=1&pageSize=50
+
+###
+
+# 디버그: 필터 없이 전체 raw 조회
+GET {{baseUrl}}/debug/stocks?marketType=all
+
+
+### ───────────────────────────────────────────────
+### 7. 데이터 수집 / 초기화
+### ───────────────────────────────────────────────
+
+# 전체 초기화 (일봉 수집 + 지표 계산)
+POST {{baseUrl}}/initialize
+Content-Type: application/json
+
+{
+  "marketTypes": ["0", "10"]
+}
+
+###
+
+# 일봉 수집 (1주일치)
+POST {{baseUrl}}/collect/day
+Content-Type: application/json
+
+{
+  "marketType": "0",
+  "days": 7
+}

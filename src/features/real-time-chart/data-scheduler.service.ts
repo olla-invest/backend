@@ -17,11 +17,12 @@ export class DataSchedulerService {
     timeZone: 'Asia/Seoul',
   })
   async recalculateMetricsDuringMarket() {
-    // 15:30 이후 실행 방지
+    // 15:30 이후 실행 방지 (KST 기준 명시적 계산)
     const now = new Date();
-    const hours = now.getHours();
-    const minutes = now.getMinutes();
-    if (hours === 15 && minutes > 30) return;
+    const kstNow = new Date(now.getTime() + 9 * 60 * 60 * 1000);
+    const kstHours = kstNow.getUTCHours();
+    const kstMinutes = kstNow.getUTCMinutes();
+    if (kstHours === 15 && kstMinutes > 30) return;
 
     // 중복 실행 방지 (이전 계산이 아직 진행 중이면 스킵)
     if (this.isMetricsCalculating) {

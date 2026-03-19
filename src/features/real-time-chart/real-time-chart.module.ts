@@ -8,16 +8,19 @@ import { InitialSetupService } from './initial-setup.service';
 import { ChartGateway } from './chart.gateway';
 import { RealtimePriceCacheService } from './realtime-price-cache.service';
 import { DataSchedulerService } from './data-scheduler.service';
+import { DetailController } from './detail.controller';
 import { KiwoomModule } from '../../integrations/kiwoom/kiwoom.module';
 import { PrismaModule } from '../../common/prisma/prisma.module';
+import { StockInfoModule } from '../stock-info/stock-info.module';
 
 @Module({
   imports: [
     KiwoomModule,
     PrismaModule,
+    StockInfoModule,
     EventEmitterModule.forRoot(),
   ],
-  controllers: [RealTimeChartController],
+  controllers: [RealTimeChartController, DetailController],
   providers: [
     RealTimeChartService,
     ChartStorageService,
@@ -27,6 +30,6 @@ import { PrismaModule } from '../../common/prisma/prisma.module';
     RealtimePriceCacheService,
     DataSchedulerService,
   ],
-  exports: [RealTimeChartService],
+  exports: [RealTimeChartService, RealtimePriceCacheService],
 })
 export class RealTimeChartModule {}

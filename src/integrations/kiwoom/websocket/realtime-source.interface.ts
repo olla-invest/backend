@@ -11,6 +11,13 @@ export interface IRealtimeSource {
   subscribe(stockCode: string, types: string[]): Promise<void>;
 
   /**
+   * 여러 종목 일괄 실시간 구독 (단일 REG 요청으로 전송)
+   * @param stockCodes 종목코드 배열
+   * @param types 구독 타입 배열 (예: ["0B", "0D"])
+   */
+  subscribeBatch(stockCodes: string[], types: string[]): Promise<void>;
+
+  /**
    * 종목 실시간 구독 해제
    * @param stockCode 종목코드
    * @param types 구독 해제할 타입 배열 (없으면 전체 해제)
