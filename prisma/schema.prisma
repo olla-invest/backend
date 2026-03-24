@@ -70,13 +70,17 @@ model Theme {
 
 // 2. 사용자 테이블
 model User {
-  userId    String    @id @default(uuid()) @map("user_id") @db.Uuid
-  username  String    @db.VarChar(50)
-  email     String    @db.VarChar(100)
-  password  String    @db.VarChar(255)
-  createdAt DateTime  @default(now()) @map("created_at")
-  updatedAt DateTime  @default(now()) @updatedAt @map("updated_at")
-  deletedAt DateTime? @map("deleted_at")
+  userId           String    @id @default(uuid()) @map("user_id") @db.Uuid
+  username         String    @db.VarChar(50)
+  email            String    @db.VarChar(100)
+  password         String    @db.VarChar(255)
+  name             String?   @db.VarChar(100)
+  phone            String?   @db.VarChar(20)
+  marketingConsent Boolean   @default(false) @map("marketing_consent")
+  isTempPassword   Boolean   @default(false) @map("is_temp_password")
+  createdAt        DateTime  @default(now()) @map("created_at")
+  updatedAt        DateTime  @default(now()) @updatedAt @map("updated_at")
+  deletedAt        DateTime? @map("deleted_at")
 
   // Relations
   watchlist           UserWatchlist[]
@@ -449,7 +453,10 @@ model StockDailyMetrics {
   volume1d              BigInt?  @map("volume_1d")
   tradingValue          BigInt?  @map("trading_value")
   ma50                  Decimal? @map("ma_50") @db.Decimal(15, 2)
-  passedStaticFilters   Boolean  @default(false) @map("passed_static_filters")
+  passedStaticFilters         Boolean  @default(false) @map("passed_static_filters")
+  isVolatilityContraction     Boolean  @default(false) @map("is_volatility_contraction")
+  isPriceCompression          Boolean  @default(false) @map("is_price_compression")
+  strengthContinuationDays    Int?     @map("strength_continuation_days")
   createdAt             DateTime @default(now()) @map("created_at")
   updatedAt             DateTime @updatedAt @map("updated_at")
 

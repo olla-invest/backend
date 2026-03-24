@@ -44,6 +44,9 @@ export class StockMetricsService {
         passedStaticFilters: metric.passedStaticFilters,
         highPrice52w: metric.highPrice52w ? Number(metric.highPrice52w) : null,
         lowPrice52w: metric.lowPrice52w ? Number(metric.lowPrice52w) : null,
+        isVolatilityContraction: metric.isVolatilityContraction,
+        isPriceCompression: metric.isPriceCompression,
+        strengthContinuationDays: metric.strengthContinuationDays,
       });
     });
 
@@ -54,7 +57,10 @@ export class StockMetricsService {
    * 최신 거래일 조회
    */
   async getLatestTradeDate(marketType?: string): Promise<Date | null> {
-    const where = marketType ? { marketType } : {};
+    // passedStaticFilters: true 인 레코드 중 가장 최신 날짜 반환
+    // → 주말/휴일에 메트릭이 저장되더라도 실제 거래일 기준으로 폴백
+    const where: any = { passedStaticFilters: true };
+    if (marketType) where.marketType = marketType;
     const latestDate = await this.prisma.stockDailyMetrics.findFirst({
       where,
       orderBy: { tradeDate: 'desc' },
@@ -402,7 +408,8 @@ export class StockMetricsService {
 
   /**
    * 기간 기반 RS 계산 (rsStartDate와 rsEndDate 사용)
-   * endDate 종가를 기준으로 startDate 가격까지의 수익률 계산
+   * SF1~SF5는 passedStaticFilters로 사전 필터링된 종목만 입력받으므로 재계산하지 않음.
+   * 각 필터 기간의 start/end 날짜 종가만 조회하여 메모리 사용량을 최소화.
    */
   async calculateRangeRS(
     stockCodes: string[],
@@ -436,267 +443,184 @@ export class StockMetricsService {
     }
 
     const tradeDates = recentDates.map((d) => d.candleTime);
-    this.logger.log(`Found ${tradeDates.length} recent trading days`);
 
-    // 날짜를 일수로 변환
+    // 필터별 날짜 → 일수 변환
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    const periodsData: Array<{ startDays: number; endDays: number; weight: number }> = [];
-    let maxDays = 0;
+    const periodsData = rsFilters.map((f) => ({
+      startDays: this.convertDateToDays(f.rsStartDate, today),
+      endDays: this.convertDateToDays(f.rsEndDate, today),
+      weight: f.strength,
+    }));
 
-    for (const filter of rsFilters) {
-      const startDays = this.convertDateToDays(filter.rsStartDate, today);
-      const endDays = this.convertDateToDays(filter.rsEndDate, today);
-      periodsData.push({ startDays, endDays, weight: filter.strength });
-      maxDays = Math.max(maxDays, startDays); // startDays가 더 크므로 (더 과거)
+    // 필요한 날짜 범위 파악 (거래일 목록 조회용)
+    const maxStartDays = Math.max(...periodsData.map((p) => p.startDays));
+    const oldestTradeDate = tradeDates[tradeDates.length - 1];
+    const rangeFrom = new Date(oldestTradeDate);
+    rangeFrom.setDate(rangeFrom.getDate() - maxStartDays - 10); // 여유 10일
+
+    // 범위 내 실제 거래일 목록 조회 — 인덱스 캔들 사용 (하루 1행으로 distinct 불필요, 수십 배 빠름)
+    const tradingDateRows = await this.prisma.stockCandle.findMany({
+      where: {
+        candleType: 'day',
+        stockCode: indexCode,
+        candleTime: { gte: rangeFrom },
+      },
+      orderBy: { candleTime: 'asc' },
+      select: { candleTime: true },
+    });
+    const allTradingDates = tradingDateRows.map((r) => r.candleTime);
+
+    const memUsage = process.memoryUsage();
+    this.logger.log(
+      `[calculateRangeRS] index=${indexCode} stocks=${stockCodes.length} tradingDates=${allTradingDates.length} ` +
+      `heap=${Math.round(memUsage.heapUsed / 1024 / 1024)}MB / ${Math.round(memUsage.heapTotal / 1024 / 1024)}MB`,
+    );
+
+    // tradeDate × 필터별 실제 start/end 거래일 resolve
+    type DatePair = { startDate: Date; endDate: Date; weight: number };
+    const tradeDatePeriods = new Map<string, DatePair[]>();
+    const neededDatesSet = new Set<string>();
+
+    for (const tradeDate of tradeDates) {
+      const td = new Date(tradeDate);
+      td.setHours(0, 0, 0, 0);
+      const pairs: DatePair[] = [];
+
+      for (const { startDays, endDays, weight } of periodsData) {
+        const targetStart = new Date(td);
+        targetStart.setDate(td.getDate() - startDays);
+        const targetEnd = new Date(td);
+        targetEnd.setDate(td.getDate() - endDays);
+
+        // startDate: targetStart 이상의 첫 거래일 (gte)
+        const startDate = allTradingDates.find((d) => d >= targetStart) ?? null;
+        // endDate: targetEnd 이하의 마지막 거래일 (lte)
+        let endDate: Date | null = null;
+        for (let i = allTradingDates.length - 1; i >= 0; i--) {
+          if (allTradingDates[i] <= targetEnd) { endDate = allTradingDates[i]; break; }
+        }
+
+        if (startDate && endDate && startDate < endDate) {
+          pairs.push({ startDate, endDate, weight });
+          neededDatesSet.add(startDate.toISOString());
+          neededDatesSet.add(endDate.toISOString());
+        }
+      }
+      tradeDatePeriods.set(tradeDate.toISOString(), pairs);
     }
 
-    // 과거 데이터 조회 범위
-    const historicalCutoff = new Date(tradeDates[0]);
-    historicalCutoff.setDate(historicalCutoff.getDate() - Math.max(365, maxDays + 10));
+    const neededDates = Array.from(neededDatesSet).map((s) => new Date(s));
+    this.logger.log(
+      `[calculateRangeRS] neededDates=${neededDates.length}, stockCodes=${stockCodes.length}, index=${indexCode} ` +
+      `heap=${Math.round(process.memoryUsage().heapUsed / 1024 / 1024)}MB`,
+    );
 
-    // 지수 데이터만 먼저 로드 (소량)
-    const indexCandles = await this.prisma.stockCandle.findMany({
+    // 주식 종가: 필요한 날짜만 단일 쿼리로 조회
+    const stockPriceRows = await this.prisma.stockCandle.findMany({
       where: {
-        stockCode: indexCode,
         candleType: 'day',
-        candleTime: { gte: historicalCutoff },
+        stockCode: { in: stockCodes },
+        candleTime: { in: neededDates },
       },
-      select: { candleTime: true, closePrice: true },
-      orderBy: { candleTime: 'asc' },
+      select: { stockCode: true, candleTime: true, closePrice: true },
     });
 
-    this.logger.log(`Loaded ${indexCandles.length} index candles`);
-
-    // tradeDate별 지수 슬라이스 사전 계산
-    const indexCandlesByDate = new Map<string, typeof indexCandles>();
-    for (const tradeDate of tradeDates) {
-      const key = tradeDate.toISOString();
-      const upTo = indexCandles.filter((c) => c.candleTime <= tradeDate);
-      indexCandlesByDate.set(key, upTo);
+    // stockCode → (dateISO → price)
+    const stockPriceMap = new Map<string, Map<string, number>>();
+    for (const row of stockPriceRows) {
+      if (!stockPriceMap.has(row.stockCode)) stockPriceMap.set(row.stockCode, new Map());
+      stockPriceMap.get(row.stockCode)!.set(row.candleTime.toISOString(), row.closePrice.toNumber());
     }
 
-    // tradeDate별 누적 결과 (배치 완료 후 랭킹 계산)
+    // 지수 종가: 필요한 날짜만 조회
+    const indexRows = await this.prisma.stockCandle.findMany({
+      where: {
+        candleType: 'day',
+        stockCode: indexCode,
+        candleTime: { in: neededDates },
+      },
+      select: { candleTime: true, closePrice: true },
+    });
+    const indexPriceMap = new Map<string, number>();
+    for (const row of indexRows) {
+      indexPriceMap.set(row.candleTime.toISOString(), row.closePrice.toNumber());
+    }
+
+    this.logger.log(
+      `[calculateRangeRS] stockPriceRows=${stockPriceRows.length}, indexRows=${indexRows.length} ` +
+      `heap=${Math.round(process.memoryUsage().heapUsed / 1024 / 1024)}MB`,
+    );
+
+    // tradeDate별 RS 계산
     const perDateRSMap = new Map<string, Map<string, number>>();
-    const perDatePassedSet = new Map<string, Set<string>>();
-    const perDateFilterStats = new Map<string, { total: number; f1Fail: number; f2Fail: number; f3Fail: number; f4Fail: number; f5Fail: number; noData: number; passed: number }>();
+    for (const tradeDate of tradeDates) perDateRSMap.set(tradeDate.toISOString(), new Map());
+
     for (const tradeDate of tradeDates) {
-      const key = tradeDate.toISOString();
-      perDateRSMap.set(key, new Map());
-      perDatePassedSet.set(key, new Set());
-      perDateFilterStats.set(key, { total: 0, f1Fail: 0, f2Fail: 0, f3Fail: 0, f4Fail: 0, f5Fail: 0, noData: 0, passed: 0 });
-    }
+      const dateKey = tradeDate.toISOString();
+      const pairs = tradeDatePeriods.get(dateKey) ?? [];
+      const stockRSMap = perDateRSMap.get(dateKey)!;
 
-    // 배치 처리: BATCH_SIZE 종목씩 로드하여 메모리 사용량 제어
-    const BATCH_SIZE = 150;
-    const MIN_TRADING_VALUE = 1_000_000_000; // 10억
+      for (const stockCode of stockCodes) {
+        const prices = stockPriceMap.get(stockCode);
+        if (!prices) continue;
 
-    for (let batchStart = 0; batchStart < stockCodes.length; batchStart += BATCH_SIZE) {
-      const batchCodes = stockCodes.slice(batchStart, batchStart + BATCH_SIZE);
+        const rsValues: number[] = [];
+        const weights: number[] = [];
 
-      const batchCandles = await this.prisma.stockCandle.findMany({
-        where: {
-          candleType: 'day',
-          stockCode: { in: batchCodes },
-          candleTime: { gte: historicalCutoff },
-        },
-        select: {
-          stockCode: true,
-          candleTime: true,
-          closePrice: true,
-          tradingValue: true,
-          volume: true,
-        },
-        orderBy: [{ stockCode: 'asc' }, { candleTime: 'asc' }],
-      });
+        for (const { startDate, endDate, weight } of pairs) {
+          const startPrice = prices.get(startDate.toISOString());
+          const endPrice = prices.get(endDate.toISOString());
+          const indexStartPrice = indexPriceMap.get(startDate.toISOString());
+          const indexEndPrice = indexPriceMap.get(endDate.toISOString());
 
-      // 배치 내 종목별 그룹핑
-      const candlesByStock = new Map<string, typeof batchCandles>();
-      for (const candle of batchCandles) {
-        if (!candlesByStock.has(candle.stockCode)) {
-          candlesByStock.set(candle.stockCode, []);
+          if (!startPrice || !endPrice || !indexStartPrice || !indexEndPrice) continue;
+          if (endPrice <= 0 || indexEndPrice <= 0) continue;
+
+          const rs = (startPrice / endPrice) / (indexStartPrice / indexEndPrice);
+          rsValues.push(rs);
+          weights.push(weight);
         }
-        candlesByStock.get(candle.stockCode)!.push(candle);
-      }
 
-      for (const tradeDate of tradeDates) {
-        const dateKey = tradeDate.toISOString();
-        const tradeDateOnly = new Date(tradeDate);
-        tradeDateOnly.setHours(0, 0, 0, 0);
+        if (rsValues.length === 0) continue;
 
-        const indexCandlesUpToDate = indexCandlesByDate.get(dateKey)!;
-        if (indexCandlesUpToDate.length === 0) continue;
-
-        const stockRSMap = perDateRSMap.get(dateKey)!;
-        const passedStockCodes = perDatePassedSet.get(dateKey)!;
-        const filterStats = perDateFilterStats.get(dateKey)!;
-
-        for (const [stockCode, candles] of candlesByStock) {
-          // 해당 거래일까지의 캔들 (이진 탐색 대신 선형 — 이미 정렬됨)
-          let endIdx = candles.length - 1;
-          while (endIdx >= 0 && candles[endIdx].candleTime > tradeDate) endIdx--;
-          if (endIdx < 0) continue;
-          const candlesUpToDate = candles.slice(0, endIdx + 1);
-
-          const rsValues: number[] = [];
-          const weights: number[] = [];
-          let anyFilterPassed = false;
-
-          for (const periodData of periodsData) {
-            const { startDays, endDays, weight } = periodData;
-
-            const targetStartDate = new Date(tradeDateOnly);
-            targetStartDate.setDate(tradeDateOnly.getDate() - startDays);
-            const targetEndDate = new Date(tradeDateOnly);
-            targetEndDate.setDate(tradeDateOnly.getDate() - endDays);
-
-            // startDate: 목표일 이상의 가장 가까운 거래일 (앞에서 탐색)
-            const startCandle = candlesUpToDate.find((c) => c.candleTime >= targetStartDate);
-            // endDate: 목표일 이하의 가장 최근 거래일 (뒤에서 탐색, 배열 복사 없이)
-            let endCandle: (typeof candlesUpToDate)[0] | undefined;
-            for (let i = candlesUpToDate.length - 1; i >= 0; i--) {
-              if (candlesUpToDate[i].candleTime <= targetEndDate) { endCandle = candlesUpToDate[i]; break; }
-            }
-
-            if (!startCandle || !endCandle) continue;
-
-            const indexStartCandle = indexCandlesUpToDate.find((c) => c.candleTime >= targetStartDate);
-            let indexEndCandle: (typeof indexCandlesUpToDate)[0] | undefined;
-            for (let i = indexCandlesUpToDate.length - 1; i >= 0; i--) {
-              if (indexCandlesUpToDate[i].candleTime <= targetEndDate) { indexEndCandle = indexCandlesUpToDate[i]; break; }
-            }
-
-            if (!indexStartCandle || !indexEndCandle) continue;
-
-            // endDate 기준 MA 계산 (배열 복사 없이 slice만)
-            let endCandleIdx = endIdx;
-            while (endCandleIdx >= 0 && candlesUpToDate[endCandleIdx].candleTime > endCandle.candleTime) endCandleIdx--;
-            const candlesUpToEndDate = candlesUpToDate.slice(0, endCandleIdx + 1);
-            const closePrice = endCandle.closePrice.toNumber();
-
-            const ma50Slice = candlesUpToEndDate.slice(-50);
-            const ma50 = ma50Slice.length >= 50
-              ? ma50Slice.reduce((sum, c) => sum + c.closePrice.toNumber(), 0) / 50
-              : null;
-
-            const ma150Slice = candlesUpToEndDate.slice(-150);
-            const ma150 = ma150Slice.length >= 150
-              ? ma150Slice.reduce((sum, c) => sum + c.closePrice.toNumber(), 0) / 150
-              : null;
-
-            const ma200Slice = candlesUpToEndDate.slice(-200);
-            const ma200 = ma200Slice.length >= 200
-              ? ma200Slice.reduce((sum, c) => sum + c.closePrice.toNumber(), 0) / 200
-              : null;
-
-            const ma200_20dSlice = candlesUpToEndDate.length >= 220
-              ? candlesUpToEndDate.slice(-(200 + 20), -20)
-              : [];
-            const ma200_20d = ma200_20dSlice.length >= 200
-              ? ma200_20dSlice.reduce((sum, c) => sum + c.closePrice.toNumber(), 0) / 200
-              : null;
-
-            const tradingValue = endCandle.tradingValue
-              ? Number(endCandle.tradingValue)
-              : closePrice * Number(endCandle.volume);
-
-            const startPrice = startCandle.closePrice.toNumber();
-            const endPrice = endCandle.closePrice.toNumber();
-            const indexStartPrice = indexStartCandle.closePrice.toNumber();
-            const indexEndPrice = indexEndCandle.closePrice.toNumber();
-
-            if (endPrice > 0 && indexEndPrice > 0) {
-              const stockReturn = startPrice / endPrice;
-              const indexReturn = indexStartPrice / indexEndPrice;
-              const rs = stockReturn / indexReturn;
-
-              rsValues.push(rs);
-              weights.push(weight);
-
-              const sf1 = ma50 !== null && ma150 !== null && ma50 > ma150;
-              const sf2 = ma150 !== null && ma200 !== null && ma150 > ma200;
-              const sf3 = ma200 !== null && ma200_20d !== null && ma200 > ma200_20d;
-              const sf4 = rs > 0;
-              const sf5 = tradingValue >= MIN_TRADING_VALUE;
-
-              filterStats.total++;
-              if (!sf1) filterStats.f1Fail++;
-              if (!sf2) filterStats.f2Fail++;
-              if (!sf3) filterStats.f3Fail++;
-              if (!sf4) filterStats.f4Fail++;
-              if (!sf5) filterStats.f5Fail++;
-
-              if (sf1 && sf2 && sf3 && sf4 && sf5) {
-                anyFilterPassed = true;
-                filterStats.passed++;
-              }
-            } else {
-              filterStats.noData++;
-            }
-          }
-
-          let weightedRS = 0;
-          let totalWeight = 0;
-          for (let i = 0; i < rsValues.length; i++) {
-            if (rsValues[i] > 0) {
-              weightedRS += rsValues[i] * weights[i];
-              totalWeight += weights[i];
-            }
-          }
-
-          if (totalWeight > 0) {
-            weightedRS /= totalWeight;
-            stockRSMap.set(stockCode, weightedRS);
-            if (anyFilterPassed) {
-              passedStockCodes.add(stockCode);
-            }
+        let weightedRS = 0;
+        let totalWeight = 0;
+        for (let i = 0; i < rsValues.length; i++) {
+          if (rsValues[i] > 0) {
+            weightedRS += rsValues[i] * weights[i];
+            totalWeight += weights[i];
           }
         }
+        if (totalWeight > 0) stockRSMap.set(stockCode, weightedRS / totalWeight);
       }
-
-      this.logger.log(`Range RS batch ${batchStart + batchCodes.length}/${stockCodes.length} done`);
     }
 
-    // 전체 배치 완료 후 tradeDate별 랭킹 계산
+    // tradeDate별 랭킹 계산
     const resultMap = new Map<string, Array<{ tradeDate: Date; rank: number; rsScore: number }>>();
 
     for (const tradeDate of tradeDates) {
       const dateKey = tradeDate.toISOString();
       const tradeDateOnly = new Date(tradeDate);
       tradeDateOnly.setHours(0, 0, 0, 0);
-
       const stockRSMap = perDateRSMap.get(dateKey)!;
-      const passedStockCodes = perDatePassedSet.get(dateKey)!;
-      const filterStats = perDateFilterStats.get(dateKey)!;
 
-      this.logger.log(
-        `[Range RS Static Filter Stats] Total: ${filterStats.total}, Passed: ${filterStats.passed}, ` +
-        `SF1(MA50>MA150): ${filterStats.f1Fail}, SF2(MA150>MA200): ${filterStats.f2Fail}, ` +
-        `SF3(MA200 uptrend): ${filterStats.f3Fail}, SF4(RS>0): ${filterStats.f4Fail}, SF5(거래대금): ${filterStats.f5Fail}, NoData: ${filterStats.noData}`,
-      );
+      const sorted = Array.from(stockRSMap.entries())
+        .filter(([, rs]) => rs > 0)
+        .sort(([, a], [, b]) => b - a);
 
-      const filtered = Array.from(passedStockCodes).map((code) => ({
-        stockCode: code,
-        rsRaw: stockRSMap.get(code) || 0,
-      }));
-      filtered.sort((a, b) => b.rsRaw - a.rsRaw);
+      const totalStocks = sorted.length;
+      this.logger.log(`[Range RS ${dateKey.split('T')[0]}] ${totalStocks} stocks with positive RS`);
 
-      const totalStocks = filtered.length;
       for (let i = 0; i < totalStocks; i++) {
-        const { stockCode } = filtered[i];
+        const [stockCode] = sorted[i];
         const rank = i + 1;
         const topPercent = (rank / totalStocks) * 100;
         const score = this.percentileToScore(topPercent);
 
-        if (!resultMap.has(stockCode)) {
-          resultMap.set(stockCode, []);
-        }
-        resultMap.get(stockCode)!.push({
-          tradeDate: tradeDateOnly,
-          rank,
-          rsScore: score,
-        });
+        if (!resultMap.has(stockCode)) resultMap.set(stockCode, []);
+        resultMap.get(stockCode)!.push({ tradeDate: tradeDateOnly, rank, rsScore: score });
       }
     }
 
@@ -776,28 +700,16 @@ export class StockMetricsService {
       `Starting metrics calculation for ${marketType} on ${targetDate.toISOString().split('T')[0]}, index: ${indexCode}${stockIndexMap ? ' (multi-index)' : ''}`,
     );
 
-    // 1. 모든 일봉 데이터 한번에 조회 (52주 = 365일)
+    // 1. 365일 기준 커트오프 + 지수 캔들 먼저 로드 (소량)
     const historicalCutoff = new Date(targetDate);
     historicalCutoff.setDate(historicalCutoff.getDate() - 365);
 
-    // 필요한 지수 목록 결정
     const indexCodesToLoad = stockIndexMap
       ? [...new Set(stockIndexMap.values())]
       : [indexCode];
 
-    // 종목 캔들 + 모든 필요 지수 캔들 병렬 조회
-    const [allCandles, ...indexResultArrays] = await Promise.all([
-      this.prisma.stockCandle.findMany({
-        where: {
-          candleType: 'day',
-          candleTime: { gte: historicalCutoff, lte: targetDate },
-          stockCode: stockCodes
-            ? { in: stockCodes }
-            : { not: { startsWith: 'INDEX_' } },
-        },
-        orderBy: [{ stockCode: 'asc' }, { candleTime: 'asc' }],
-      }),
-      ...indexCodesToLoad.map((idx) =>
+    const indexResultArrays = await Promise.all(
+      indexCodesToLoad.map((idx) =>
         this.prisma.stockCandle.findMany({
           where: {
             stockCode: idx,
@@ -807,33 +719,39 @@ export class StockMetricsService {
           orderBy: { candleTime: 'asc' },
         }),
       ),
-    ]);
+    );
 
-    // 지수 캔들 맵 구성
-    const indexCandlesMap = new Map<string, typeof allCandles>();
+    const indexCandlesMap = new Map<string, typeof indexResultArrays[0]>();
     indexCodesToLoad.forEach((idx, i) => {
       indexCandlesMap.set(idx, indexResultArrays[i]);
     });
-
-    this.logger.log(
-      `Loaded ${allCandles.length} stock candles, indices: ${indexCodesToLoad.map((idx) => `${idx}(${indexCandlesMap.get(idx)?.length || 0})`).join(', ')}`,
-    );
 
     if (indexResultArrays.every((arr) => arr.length === 0)) {
       this.logger.warn(`No index candles found. Cannot calculate RS.`);
       return { success: false, count: 0, date: targetDate };
     }
 
-    // 종목별 그룹핑
-    const candlesByStock = new Map<string, typeof allCandles>();
-    for (const candle of allCandles) {
-      if (!candlesByStock.has(candle.stockCode)) {
-        candlesByStock.set(candle.stockCode, []);
-      }
-      candlesByStock.get(candle.stockCode)!.push(candle);
+    // 처리할 종목 코드 목록 확보 (stockCodes 파라미터 없으면 DB에서 조회)
+    let allStockCodes: string[];
+    if (stockCodes && stockCodes.length > 0) {
+      allStockCodes = stockCodes;
+    } else {
+      const codeRows = await this.prisma.stockCandle.findMany({
+        where: {
+          candleType: 'day',
+          candleTime: { gte: historicalCutoff, lte: targetDate },
+          stockCode: { not: { startsWith: 'INDEX_' } },
+        },
+        distinct: ['stockCode'],
+        select: { stockCode: true },
+      });
+      allStockCodes = codeRows.map((r) => r.stockCode);
     }
 
-    // 2. 각 종목별 계산
+    this.logger.log(`Total stocks to process: ${allStockCodes.length}, indices: ${indexCodesToLoad.map((idx) => `${idx}(${indexCandlesMap.get(idx)?.length || 0})`).join(', ')}`);
+
+    // 2. 종목별 계산 — 배치로 나눠 메모리 사용량 제어
+    const CALC_BATCH_SIZE = 300; // 300종목 × 250거래일 ≈ 75,000 rows/배치
     const MIN_TRADING_VALUE = 1_000_000_000; // 10억
 
     interface StockCalc {
@@ -857,49 +775,88 @@ export class StockMetricsService {
       candleTime: Date;
       rsScore?: number;
       rank?: number;
+      isVolatilityContraction: boolean;
+      isPriceCompression: boolean;
+      strengthContinuationDays: number | null;
     }
 
     const calculations: StockCalc[] = [];
-
-    // 디버그: 정적 필터별 탈락 통계
     const filterStats = { total: 0, sf1Fail: 0, sf2Fail: 0, sf3Fail: 0, sf4Fail: 0, sf5Fail: 0, passed: 0 };
 
-    for (const [stockCode, candles] of candlesByStock) {
+    for (let batchStart = 0; batchStart < allStockCodes.length; batchStart += CALC_BATCH_SIZE) {
+      const batchCodes = allStockCodes.slice(batchStart, batchStart + CALC_BATCH_SIZE);
+
+      const rawCandles = await this.prisma.stockCandle.findMany({
+        where: {
+          candleType: 'day',
+          candleTime: { gte: historicalCutoff, lte: targetDate },
+          stockCode: { in: batchCodes },
+        },
+        select: {
+          stockCode: true,
+          candleTime: true,
+          closePrice: true,
+          highPrice: true,
+          lowPrice: true,
+          volume: true,
+          tradingValue: true,
+        },
+        orderBy: [{ stockCode: 'asc' }, { candleTime: 'asc' }],
+      });
+
+      // Decimal → number 즉시 변환 (Prisma Decimal 객체 해제)
+      type PlainCandle = { stockCode: string; candleTime: Date; close: number; high: number; low: number; volume: bigint; tradingValue: bigint | null };
+      const batchCandles: PlainCandle[] = rawCandles.map((c) => ({
+        stockCode: c.stockCode,
+        candleTime: c.candleTime,
+        close: c.closePrice.toNumber(),
+        high: c.highPrice.toNumber(),
+        low: c.lowPrice.toNumber(),
+        volume: c.volume,
+        tradingValue: c.tradingValue,
+      }));
+
+      const candlesByStock = new Map<string, PlainCandle[]>();
+      for (const candle of batchCandles) {
+        if (!candlesByStock.has(candle.stockCode)) candlesByStock.set(candle.stockCode, []);
+        candlesByStock.get(candle.stockCode)!.push(candle);
+      }
+
+      this.logger.log(`Processing batch ${batchStart + batchCodes.length}/${allStockCodes.length} (${batchCandles.length} candles)`);
+
+      for (const [stockCode, candles] of candlesByStock) {
       if (candles.length === 0) continue;
 
       const latest = candles[candles.length - 1];
-      const closePrice = latest.closePrice.toNumber();
+      const closePrice = latest.close;
 
       // 52주 고/저가
       let high52w = -Infinity;
       let low52w = Infinity;
       for (const c of candles) {
-        const h = c.highPrice.toNumber();
-        const l = c.lowPrice.toNumber();
-        if (h > high52w) high52w = h;
-        if (l < low52w) low52w = l;
+        if (c.high > high52w) high52w = c.high;
+        if (c.low < low52w) low52w = c.low;
       }
 
       // 전일 종가
-      const prev = candles.length >= 2 ? candles[candles.length - 2] : null;
-      const prevClose = prev ? prev.closePrice.toNumber() : 0;
+      const prevClose = candles.length >= 2 ? candles[candles.length - 2].close : 0;
 
       // MA50
       const ma50Slice = candles.slice(-50);
       const ma50 = ma50Slice.length >= 50
-        ? ma50Slice.reduce((sum, c) => sum + c.closePrice.toNumber(), 0) / 50
+        ? ma50Slice.reduce((sum, c) => sum + c.close, 0) / 50
         : null;
 
       // MA150
       const ma150Slice = candles.slice(-150);
       const ma150 = ma150Slice.length >= 150
-        ? ma150Slice.reduce((sum, c) => sum + c.closePrice.toNumber(), 0) / 150
+        ? ma150Slice.reduce((sum, c) => sum + c.close, 0) / 150
         : null;
 
       // MA200 (현재)
       const ma200Slice = candles.slice(-200);
       const ma200 = ma200Slice.length >= 200
-        ? ma200Slice.reduce((sum, c) => sum + c.closePrice.toNumber(), 0) / 200
+        ? ma200Slice.reduce((sum, c) => sum + c.close, 0) / 200
         : null;
 
       // MA200 (20일 전)
@@ -907,7 +864,7 @@ export class StockMetricsService {
         ? candles.slice(-(200 + 20), -20)
         : [];
       const ma200_20d = ma200_20dSlice.length >= 200
-        ? ma200_20dSlice.reduce((sum, c) => sum + c.closePrice.toNumber(), 0) / 200
+        ? ma200_20dSlice.reduce((sum, c) => sum + c.close, 0) / 200
         : null;
 
       // RS(63): 종목별로 자기 시장 지수 사용
@@ -921,7 +878,7 @@ export class StockMetricsService {
         : null;
 
       const close63Ago = candles.length > 63
-        ? candles[candles.length - 64].closePrice.toNumber()
+        ? candles[candles.length - 64].close
         : null;
 
       let rsRaw = 0;
@@ -954,7 +911,50 @@ export class StockMetricsService {
       if (!sf5) filterStats.sf5Fail++;
       if (passedStaticFilters) filterStats.passed++;
 
-      const isNewHigh = latest.highPrice.toNumber() >= high52w;
+      const isNewHigh = latest.high >= high52w;
+
+      // === 투자 중요 지표 계산 (최근 10거래일 필요) ===
+      const last11 = candles.slice(-11); // TR 계산에 prevClose 필요하므로 11개
+      const last10 = candles.slice(-10);
+
+      // 1) 변동성 축소: 최근 10일 True Range의 하락 추세 여부
+      //    TR = max(high-low, |high-prevClose|, |low-prevClose|)
+      //    앞 5일 평균 TR vs 뒤 5일 평균 TR 비교
+      let isVolatilityContraction = false;
+      if (last11.length >= 11) {
+        const trValues: number[] = [];
+        for (let i = 1; i < last11.length; i++) {
+          const c = last11[i];
+          const prev = last11[i - 1];
+          const tr = Math.max(
+            c.high - c.low,
+            Math.abs(c.high - prev.close),
+            Math.abs(c.low - prev.close),
+          );
+          trValues.push(tr);
+        }
+        const first5Avg = trValues.slice(0, 5).reduce((s, v) => s + v, 0) / 5;
+        const last5Avg  = trValues.slice(5).reduce((s, v) => s + v, 0) / 5;
+        isVolatilityContraction = last5Avg < first5Avg;
+      }
+
+      // 2) 가격 압축: 오늘 고저폭이 최근 10일 중 최솟값
+      let isPriceCompression = false;
+      if (last10.length >= 10) {
+        const todayRange = latest.high - latest.low;
+        const minRange = Math.min(...last10.map((c) => c.high - c.low));
+        isPriceCompression = todayRange <= minRange;
+      }
+
+      // 3) 강도 지속: 최근 10거래일 중 종가 > 전일 종가인 날 수
+      let strengthContinuationDays: number | null = null;
+      if (last11.length >= 11) {
+        let upDays = 0;
+        for (let i = 1; i < last11.length; i++) {
+          if (last11[i].close > last11[i - 1].close) upDays++;
+        }
+        strengthContinuationDays = upDays;
+      }
 
       calculations.push({
         stockCode,
@@ -975,8 +975,12 @@ export class StockMetricsService {
         idx63Ago,
         passedStaticFilters,
         candleTime: latest.candleTime,
+        isVolatilityContraction,
+        isPriceCompression,
+        strengthContinuationDays,
       });
-    }
+      } // end candlesByStock loop
+    } // end batch loop
 
     // 3. 정적 필터 통과 종목 → RS 내림차순 정렬 → 점수 + 랭킹
     const filtered = calculations.filter((c) => c.passedStaticFilters);
@@ -1013,9 +1017,16 @@ export class StockMetricsService {
 
       await Promise.all(
         batch.map((calc) => {
+          // tradeDate는 targetDate 기준 (캔들 날짜가 아님)
+          // - target=2026-03-20인데 주식 캔들이 2026-03-19까지만 있어도 2026-03-20으로 저장
+          // - 이렇게 해야 target=2026-03-20과 target=2026-03-19가 서로 다른 DB 키를 가짐
+          // setUTCHours: KST 서버에서 setHours 사용 시 날짜가 하루 밀리는 버그 방지
+          const tradeDate = new Date(targetDate);
+          tradeDate.setUTCHours(0, 0, 0, 0);
+
           const data = {
             stockCode: calc.stockCode,
-            tradeDate: new Date(calc.candleTime.getTime()),
+            tradeDate,
             closePrice: new Prisma.Decimal(calc.closePrice),
             relativeStrengthScore: new Prisma.Decimal(calc.rsScore ?? 0),
             rank: calc.rank ?? 0,
@@ -1029,10 +1040,10 @@ export class StockMetricsService {
             tradingValue: calc.tradingValue,
             ma50: calc.ma50 !== null ? new Prisma.Decimal(calc.ma50) : null,
             passedStaticFilters: calc.passedStaticFilters,
+            isVolatilityContraction: calc.isVolatilityContraction,
+            isPriceCompression: calc.isPriceCompression,
+            strengthContinuationDays: calc.strengthContinuationDays,
           };
-
-          // tradeDate를 날짜만 사용 (시간 제거)
-          data.tradeDate.setHours(0, 0, 0, 0);
 
           return this.prisma.stockDailyMetrics.upsert({
             where: {
@@ -1126,7 +1137,7 @@ export class StockMetricsService {
     const targetDate = tradeDate
       ? new Date(`${tradeDate.substring(0, 4)}-${tradeDate.substring(4, 6)}-${tradeDate.substring(6, 8)}`)
       : new Date();
-    targetDate.setHours(0, 0, 0, 0);
+    targetDate.setUTCHours(0, 0, 0, 0);
 
     const historicalCutoff = new Date(targetDate);
     historicalCutoff.setDate(historicalCutoff.getDate() - 365);
@@ -1197,9 +1208,6 @@ export class StockMetricsService {
         if (h > high52w) high52w = h;
         if (l < low52w) low52w = l;
       }
-
-      const prev = candles.length >= 2 ? candles[candles.length - 2] : null;
-      const prevClose = prev ? prev.closePrice.toNumber() : 0;
 
       const ma50Slice = candles.slice(-50);
       const ma50 = ma50Slice.length >= 50 ? ma50Slice.reduce((s, c) => s + c.closePrice.toNumber(), 0) / 50 : null;

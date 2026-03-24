@@ -34,6 +34,15 @@ export class IssueThemeController {
   }
 
   /**
+   * POST /issue-theme/sync-themes
+   * 키움 API upName → themes 테이블 + company.theme_code 동기화 (최초 1회)
+   */
+  @Post('sync-themes')
+  async syncThemes() {
+    return this.issueThemeService.syncThemes();
+  }
+
+  /**
    * POST /issue-theme/snapshot/theme
    * 테마 일별 스냅샷 저장 (장 마감 후 1회)
    */

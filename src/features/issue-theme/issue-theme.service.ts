@@ -1,6 +1,7 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../common/prisma/prisma.service';
 import { RealtimePriceCacheService } from '../real-time-chart/realtime-price-cache.service';
+import { KiwoomRestService } from '../../integrations/kiwoom/rest/kiwoom-rest.service';
 
 @Injectable()
 export class IssueThemeService {
@@ -9,6 +10,7 @@ export class IssueThemeService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly realtimeCache: RealtimePriceCacheService,
+    private readonly kiwoomRest: KiwoomRestService,
   ) {}
 
   // ─── 헬퍼 ────────────────────────────────────────────────────────
@@ -355,5 +357,62 @@ export class IssueThemeService {
 
     this.logger.log(`Trading value snapshot saved: ${snapshots.length} stocks at ${snapshotTime}`);
     return { saved: snapshots.length, time: snapshotTime };
+  }
+
+  // ─── 테마 동기화 ──────────────────────────────────────────────────
+
+  /**
+   * 키움 API 종목 리스트의 upName → themes 테이블 + company.theme_code 동기화
+   * 최초 1회 또는 테마 데이터 갱신 시 수동 호출
+   */
+  async syncThemes(): Promise<{ themesCreated: number; companiesUpdated: number }> {
+    this.logger.log('Starting theme sync from Kiwoom stock list...');
+
+    // KOSPI + KOSDAQ 종목 리스트 조회 (upName 포함)
+    const [kospiResult, kosdaqResult] = await Promise.all([
+      this.kiwoomRest.getStockList('0'),
+      this.kiwoomRest.getStockList('10'),
+    ]);
+    const allStocks = [
+      ...kospiResult.list.filter((s) => s.code?.match(/^\d{6}$/)),
+      ...kosdaqResult.list.filter((s) => s.code?.match(/^\d{6}$/)),
+    ];
+    this.logger.log(`Fetched ${allStocks.length} stocks from Kiwoom`);
+
+    // 기존 테마 조회
+    const existingThemes = await this.prisma.theme.findMany({ where: { deletedAt: null } });
+    const themeNameToCode = new Map<string, number>(existingThemes.map((t) => [t.themeName, t.themeCode]));
+    const maxCode = existingThemes.reduce((max, t) => Math.max(max, t.themeCode), 0);
+    let nextCode = maxCode + 1;
+
+    // 신규 upName → theme 생성
+    const newThemes: { themeCode: number; themeName: string }[] = [];
+    for (const stock of allStocks) {
+      if (!stock.upName || themeNameToCode.has(stock.upName)) continue;
+      themeNameToCode.set(stock.upName, nextCode);
+      newThemes.push({ themeCode: nextCode, themeName: stock.upName });
+      nextCode++;
+    }
+
+    if (newThemes.length > 0) {
+      await this.prisma.theme.createMany({ data: newThemes, skipDuplicates: true });
+      this.logger.log(`Created ${newThemes.length} new themes`);
+    }
+
+    // company.theme_code 업데이트 (배치)
+    let companiesUpdated = 0;
+    for (const stock of allStocks) {
+      if (!stock.upName) continue;
+      const themeCode = themeNameToCode.get(stock.upName);
+      if (!themeCode) continue;
+      const result = await this.prisma.company.updateMany({
+        where: { stockCode: stock.code, deletedAt: null },
+        data: { themeCode },
+      });
+      companiesUpdated += result.count;
+    }
+
+    this.logger.log(`Theme sync done: ${newThemes.length} themes created, ${companiesUpdated} companies updated`);
+    return { themesCreated: newThemes.length, companiesUpdated };
   }
 }

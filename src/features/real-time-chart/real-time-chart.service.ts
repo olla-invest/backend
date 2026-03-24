@@ -296,7 +296,7 @@ export class RealTimeChartService implements OnModuleInit {
    * 일봉 차트 데이터 조회 및 저장
    */
   async getDayCandles(stockCode: string, baseDate: string, saveToDb = false, days = 7) {
-    this.logger.log(`Getting day candles for ${stockCode} from ${baseDate}`);
+    // this.logger.log(`Getting day candles for ${stockCode} from ${baseDate}`);
 
     const kiwoomData = await this.kiwoomRest.getDayCandles(stockCode, baseDate);
 
@@ -324,7 +324,7 @@ export class RealTimeChartService implements OnModuleInit {
         lowPrice: this.parsePrice(item.low_pric),
         closePrice: this.parsePrice(item.cur_prc),
         volume: BigInt(item.trde_qty),
-        tradingValue: BigInt(item.trde_prica || '0'),
+        tradingValue: item.trde_prica ? BigInt(item.trde_prica) * 1_000_000n : null,
       }));
 
       await Promise.all(candlesToSave.map((c) => this.chartStorage.saveCandle(c)));
@@ -592,6 +592,8 @@ export class RealTimeChartService implements OnModuleInit {
         dataDate: latestTradeDate?.toISOString().split('T')[0] || null, // 데이터 기준 거래일
         lastUpdatedAt: this.lastDataUpdate?.toISOString() || null, // 마지막 데이터 갱신 시간
         isInitialized: this.initializationComplete, // 초기화 완료 여부
+        queryStartDate: latestTradeDate ? (() => { const d = new Date(latestTradeDate); d.setDate(d.getDate() - Math.round(63 * 1.5)); return d.toISOString().split('T')[0]; })() : null,
+        queryEndDate: latestTradeDate?.toISOString().split('T')[0] || null,
       },
       stocks: paginatedData.map((item, index) => {
         const s = item.stock;
@@ -624,6 +626,9 @@ export class RealTimeChartService implements OnModuleInit {
             twoDaysAgo: rankHistory[2] || null,
             threeDaysAgo: rankHistory[3] || null,
           },
+          isVolatilityContraction: metrics?.isVolatilityContraction ?? false,
+          isPriceCompression: metrics?.isPriceCompression ?? false,
+          strengthContinuationDays: metrics?.strengthContinuationDays ?? null,
         };
       }),
     };
@@ -809,6 +814,8 @@ export class RealTimeChartService implements OnModuleInit {
         dataDate: latestTradeDate?.toISOString().split('T')[0] || null,
         lastUpdatedAt: this.lastDataUpdate?.toISOString() || null,
         isInitialized: this.initializationComplete,
+        queryStartDate: latestTradeDate ? (() => { const maxPeriod = periods.length > 0 ? Math.max(...periods) : 63; const d = new Date(latestTradeDate); d.setDate(d.getDate() - Math.round(maxPeriod * 1.5)); return d.toISOString().split('T')[0]; })() : null,
+        queryEndDate: latestTradeDate?.toISOString().split('T')[0] || null,
         customRS: { periods, weights },
       },
       stocks: paginatedData.map((item, index) => {
@@ -842,6 +849,9 @@ export class RealTimeChartService implements OnModuleInit {
             twoDaysAgo: rankHistory[2]?.rank || null,
             threeDaysAgo: rankHistory[3]?.rank || null,
           },
+          isVolatilityContraction: metrics?.isVolatilityContraction ?? false,
+          isPriceCompression: metrics?.isPriceCompression ?? false,
+          strengthContinuationDays: metrics?.strengthContinuationDays ?? null,
         };
       }),
     };
@@ -1045,6 +1055,8 @@ export class RealTimeChartService implements OnModuleInit {
         dataDate: latestTradeDate?.toISOString().split('T')[0] || null,
         lastUpdatedAt: this.lastDataUpdate?.toISOString() || null,
         isInitialized: this.initializationComplete,
+        queryStartDate: (() => { const toMs = (s: string) => new Date(`${s.slice(0,4)}-${s.slice(4,6)}-${s.slice(6,8)}`).getTime(); const longest = rsFilters.reduce((max, f) => (toMs(f.rsEndDate) - toMs(f.rsStartDate)) > (toMs(max.rsEndDate) - toMs(max.rsStartDate)) ? f : max); return `${longest.rsStartDate.slice(0,4)}-${longest.rsStartDate.slice(4,6)}-${longest.rsStartDate.slice(6,8)}`; })(),
+        queryEndDate: (() => { const toMs = (s: string) => new Date(`${s.slice(0,4)}-${s.slice(4,6)}-${s.slice(6,8)}`).getTime(); const longest = rsFilters.reduce((max, f) => (toMs(f.rsEndDate) - toMs(f.rsStartDate)) > (toMs(max.rsEndDate) - toMs(max.rsStartDate)) ? f : max); return `${longest.rsEndDate.slice(0,4)}-${longest.rsEndDate.slice(4,6)}-${longest.rsEndDate.slice(6,8)}`; })(),
         rangeRS: { filters: rsFilters, periods, weights },
       },
       stocks: paginatedData.map((item, index) => {
@@ -1078,6 +1090,9 @@ export class RealTimeChartService implements OnModuleInit {
             twoDaysAgo: rankHistory[2]?.rank || null,
             threeDaysAgo: rankHistory[3]?.rank || null,
           },
+          isVolatilityContraction: metrics?.isVolatilityContraction ?? false,
+          isPriceCompression: metrics?.isPriceCompression ?? false,
+          strengthContinuationDays: metrics?.strengthContinuationDays ?? null,
         };
       }),
     };
@@ -1351,9 +1366,12 @@ export class RealTimeChartService implements OnModuleInit {
     const stockList = await this.kiwoomRest.getStockList(marketType);
     const today = new Date().toISOString().slice(0, 10).replace(/-/g, '');
 
-    // 해당 시장 종목 필터 (우선주 등 비정규 코드 포함)
+    // 해당 시장 종목 필터 (ETF/ETN 제외)
+    // - ETF: marketCode='8'이라 이미 제외됨
+    // - ETN: 코드가 5/6/7로 시작 (marketCode='0'이지만 ETN)
+    // - 알파벳 포함 코드: ETF/ETN 변형
     const stocks = stockList.list.filter(
-      (s) => s.marketCode === marketType,
+      (s) => s.marketCode === marketType && /^\d+$/.test(s.code) && !/^[567]/.test(s.code),
     );
 
     this.logger.log(`Found ${stocks.length} stocks to process in batches of ${BATCH_SIZE}`);
@@ -1438,6 +1456,72 @@ export class RealTimeChartService implements OnModuleInit {
   }
 
   /**
+   * 전체 종목 일봉 + 거래대금 백필 (getDayCandlesWithHistory 사용, 페이지네이션 지원)
+   */
+  async backfillDayCandles(marketType: '0' | '10' = '0', days = 130) {
+    const BATCH_SIZE = 3;
+    const BATCH_DELAY_MS = 1000;
+
+    this.logger.log(`Starting day candle backfill: market=${marketType}, days=${days}`);
+
+    const stockList = await this.kiwoomRest.getStockList(marketType);
+    const today = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+
+    const stocks = stockList.list.filter(
+      (s) => s.marketCode === marketType && /^\d+$/.test(s.code) && !/^[567]/.test(s.code),
+    );
+    this.logger.log(`Backfilling ${stocks.length} stocks (${days} days each)`);
+
+    let success = 0;
+    let failed = 0;
+    const errors: { code: string; error: string }[] = [];
+
+    for (let i = 0; i < stocks.length; i += BATCH_SIZE) {
+      const batch = stocks.slice(i, i + BATCH_SIZE);
+
+      const results = await Promise.allSettled(
+        batch.map(async (stock) => {
+          const kiwoomData = await this.kiwoomRest.getDayCandlesWithHistory(stock.code, today, days);
+          const candlesToSave = kiwoomData.stk_dt_pole_chart_qry.map((item) => ({
+            stockCode: stock.code,
+            candleType: 'day',
+            candleTime: this.parseDateOnly(item.dt),
+            openPrice: this.parsePrice(item.open_pric),
+            highPrice: this.parsePrice(item.high_pric),
+            lowPrice: this.parsePrice(item.low_pric),
+            closePrice: this.parsePrice(item.cur_prc),
+            volume: BigInt(item.trde_qty || '0'),
+            tradingValue: item.trde_prica ? BigInt(item.trde_prica) * 1_000_000n : null,
+          }));
+          await Promise.all(candlesToSave.map((c) => this.chartStorage.saveCandle(c)));
+          return candlesToSave.length;
+        }),
+      );
+
+      for (let j = 0; j < results.length; j++) {
+        if (results[j].status === 'fulfilled') {
+          success++;
+        } else {
+          failed++;
+          const err = (results[j] as PromiseRejectedResult).reason;
+          errors.push({ code: batch[j].code, error: err?.message || 'Unknown' });
+          this.logger.warn(`Backfill failed: ${batch[j].code} - ${err?.message}`);
+        }
+      }
+
+      const processed = Math.min(i + BATCH_SIZE, stocks.length);
+      if (processed % 100 === 0 || processed === stocks.length) {
+        this.logger.log(`Backfill progress: ${processed}/${stocks.length} - success: ${success}, failed: ${failed}`);
+      }
+
+      await new Promise((resolve) => setTimeout(resolve, BATCH_DELAY_MS));
+    }
+
+    this.logger.log(`Backfill completed: ${success} success, ${failed} failed out of ${stocks.length}`);
+    return { marketType, days, total: stocks.length, success, failed, errors: errors.slice(0, 20) };
+  }
+
+  /**
    * DB에서 저장된 캔들 데이터 조회
    */
   async getStoredCandles(
@@ -1449,6 +1533,15 @@ export class RealTimeChartService implements OnModuleInit {
     const startTime = new Date(startDate);
     const endTime = new Date(endDate);
     endTime.setUTCHours(23, 59, 59, 999);
+
+    // 일봉/주봉/월봉은 오늘 미완성 캔들 제외 → 어제까지만
+    if (candleType === 'day' || candleType === 'week' || candleType === 'month') {
+      const kstNow = new Date(Date.now() + 9 * 60 * 60 * 1000);
+      const todayKst = new Date(kstNow.toISOString().split('T')[0]); // 오늘 KST 00:00 UTC
+      if (endTime >= todayKst) {
+        endTime.setTime(todayKst.getTime() - 1); // 어제 23:59:59.999 UTC
+      }
+    }
 
     const candles = await this.chartStorage.getCandles(stockCode, candleType, startTime, endTime);
 
@@ -1792,6 +1885,10 @@ export class RealTimeChartService implements OnModuleInit {
     for (const s of kosdaqStocks) { stockIndexMap.set(s.code, 'INDEX_KOSDAQ'); stockNameMap.set(s.code, s.name); }
 
     const result = await this.metricsService.calculateAndSaveDailyMetrics('all', date, 'INDEX_KOSPI', allCodes, stockIndexMap, stockNameMap);
+
+    // 수동 재계산 후 초기화 상태 갱신
+    this.initializationComplete = true;
+    this.lastDataUpdate = new Date();
 
     // 재계산 후 새로 필터 통과된 종목 구독 갱신 (백그라운드)
     this.subscribeFilteredStocks().catch((error) => {

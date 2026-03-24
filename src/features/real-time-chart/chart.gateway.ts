@@ -150,10 +150,14 @@ export class ChartGateway
 
     // 전체 클라이언트에게 가격 업데이트 브로드캐스트 (테이블 currentPrice 갱신용)
     // 키움 현재가(values['10'])는 등락 방향 부호 포함 → 절대값으로 변환
+    const changeRateNum = parseFloat(values['12']);
+    const changeRateStr = isNaN(changeRateNum)
+      ? values['12']
+      : `${changeRateNum > 0 ? '+' : ''}${changeRateNum.toFixed(2)}%`;
     this.server.emit('priceUpdated', {
       stockCode,
       price: String(Math.abs(Number(values['10']))),  // 현재가 (부호 제거)
-      changeRate: values['12'],                        // 등락율 (부호 유지, % 미포함)
+      changeRate: changeRateStr,                       // 등락율 (+5.23% 형식)
       prevDayCompare: values['11'],                    // 전일대비
     });
   }

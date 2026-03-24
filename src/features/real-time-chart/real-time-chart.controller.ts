@@ -105,10 +105,28 @@ export class RealTimeChartController {
   @Get('stored/:stockCode')
   async getStoredCandles(
     @Param('stockCode') stockCode: string,
-    @Query('candleType') candleType: string,
+    @Query('chartType') chartType: string,
+    @Query('interval') interval: string,
     @Query('startDate') startDate: string,
     @Query('endDate') endDate: string,
   ) {
+    // 분봉/틱봉은 키움 API에서 실시간 조회
+    if (chartType === 'minute') {
+      const intervalVal = (interval || '1') as '1' | '3' | '5' | '10' | '15' | '30' | '45' | '60';
+      return await this.chartService.getMinuteCandles(stockCode, intervalVal);
+    }
+    if (chartType === 'tick') {
+      const intervalVal = (interval || '1') as '1' | '3' | '5' | '10' | '30';
+      return await this.chartService.getTickCandles(stockCode, intervalVal);
+    }
+
+    // 일/주/월봉은 DB에서 조회
+    const candleTypeMap: Record<string, string> = {
+      day: 'day',
+      week: 'week',
+      month: 'month',
+    };
+    const candleType = candleTypeMap[chartType] ?? chartType;
     return await this.chartService.getStoredCandles(
       stockCode,
       candleType,
@@ -279,6 +297,30 @@ export class RealTimeChartController {
     @Body('days') days = 7,
   ) {
     return await this.chartService.collectAllDayCandles(marketType, days);
+  }
+
+  /**
+   * POST /real-time-chart/backfill/day
+   * 전체 종목 일봉 + 거래대금 백필 (페이지네이션, 최대 750일)
+   * Fire-and-forget: 즉시 응답, 백그라운드 처리
+   */
+  @Post('backfill/day')
+  async backfillDayCandles(
+    @Body('marketType') marketType: '0' | '10' | 'all' = 'all',
+    @Body('days') days: number = 130,
+  ) {
+    const markets: ('0' | '10')[] = marketType === 'all' ? ['0', '10'] : [marketType];
+
+    for (const market of markets) {
+      this.chartService.backfillDayCandles(market, days)
+        .then((result) => console.log(`Backfill done: market=${market}`, result))
+        .catch((err) => console.error(`Backfill failed: market=${market}`, err));
+    }
+
+    return {
+      success: true,
+      message: `Day candle backfill started (markets: ${markets.join(',')}, days: ${days}). Check server logs for progress.`,
+    };
   }
 
   /**

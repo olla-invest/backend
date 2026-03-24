@@ -312,7 +312,7 @@ export class InitialSetupService {
                 lowPrice: safeDecimal(candle.low_pric),
                 closePrice: safeDecimal(candle.cur_prc),
                 volume: safeBigInt(candle.trde_qty),
-                tradingValue: candle.trde_prica ? safeBigInt(candle.trde_prica) : null,
+                tradingValue: candle.trde_prica ? safeBigInt(candle.trde_prica) * 1_000_000n : null,
                 prevDayCompare: safeDecimal(candle.pred_pre || '0'),
               },
             });

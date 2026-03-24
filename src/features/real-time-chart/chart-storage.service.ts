@@ -187,7 +187,9 @@ export class ChartStorageService {
     lowPrice: number | Decimal;
     closePrice: number | Decimal;
     volume: bigint;
+    tradingValue?: bigint | null;
   }): Promise<void> {
+    const tradingValue = 'tradingValue' in candle ? candle.tradingValue : undefined;
     await this.prisma.stockCandle.upsert({
       where: {
         stockCode_candleType_candleTime: {
@@ -201,6 +203,7 @@ export class ChartStorageService {
         lowPrice: candle.lowPrice,
         closePrice: candle.closePrice,
         volume: candle.volume,
+        ...(tradingValue !== undefined && { tradingValue }),
       },
       create: {
         stockCode: candle.stockCode,
@@ -211,6 +214,7 @@ export class ChartStorageService {
         lowPrice: candle.lowPrice,
         closePrice: candle.closePrice,
         volume: candle.volume,
+        tradingValue: tradingValue ?? null,
       },
     });
 
