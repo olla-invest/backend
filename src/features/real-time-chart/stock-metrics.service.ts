@@ -74,6 +74,11 @@ export class StockMetricsService {
    * calculateRangeRS 사전 필터링용 (전체 종목 → 통과 종목만 추려서 연산량 감소)
    */
   async getPassedStaticFilterCodes(stockCodes: string[], tradeDate: Date): Promise<string[]> {
+    const _mem = process.memoryUsage();
+    this.logger.log(
+      `[getPassedStaticFilterCodes] START stockCodes=${stockCodes.length} tradeDate=${tradeDate.toISOString().split('T')[0]} ` +
+      `heap=${Math.round(_mem.heapUsed/1024/1024)}MB/${Math.round(_mem.heapTotal/1024/1024)}MB rss=${Math.round(_mem.rss/1024/1024)}MB`,
+    );
     const rows = await this.prisma.stockDailyMetrics.findMany({
       where: {
         stockCode: { in: stockCodes },
@@ -98,6 +103,8 @@ export class StockMetricsService {
         tradeDate: latestDate,
         passedStaticFilters: true,
       },
+      orderBy: { rank: 'asc' },
+      take: 200,
       select: { stockCode: true },
     });
 
@@ -108,6 +115,11 @@ export class StockMetricsService {
    * 최신 거래일의 종목별 지표 조회 (날짜 상관없이 가장 최근 데이터)
    */
   async getLatestMetrics(stockCodes: string[], marketType?: string): Promise<Map<string, any>> {
+    const _mem = process.memoryUsage();
+    this.logger.log(
+      `[getLatestMetrics] START stockCodes=${stockCodes.length} ` +
+      `heap=${Math.round(_mem.heapUsed/1024/1024)}MB/${Math.round(_mem.heapTotal/1024/1024)}MB rss=${Math.round(_mem.rss/1024/1024)}MB`,
+    );
     const latestDate = await this.getLatestTradeDate(marketType);
 
     if (!latestDate) {
@@ -238,7 +250,7 @@ export class StockMetricsService {
     // 최대 기간 계산 (52주 = 365일)
     const maxPeriod = Math.max(...periods);
     const historicalCutoff = new Date(tradeDates[0]);
-    historicalCutoff.setDate(historicalCutoff.getDate() - Math.max(365, maxPeriod + 10));
+    historicalCutoff.setUTCDate(historicalCutoff.getUTCDate() - Math.max(365, maxPeriod + 10));
 
     // 일봉 데이터 조회
     const [stockCandles, indexCandles] = await Promise.all([
@@ -421,19 +433,20 @@ export class StockMetricsService {
     indexCode: string,
     tradingDays: number = 4,
   ): Promise<Map<string, Array<{ tradeDate: Date; rank: number; rsScore: number }>>> {
+    const _mem0 = process.memoryUsage();
     this.logger.log(
-      `Calculating range RS for ${stockCodes.length} stocks, filters: ${JSON.stringify(rsFilters)}, index: ${indexCode}`,
+      `[calculateRangeRS] START stocks=${stockCodes.length} index=${indexCode} filters=${JSON.stringify(rsFilters)} ` +
+      `heap=${Math.round(_mem0.heapUsed/1024/1024)}MB/${Math.round(_mem0.heapTotal/1024/1024)}MB rss=${Math.round(_mem0.rss/1024/1024)}MB`,
     );
 
-    // 최근 N개 거래일 조회
+    // 최근 N개 거래일 조회 — 인덱스 캔들(하루 1행)로 대체하여 full-scan distinct 제거
     const recentDates = await this.prisma.stockCandle.findMany({
       where: {
         candleType: 'day',
-        stockCode: { not: { startsWith: 'INDEX_' } },
+        stockCode: indexCode,
       },
       orderBy: { candleTime: 'desc' },
       take: tradingDays,
-      distinct: ['candleTime'],
       select: { candleTime: true },
     });
 
@@ -688,6 +701,7 @@ export class StockMetricsService {
     stockCodes?: string[],
     stockIndexMap?: Map<string, string>,
     stockNameMap?: Map<string, string>,
+    writeLogFile: boolean = false,
   ) {
     // KST 기준 오늘 날짜를 UTC midnight으로 설정 (캔들 저장 방식과 일치: new Date('YYYY-MM-DD') = UTC midnight)
     const targetDate = tradeDate ?? (() => {
@@ -702,7 +716,7 @@ export class StockMetricsService {
 
     // 1. 365일 기준 커트오프 + 지수 캔들 먼저 로드 (소량)
     const historicalCutoff = new Date(targetDate);
-    historicalCutoff.setDate(historicalCutoff.getDate() - 365);
+    historicalCutoff.setUTCDate(historicalCutoff.getUTCDate() - 365);
 
     const indexCodesToLoad = stockIndexMap
       ? [...new Set(stockIndexMap.values())]
@@ -729,6 +743,20 @@ export class StockMetricsService {
     if (indexResultArrays.every((arr) => arr.length === 0)) {
       this.logger.warn(`No index candles found. Cannot calculate RS.`);
       return { success: false, count: 0, date: targetDate };
+    }
+
+    // 인덱스별 63거래일 전 기준값 사전 계산 (종목 캔들 수가 달라도 같은 날짜 기준 적용)
+    const idx63AgoRefMap = new Map<string, { value: number; timeMs: number } | null>();
+    for (const [idxCode, idxCandles] of indexCandlesMap) {
+      if (idxCandles.length > 63) {
+        const ref = idxCandles[idxCandles.length - 64];
+        idx63AgoRefMap.set(idxCode, {
+          value: ref.closePrice.toNumber(),
+          timeMs: ref.candleTime.getTime(),
+        });
+      } else {
+        idx63AgoRefMap.set(idxCode, null);
+      }
     }
 
     // 처리할 종목 코드 목록 확보 (stockCodes 파라미터 없으면 DB에서 조회)
@@ -873,12 +901,16 @@ export class StockMetricsService {
       const idxCloseNow = stockIdxCandles.length > 0
         ? stockIdxCandles[stockIdxCandles.length - 1].closePrice.toNumber()
         : 0;
-      const idx63Ago = stockIdxCandles.length > 63
-        ? stockIdxCandles[stockIdxCandles.length - 64].closePrice.toNumber()
-        : null;
 
-      const close63Ago = candles.length > 63
-        ? candles[candles.length - 64].close
+      // 인덱스 기준 63거래일 전 값 + 날짜 (배열 인덱스 방식 → 날짜 매칭 방식으로 변경)
+      // 종목마다 캔들 수가 달라도 동일한 거래일 기준으로 rsRaw 계산
+      const idx63AgoRef = idx63AgoRefMap.get(stockIdxCode) ?? null;
+      const idx63Ago = idx63AgoRef ? idx63AgoRef.value : null;
+
+      // 인덱스의 63거래일 전 날짜와 정확히 일치하는 종목 종가 (Map으로 O(1) 조회)
+      const candleTimeMap = new Map(candles.map(c => [c.candleTime.getTime(), c.close]));
+      const close63Ago = idx63AgoRef !== null
+        ? (candleTimeMap.get(idx63AgoRef.timeMs) ?? null)
         : null;
 
       let rsRaw = 0;
@@ -1068,55 +1100,57 @@ export class StockMetricsService {
       filteredCount: totalFiltered,
     });
 
-    // 정적 + 동적 필터 모두 통과한 종목만 로그 (종가를 현재가로 사용)
-    const dynamicFiltered = filtered.filter((calc) => {
-      const df1 = calc.closePrice >= calc.low52w * 1.3;
-      const df2 = calc.closePrice >= calc.high52w * 0.75;
-      const df3 = calc.ma50 !== null && calc.closePrice > calc.ma50;
-      return df1 && df2 && df3;
-    });
+    if (writeLogFile) {
+      // 정적 + 동적 필터 모두 통과한 종목만 로그 (종가를 현재가로 사용)
+      const dynamicFiltered = filtered.filter((calc) => {
+        const df1 = calc.closePrice >= calc.low52w * 1.3;
+        const df2 = calc.closePrice >= calc.high52w * 0.75;
+        const df3 = calc.ma50 !== null && calc.closePrice > calc.ma50;
+        return df1 && df2 && df3;
+      });
 
-    const now = new Date();
-    const kstNow = new Date(now.getTime() + 9 * 60 * 60 * 1000);
-    const fileTimestamp = kstNow.toISOString().replace('T', '_').replace(/:/g, '').substring(0, 17);
-    const displayTimestamp = kstNow.toISOString().replace('T', ' ').substring(0, 19);
-    const indexInfo = stockIndexMap ? 'KOSPI/KOSDAQ(종목별)' : indexCode.replace('INDEX_', '');
-    const kstTargetDate = new Date(targetDate.getTime() + 9 * 60 * 60 * 1000);
-    const tradeDateStr = kstTargetDate.toISOString().split('T')[0];
-    const rsLogPath = path.join(process.cwd(), 'logs', `rs-scores-${fileTimestamp}.log`);
-    const rsLogLines = [
-      `=== RS Scores [${displayTimestamp}] | 조회기준일: ${tradeDateStr} | 기준: RS(63일) | 지수: ${indexInfo} | 대상: ${marketType} | total=${calculations.length} static=${totalFiltered} filtered=${dynamicFiltered.length} ===`,
-      ...dynamicFiltered.map((calc, i) => {
-        const name = stockNameMap?.get(calc.stockCode) ?? '';
-        const tv억 = (Number(calc.tradingValue) / 1e8).toFixed(1);
-        const df1Val = `${calc.closePrice}>=${(calc.low52w * 1.3).toFixed(0)}`;
-        const df2Val = `${calc.closePrice}>=${(calc.high52w * 0.75).toFixed(0)}`;
-        const df3Val = calc.ma50 !== null ? `${calc.closePrice}>${calc.ma50.toFixed(0)}` : 'N/A';
-        return [
-          `rank=${i + 1}`,
-          `code=${calc.stockCode}`,
-          `name=${name}`,
-          `rsRaw=${calc.rsRaw.toFixed(6)}`,
-          `score=${calc.rsScore ?? 0}`,
-          `closePrice=${calc.closePrice}`,
-          `close63Ago=${calc.close63Ago !== null ? calc.close63Ago : 'N/A'}`,
-          `idxCloseNow=${calc.idxCloseNow}`,
-          `idx63Ago=${calc.idx63Ago !== null ? calc.idx63Ago : 'N/A'}`,
-          `MA50=${calc.ma50 !== null ? calc.ma50.toFixed(0) : 'N/A'}`,
-          `MA150=${calc.ma150 !== null ? calc.ma150.toFixed(0) : 'N/A'}`,
-          `MA200=${calc.ma200 !== null ? calc.ma200.toFixed(0) : 'N/A'}`,
-          `52주고가=${calc.high52w}`,
-          `52주저가=${calc.low52w}`,
-          `거래대금=${tv억}억`,
-          `신고가=${calc.isNewHigh ? 'Y' : 'N'}`,
-          `df1=${df1Val}`,
-          `df2=${df2Val}`,
-          `df3=${df3Val}`,
-        ].join(', ');
-      }),
-    ].join('\n');
-    fs.writeFileSync(rsLogPath, rsLogLines + '\n', { encoding: 'utf-8' });
-    this.logger.log(`RS scores written to logs/rs-scores-${fileTimestamp}.log (static: ${totalFiltered}, dynamic: ${dynamicFiltered.length})`);
+      const now = new Date();
+      const kstNow = new Date(now.getTime() + 9 * 60 * 60 * 1000);
+      const fileTimestamp = kstNow.toISOString().replace('T', '_').replace(/:/g, '').substring(0, 17);
+      const displayTimestamp = kstNow.toISOString().replace('T', ' ').substring(0, 19);
+      const indexInfo = stockIndexMap ? 'KOSPI/KOSDAQ(종목별)' : indexCode.replace('INDEX_', '');
+      const kstTargetDate = new Date(targetDate.getTime() + 9 * 60 * 60 * 1000);
+      const tradeDateStr = kstTargetDate.toISOString().split('T')[0];
+      const rsLogPath = path.join(process.cwd(), 'logs', `rs-scores-${fileTimestamp}.log`);
+      const rsLogLines = [
+        `RS Scores [${displayTimestamp}] | 조회기준일: ${tradeDateStr} | 기준: RS(63일) | 지수: ${indexInfo} | 대상: ${marketType} | total=${calculations.length} static=${totalFiltered} filtered=${dynamicFiltered.length}`,
+        ...dynamicFiltered.map((calc, i) => {
+          const name = stockNameMap?.get(calc.stockCode) ?? '';
+          const tv억 = (Number(calc.tradingValue) / 1e8).toFixed(1);
+          const df1Val = `${calc.closePrice}>=${(calc.low52w * 1.3).toFixed(0)}`;
+          const df2Val = `${calc.closePrice}>=${(calc.high52w * 0.75).toFixed(0)}`;
+          const df3Val = calc.ma50 !== null ? `${calc.closePrice}>${calc.ma50.toFixed(0)}` : 'N/A';
+          return [
+            `rank=${i + 1}`,
+            `code=${calc.stockCode}`,
+            `name=${name}`,
+            `rsRaw=${calc.rsRaw.toFixed(6)}`,
+            `score=${calc.rsScore ?? 0}`,
+            `closePrice=${calc.closePrice}`,
+            `close63Ago=${calc.close63Ago !== null ? calc.close63Ago : 'N/A'}`,
+            `idxCloseNow=${calc.idxCloseNow}`,
+            `idx63Ago=${calc.idx63Ago !== null ? calc.idx63Ago : 'N/A'}`,
+            `MA50=${calc.ma50 !== null ? calc.ma50.toFixed(0) : 'N/A'}`,
+            `MA150=${calc.ma150 !== null ? calc.ma150.toFixed(0) : 'N/A'}`,
+            `MA200=${calc.ma200 !== null ? calc.ma200.toFixed(0) : 'N/A'}`,
+            `52주고가=${calc.high52w}`,
+            `52주저가=${calc.low52w}`,
+            `거래대금=${tv억}억`,
+            `신고가=${calc.isNewHigh ? 'Y' : 'N'}`,
+            `df1=${df1Val}`,
+            `df2=${df2Val}`,
+            `df3=${df3Val}`,
+          ].join(', ');
+        }),
+      ].join('\n');
+      fs.writeFileSync(rsLogPath, rsLogLines + '\n', { encoding: 'utf-8' });
+      this.logger.log(`RS scores written to logs/rs-scores-${fileTimestamp}.log (static: ${totalFiltered}, dynamic: ${dynamicFiltered.length})`);
+    }
 
     return {
       success: true,
@@ -1140,7 +1174,7 @@ export class StockMetricsService {
     targetDate.setUTCHours(0, 0, 0, 0);
 
     const historicalCutoff = new Date(targetDate);
-    historicalCutoff.setDate(historicalCutoff.getDate() - 365);
+    historicalCutoff.setUTCDate(historicalCutoff.getUTCDate() - 365);
 
     // 종목 시장 정보 + 이름 조회
     const stockInfos = await this.prisma.company.findMany({
@@ -1308,7 +1342,7 @@ export class StockMetricsService {
     targetDate.setHours(0, 0, 0, 0);
 
     const historicalCutoff = new Date(targetDate);
-    historicalCutoff.setDate(historicalCutoff.getDate() - 365);
+    historicalCutoff.setUTCDate(historicalCutoff.getUTCDate() - 365);
 
     const indexCodesToLoad = stockIndexMap
       ? [...new Set(stockIndexMap.values())]

@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { Cron, CronExpression } from '@nestjs/schedule';
+import { Cron } from '@nestjs/schedule';
 import { RealTimeChartService } from './real-time-chart.service';
 
 @Injectable()
@@ -30,17 +30,37 @@ export class DataSchedulerService {
       return;
     }
 
+    // 연결 끊긴 경우 자동 재연결
+    await this.realTimeChartService.ensureRealtimeConnection().catch((e) => {
+      this.logger.warn(`[장중] Realtime reconnect failed: ${e.message}`);
+    });
+
     this.isMetricsCalculating = true;
-    this.logger.log('[장중] Recalculating metrics...');
 
     try {
       await this.realTimeChartService.calculateDailyMetrics('all');
-      this.logger.log('[장중] Metrics recalculation completed');
     } catch (error) {
       this.logger.error('[장중] Metrics recalculation failed', error);
     } finally {
       this.isMetricsCalculating = false;
     }
+  }
+
+  /**
+   * 30초마다 실시간 연결 상태 확인 (장중 09:00~15:30)
+   */
+  @Cron('*/30 * * * * *', {
+    timeZone: 'Asia/Seoul',
+  })
+  async checkRealtimeConnection() {
+    const now = new Date();
+    const kstNow = new Date(now.getTime() + 9 * 60 * 60 * 1000);
+    const kstHours = kstNow.getUTCHours();
+    const kstMinutes = kstNow.getUTCMinutes();
+    if (kstHours < 9 || kstHours > 15 || (kstHours === 15 && kstMinutes > 30)) return;
+
+    const status = this.realTimeChartService.getRealtimeStatus();
+    this.logger.log(`[heartbeat] realtime=${status.websocket.status} subscriptions=${status.subscriptions.total}`);
   }
 
   /**

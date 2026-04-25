@@ -150,6 +150,12 @@ export class InitialSetupService {
     let skippedCount = 0;
 
     for (const { stock, mappedMarketType } of stocksWithMarket) {
+      // 일반 주권(보통주/우선주)만 저장, ETF/ELW/ETN 등 제외
+      if (stock.companyClassName !== '주권') {
+        skippedCount++;
+        continue;
+      }
+
       // DB에 이미 있는지 확인
       const existing = await this.prisma.company.findFirst({
         where: {

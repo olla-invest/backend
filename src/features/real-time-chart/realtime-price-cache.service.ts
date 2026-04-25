@@ -54,7 +54,6 @@ export class RealtimePriceCacheService {
    */
   setPrice(data: RealtimePrice): void {
     this.priceCache.set(data.stockCode, data);
-    this.logger.debug(`Price cached: ${data.stockCode} = ${data.currentPrice}`);
   }
 
   /**
@@ -69,7 +68,6 @@ export class RealtimePriceCacheService {
    */
   addSubscription(stockCode: string): void {
     this.subscribedStocks.add(stockCode);
-    this.logger.log(`Added subscription: ${stockCode}`);
   }
 
   /**
@@ -78,7 +76,6 @@ export class RealtimePriceCacheService {
   removeSubscription(stockCode: string): void {
     this.subscribedStocks.delete(stockCode);
     this.priceCache.delete(stockCode);
-    this.logger.log(`Removed subscription: ${stockCode}`);
   }
 
   /**

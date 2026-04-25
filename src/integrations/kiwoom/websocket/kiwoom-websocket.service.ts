@@ -114,9 +114,7 @@ export class KiwoomWebSocketService implements IRealtimeSource, OnModuleInit, On
     try {
       const message: KiwoomRealtimeResponse = JSON.parse(data.toString());
 
-      // 메시지 상세 로깅 (항상 출력)
-      this.logger.log(`Received message: trnm=${message.trnm}, return_code=${message.return_code}, readyState=${this.ws?.readyState}`);
-      this.logger.debug(`Full message: ${JSON.stringify(message)}`);
+      this.logger.debug(`Received message: trnm=${message.trnm}, return_code=${message.return_code}, readyState=${this.ws?.readyState}`);
 
       // 로그인 완료 체크 - 실제 성공 메시지인지 검증
       if (!this.isLoggedIn) {
@@ -358,8 +356,9 @@ export class KiwoomWebSocketService implements IRealtimeSource, OnModuleInit, On
     const CHUNK_SIZE = 100;
     for (let i = 0; i < stockCodes.length; i += CHUNK_SIZE) {
       const chunk = stockCodes.slice(i, i + CHUNK_SIZE);
-      await this.sendBatchSubscription(chunk, types, 'REG');
-      this.logger.log(`Batch REG sent: ${chunk.length} stocks (${i + chunk.length}/${stockCodes.length})`);
+      const grpNo = String(Math.floor(i / CHUNK_SIZE) + 1);
+      await this.sendBatchSubscription(chunk, types, 'REG', grpNo);
+      this.logger.log(`Batch REG sent: ${chunk.length} stocks (${i + chunk.length}/${stockCodes.length}) grp_no=${grpNo}`);
       if (i + CHUNK_SIZE < stockCodes.length) {
         await new Promise((resolve) => setTimeout(resolve, 500));
       }
@@ -373,6 +372,7 @@ export class KiwoomWebSocketService implements IRealtimeSource, OnModuleInit, On
     stockCodes: string[],
     types: string[],
     action: 'REG' | 'REMOVE',
+    grpNo: string = '1',
   ): Promise<void> {
     if (!this.ws || this.ws.readyState !== WebSocket.OPEN) {
       this.logger.warn(`WebSocket not connected, cannot send batch subscription`);
@@ -381,7 +381,7 @@ export class KiwoomWebSocketService implements IRealtimeSource, OnModuleInit, On
 
     const request = {
       trnm: action,
-      grp_no: '1',
+      grp_no: grpNo,
       refresh: '1',
       data: [{ item: stockCodes, type: types }],
     };
@@ -481,8 +481,9 @@ export class KiwoomWebSocketService implements IRealtimeSource, OnModuleInit, On
       const CHUNK_SIZE = 100;
       for (let i = 0; i < stockCodes.length; i += CHUNK_SIZE) {
         const chunk = stockCodes.slice(i, i + CHUNK_SIZE);
-        await this.sendBatchSubscription(chunk, types, 'REG');
-        this.logger.log(`Re-subscribe batch: ${chunk.length} stocks (${i + chunk.length}/${stockCodes.length})`);
+        const grpNo = String(Math.floor(i / CHUNK_SIZE) + 1);
+        await this.sendBatchSubscription(chunk, types, 'REG', grpNo);
+        this.logger.log(`Re-subscribe batch: ${chunk.length} stocks (${i + chunk.length}/${stockCodes.length}) grp_no=${grpNo}`);
         if (i + CHUNK_SIZE < stockCodes.length) {
           await new Promise((resolve) => setTimeout(resolve, 500));
         }

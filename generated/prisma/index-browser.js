@@ -123,6 +123,7 @@ exports.Prisma.TransactionIsolationLevel = makeStrictEnum({
 exports.Prisma.ThemeScalarFieldEnum = {
   themeCode: 'themeCode',
   themeName: 'themeName',
+  imageUrl: 'imageUrl',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   deletedAt: 'deletedAt'
@@ -133,6 +134,13 @@ exports.Prisma.UserScalarFieldEnum = {
   username: 'username',
   email: 'email',
   password: 'password',
+  provider: 'provider',
+  socialId: 'socialId',
+  name: 'name',
+  phone: 'phone',
+  marketingConsent: 'marketingConsent',
+  isTempPassword: 'isTempPassword',
+  planType: 'planType',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   deletedAt: 'deletedAt'
@@ -144,6 +152,9 @@ exports.Prisma.CompanyScalarFieldEnum = {
   stockCode: 'stockCode',
   marketType: 'marketType',
   themeCode: 'themeCode',
+  corpCode: 'corpCode',
+  listedShares: 'listedShares',
+  businessInfo: 'businessInfo',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   deletedAt: 'deletedAt'
@@ -154,6 +165,13 @@ exports.Prisma.UserWatchlistScalarFieldEnum = {
   companyId: 'companyId',
   addedDate: 'addedDate',
   memo: 'memo',
+  deletedAt: 'deletedAt'
+};
+
+exports.Prisma.UserWatchlistThemeScalarFieldEnum = {
+  userId: 'userId',
+  themeCode: 'themeCode',
+  addedDate: 'addedDate',
   deletedAt: 'deletedAt'
 };
 
@@ -312,6 +330,31 @@ exports.Prisma.StockQuoteScalarFieldEnum = {
   createdAt: 'createdAt'
 };
 
+exports.Prisma.ThemeDailySnapshotScalarFieldEnum = {
+  snapshotId: 'snapshotId',
+  themeCode: 'themeCode',
+  snapshotDate: 'snapshotDate',
+  rank: 'rank',
+  risingCount: 'risingCount',
+  totalCount: 'totalCount',
+  risingRatio: 'risingRatio',
+  avgChangeRate: 'avgChangeRate',
+  highVolumeCount: 'highVolumeCount',
+  upCount: 'upCount',
+  flatCount: 'flatCount',
+  downCount: 'downCount',
+  createdAt: 'createdAt'
+};
+
+exports.Prisma.StockTradingValueSnapshotScalarFieldEnum = {
+  snapshotId: 'snapshotId',
+  stockCode: 'stockCode',
+  snapshotDate: 'snapshotDate',
+  snapshotTime: 'snapshotTime',
+  accTradingValue: 'accTradingValue',
+  createdAt: 'createdAt'
+};
+
 exports.Prisma.StockDailyMetricsScalarFieldEnum = {
   metricId: 'metricId',
   stockCode: 'stockCode',
@@ -327,6 +370,62 @@ exports.Prisma.StockDailyMetricsScalarFieldEnum = {
   priceChangeRate1d: 'priceChangeRate1d',
   volume1d: 'volume1d',
   tradingValue: 'tradingValue',
+  ma50: 'ma50',
+  passedStaticFilters: 'passedStaticFilters',
+  isVolatilityContraction: 'isVolatilityContraction',
+  isPriceCompression: 'isPriceCompression',
+  isTrendTemplate: 'isTrendTemplate',
+  strengthContinuationDays: 'strengthContinuationDays',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.UserSubscriptionScalarFieldEnum = {
+  subscriptionId: 'subscriptionId',
+  userId: 'userId',
+  planType: 'planType',
+  status: 'status',
+  billingCycle: 'billingCycle',
+  currentPeriodStart: 'currentPeriodStart',
+  currentPeriodEnd: 'currentPeriodEnd',
+  nextBillingDate: 'nextBillingDate',
+  cancelledAt: 'cancelledAt',
+  cancelEffectiveAt: 'cancelEffectiveAt',
+  pendingPlanType: 'pendingPlanType',
+  pendingBillingCycle: 'pendingBillingCycle',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.PaymentCardScalarFieldEnum = {
+  cardId: 'cardId',
+  userId: 'userId',
+  billingKey: 'billingKey',
+  cardNumber: 'cardNumber',
+  cardType: 'cardType',
+  issuerCode: 'issuerCode',
+  ownerType: 'ownerType',
+  isDefault: 'isDefault',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  deletedAt: 'deletedAt'
+};
+
+exports.Prisma.PaymentScalarFieldEnum = {
+  paymentId: 'paymentId',
+  userId: 'userId',
+  subscriptionId: 'subscriptionId',
+  orderId: 'orderId',
+  tossPaymentKey: 'tossPaymentKey',
+  amount: 'amount',
+  planType: 'planType',
+  billingCycle: 'billingCycle',
+  status: 'status',
+  paymentMethod: 'paymentMethod',
+  cardInfo: 'cardInfo',
+  failureCode: 'failureCode',
+  failureMessage: 'failureMessage',
+  paidAt: 'paidAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
@@ -336,12 +435,12 @@ exports.Prisma.SortOrder = {
   desc: 'desc'
 };
 
-exports.Prisma.JsonNullValueInput = {
+exports.Prisma.NullableJsonNullValueInput = {
+  DbNull: Prisma.DbNull,
   JsonNull: Prisma.JsonNull
 };
 
-exports.Prisma.NullableJsonNullValueInput = {
-  DbNull: Prisma.DbNull,
+exports.Prisma.JsonNullValueInput = {
   JsonNull: Prisma.JsonNull
 };
 
@@ -360,6 +459,19 @@ exports.Prisma.JsonNullValueFilter = {
   JsonNull: Prisma.JsonNull,
   AnyNull: Prisma.AnyNull
 };
+exports.AuthProvider = exports.$Enums.AuthProvider = {
+  LOCAL: 'LOCAL',
+  NAVER: 'NAVER',
+  KAKAO: 'KAKAO'
+};
+
+exports.PlanType = exports.$Enums.PlanType = {
+  FREE: 'FREE',
+  BASIC: 'BASIC',
+  PRO: 'PRO',
+  PREMIUM: 'PREMIUM'
+};
+
 exports.MarketType = exports.$Enums.MarketType = {
   KOSPI: 'KOSPI',
   KOSDAQ: 'KOSDAQ',
@@ -383,11 +495,33 @@ exports.BatchJobStatus = exports.$Enums.BatchJobStatus = {
   FAILED: 'FAILED'
 };
 
+exports.SubscriptionStatus = exports.$Enums.SubscriptionStatus = {
+  ACTIVE: 'ACTIVE',
+  INACTIVE: 'INACTIVE',
+  CANCELLED: 'CANCELLED',
+  EXPIRED: 'EXPIRED',
+  PAST_DUE: 'PAST_DUE'
+};
+
+exports.BillingCycle = exports.$Enums.BillingCycle = {
+  MONTHLY: 'MONTHLY',
+  YEARLY: 'YEARLY'
+};
+
+exports.PaymentStatus = exports.$Enums.PaymentStatus = {
+  PENDING: 'PENDING',
+  SUCCESS: 'SUCCESS',
+  FAILED: 'FAILED',
+  CANCELLED: 'CANCELLED',
+  REFUNDED: 'REFUNDED'
+};
+
 exports.Prisma.ModelName = {
   Theme: 'Theme',
   User: 'User',
   Company: 'Company',
   UserWatchlist: 'UserWatchlist',
+  UserWatchlistTheme: 'UserWatchlistTheme',
   Tag: 'Tag',
   WatchlistTag: 'WatchlistTag',
   RsFilterPreset: 'RsFilterPreset',
@@ -401,7 +535,12 @@ exports.Prisma.ModelName = {
   StockCandle: 'StockCandle',
   StockTick: 'StockTick',
   StockQuote: 'StockQuote',
-  StockDailyMetrics: 'StockDailyMetrics'
+  ThemeDailySnapshot: 'ThemeDailySnapshot',
+  StockTradingValueSnapshot: 'StockTradingValueSnapshot',
+  StockDailyMetrics: 'StockDailyMetrics',
+  UserSubscription: 'UserSubscription',
+  PaymentCard: 'PaymentCard',
+  Payment: 'Payment'
 };
 
 /**

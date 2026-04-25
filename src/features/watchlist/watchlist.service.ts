@@ -5,10 +5,8 @@ import { PrismaService } from '../../common/prisma/prisma.service';
 export class WatchlistService {
   constructor(private readonly prisma: PrismaService) {}
 
-  /**
-   * 관심종목 현황 조회
-   * 최신 거래일 지표 + 전일 대비 순위 변동 + 이벤트 계산
-   */
+  // ─── 관심종목 ─────────────────────────────────────────────────────
+
   async getWatchlistStocks(userId: string) {
     const watchlist = await this.prisma.userWatchlist.findMany({
       where: { userId, deletedAt: null },
@@ -24,7 +22,6 @@ export class WatchlistService {
 
     const stockCodes = watchlist.map((w) => w.company.stockCode);
 
-    // 최신 거래일 조회
     const latestMetric = await this.prisma.stockDailyMetrics.findFirst({
       where: { stockCode: { in: stockCodes } },
       orderBy: { tradeDate: 'desc' },
@@ -32,15 +29,10 @@ export class WatchlistService {
     });
 
     if (!latestMetric) {
-      return {
-        tradeDate: null,
-        stocks: watchlist.map((w) => this.buildStockItem(w, null, null)),
-      };
+      return { tradeDate: null, stocks: watchlist.map((w) => this.buildStockItem(w, null, null)) };
     }
 
     const latestDate = latestMetric.tradeDate;
-
-    // 당일 + 전일 지표 병렬 조회
     const prevDateRecord = await this.prisma.stockDailyMetrics.findFirst({
       where: { tradeDate: { lt: latestDate } },
       orderBy: { tradeDate: 'desc' },
@@ -71,15 +63,16 @@ export class WatchlistService {
 
   private buildStockItem(watchlistEntry: any, today: any, prev: any) {
     const events: string[] = [];
-
     if (today) {
       if (today.isNewHigh) events.push('NEW_HIGH');
+      if (today.isVolatilityContraction) events.push('VOLATILITY_CONTRACTION');
+      if (today.isPriceCompression) events.push('PRICE_COMPRESSION');
+      if (today.isTrendTemplate) events.push('TREND_TEMPLATE');
       if (prev) {
         if (today.rank < prev.rank) events.push('RANK_UP');
         else if (today.rank > prev.rank) events.push('RANK_DOWN');
       }
     }
-
     return {
       companyId: watchlistEntry.companyId,
       stockCode: watchlistEntry.company.stockCode,
@@ -98,13 +91,8 @@ export class WatchlistService {
     };
   }
 
-  /**
-   * 관심종목 추가 (stockCode 기반)
-   */
   async addStock(userId: string, stockCode: string) {
-    const company = await this.prisma.company.findFirst({
-      where: { stockCode, deletedAt: null },
-    });
+    const company = await this.prisma.company.findFirst({ where: { stockCode, deletedAt: null } });
     if (!company) throw new NotFoundException(`종목코드 ${stockCode}를 찾을 수 없습니다`);
 
     const existing = await this.prisma.userWatchlist.findFirst({
@@ -112,11 +100,9 @@ export class WatchlistService {
     });
     if (existing) throw new ConflictException(`이미 관심종목으로 등록된 종목입니다`);
 
-    // soft delete된 항목이 있으면 복구, 없으면 새로 생성
     const deleted = await this.prisma.userWatchlist.findFirst({
       where: { userId, companyId: company.companyId, deletedAt: { not: null } },
     });
-
     if (deleted) {
       return this.prisma.userWatchlist.update({
         where: { userId_companyId: { userId, companyId: company.companyId } },
@@ -131,13 +117,8 @@ export class WatchlistService {
     });
   }
 
-  /**
-   * 관심종목 삭제 (stockCode 기반, soft delete)
-   */
   async removeStock(userId: string, stockCode: string) {
-    const company = await this.prisma.company.findFirst({
-      where: { stockCode, deletedAt: null },
-    });
+    const company = await this.prisma.company.findFirst({ where: { stockCode, deletedAt: null } });
     if (!company) throw new NotFoundException(`종목코드 ${stockCode}를 찾을 수 없습니다`);
 
     const watchlistEntry = await this.prisma.userWatchlist.findFirst({
@@ -149,7 +130,555 @@ export class WatchlistService {
       where: { userId_companyId: { userId, companyId: company.companyId } },
       data: { deletedAt: new Date() },
     });
-
     return { message: '관심종목에서 삭제되었습니다', stockCode };
+  }
+
+  // ─── 관심테마 ─────────────────────────────────────────────────────
+
+  /**
+   * GET /watchlist/themes
+   * 관심테마 현황 조회
+   * - 이벤트: 테마 순위 상승/하락 텍스트
+   * - 정렬: 테마명 가나다순
+   */
+  async getWatchlistThemes(userId: string) {
+    const watchlistThemes = await this.prisma.userWatchlistTheme.findMany({
+      where: { userId, deletedAt: null },
+      include: { theme: { select: { themeCode: true, themeName: true, imageUrl: true } } },
+    });
+
+    if (watchlistThemes.length === 0) return { themes: [] };
+
+    const themeCodes = watchlistThemes.map((w) => w.themeCode);
+
+    // 최신 스냅샷 날짜
+    const latestSnapshot = await this.prisma.themeDailySnapshot.findFirst({
+      where: { themeCode: { in: themeCodes } },
+      orderBy: { snapshotDate: 'desc' },
+      select: { snapshotDate: true },
+    });
+
+    let todayMap = new Map<number, any>();
+    let prevMap = new Map<number, any>();
+
+    if (latestSnapshot) {
+      const latestDate = latestSnapshot.snapshotDate;
+      const prevDateRecord = await this.prisma.themeDailySnapshot.findFirst({
+        where: { snapshotDate: { lt: latestDate } },
+        orderBy: { snapshotDate: 'desc' },
+        select: { snapshotDate: true },
+      });
+
+      const [todaySnapshots, prevSnapshots] = await Promise.all([
+        this.prisma.themeDailySnapshot.findMany({
+          where: { themeCode: { in: themeCodes }, snapshotDate: latestDate },
+        }),
+        prevDateRecord
+          ? this.prisma.themeDailySnapshot.findMany({
+              where: { themeCode: { in: themeCodes }, snapshotDate: prevDateRecord.snapshotDate },
+            })
+          : Promise.resolve([]),
+      ]);
+
+      todayMap = new Map(todaySnapshots.map((s) => [s.themeCode, s]));
+      prevMap = new Map(prevSnapshots.map((s) => [s.themeCode, s]));
+    }
+
+    const themes = watchlistThemes.map((w) => {
+      const today = todayMap.get(w.themeCode) ?? null;
+      const prev = prevMap.get(w.themeCode) ?? null;
+      return this.buildThemeItem(w, today, prev);
+    });
+
+    // 가나다순
+    themes.sort((a, b) => a.themeName.localeCompare(b.themeName, 'ko'));
+
+    return { themes };
+  }
+
+  private buildThemeItem(watchlistEntry: any, today: any, prev: any) {
+    let event = '-';
+    if (today && prev) {
+      const diff = prev.rank - today.rank;
+      if (diff > 0) {
+        event = `테마 순위가 ${prev.rank} → ${today.rank}으로 상승했어요.(+${diff})`;
+      } else if (diff < 0) {
+        event = `테마 순위가 ${prev.rank} → ${today.rank}으로 하락했어요.(${diff})`;
+      }
+    }
+    return {
+      themeCode: watchlistEntry.themeCode,
+      themeName: watchlistEntry.theme.themeName,
+      imageUrl: watchlistEntry.theme.imageUrl ?? null,
+      addedDate: watchlistEntry.addedDate,
+      rank: today?.rank ?? null,
+      prevRank: prev?.rank ?? null,
+      risingCount: today?.risingCount ?? null,
+      totalCount: today?.totalCount ?? null,
+      upCount: today?.upCount ?? null,
+      flatCount: today?.flatCount ?? null,
+      downCount: today?.downCount ?? null,
+      event,
+    };
+  }
+
+  async addTheme(userId: string, themeCode: number) {
+    const theme = await this.prisma.theme.findFirst({ where: { themeCode, deletedAt: null } });
+    if (!theme) throw new NotFoundException(`테마코드 ${themeCode}를 찾을 수 없습니다`);
+
+    const existing = await this.prisma.userWatchlistTheme.findFirst({
+      where: { userId, themeCode, deletedAt: null },
+    });
+    if (existing) throw new ConflictException(`이미 관심테마로 등록된 테마입니다`);
+
+    // soft delete 복구
+    const deleted = await this.prisma.userWatchlistTheme.findFirst({
+      where: { userId, themeCode, deletedAt: { not: null } },
+    });
+    if (deleted) {
+      return this.prisma.userWatchlistTheme.update({
+        where: { userId_themeCode: { userId, themeCode } },
+        data: { deletedAt: null, addedDate: new Date() },
+        include: { theme: { select: { themeName: true } } },
+      });
+    }
+
+    return this.prisma.userWatchlistTheme.create({
+      data: { userId, themeCode },
+      include: { theme: { select: { themeName: true } } },
+    });
+  }
+
+  async removeTheme(userId: string, themeCode: number) {
+    const theme = await this.prisma.theme.findFirst({ where: { themeCode, deletedAt: null } });
+    if (!theme) throw new NotFoundException(`테마코드 ${themeCode}를 찾을 수 없습니다`);
+
+    const entry = await this.prisma.userWatchlistTheme.findFirst({
+      where: { userId, themeCode, deletedAt: null },
+    });
+    if (!entry) throw new NotFoundException(`관심테마에 등록되지 않은 테마입니다`);
+
+    await this.prisma.userWatchlistTheme.update({
+      where: { userId_themeCode: { userId, themeCode } },
+      data: { deletedAt: new Date() },
+    });
+    return { message: '관심테마에서 삭제되었습니다', themeCode };
+  }
+
+  // ─── 섹션 1: 오늘 주목해야 할 내 관심항목 Top5 ────────────────────
+
+  /**
+   * GET /watchlist/highlights
+   * 관심테마 중 순위 기준 상위 2개 + 관심종목 중 rank 기준 상위 3개
+   */
+  async getHighlights(userId: string) {
+    const [watchlistThemes, watchlistStocks] = await Promise.all([
+      this.prisma.userWatchlistTheme.findMany({
+        where: { userId, deletedAt: null },
+        include: { theme: { select: { themeCode: true, themeName: true, imageUrl: true } } },
+      }),
+      this.prisma.userWatchlist.findMany({
+        where: { userId, deletedAt: null },
+        include: {
+          company: { select: { companyId: true, companyName: true, stockCode: true, marketType: true } },
+        },
+      }),
+    ]);
+
+    // 테마 Top2 - 최신 스냅샷 순위 기준
+    const themeCodes = watchlistThemes.map((w) => w.themeCode);
+    const latestThemeSnapshot = themeCodes.length > 0
+      ? await this.prisma.themeDailySnapshot.findFirst({
+          where: { themeCode: { in: themeCodes } },
+          orderBy: { snapshotDate: 'desc' },
+          select: { snapshotDate: true },
+        })
+      : null;
+
+    let topThemes: any[] = [];
+    if (latestThemeSnapshot) {
+      const snapshots = await this.prisma.themeDailySnapshot.findMany({
+        where: { themeCode: { in: themeCodes }, snapshotDate: latestThemeSnapshot.snapshotDate },
+        orderBy: { rank: 'asc' },
+        take: 2,
+      });
+      const snapshotMap = new Map(snapshots.map((s) => [s.themeCode, s]));
+      topThemes = snapshots.map((s) => {
+        const w = watchlistThemes.find((wt) => wt.themeCode === s.themeCode)!;
+        return {
+          type: 'THEME',
+          themeCode: s.themeCode,
+          themeName: w.theme.themeName,
+          imageUrl: w.theme.imageUrl ?? null,
+          rank: s.rank,
+          risingCount: s.risingCount,
+          totalCount: s.totalCount,
+        };
+      });
+    } else {
+      topThemes = watchlistThemes.slice(0, 2).map((w) => ({
+        type: 'THEME',
+        themeCode: w.themeCode,
+        themeName: w.theme.themeName,
+        imageUrl: w.theme.imageUrl ?? null,
+        rank: null,
+        risingCount: null,
+        totalCount: null,
+      }));
+    }
+
+    // 종목 Top3 - 최신 지표 rank 기준
+    const stockCodes = watchlistStocks.map((w) => w.company.stockCode);
+    const latestStockMetric = stockCodes.length > 0
+      ? await this.prisma.stockDailyMetrics.findFirst({
+          where: { stockCode: { in: stockCodes } },
+          orderBy: { tradeDate: 'desc' },
+          select: { tradeDate: true },
+        })
+      : null;
+
+    let topStocks: any[] = [];
+    if (latestStockMetric) {
+      const metrics = await this.prisma.stockDailyMetrics.findMany({
+        where: { stockCode: { in: stockCodes }, tradeDate: latestStockMetric.tradeDate },
+        orderBy: { rank: 'asc' },
+        take: 3,
+      });
+      topStocks = metrics.map((m) => {
+        const w = watchlistStocks.find((ws) => ws.company.stockCode === m.stockCode)!;
+        return {
+          type: 'STOCK',
+          companyId: w.company.companyId,
+          stockCode: m.stockCode,
+          companyName: w.company.companyName,
+          marketType: w.company.marketType,
+          rank: m.rank,
+          closePrice: Number(m.closePrice),
+          priceChangeRate1d: m.priceChangeRate1d != null ? Number(m.priceChangeRate1d) : null,
+          relativeStrengthScore: Number(m.relativeStrengthScore),
+        };
+      });
+    } else {
+      topStocks = watchlistStocks.slice(0, 3).map((w) => ({
+        type: 'STOCK',
+        companyId: w.company.companyId,
+        stockCode: w.company.stockCode,
+        companyName: w.company.companyName,
+        marketType: w.company.marketType,
+        rank: null,
+        closePrice: null,
+        priceChangeRate1d: null,
+        relativeStrengthScore: null,
+      }));
+    }
+
+    return { highlights: [...topThemes, ...topStocks] };
+  }
+
+  // ─── 섹션 4: 함께 보면 좋을 만한 종목·테마 ──────────────────────
+
+  /**
+   * GET /watchlist/recommendations
+   * 테마 추천 1개 + 종목 추천 1개
+   */
+  async getRecommendations(userId: string) {
+    const [watchlistThemes, watchlistStocks] = await Promise.all([
+      this.prisma.userWatchlistTheme.findMany({ where: { userId, deletedAt: null } }),
+      this.prisma.userWatchlist.findMany({
+        where: { userId, deletedAt: null },
+        include: { company: { select: { stockCode: true, themeCode: true } } },
+      }),
+    ]);
+
+    const watchlistThemeCodes = new Set(watchlistThemes.map((w) => w.themeCode));
+
+    // 날짜 기반 시드 (매일 다르게)
+    const dayIndex = Math.floor(Date.now() / (1000 * 60 * 60 * 24));
+
+    // ── 테마 추천 ──
+    const recommendedTheme = await this.recommendTheme(watchlistStocks, watchlistThemeCodes, dayIndex);
+
+    // ── 종목 추천 ──
+    const recommendedStock = await this.recommendStock(watchlistThemeCodes, watchlistStocks, dayIndex);
+
+    return { recommendedTheme, recommendedStock };
+  }
+
+  private buildThemeRecommendResult(reason: string, theme: any, snapshot: any, prevRank: number | null) {
+    return {
+      reason,
+      type: 'THEME',
+      themeCode: snapshot.themeCode,
+      themeName: theme.themeName,
+      imageUrl: theme.imageUrl ?? null,
+      rank: snapshot.rank,
+      prevRank,
+      risingCount: snapshot.risingCount,
+      totalCount: snapshot.totalCount,
+      upCount: snapshot.upCount,
+      flatCount: snapshot.flatCount,
+      downCount: snapshot.downCount,
+    };
+  }
+
+  private async recommendTheme(watchlistStocks: any[], watchlistThemeCodes: Set<number>, dayIndex: number) {
+    // 1순위: 관심종목이 속한 테마 중 관심테마에 없는 것 → 테마 순위 가장 높은 1개
+    const stockThemeCodes = [
+      ...new Set(
+        watchlistStocks
+          .map((w) => w.company.themeCode)
+          .filter((tc): tc is number => tc != null && !watchlistThemeCodes.has(tc)),
+      ),
+    ];
+
+    if (stockThemeCodes.length > 0) {
+      const latestSnapshot = await this.prisma.themeDailySnapshot.findFirst({
+        orderBy: { snapshotDate: 'desc' },
+        select: { snapshotDate: true },
+      });
+      if (latestSnapshot) {
+        const best = await this.prisma.themeDailySnapshot.findFirst({
+          where: { themeCode: { in: stockThemeCodes }, snapshotDate: latestSnapshot.snapshotDate },
+          orderBy: { rank: 'asc' },
+        });
+        if (best) {
+          const [theme, prevSnapshot] = await Promise.all([
+            this.prisma.theme.findFirst({ where: { themeCode: best.themeCode, deletedAt: null } }),
+            this.prisma.themeDailySnapshot.findFirst({
+              where: { themeCode: best.themeCode, snapshotDate: { lt: latestSnapshot.snapshotDate } },
+              orderBy: { snapshotDate: 'desc' },
+              select: { rank: true },
+            }),
+          ]);
+          if (theme) {
+            return this.buildThemeRecommendResult('1순위', theme, best, prevSnapshot?.rank ?? null);
+          }
+        }
+      }
+    }
+
+    // 2순위: 오늘의 Top10 테마 중 매일 다르게 1개
+    const latestSnapshot = await this.prisma.themeDailySnapshot.findFirst({
+      orderBy: { snapshotDate: 'desc' },
+      select: { snapshotDate: true },
+    });
+    if (!latestSnapshot) return null;
+
+    const top10 = await this.prisma.themeDailySnapshot.findMany({
+      where: {
+        snapshotDate: latestSnapshot.snapshotDate,
+        themeCode: { notIn: Array.from(watchlistThemeCodes) },
+      },
+      orderBy: { rank: 'asc' },
+      take: 10,
+    });
+    if (top10.length === 0) return null;
+
+    const picked = top10[dayIndex % top10.length];
+    const [theme, prevSnapshot] = await Promise.all([
+      this.prisma.theme.findFirst({ where: { themeCode: picked.themeCode, deletedAt: null } }),
+      this.prisma.themeDailySnapshot.findFirst({
+        where: { themeCode: picked.themeCode, snapshotDate: { lt: latestSnapshot.snapshotDate } },
+        orderBy: { snapshotDate: 'desc' },
+        select: { rank: true },
+      }),
+    ]);
+    if (!theme) return null;
+
+    return this.buildThemeRecommendResult('2순위', theme, picked, prevSnapshot?.rank ?? null);
+  }
+
+  private async buildStockRecommendResult(reason: string, metric: any, company: any, prevMetric: any) {
+    const events: string[] = [];
+    if (metric.isNewHigh) events.push('NEW_HIGH');
+    if (metric.isVolatilityContraction) events.push('VOLATILITY_CONTRACTION');
+    if (metric.isPriceCompression) events.push('PRICE_COMPRESSION');
+    if (metric.isTrendTemplate) events.push('TREND_TEMPLATE');
+    if (prevMetric) {
+      if (metric.rank < prevMetric.rank) events.push('RANK_UP');
+      else if (metric.rank > prevMetric.rank) events.push('RANK_DOWN');
+    }
+    return {
+      reason,
+      type: 'STOCK',
+      companyId: company.companyId,
+      stockCode: metric.stockCode,
+      companyName: company.companyName,
+      marketType: company.marketType,
+      rank: metric.rank,
+      closePrice: Number(metric.closePrice),
+      priceChangeRate1d: metric.priceChangeRate1d != null ? Number(metric.priceChangeRate1d) : null,
+      relativeStrengthScore: Number(metric.relativeStrengthScore),
+      events,
+    };
+  }
+
+  private async recommendStock(watchlistThemeCodes: Set<number>, watchlistStocks: any[], dayIndex: number) {
+    const watchlistStockCodes = new Set(watchlistStocks.map((w) => w.company.stockCode));
+
+    // 1순위: 관심테마 내 종목 중 RS 상위 top5 → 1개 노출
+    if (watchlistThemeCodes.size > 0) {
+      const themeCompanies = await this.prisma.company.findMany({
+        where: { themeCode: { in: Array.from(watchlistThemeCodes) }, deletedAt: null },
+        select: { stockCode: true, companyId: true, companyName: true, marketType: true },
+      });
+      const candidateCodes = themeCompanies
+        .filter((c) => !watchlistStockCodes.has(c.stockCode))
+        .map((c) => c.stockCode);
+
+      if (candidateCodes.length > 0) {
+        const latestMetric = await this.prisma.stockDailyMetrics.findFirst({
+          where: { stockCode: { in: candidateCodes } },
+          orderBy: { tradeDate: 'desc' },
+          select: { tradeDate: true },
+        });
+        if (latestMetric) {
+          const top5 = await this.prisma.stockDailyMetrics.findMany({
+            where: { stockCode: { in: candidateCodes }, tradeDate: latestMetric.tradeDate },
+            orderBy: { relativeStrengthScore: 'desc' },
+            take: 5,
+          });
+          if (top5.length > 0) {
+            const picked = top5[dayIndex % top5.length];
+            const company = themeCompanies.find((c) => c.stockCode === picked.stockCode)!;
+            const prevMetric = await this.prisma.stockDailyMetrics.findFirst({
+              where: { stockCode: picked.stockCode, tradeDate: { lt: latestMetric.tradeDate } },
+              orderBy: { tradeDate: 'desc' },
+              select: { rank: true },
+            });
+            return this.buildStockRecommendResult('1순위', picked, company, prevMetric);
+          }
+        }
+      }
+    }
+
+    // 2순위: 오늘의 Top10 종목 중 매일 다르게 1개
+    const latestMetric = await this.prisma.stockDailyMetrics.findFirst({
+      orderBy: { tradeDate: 'desc' },
+      select: { tradeDate: true },
+    });
+    if (!latestMetric) return null;
+
+    const top10 = await this.prisma.stockDailyMetrics.findMany({
+      where: {
+        tradeDate: latestMetric.tradeDate,
+        stockCode: { notIn: Array.from(watchlistStockCodes) },
+      },
+      orderBy: { rank: 'asc' },
+      take: 10,
+    });
+    if (top10.length === 0) return null;
+
+    const picked = top10[dayIndex % top10.length];
+    const [company, prevMetric] = await Promise.all([
+      this.prisma.company.findFirst({
+        where: { stockCode: picked.stockCode, deletedAt: null },
+        select: { companyId: true, companyName: true, marketType: true },
+      }),
+      this.prisma.stockDailyMetrics.findFirst({
+        where: { stockCode: picked.stockCode, tradeDate: { lt: latestMetric.tradeDate } },
+        orderBy: { tradeDate: 'desc' },
+        select: { rank: true },
+      }),
+    ]);
+    if (!company) return null;
+
+    return this.buildStockRecommendResult('2순위', picked, company, prevMetric);
+  }
+
+  // ─── 섹션 5: 내 관심 통합 목록 ───────────────────────────────────
+
+  /**
+   * GET /watchlist/my
+   * 관심테마 + 관심종목 합산, addedDate 내림차순
+   * 종목: 현재가 및 전일대비 평균수익률 등락 표시
+   * 테마: 테마 내 상승 종목 수 / 전체 종목 수
+   */
+  async getMyWatchlist(userId: string) {
+    const [watchlistThemes, watchlistStocks] = await Promise.all([
+      this.prisma.userWatchlistTheme.findMany({
+        where: { userId, deletedAt: null },
+        include: { theme: { select: { themeCode: true, themeName: true, imageUrl: true } } },
+      }),
+      this.prisma.userWatchlist.findMany({
+        where: { userId, deletedAt: null },
+        include: {
+          company: { select: { companyId: true, companyName: true, stockCode: true, marketType: true } },
+        },
+      }),
+    ]);
+
+    // 종목 지표
+    const stockCodes = watchlistStocks.map((w) => w.company.stockCode);
+    const latestStockMetric = stockCodes.length > 0
+      ? await this.prisma.stockDailyMetrics.findFirst({
+          where: { stockCode: { in: stockCodes } },
+          orderBy: { tradeDate: 'desc' },
+          select: { tradeDate: true },
+        })
+      : null;
+
+    let stockMetricMap = new Map<string, any>();
+    if (latestStockMetric) {
+      const metrics = await this.prisma.stockDailyMetrics.findMany({
+        where: { stockCode: { in: stockCodes }, tradeDate: latestStockMetric.tradeDate },
+      });
+      stockMetricMap = new Map(metrics.map((m) => [m.stockCode, m]));
+    }
+
+    // 테마 스냅샷
+    const themeCodes = watchlistThemes.map((w) => w.themeCode);
+    const latestThemeSnapshot = themeCodes.length > 0
+      ? await this.prisma.themeDailySnapshot.findFirst({
+          where: { themeCode: { in: themeCodes } },
+          orderBy: { snapshotDate: 'desc' },
+          select: { snapshotDate: true },
+        })
+      : null;
+
+    let themeSnapshotMap = new Map<number, any>();
+    if (latestThemeSnapshot) {
+      const snapshots = await this.prisma.themeDailySnapshot.findMany({
+        where: { themeCode: { in: themeCodes }, snapshotDate: latestThemeSnapshot.snapshotDate },
+      });
+      themeSnapshotMap = new Map(snapshots.map((s) => [s.themeCode, s]));
+    }
+
+    const items: any[] = [];
+
+    for (const w of watchlistThemes) {
+      const snapshot = themeSnapshotMap.get(w.themeCode);
+      items.push({
+        type: 'THEME',
+        themeCode: w.themeCode,
+        themeName: w.theme.themeName,
+        imageUrl: w.theme.imageUrl ?? null,
+        addedDate: w.addedDate,
+        risingCount: snapshot?.risingCount ?? null,
+        totalCount: snapshot?.totalCount ?? null,
+        upCount: snapshot?.upCount ?? null,
+        flatCount: snapshot?.flatCount ?? null,
+        downCount: snapshot?.downCount ?? null,
+      });
+    }
+
+    for (const w of watchlistStocks) {
+      const m = stockMetricMap.get(w.company.stockCode);
+      items.push({
+        type: 'STOCK',
+        companyId: w.company.companyId,
+        stockCode: w.company.stockCode,
+        companyName: w.company.companyName,
+        marketType: w.company.marketType,
+        addedDate: w.addedDate,
+        closePrice: m ? Number(m.closePrice) : null,
+        priceChangeRate1d: m?.priceChangeRate1d != null ? Number(m.priceChangeRate1d) : null,
+      });
+    }
+
+    // addedDate 내림차순
+    items.sort((a, b) => new Date(b.addedDate).getTime() - new Date(a.addedDate).getTime());
+
+    return { items };
   }
 }

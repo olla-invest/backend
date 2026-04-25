@@ -6,8 +6,6 @@ import { StockMetricsService } from './stock-metrics.service';
 import { RealtimePriceCacheService } from './realtime-price-cache.service';
 import { PrismaService } from '../../common/prisma/prisma.service';
 import { mapUpNameToThemeCode } from '../../common/constants/theme-codes';
-import * as fs from 'fs';
-import * as path from 'path';
 
 interface StockListCache {
   data: any[];
@@ -162,8 +160,9 @@ export class RealTimeChartService implements OnModuleInit {
       const recentDates = await this.metricsService.getRecentTradingDates(4);
       this.logger.log(`Calculating unified metrics for ${recentDates.length} trading days (KOSPI: ${kospiStockList.length}, KOSDAQ: ${kosdaqStockList.length}, total: ${allStockCodes.length})...`);
 
-      for (const tradeDate of recentDates) {
-        const metricsResult = await this.metricsService.calculateAndSaveDailyMetrics('all', tradeDate, 'INDEX_KOSPI', allStockCodes, stockIndexMap, stockNameMap);
+      for (let i = 0; i < recentDates.length; i++) {
+        const tradeDate = recentDates[i];
+        const metricsResult = await this.metricsService.calculateAndSaveDailyMetrics('all', tradeDate, 'INDEX_KOSPI', allStockCodes, stockIndexMap, stockNameMap, i === 0);
         this.logger.log(`Metrics for ${tradeDate.toISOString().split('T')[0]}: ${metricsResult?.count || 0} stocks, filtered: ${metricsResult?.filtered || 0}`);
       }
 
@@ -226,17 +225,12 @@ export class RealTimeChartService implements OnModuleInit {
    * (장시작 시간에 WebSocket 연결 확인 및 재연결)
    */
   async ensureRealtimeConnection(): Promise<void> {
-    this.logger.log('Ensuring realtime data source connection...');
-
     try {
       const isConnected = this.realtimeSource.isConnected();
 
-      if (isConnected) {
-        this.logger.log('Realtime source already connected');
-      } else {
-        this.logger.log('Realtime source not connected, attempting to connect...');
+      if (!isConnected) {
         await this.realtimeSource.ensureConnection();
-        this.logger.log('Realtime source connection established');
+        this.logger.log('Realtime source reconnected');
       }
     } catch (error) {
       this.logger.error(`Failed to ensure realtime connection: ${(error as Error).message}`, (error as Error).stack);
@@ -696,31 +690,6 @@ export class RealTimeChartService implements OnModuleInit {
       );
     }
 
-    // 커스텀 RS 로그 파일 저장
-    try {
-      const now = new Date();
-      const fileTimestamp = now.toISOString().replace('T', '_').replace(/:/g, '').substring(0, 17);
-      const displayTimestamp = now.toISOString().replace('T', ' ').substring(0, 19);
-      const periodsStr = periods.map((p, i) => `${p}일×${weights[i]}%`).join(' + ');
-      const indexInfo = marketType === 'all' ? 'KOSPI/KOSDAQ(종목별)' : (marketType === '0' ? 'KOSPI' : 'KOSDAQ');
-      const rsRanking: Array<{ rank: number; code: string; name: string; rsScore: number }> = [];
-      for (const s of validStocks) {
-        const rsHistory = rsHistoryMap.get(s.code);
-        if (rsHistory && rsHistory.length > 0 && rsHistory[0].rank > 0) {
-          rsRanking.push({ rank: rsHistory[0].rank, code: s.code, name: s.name, rsScore: rsHistory[0].rsScore });
-        }
-      }
-      rsRanking.sort((a, b) => a.rank - b.rank);
-      const logLines = [
-        `=== Custom RS [${displayTimestamp}] | 기준: ${periodsStr} | 지수: ${indexInfo} | 대상: ${marketType} | filtered=${rsRanking.length} ===`,
-        ...rsRanking.map((r) => `[${String(r.rank).padStart(4)}] ${r.code}  ${r.name.padEnd(20)}  score=${r.rsScore}`),
-      ].join('\n');
-      fs.writeFileSync(path.join(process.cwd(), 'logs', `rs-scores-custom-${fileTimestamp}.log`), logLines + '\n', { encoding: 'utf-8' });
-      this.logger.log(`Custom RS scores written to logs/rs-scores-custom-${fileTimestamp}.log (${rsRanking.length} stocks)`);
-    } catch (e) {
-      this.logger.warn(`Failed to write custom RS log: ${(e as Error).message}`);
-    }
-
     // 기본 지표 데이터 조회 (ma50, 52w 고저, isNewHigh, tradingValue 등)
     const metricsMap = await this.metricsService.getLatestMetrics(allStockCodes);
 
@@ -876,7 +845,11 @@ export class RealTimeChartService implements OnModuleInit {
       strength: number;
     }>,
   ) {
-    this.logger.log(`Getting stock list with range RS filters: ${JSON.stringify(rsFilters)}`);
+    const _mem0 = process.memoryUsage();
+    this.logger.log(
+      `[getStockListWithRangeRS] START filters=${JSON.stringify(rsFilters)} ` +
+      `heap=${Math.round(_mem0.heapUsed/1024/1024)}MB/${Math.round(_mem0.heapTotal/1024/1024)}MB rss=${Math.round(_mem0.rss/1024/1024)}MB`,
+    );
 
     // rsFilters가 없으면 기본 로직 사용
     if (!rsFilters || rsFilters.length === 0) {
@@ -943,31 +916,6 @@ export class RealTimeChartService implements OnModuleInit {
         indexCode,
         4,
       );
-    }
-
-    // Range RS 로그 파일 저장
-    try {
-      const now = new Date();
-      const fileTimestamp = now.toISOString().replace('T', '_').replace(/:/g, '').substring(0, 17);
-      const displayTimestamp = now.toISOString().replace('T', ' ').substring(0, 19);
-      const filtersStr = rsFilters.map((f) => `${f.rsStartDate}~${f.rsEndDate}(${f.strength}%)`).join(' + ');
-      const indexInfo = marketType === 'all' ? 'KOSPI/KOSDAQ(종목별)' : (marketType === '0' ? 'KOSPI' : 'KOSDAQ');
-      const rsRanking: Array<{ rank: number; code: string; name: string; rsScore: number }> = [];
-      for (const s of validStocks) {
-        const rsHistory = rsHistoryMap.get(s.code);
-        if (rsHistory && rsHistory.length > 0 && rsHistory[0].rank > 0) {
-          rsRanking.push({ rank: rsHistory[0].rank, code: s.code, name: s.name, rsScore: rsHistory[0].rsScore });
-        }
-      }
-      rsRanking.sort((a, b) => a.rank - b.rank);
-      const logLines = [
-        `=== Range RS [${displayTimestamp}] | 기준: ${filtersStr} | 지수: ${indexInfo} | 대상: ${marketType} | filtered=${rsRanking.length} ===`,
-        ...rsRanking.map((r) => `[${String(r.rank).padStart(4)}] ${r.code}  ${r.name.padEnd(20)}  score=${r.rsScore}`),
-      ].join('\n');
-      fs.writeFileSync(path.join(process.cwd(), 'logs', `rs-scores-range-${fileTimestamp}.log`), logLines + '\n', { encoding: 'utf-8' });
-      this.logger.log(`Range RS scores written to logs/rs-scores-range-${fileTimestamp}.log (${rsRanking.length} stocks)`);
-    } catch (e) {
-      this.logger.warn(`Failed to write range RS log: ${(e as Error).message}`);
     }
 
     // 기본 지표 데이터 조회 (ma50, 52w 고저, isNewHigh, tradingValue 등)
@@ -1522,6 +1470,87 @@ export class RealTimeChartService implements OnModuleInit {
   }
 
   /**
+   * tradingValue가 null인 일봉을 찾아 키움 데이터로 채워넣기
+   */
+  async fillMissingTradingValue() {
+    const BATCH_SIZE = 3;
+    const BATCH_DELAY_MS = 1000;
+
+    // tradingValue가 null인 종목 코드 목록 조회
+    const nullCandleStocks = await this.prisma.stockCandle.findMany({
+      where: { candleType: 'day', tradingValue: null },
+      select: { stockCode: true },
+      distinct: ['stockCode'],
+    });
+
+    const stockCodes = nullCandleStocks.map((r) => r.stockCode);
+    this.logger.log(`fillMissingTradingValue: ${stockCodes.length}개 종목에 tradingValue 누락 일봉 존재`);
+
+    if (stockCodes.length === 0) return { total: 0, success: 0, failed: 0, updated: 0, errors: [] };
+
+    const today = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+    let success = 0;
+    let failed = 0;
+    let totalUpdated = 0;
+    const errors: { code: string; error: string }[] = [];
+
+    for (let i = 0; i < stockCodes.length; i += BATCH_SIZE) {
+      const batch = stockCodes.slice(i, i + BATCH_SIZE);
+
+      const results = await Promise.allSettled(
+        batch.map(async (stockCode) => {
+          // 해당 종목에서 tradingValue가 null인 일자 목록
+          const nullDates = await this.prisma.stockCandle.findMany({
+            where: { stockCode, candleType: 'day', tradingValue: null },
+            select: { candleTime: true },
+          });
+          const nullDateSet = new Set(nullDates.map((r) => r.candleTime.toISOString()));
+
+          // 키움에서 해당 종목 일봉 데이터 조회 (최대 750일)
+          const kiwoomData = await this.kiwoomRest.getDayCandlesWithHistory(stockCode, today, 750);
+
+          let updatedCount = 0;
+          for (const item of kiwoomData.stk_dt_pole_chart_qry) {
+            if (!item.trde_prica) continue;
+            const candleTime = this.parseDateOnly(item.dt);
+            if (!nullDateSet.has(candleTime.toISOString())) continue;
+
+            const tradingValue = BigInt(item.trde_prica) * 1_000_000n;
+            await this.prisma.stockCandle.updateMany({
+              where: { stockCode, candleType: 'day', candleTime, tradingValue: null },
+              data: { tradingValue },
+            });
+            updatedCount++;
+          }
+          return updatedCount;
+        }),
+      );
+
+      for (let j = 0; j < results.length; j++) {
+        if (results[j].status === 'fulfilled') {
+          success++;
+          totalUpdated += (results[j] as PromiseFulfilledResult<number>).value;
+        } else {
+          failed++;
+          const err = (results[j] as PromiseRejectedResult).reason;
+          errors.push({ code: batch[j], error: err?.message || 'Unknown' });
+          this.logger.warn(`fillMissingTradingValue failed: ${batch[j]} - ${err?.message}`);
+        }
+      }
+
+      const processed = Math.min(i + BATCH_SIZE, stockCodes.length);
+      if (processed % 50 === 0 || processed === stockCodes.length) {
+        this.logger.log(`진행: ${processed}/${stockCodes.length} - 업데이트: ${totalUpdated}건, 실패: ${failed}`);
+      }
+
+      await new Promise((resolve) => setTimeout(resolve, BATCH_DELAY_MS));
+    }
+
+    this.logger.log(`fillMissingTradingValue 완료: ${success}종목 처리, ${totalUpdated}건 업데이트, ${failed}종목 실패`);
+    return { total: stockCodes.length, success, failed, updated: totalUpdated, errors: errors.slice(0, 20) };
+  }
+
+  /**
    * DB에서 저장된 캔들 데이터 조회
    */
   async getStoredCandles(
@@ -1534,12 +1563,15 @@ export class RealTimeChartService implements OnModuleInit {
     const endTime = new Date(endDate);
     endTime.setUTCHours(23, 59, 59, 999);
 
-    // 일봉/주봉/월봉은 오늘 미완성 캔들 제외 → 어제까지만
+    // 일봉/주봉/월봉은 오늘 미완성 캔들 제외 → 전 거래일까지만
+    // KST 오늘(YYYY-MM-DD)의 일봉은 parseDateOnly 기준으로 (todayKST 00:00 UTC - 9h) 에 저장됨
+    // 따라서 cutoff = todayKST 00:00 UTC - 9h - 1ms 로 잘라야 오늘 봉이 제외됨
     if (candleType === 'day' || candleType === 'week' || candleType === 'month') {
       const kstNow = new Date(Date.now() + 9 * 60 * 60 * 1000);
-      const todayKst = new Date(kstNow.toISOString().split('T')[0]); // 오늘 KST 00:00 UTC
-      if (endTime >= todayKst) {
-        endTime.setTime(todayKst.getTime() - 1); // 어제 23:59:59.999 UTC
+      const todayKstMidnightUtc = new Date(kstNow.toISOString().split('T')[0]); // 오늘 KST 00:00 = UTC 당일 00:00
+      const todayCandleStoredAt = new Date(todayKstMidnightUtc.getTime() - 9 * 60 * 60 * 1000); // 전날 15:00 UTC
+      if (endTime >= todayCandleStoredAt) {
+        endTime.setTime(todayCandleStoredAt.getTime() - 1); // 전날 14:59:59.999 UTC = 전날 23:59:59 KST
       }
     }
 
@@ -1689,7 +1721,6 @@ export class RealTimeChartService implements OnModuleInit {
    * 실시간 구독 시작
    */
   async startRealtime(stockCode: string) {
-    this.logger.log(`Starting realtime subscription for ${stockCode}`);
 
     // 캐시에 구독 추가
     this.realtimeCache.addSubscription(stockCode);
@@ -1704,7 +1735,6 @@ export class RealTimeChartService implements OnModuleInit {
    * 실시간 구독 중지
    */
   async stopRealtime(stockCode: string) {
-    this.logger.log(`Stopping realtime subscription for ${stockCode}`);
 
     // 실시간 소스 구독 해제
     await this.realtimeSource.unsubscribe(stockCode);
@@ -1866,9 +1896,14 @@ export class RealTimeChartService implements OnModuleInit {
   /**
    * 일별 지표 계산 (배치 작업)
    */
-  async calculateDailyMetrics(marketType: '0' | '10' | 'all' = 'all', tradeDate?: string) {
+  async calculateDailyMetrics(marketType: '0' | '10' | 'all' = 'all', tradeDate?: string, writeLogFile: boolean = false) {
     this.logger.log(`Starting daily metrics calculation for market type: ${marketType}, date: ${tradeDate || 'today'}`);
-    const date = tradeDate ? new Date(tradeDate) : undefined;
+    const parsedTradeDate = tradeDate
+      ? /^\d{8}$/.test(tradeDate)
+        ? `${tradeDate.slice(0, 4)}-${tradeDate.slice(4, 6)}-${tradeDate.slice(6, 8)}`
+        : tradeDate
+      : undefined;
+    const date = parsedTradeDate ? new Date(parsedTradeDate) : undefined;
 
     // 항상 KOSPI + KOSDAQ 통합 랭킹 (순위는 전체 풀에서 매기고, 시장별 조회 시 필터링)
     const [kospiStocks, kosdaqStocks] = await Promise.all([
@@ -1884,7 +1919,7 @@ export class RealTimeChartService implements OnModuleInit {
     for (const s of kospiStocks) { stockIndexMap.set(s.code, 'INDEX_KOSPI'); stockNameMap.set(s.code, s.name); }
     for (const s of kosdaqStocks) { stockIndexMap.set(s.code, 'INDEX_KOSDAQ'); stockNameMap.set(s.code, s.name); }
 
-    const result = await this.metricsService.calculateAndSaveDailyMetrics('all', date, 'INDEX_KOSPI', allCodes, stockIndexMap, stockNameMap);
+    const result = await this.metricsService.calculateAndSaveDailyMetrics('all', date, 'INDEX_KOSPI', allCodes, stockIndexMap, stockNameMap, writeLogFile);
 
     // 수동 재계산 후 초기화 상태 갱신
     this.initializationComplete = true;

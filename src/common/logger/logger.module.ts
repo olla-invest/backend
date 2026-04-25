@@ -16,7 +16,21 @@ const logDir = 'logs';
                         winston.format.timestamp( { format: 'YYYY-MM-DD HH:mm:ss' } ),
                         winston.format.colorize(),
                         winston.format.printf( ( { timestamp, level, message, context, ...meta } ) => {
-                            const metaStr = Object.keys( meta ).length ? JSON.stringify( meta ) : '';
+                            let metaStr = '';
+                            if ( Object.keys( meta ).length ) {
+                                try {
+                                    const seen = new WeakSet();
+                                    metaStr = JSON.stringify( meta, ( _key, value ) => {
+                                        if ( typeof value === 'object' && value !== null ) {
+                                            if ( seen.has( value ) ) return '[Circular]';
+                                            seen.add( value );
+                                        }
+                                        return value;
+                                    } );
+                                } catch {
+                                    metaStr = '[Unserializable]';
+                                }
+                            }
                             return `${timestamp} [${context || 'Application'}] ${level}: ${message} ${metaStr}`;
                         } ),
                     ),

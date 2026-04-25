@@ -109,10 +109,13 @@ export class IssueThemeService {
       const risingCount = changeRates.filter((r) => r > 0).length;
       const risingRatio = totalCount > 0 ? (risingCount / totalCount) * 100 : 0;
       const avgChangeRate = changeRates.reduce((a, b) => a + b, 0) / (changeRates.length || 1);
-      themeList.push({ themeCode, themeName: themeNameMap.get(themeCode) ?? '알 수 없음', totalCount, risingCount, risingRatio: Math.round(risingRatio * 100) / 100, avgChangeRate: Math.round(avgChangeRate * 100) / 100 });
+      const upCount = changeRates.filter((r) => r >= 1).length;
+      const downCount = changeRates.filter((r) => r <= -1).length;
+      const flatCount = totalCount - upCount - downCount;
+      themeList.push({ themeCode, themeName: themeNameMap.get(themeCode) ?? '알 수 없음', totalCount, risingCount, risingRatio: Math.round(risingRatio * 100) / 100, avgChangeRate: Math.round(avgChangeRate * 100) / 100, upCount, flatCount, downCount });
     }
 
-    // 순위 산출 (상승비율 내림차순, 동률 동일순위)
+    // 순위 산출 (상승비율 내림차순, 동률 동일순위, 다음 순위 건너뛰지 않음)
     themeList.sort((a, b) => b.risingRatio - a.risingRatio);
     let rank = 1;
     for (let i = 0; i < themeList.length; i++) {
@@ -120,8 +123,8 @@ export class IssueThemeService {
         themeList[i].rank = themeList[i - 1].rank;
       } else {
         themeList[i].rank = rank;
+        rank++;
       }
-      rank++;
     }
 
     // 순위변동
@@ -138,7 +141,7 @@ export class IssueThemeService {
 
   // ─── 테마 상세 (팝업) ─────────────────────────────────────────────
 
-  async getThemeDetail(themeCode: number) {
+  async getThemeDetail(themeCode: number, userId?: string) {
     const theme = await this.prisma.theme.findFirst({ where: { themeCode, deletedAt: null } });
     if (!theme) throw new NotFoundException(`Theme ${themeCode} not found`);
 
@@ -238,17 +241,69 @@ export class IssueThemeService {
     const rankChange =
       currentSnapshot && prevSnapshot ? prevSnapshot.rank - currentSnapshot.rank : null;
 
+    let isFavorite: boolean | null = null;
+    if (userId) {
+      const favorite = await this.prisma.userWatchlistTheme.findFirst({
+        where: { userId, themeCode, deletedAt: null },
+      });
+      isFavorite = favorite != null;
+    }
+
     return {
       themeCode,
       themeName: theme.themeName,
+      imageUrl: theme.imageUrl ?? null,
       rank: currentSnapshot?.rank ?? null,
       rankChange,
       risingCount,
       totalCount,
       insights,
+      isFavorite,
       stocks: stockRows,
       updatedAt: new Date().toISOString(),
     };
+  }
+
+  // ─── 테마 즐겨찾기 ────────────────────────────────────────────────
+
+  async addFavorite(userId: string, themeCode: number) {
+    const theme = await this.prisma.theme.findFirst({ where: { themeCode, deletedAt: null } });
+    if (!theme) throw new NotFoundException(`Theme ${themeCode} not found`);
+
+    const existing = await this.prisma.userWatchlistTheme.findFirst({
+      where: { userId, themeCode, deletedAt: null },
+    });
+    if (existing) return { message: '이미 즐겨찾기에 추가된 테마입니다', themeCode };
+
+    const deleted = await this.prisma.userWatchlistTheme.findFirst({
+      where: { userId, themeCode, deletedAt: { not: null } },
+    });
+    if (deleted) {
+      await this.prisma.userWatchlistTheme.update({
+        where: { userId_themeCode: { userId, themeCode } },
+        data: { deletedAt: null, addedDate: new Date() },
+      });
+    } else {
+      await this.prisma.userWatchlistTheme.create({
+        data: { userId, themeCode },
+      });
+    }
+
+    return { message: '즐겨찾기에 추가되었습니다', themeCode };
+  }
+
+  async removeFavorite(userId: string, themeCode: number) {
+    const existing = await this.prisma.userWatchlistTheme.findFirst({
+      where: { userId, themeCode, deletedAt: null },
+    });
+    if (!existing) throw new NotFoundException('즐겨찾기에 등록되지 않은 테마입니다');
+
+    await this.prisma.userWatchlistTheme.update({
+      where: { userId_themeCode: { userId, themeCode } },
+      data: { deletedAt: new Date() },
+    });
+
+    return { message: '즐겨찾기에서 삭제되었습니다', themeCode };
   }
 
   // ─── 스냅샷 저장 ──────────────────────────────────────────────────
@@ -286,7 +341,10 @@ export class IssueThemeService {
       const risingCount = changeRates.filter((r) => r > 0).length;
       const risingRatio = totalCount > 0 ? (risingCount / totalCount) * 100 : 0;
       const avgChangeRate = changeRates.reduce((a, b) => a + b, 0) / (changeRates.length || 1);
-      themeList.push({ themeCode, totalCount, risingCount, risingRatio, avgChangeRate });
+      const upCount = changeRates.filter((r) => r >= 1).length;
+      const downCount = changeRates.filter((r) => r <= -1).length;
+      const flatCount = totalCount - upCount - downCount;
+      themeList.push({ themeCode, totalCount, risingCount, risingRatio, avgChangeRate, upCount, flatCount, downCount });
     }
 
     themeList.sort((a, b) => b.risingRatio - a.risingRatio);
@@ -296,8 +354,8 @@ export class IssueThemeService {
         themeList[i].rank = themeList[i - 1].rank;
       } else {
         themeList[i].rank = rank;
+        rank++;
       }
-      rank++;
     }
 
     const snapshotDate = new Date(Date.UTC(
@@ -316,6 +374,9 @@ export class IssueThemeService {
         risingRatio: t.risingRatio,
         avgChangeRate: t.avgChangeRate,
         highVolumeCount: 0,
+        upCount: t.upCount,
+        flatCount: t.flatCount,
+        downCount: t.downCount,
       })),
       skipDuplicates: true,
     });

@@ -80,7 +80,6 @@ export class ChartStorageService {
       },
     });
 
-    this.logger.debug(`Saved tick data for ${stockCode} at ${tickTime.toISOString()}`);
   }
 
   /**
@@ -118,7 +117,6 @@ export class ChartStorageService {
       },
     });
 
-    this.logger.debug(`Saved quote data for ${stockCode} at ${quoteTime.toISOString()}`);
   }
 
   /**

@@ -74,7 +74,6 @@ export class ChartGateway
   ): Promise<void> {
     const { stockCode } = data;
 
-    this.logger.log(`Client ${client.id} subscribing to ${stockCode}`);
 
     // 클라이언트 구독 목록에 추가
     const stockCodes = this.clientSubscriptions.get(client.id)!;
@@ -97,7 +96,6 @@ export class ChartGateway
   ): Promise<void> {
     const { stockCode } = data;
 
-    this.logger.log(`Client ${client.id} unsubscribing from ${stockCode}`);
 
     // 클라이언트 구독 목록에서 제거
     const stockCodes = this.clientSubscriptions.get(client.id);
@@ -168,7 +166,6 @@ export class ChartGateway
   @OnEvent('metrics.updated')
   handleMetricsUpdated(event: { tradeDate: string; filteredCount: number }): void {
     this.server.emit('metricsUpdated', event);
-    this.logger.log(`Broadcast metricsUpdated: ${event.tradeDate}, ${event.filteredCount} stocks`);
   }
 
   /**
@@ -216,7 +213,6 @@ export class ChartGateway
   ): void {
     const { stockCode } = data;
     client.join(`stock:${stockCode}`);
-    this.logger.debug(`Client ${client.id} joined room: stock:${stockCode}`);
   }
 
   /**
@@ -229,6 +225,5 @@ export class ChartGateway
   ): void {
     const { stockCode } = data;
     client.leave(`stock:${stockCode}`);
-    this.logger.debug(`Client ${client.id} left room: stock:${stockCode}`);
   }
 }

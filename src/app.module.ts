@@ -16,6 +16,8 @@ import { MarketModule } from './features/market/market.module';
 import { RealTimeChartModule } from './features/real-time-chart/real-time-chart.module';
 import { StockInfoModule } from './features/stock-info/stock-info.module';
 import { IssueThemeModule } from './features/issue-theme/issue-theme.module';
+import { SubscriptionModule } from './features/subscription/subscription.module';
+import { PaymentModule } from './features/payment/payment.module';
 
 @Module( {
     imports: [
@@ -37,6 +39,8 @@ import { IssueThemeModule } from './features/issue-theme/issue-theme.module';
         RealTimeChartModule,
         StockInfoModule,
         IssueThemeModule,
+        SubscriptionModule,
+        PaymentModule,
     ],
     providers: [
         {

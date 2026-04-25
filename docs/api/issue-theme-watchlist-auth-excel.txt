@@ -1,0 +1,582 @@
+이슈테마 / 관심종목 / 로그인 API 명세서
+Base URL: http://localhost:3000
+인증: JWT Bearer Token  —  Authorization: Bearer <accessToken>
+
+
+1. 로그인 관련 API  /auth
+인증 방식: 앱 전체 JwtAuthGuard 전역 적용  /  🔒 표시 엔드포인트만 토큰 필요  /  JWT 만료: 7일
+
+
+1-1. 회원가입
+POST /auth/register
+
+파라미터 (Body · application/json)
+파라미터명	타입	필수 여부	제약 / 설명
+username	String	필수	4~20자, 영문·숫자만  (/^[a-zA-Z0-9]{4,20}$/)
+password	String	필수	8~50자
+email	String	필수	이메일 형식, 최대 100자
+name	String	필수	최대 100자
+phone	String	필수	최대 20자
+agreeService	Boolean	필수	true 이어야 가입 가능 (false 시 400 에러)
+agreePrivacy	Boolean	필수	true 이어야 가입 가능 (false 시 400 에러)
+agreeMarketing	Boolean	선택	마케팅 수신 동의, 기본값 false
+
+호출 예시
+POST /auth/register
+Content-Type: application/json
+
+{
+  "username": "honggildong",
+  "password": "myPass123!",
+  "email": "hong@example.com",
+  "name": "홍길동",
+  "phone": "010-1234-5678",
+  "agreeService": true,
+  "agreePrivacy": true,
+  "agreeMarketing": false
+}
+
+Response 201
+{
+  "userId": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+  "username": "honggildong",
+  "email": "hong@example.com",
+  "name": "홍길동"
+}
+
+에러
+상태코드	메시지	발생 조건
+400	필수 약관에 동의해주세요	agreeService 또는 agreePrivacy 가 false
+409	이미 사용 중인 ID입니다	동일 username 계정 존재
+409	이미 사용 중인 이메일입니다	동일 email 계정 존재
+
+
+1-2. 로그인
+POST /auth/login
+
+파라미터 (Body · application/json)
+파라미터명	타입	필수 여부	제약 / 설명
+username	String	필수	로그인 아이디
+password	String	필수	비밀번호
+
+호출 예시
+POST /auth/login
+Content-Type: application/json
+
+{
+  "username": "honggildong",
+  "password": "myPass123!"
+}
+
+Response 200
+{
+  "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "user": {
+    "userId": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+    "username": "honggildong",
+    "email": "hong@example.com",
+    "name": "홍길동",
+    "isTempPassword": false
+  }
+}
+
+필드 설명 (Response)
+필드명	타입	설명
+accessToken	String	JWT 토큰 (7일 유효)  —  이후 요청 시 Authorization 헤더에 포함
+user.isTempPassword	Boolean	임시 비밀번호 여부  —  true: 비밀번호 찾기로 발급된 임시 비밀번호 상태 → 로그인 후 비밀번호 변경 화면으로 강제 이동 필요
+
+에러
+상태코드	메시지	발생 조건
+404	가입된 계정이 없습니다. 회원가입 후 이용해주세요.	username 일치 계정 없음
+401	비밀번호가 일치하지 않습니다.	비밀번호 불일치
+
+
+1-3. 아이디 찾기
+POST /auth/find-id
+
+파라미터 (Body · application/json)
+파라미터명	타입	필수 여부	제약 / 설명
+name	String	필수	가입 시 입력한 이름
+email	String	필수	가입 이메일
+
+호출 예시
+POST /auth/find-id
+Content-Type: application/json
+
+{
+  "name": "홍길동",
+  "email": "hong@example.com"
+}
+
+Response 200
+{
+  "maskedUsername": "hong****g"
+}
+
+필드 설명 (Response)
+필드명	타입	설명
+maskedUsername	String	마스킹된 아이디  —  5자 이상: 앞 4자 + 중간 * + 마지막 1자  (예: honggildong → hong******g)  /  4자 이하: 앞 2자 + * 처리 (예: ab12 → ab**)
+
+에러
+상태코드	메시지	발생 조건
+404	사용자 정보가 일치하지 않습니다	name + email 일치 계정 없음
+
+
+1-4. 비밀번호 찾기 (임시 비밀번호 이메일 발송)
+POST /auth/find-password
+
+파라미터 (Body · application/json)
+파라미터명	타입	필수 여부	제약 / 설명
+username	String	필수	로그인 아이디
+email	String	필수	가입 이메일
+
+호출 예시
+POST /auth/find-password
+Content-Type: application/json
+
+{
+  "username": "honggildong",
+  "email": "hong@example.com"
+}
+
+Response 200
+{
+  "email": "hong@example.com"
+}
+
+처리 흐름
+1. username + email 일치 계정 조회
+2. 12자리 임시 비밀번호 생성  (대문자 2 + 소문자 2 + 숫자 2 + 특수문자 2 + 랜덤 4, 셔플)
+3. 임시 비밀번호 bcrypt 해시 후 DB 저장
+4. isTempPassword = true 로 업데이트
+5. 가입 이메일로 임시 비밀번호 발송  →  로그인 후 비밀번호 변경(1-5) 필수
+
+에러
+상태코드	메시지	발생 조건
+404	입력하신 정보로 가입된 계정을 찾을 수 없습니다. 다시 확인해주세요.	username + email 일치 계정 없음
+
+
+1-5. 비밀번호 변경  🔒
+PATCH /auth/change-password
+
+파라미터 (Header)
+파라미터명	타입	필수 여부	설명
+Authorization	String	필수	Bearer <accessToken>
+
+파라미터 (Body · application/json)
+파라미터명	타입	필수 여부	제약 / 설명
+newPassword	String	필수	새 비밀번호, 8~50자
+confirmPassword	String	필수	새 비밀번호 확인  —  newPassword 와 동일해야 함
+
+호출 예시
+PATCH /auth/change-password
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+
+{
+  "newPassword": "newSecurePass1!",
+  "confirmPassword": "newSecurePass1!"
+}
+
+Response 200
+{
+  "message": "비밀번호가 변경되었습니다."
+}
+
+비고
+성공 시 isTempPassword = false 로 초기화
+임시 비밀번호 로그인 상태(isTempPassword=true)에서 이 API 호출 후 정상 이용 가능
+
+에러
+상태코드	메시지	발생 조건
+400	비밀번호가 일치하지 않습니다.	newPassword ≠ confirmPassword
+401	Unauthorized	토큰 없음 또는 만료
+
+
+
+2. 이슈테마 API  /issue-theme
+인증: 불필요 (전체 공개)
+
+종목 집계 기준: 정적 필터(passedStaticFilters=true) 통과 종목 중 아래 동적 필터 3가지를 모두 통과한 종목만 사용
+DF1	현재가 ≥ 52주 저가 × 1.3
+DF2	현재가 ≥ 52주 고가 × 0.75
+DF3	현재가 > 50일 이동평균
+
+
+2-1. 테마 목록
+GET /issue-theme
+
+파라미터 (Query)
+파라미터명	타입	필수 여부	기본값	설명
+display	Number	선택	20	페이지당 항목 수
+page	Number	선택	1	페이지 번호
+
+호출 예시
+GET /issue-theme
+GET /issue-theme?page=2&display=10
+
+Response 200
+{
+  "updatedAt": "2026-03-20T09:30:00.000Z",
+  "total": 19,
+  "page": 1,
+  "display": 20,
+  "themes": [
+    {
+      "themeCode": 5,
+      "themeName": "건설",
+      "rank": 1,
+      "rankChange": 2,
+      "totalCount": 12,
+      "risingCount": 9,
+      "risingRatio": 75.0,
+      "avgChangeRate": 2.34
+    },
+    {
+      "themeCode": 12,
+      "themeName": "2차전지",
+      "rank": 2,
+      "rankChange": -1,
+      "totalCount": 18,
+      "risingCount": 12,
+      "risingRatio": 66.67,
+      "avgChangeRate": 1.82
+    },
+    {
+      "themeCode": 7,
+      "themeName": "반도체",
+      "rank": 3,
+      "rankChange": null,
+      "totalCount": 24,
+      "risingCount": 14,
+      "risingRatio": 58.33,
+      "avgChangeRate": 1.21
+    }
+  ]
+}
+
+필드 설명 (최상단)
+필드명	타입	설명
+updatedAt	String (ISO8601)	응답 생성 시각
+total	Number	전체 테마 수 (페이지 무관)
+page	Number	현재 페이지
+display	Number	페이지당 항목 수
+
+필드 설명 (themes 배열 항목)
+필드명	타입	설명
+themeCode	Number	테마 코드
+themeName	String	테마명
+rank	Number	현재 순위  —  상승비율 내림차순 정렬 / 동률 시 동일 순위 부여
+rankChange	Number | null	순위 변동  —  전일 순위 - 현재 순위  /  양수=상승, 음수=하락  /  null=전일 스냅샷 없음
+totalCount	Number	필터 통과 종목 수
+risingCount	Number	상승 종목 수 (등락률 > 0 기준)
+risingRatio	Number	상승 비율 (%, 소수 2자리)
+avgChangeRate	Number	평균 등락률 (%, 소수 2자리)
+
+비고
+등락률은 실시간 캐시(WebSocket) 우선 사용  —  캐시 없으면 전일 DB 종가 기준으로 대체
+테마 데이터 없을 경우: { "updatedAt": null, "total": 0, "page": 1, "display": 20, "themes": [] }
+
+
+2-2. 테마 상세
+GET /issue-theme/:themeCode
+
+파라미터 (Path)
+파라미터명	타입	필수 여부	설명
+themeCode	Number	필수	테마 코드 (정수)
+
+호출 예시
+GET /issue-theme/5
+
+Response 200
+{
+  "themeCode": 5,
+  "themeName": "건설",
+  "rank": 1,
+  "rankChange": 2,
+  "risingCount": 9,
+  "totalCount": 12,
+  "insights": [
+    "테마 내 상승 종목 비율 증가",
+    "거래대금 급증 종목 증가",
+    "평균 등락률 상승"
+  ],
+  "stocks": [
+    {
+      "rank": 1,
+      "stockCode": "000720",
+      "companyName": "현대건설",
+      "currentPrice": 45000,
+      "changeRate": 5.88,
+      "rsScore": 92.5,
+      "tradingValueRatio": "3.1배"
+    },
+    {
+      "rank": 2,
+      "stockCode": "047040",
+      "companyName": "대우건설",
+      "currentPrice": 5830,
+      "changeRate": 3.45,
+      "rsScore": 85.2,
+      "tradingValueRatio": "1.8배"
+    },
+    {
+      "rank": 3,
+      "stockCode": "375500",
+      "companyName": "DL이앤씨",
+      "currentPrice": 38500,
+      "changeRate": 2.13,
+      "rsScore": 78.9,
+      "tradingValueRatio": "-"
+    }
+  ],
+  "updatedAt": "2026-03-20T09:30:00.000Z"
+}
+
+필드 설명 (상단)
+필드명	타입	설명
+rank	Number | null	당일 스냅샷 기준 순위  —  null: 당일 스냅샷 미저장 상태
+rankChange	Number | null	순위 변동  —  양수=상승, 음수=하락  /  null=전일 스냅샷 없음
+risingCount	Number	필터 통과 종목 중 상승 종목 수
+totalCount	Number	필터 통과 종목 수
+insights	String[]	인사이트 문구 목록  —  해당 없으면 빈 배열 []
+
+필드 설명 (stocks 배열 항목)
+필드명	타입	설명
+rank	Number	RS점수 기준 종목 순위 (1위가 최고 RS)
+stockCode	String	종목 코드 (6자리)
+companyName	String	종목명
+currentPrice	Number	현재가  —  실시간 캐시 우선, 없으면 DB 종가
+changeRate	Number	등락률 (%)
+rsScore	Number	RS(상대강도) 점수
+tradingValueRatio	String	전일 동시간 대비 거래대금 배율  —  "N.N배" / 비교 불가 시 "-" (전일 거래대금 100만원 이하 또는 데이터 없음)
+
+인사이트 발생 조건
+문구	발생 조건
+테마 내 상승 종목 비율 증가	전일 스냅샷 대비 상승비율 10%p 이상 증가  AND  현재 상승비율 ≥ 50%
+거래대금 급증 종목 증가	전일 동시간 대비 거래대금 2배 이상인 종목 수가 전일보다 2개 이상 증가
+평균 등락률 상승	테마 내 전체 종목 평균 등락률 ≥ 2%
+상위 종목 급등	테마 내 등락률 ≥ 7% 인 종목이 1개 이상 존재
+
+에러
+상태코드	메시지	발생 조건
+404	Theme {themeCode} not found	존재하지 않는 themeCode
+
+
+2-3. 관리용 엔드포인트 (수동 호출)
+스케줄러가 자동 실행하며, 필요 시 수동으로 직접 호출하는 관리용 엔드포인트
+
+POST /issue-theme/sync-themes
+설명	키움 API 종목 리스트의 upName → themes 테이블 + company.themeCode 동기화 (최초 1회)
+호출 예시	POST /issue-theme/sync-themes
+Response 201	{ "themesCreated": 3, "companiesUpdated": 142 }
+
+POST /issue-theme/snapshot/theme
+설명	테마 일별 스냅샷 저장  —  장 마감 후 1회 호출 (스케줄러: 평일 15:40 KST)
+호출 예시	POST /issue-theme/snapshot/theme
+Response 201	{ "saved": 19, "date": "2026-03-20" }
+
+POST /issue-theme/snapshot/trading-value
+설명	실시간 누적 거래대금 스냅샷 저장  —  장중 10분 단위 호출 (스케줄러: 09:00~15:30, 매 10분)
+호출 예시	POST /issue-theme/snapshot/trading-value
+Response 201	{ "saved": 312, "time": "1030" }
+
+
+
+3. 관심종목 API  /watchlist  🔒
+인증: 모든 엔드포인트 JWT 필요  —  요청 시 헤더에  Authorization: Bearer <accessToken>  포함 필수
+
+
+3-1. 관심종목 현황 조회
+GET /watchlist/stocks
+
+파라미터 (Header)
+파라미터명	타입	필수 여부	설명
+Authorization	String	필수	Bearer <accessToken>
+
+Query 파라미터: 없음
+
+호출 예시
+GET /watchlist/stocks
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+
+Response 200  —  정상 (관심종목 있음)
+{
+  "tradeDate": "2026-03-20T00:00:00.000Z",
+  "stocks": [
+    {
+      "companyId": "123456",
+      "stockCode": "005930",
+      "companyName": "삼성전자",
+      "marketType": "KOSPI",
+      "addedDate": "2026-03-15T09:00:00.000Z",
+      "memo": null,
+      "closePrice": 72000,
+      "priceChange1d": 900,
+      "priceChangeRate1d": 1.27,
+      "rank": 42,
+      "prevRank": 50,
+      "relativeStrengthScore": 87.5,
+      "isNewHigh": false,
+      "events": ["RANK_UP"]
+    },
+    {
+      "companyId": "234567",
+      "stockCode": "000660",
+      "companyName": "SK하이닉스",
+      "marketType": "KOSPI",
+      "addedDate": "2026-03-10T09:00:00.000Z",
+      "memo": null,
+      "closePrice": 195000,
+      "priceChange1d": -3000,
+      "priceChangeRate1d": -1.52,
+      "rank": 15,
+      "prevRank": 15,
+      "relativeStrengthScore": 94.2,
+      "isNewHigh": false,
+      "events": []
+    },
+    {
+      "companyId": "345678",
+      "stockCode": "247540",
+      "companyName": "에코프로비엠",
+      "marketType": "KOSDAQ",
+      "addedDate": "2026-03-05T09:00:00.000Z",
+      "memo": null,
+      "closePrice": 112500,
+      "priceChange1d": 8000,
+      "priceChangeRate1d": 7.65,
+      "rank": 8,
+      "prevRank": 25,
+      "relativeStrengthScore": 96.1,
+      "isNewHigh": true,
+      "events": ["NEW_HIGH", "RANK_UP"]
+    }
+  ]
+}
+
+Response 200  —  관심종목 없음
+{
+  "tradeDate": null,
+  "stocks": []
+}
+
+필드 설명 (최상단)
+필드명	타입	설명
+tradeDate	Date | null	최신 거래일 (ISO8601 UTC)  —  관심종목 없거나 지표 데이터 없으면 null
+
+필드 설명 (stocks 배열 항목)
+필드명	타입	설명
+companyId	String	종목 고유 ID
+stockCode	String	종목 코드 (6자리)
+companyName	String	종목명
+marketType	String	시장 구분  —  "KOSPI" | "KOSDAQ"
+addedDate	Date	관심종목 등록일 (ISO8601 UTC)
+memo	String | null	메모 (현재 미사용, null 고정)
+closePrice	Number | null	종가  —  지표 데이터 없으면 null
+priceChange1d	Number | null	전일 대비 등락폭 (원)
+priceChangeRate1d	Number | null	전일 대비 등락률 (%)
+rank	Number | null	당일 RS 순위
+prevRank	Number | null	전일 RS 순위  —  null이면 RANK_UP/RANK_DOWN 이벤트 미발생
+relativeStrengthScore	Number | null	RS 점수
+isNewHigh	Boolean	신고가 여부
+events	String[]	이벤트 목록  —  해당 없으면 빈 배열 []
+
+이벤트 종류
+이벤트	발생 조건
+NEW_HIGH	당일 신고가 달성 (isNewHigh = true)
+RANK_UP	전일 대비 순위 상승 (rank < prevRank)
+RANK_DOWN	전일 대비 순위 하락 (rank > prevRank)
+
+비고
+응답 정렬: addedDate 내림차순  (최근 추가 종목이 맨 앞)
+지표 데이터(rank, closePrice 등)는 최신 거래일 DB 기준
+
+에러
+상태코드	메시지	발생 조건
+401	Unauthorized	토큰 없음 또는 만료
+
+
+3-2. 관심종목 추가
+POST /watchlist/stocks
+
+파라미터 (Header)
+파라미터명	타입	필수 여부	설명
+Authorization	String	필수	Bearer <accessToken>
+
+파라미터 (Body · application/json)
+파라미터명	타입	필수 여부	제약 / 설명
+stockCode	String	필수	종목 코드 (6자리,  예: "005930")
+
+호출 예시
+POST /watchlist/stocks
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+
+{
+  "stockCode": "005930"
+}
+
+Response 201
+{
+  "userId": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+  "companyId": "123456",
+  "addedDate": "2026-03-20T09:15:00.000Z",
+  "deletedAt": null,
+  "memo": null,
+  "company": {
+    "stockCode": "005930",
+    "companyName": "삼성전자",
+    "marketType": "KOSPI"
+  }
+}
+
+필드 설명 (Response)
+필드명	타입	설명
+userId	String	현재 로그인 사용자 ID
+companyId	String	추가된 종목 고유 ID
+addedDate	Date	관심종목 등록일시 (ISO8601 UTC)
+deletedAt	null	정상 등록 시 항상 null
+memo	null	현재 미사용, null 고정
+company	Object	종목 기본 정보 (stockCode, companyName, marketType)
+
+비고
+이전에 삭제(DELETE)했던 종목 재추가 시:  신규 생성 대신 soft delete 복구 처리  (deletedAt = null, addedDate 현재 시각으로 갱신)
+
+에러
+상태코드	메시지	발생 조건
+401	Unauthorized	토큰 없음 또는 만료
+404	종목코드 {stockCode}를 찾을 수 없습니다	존재하지 않는 종목 코드
+409	이미 관심종목으로 등록된 종목입니다	이미 등록된 종목
+
+
+3-3. 관심종목 삭제
+DELETE /watchlist/stocks/:stockCode
+
+파라미터 (Header)
+파라미터명	타입	필수 여부	설명
+Authorization	String	필수	Bearer <accessToken>
+
+파라미터 (Path)
+파라미터명	타입	필수 여부	설명
+stockCode	String	필수	삭제할 종목 코드 (6자리)
+
+호출 예시
+DELETE /watchlist/stocks/005930
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+
+Response 200
+{
+  "message": "관심종목에서 삭제되었습니다",
+  "stockCode": "005930"
+}
+
+비고
+Soft delete 처리  —  DB에서 완전 삭제되지 않고 deletedAt 시각만 기록
+삭제 후 동일 종목 재추가(3-2) 시 soft delete 복구 처리됨
+
+에러
+상태코드	메시지	발생 조건
+401	Unauthorized	토큰 없음 또는 만료
+404	종목코드 {stockCode}를 찾을 수 없습니다	존재하지 않는 종목 코드
+404	관심종목에 등록되지 않은 종목입니다	관심종목 미등록 종목

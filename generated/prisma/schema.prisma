@@ -46,6 +46,50 @@ enum BatchJobStatus {
   @@map("batch_job_status")
 }
 
+enum AuthProvider {
+  LOCAL
+  NAVER
+  KAKAO
+
+  @@map("auth_provider_enum")
+}
+
+enum PlanType {
+  FREE
+  BASIC
+  PRO
+  PREMIUM
+
+  @@map("plan_type_enum")
+}
+
+enum SubscriptionStatus {
+  ACTIVE // 구독 활성
+  INACTIVE // 구독 비활성 (결제수단 없음 / 무료)
+  CANCELLED // 해지 예약됨 (기간 종료 후 FREE 전환)
+  EXPIRED // 만료됨
+  PAST_DUE // 정기결제 실패 (연체)
+
+  @@map("subscription_status_enum")
+}
+
+enum PaymentStatus {
+  PENDING // 결제 대기
+  SUCCESS // 결제 성공
+  FAILED // 결제 실패
+  CANCELLED // 취소
+  REFUNDED // 환불
+
+  @@map("payment_status_enum")
+}
+
+enum BillingCycle {
+  MONTHLY
+  YEARLY
+
+  @@map("billing_cycle_enum")
+}
+
 // =============================================
 // Models
 // =============================================
@@ -54,6 +98,7 @@ enum BatchJobStatus {
 model Theme {
   themeCode Int       @id @map("theme_code")
   themeName String    @map("theme_name") @db.VarChar(100)
+  imageUrl  String?   @map("image_url") @db.VarChar(500)
   createdAt DateTime  @default(now()) @map("created_at")
   updatedAt DateTime  @default(now()) @updatedAt @map("updated_at")
   deletedAt DateTime? @map("deleted_at")
@@ -61,6 +106,7 @@ model Theme {
   // Relations
   companies      Company[]
   dailySnapshots ThemeDailySnapshot[]
+  watchlistUsers UserWatchlistTheme[]
 
   @@unique([themeName, deletedAt], map: "uk_themes_name")
   @@index([themeName], map: "idx_themes_name")
@@ -70,43 +116,54 @@ model Theme {
 
 // 2. 사용자 테이블
 model User {
-  userId           String    @id @default(uuid()) @map("user_id") @db.Uuid
-  username         String    @db.VarChar(50)
-  email            String    @db.VarChar(100)
-  password         String    @db.VarChar(255)
-  name             String?   @db.VarChar(100)
-  phone            String?   @db.VarChar(20)
-  marketingConsent Boolean   @default(false) @map("marketing_consent")
-  isTempPassword   Boolean   @default(false) @map("is_temp_password")
-  createdAt        DateTime  @default(now()) @map("created_at")
-  updatedAt        DateTime  @default(now()) @updatedAt @map("updated_at")
-  deletedAt        DateTime? @map("deleted_at")
+  userId           String       @id @default(uuid()) @map("user_id") @db.Uuid
+  username         String       @db.VarChar(50)
+  email            String       @db.VarChar(100)
+  password         String?      @db.VarChar(255)
+  provider         AuthProvider @default(LOCAL)
+  socialId         String?      @map("social_id") @db.VarChar(100)
+  name             String?      @db.VarChar(100)
+  phone            String?      @db.VarChar(20)
+  marketingConsent Boolean      @default(false) @map("marketing_consent")
+  isTempPassword   Boolean      @default(false) @map("is_temp_password")
+  planType         PlanType     @default(FREE) @map("plan_type")
+  createdAt        DateTime     @default(now()) @map("created_at")
+  updatedAt        DateTime     @default(now()) @updatedAt @map("updated_at")
+  deletedAt        DateTime?    @map("deleted_at")
 
   // Relations
   watchlist           UserWatchlist[]
+  watchlistThemes     UserWatchlistTheme[]
   rsFilterPresets     RsFilterPreset[]
   searchFilterPresets SearchFilterPreset[]
   apiCallLogs         KiwoomApiCallLog[]
+  subscription        UserSubscription?
+  paymentCards        PaymentCard[]
+  payments            Payment[]
 
   @@unique([username, deletedAt], map: "uk_users_username")
   @@unique([email, deletedAt], map: "uk_users_email")
+  @@unique([provider, socialId, deletedAt], map: "uk_users_social")
   @@index([username], map: "idx_users_username")
   @@index([email], map: "idx_users_email")
+  @@index([provider, socialId], map: "idx_users_provider_social")
   @@index([deletedAt], map: "idx_users_deleted_at")
   @@map("users")
 }
 
 // 3. 기업 기본 정보 테이블
 model Company {
-  companyId   String     @id @default(uuid()) @map("company_id") @db.Uuid
-  companyName String     @map("company_name") @db.VarChar(100)
-  stockCode   String     @map("stock_code") @db.VarChar(20)
-  marketType  MarketType @map("market_type")
-  themeCode   Int?       @map("theme_code")
-  corpCode    String?    @map("corp_code") @db.VarChar(8)
-  createdAt   DateTime   @default(now()) @map("created_at")
-  updatedAt   DateTime   @default(now()) @updatedAt @map("updated_at")
-  deletedAt   DateTime?  @map("deleted_at")
+  companyId    String     @id @default(uuid()) @map("company_id") @db.Uuid
+  companyName  String     @map("company_name") @db.VarChar(100)
+  stockCode    String     @map("stock_code") @db.VarChar(20)
+  marketType   MarketType @map("market_type")
+  themeCode    Int?       @map("theme_code")
+  corpCode     String?    @map("corp_code") @db.VarChar(8)
+  listedShares BigInt?    @map("listed_shares")
+  businessInfo Json?      @map("business_info") @db.JsonB
+  createdAt    DateTime   @default(now()) @map("created_at")
+  updatedAt    DateTime   @default(now()) @updatedAt @map("updated_at")
+  deletedAt    DateTime?  @map("deleted_at")
 
   // Relations
   theme        Theme?              @relation(fields: [themeCode], references: [themeCode])
@@ -140,6 +197,24 @@ model UserWatchlist {
   @@index([companyId], map: "idx_watchlist_company_id")
   @@index([deletedAt], map: "idx_watchlist_deleted_at")
   @@map("user_watchlist")
+}
+
+// 4-1. 사용자-관심테마 매핑 테이블
+model UserWatchlistTheme {
+  userId    String    @map("user_id") @db.Uuid
+  themeCode Int       @map("theme_code")
+  addedDate DateTime  @default(now()) @map("added_date")
+  deletedAt DateTime? @map("deleted_at")
+
+  // Relations
+  user  User  @relation(fields: [userId], references: [userId])
+  theme Theme @relation(fields: [themeCode], references: [themeCode])
+
+  @@id([userId, themeCode])
+  @@index([userId, addedDate], map: "idx_watchlist_theme_user_added_date")
+  @@index([themeCode], map: "idx_watchlist_theme_theme_code")
+  @@index([deletedAt], map: "idx_watchlist_theme_deleted_at")
+  @@map("user_watchlist_themes")
 }
 
 // 4. 태그 마스터 테이블
@@ -405,11 +480,14 @@ model ThemeDailySnapshot {
   themeCode       Int      @map("theme_code")
   snapshotDate    DateTime @map("snapshot_date") @db.Date
   rank            Int      @map("rank") // 당일 순위 (상승비율 기준)
-  risingCount     Int      @map("rising_count") // 상승 종목 수
+  risingCount     Int      @map("rising_count") // 상승 종목 수 (등락률 > 0%)
   totalCount      Int      @map("total_count") // 전체 종목 수 (실시간차트 기준)
   risingRatio     Decimal  @map("rising_ratio") @db.Decimal(5, 2) // 상승 비율 (%)
   avgChangeRate   Decimal  @map("avg_change_rate") @db.Decimal(8, 4) // 평균 등락률 (%)
   highVolumeCount Int      @default(0) @map("high_volume_count") // 거래대금 급증 종목 수
+  upCount         Int      @default(0) @map("up_count") // 상승 종목 수 (등락률 >= +1%)
+  flatCount       Int      @default(0) @map("flat_count") // 보합 종목 수 (-1% ~ +1%)
+  downCount       Int      @default(0) @map("down_count") // 하락 종목 수 (등락률 <= -1%)
   createdAt       DateTime @default(now()) @map("created_at")
 
   // Relations
@@ -456,6 +534,7 @@ model StockDailyMetrics {
   passedStaticFilters      Boolean  @default(false) @map("passed_static_filters")
   isVolatilityContraction  Boolean  @default(false) @map("is_volatility_contraction")
   isPriceCompression       Boolean  @default(false) @map("is_price_compression")
+  isTrendTemplate          Boolean  @default(false) @map("is_trend_template")
   strengthContinuationDays Int?     @map("strength_continuation_days")
   createdAt                DateTime @default(now()) @map("created_at")
   updatedAt                DateTime @updatedAt @map("updated_at")
@@ -465,4 +544,87 @@ model StockDailyMetrics {
   @@index([stockCode, tradeDate(sort: Desc)], map: "idx_stock_metrics_code_date")
   @@index([marketType, tradeDate], map: "idx_stock_metrics_market_date")
   @@map("stock_daily_metrics")
+}
+
+// =============================================
+// MyPage - 구독 / 결제 관련 테이블
+// =============================================
+
+// 20. 사용자 구독 정보 테이블 (1 User : 1 Subscription)
+model UserSubscription {
+  subscriptionId      String             @id @default(uuid()) @map("subscription_id") @db.Uuid
+  userId              String             @unique @map("user_id") @db.Uuid
+  planType            PlanType           @map("plan_type")
+  status              SubscriptionStatus @default(INACTIVE) @map("status")
+  billingCycle        BillingCycle       @map("billing_cycle")
+  currentPeriodStart  DateTime           @map("current_period_start")
+  currentPeriodEnd    DateTime           @map("current_period_end")
+  nextBillingDate     DateTime?          @map("next_billing_date")
+  cancelledAt         DateTime?          @map("cancelled_at") // 해지 요청 일시
+  cancelEffectiveAt   DateTime?          @map("cancel_effective_at") // 해지 실제 적용 일시 (= currentPeriodEnd)
+  pendingPlanType     PlanType?          @map("pending_plan_type") // 다운그레이드 예약 플랜
+  pendingBillingCycle BillingCycle?      @map("pending_billing_cycle")
+  createdAt           DateTime           @default(now()) @map("created_at")
+  updatedAt           DateTime           @default(now()) @updatedAt @map("updated_at")
+
+  // Relations
+  user     User      @relation(fields: [userId], references: [userId])
+  payments Payment[]
+
+  @@index([userId], map: "idx_subscription_user_id")
+  @@index([status], map: "idx_subscription_status")
+  @@index([nextBillingDate], map: "idx_subscription_next_billing")
+  @@map("user_subscriptions")
+}
+
+// 21. 사용자 결제 카드 정보 테이블 (Toss Payments 빌링키)
+model PaymentCard {
+  cardId     String    @id @default(uuid()) @map("card_id") @db.Uuid
+  userId     String    @map("user_id") @db.Uuid
+  billingKey String    @map("billing_key") @db.VarChar(200) // Toss 빌링키
+  cardNumber String    @map("card_number") @db.VarChar(25) // 마스킹된 카드번호 (예: ****-****-****-1234)
+  cardType   String?   @map("card_type") @db.VarChar(50) // VISA, MASTER, 현대 등
+  issuerCode String?   @map("issuer_code") @db.VarChar(10) // 발급사 코드
+  ownerType  String?   @map("owner_type") @db.VarChar(10) // 개인 / 법인
+  isDefault  Boolean   @default(true) @map("is_default")
+  createdAt  DateTime  @default(now()) @map("created_at")
+  updatedAt  DateTime  @default(now()) @updatedAt @map("updated_at")
+  deletedAt  DateTime? @map("deleted_at")
+
+  // Relations
+  user User @relation(fields: [userId], references: [userId])
+
+  @@index([userId], map: "idx_payment_card_user_id")
+  @@index([deletedAt], map: "idx_payment_card_deleted_at")
+  @@map("payment_cards")
+}
+
+// 22. 결제 내역 테이블
+model Payment {
+  paymentId      String        @id @default(uuid()) @map("payment_id") @db.Uuid
+  userId         String        @map("user_id") @db.Uuid
+  subscriptionId String?       @map("subscription_id") @db.Uuid
+  orderId        String        @unique @map("order_id") @db.VarChar(100) // 우리 시스템 주문 ID (Toss에 전달)
+  tossPaymentKey String?       @map("toss_payment_key") @db.VarChar(200) // Toss 결제 키 (성공 시)
+  amount         Int           @map("amount") // 결제 금액 (원)
+  planType       PlanType      @map("plan_type")
+  billingCycle   BillingCycle  @map("billing_cycle")
+  status         PaymentStatus @default(PENDING) @map("status")
+  paymentMethod  String?       @map("payment_method") @db.VarChar(50) // CARD 등
+  cardInfo       Json?         @map("card_info") @db.JsonB // Toss 응답 카드 정보
+  failureCode    String?       @map("failure_code") @db.VarChar(50)
+  failureMessage String?       @map("failure_message") @db.Text
+  paidAt         DateTime?     @map("paid_at")
+  createdAt      DateTime      @default(now()) @map("created_at")
+  updatedAt      DateTime      @default(now()) @updatedAt @map("updated_at")
+
+  // Relations
+  user         User              @relation(fields: [userId], references: [userId])
+  subscription UserSubscription? @relation(fields: [subscriptionId], references: [subscriptionId])
+
+  @@index([userId], map: "idx_payment_user_id")
+  @@index([subscriptionId], map: "idx_payment_subscription_id")
+  @@index([status], map: "idx_payment_status")
+  @@index([paidAt(sort: Desc)], map: "idx_payment_paid_at")
+  @@map("payments")
 }
