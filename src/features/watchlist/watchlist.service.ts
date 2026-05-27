@@ -405,6 +405,8 @@ export class WatchlistService {
   }
 
   private buildThemeRecommendResult(reason: string, theme: any, snapshot: any, prevRank: number | null) {
+    const rankChange = prevRank != null ? prevRank - snapshot.rank : null;
+
     return {
       reason,
       type: 'THEME',
@@ -413,6 +415,12 @@ export class WatchlistService {
       imageUrl: theme.imageUrl ?? null,
       rank: snapshot.rank,
       prevRank,
+      previousRank: prevRank,
+      rankChange,
+      rankHistory: {
+        today: snapshot.rank,
+        oneDayAgo: prevRank,
+      },
       risingCount: snapshot.risingCount,
       totalCount: snapshot.totalCount,
       upCount: snapshot.upCount,
@@ -490,14 +498,18 @@ export class WatchlistService {
 
   private async buildStockRecommendResult(reason: string, metric: any, company: any, prevMetric: any) {
     const events: string[] = [];
+    const prevRank = prevMetric?.rank ?? null;
+    const rankChange = prevRank != null ? prevRank - metric.rank : null;
+
     if (metric.isNewHigh) events.push('NEW_HIGH');
     if (metric.isVolatilityContraction) events.push('VOLATILITY_CONTRACTION');
     if (metric.isPriceCompression) events.push('PRICE_COMPRESSION');
     if (metric.isTrendTemplate) events.push('TREND_TEMPLATE');
-    if (prevMetric) {
-      if (metric.rank < prevMetric.rank) events.push('RANK_UP');
-      else if (metric.rank > prevMetric.rank) events.push('RANK_DOWN');
+    if (prevRank != null) {
+      if (metric.rank < prevRank) events.push('RANK_UP');
+      else if (metric.rank > prevRank) events.push('RANK_DOWN');
     }
+
     return {
       reason,
       type: 'STOCK',
@@ -506,6 +518,13 @@ export class WatchlistService {
       companyName: company.companyName,
       marketType: company.marketType,
       rank: metric.rank,
+      prevRank,
+      previousRank: prevRank,
+      rankChange,
+      rankHistory: {
+        today: metric.rank,
+        oneDayAgo: prevRank,
+      },
       closePrice: Number(metric.closePrice),
       priceChangeRate1d: metric.priceChangeRate1d != null ? Number(metric.priceChangeRate1d) : null,
       relativeStrengthScore: Number(metric.relativeStrengthScore),
@@ -637,23 +656,44 @@ export class WatchlistService {
       : null;
 
     let themeSnapshotMap = new Map<number, any>();
+    let prevThemeSnapshotMap = new Map<number, any>();
     if (latestThemeSnapshot) {
-      const snapshots = await this.prisma.themeDailySnapshot.findMany({
-        where: { themeCode: { in: themeCodes }, snapshotDate: latestThemeSnapshot.snapshotDate },
+      const prevThemeDateRecord = await this.prisma.themeDailySnapshot.findFirst({
+        where: { snapshotDate: { lt: latestThemeSnapshot.snapshotDate } },
+        orderBy: { snapshotDate: 'desc' },
+        select: { snapshotDate: true },
       });
+
+      const [snapshots, prevSnapshots] = await Promise.all([
+        this.prisma.themeDailySnapshot.findMany({
+          where: { themeCode: { in: themeCodes }, snapshotDate: latestThemeSnapshot.snapshotDate },
+        }),
+        prevThemeDateRecord
+          ? this.prisma.themeDailySnapshot.findMany({
+              where: { themeCode: { in: themeCodes }, snapshotDate: prevThemeDateRecord.snapshotDate },
+            })
+          : Promise.resolve([]),
+      ]);
       themeSnapshotMap = new Map(snapshots.map((s) => [s.themeCode, s]));
+      prevThemeSnapshotMap = new Map(prevSnapshots.map((s) => [s.themeCode, s]));
     }
 
     const items: any[] = [];
 
     for (const w of watchlistThemes) {
       const snapshot = themeSnapshotMap.get(w.themeCode);
+      const prevSnapshot = prevThemeSnapshotMap.get(w.themeCode);
+      const rankChange =
+        snapshot && prevSnapshot ? prevSnapshot.rank - snapshot.rank : null;
       items.push({
         type: 'THEME',
         themeCode: w.themeCode,
         themeName: w.theme.themeName,
         imageUrl: w.theme.imageUrl ?? null,
         addedDate: w.addedDate,
+        rank: snapshot?.rank ?? null,
+        prevRank: prevSnapshot?.rank ?? null,
+        rankChange,
         risingCount: snapshot?.risingCount ?? null,
         totalCount: snapshot?.totalCount ?? null,
         upCount: snapshot?.upCount ?? null,

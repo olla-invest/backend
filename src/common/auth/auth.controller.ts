@@ -9,6 +9,7 @@ import { LoginDto } from './dto/login.dto';
 import { FindIdDto } from './dto/find-id.dto';
 import { FindPasswordDto } from './dto/find-password.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
+import { CompleteSocialProfileDto } from './dto/complete-social-profile.dto';
 import { Public } from './decorators/public.decorator';
 import { CurrentUser } from './decorators/current-user.decorator';
 import { SocialProfile } from './types/social-profile.type';
@@ -64,11 +65,9 @@ export class AuthController {
     @UseGuards( AuthGuard( 'naver' ) )
     @ApiOperation( { summary: '네이버 OAuth 콜백' } )
     async naverCallback( @Req() req: Request, @Res() res: Response ) {
-        const { accessToken, user } = await this.authService.socialLogin( req.user as SocialProfile );
+        const { accessToken } = await this.authService.socialLogin( req.user as SocialProfile );
         const frontendUrl = this.configService.get<string>( 'FRONTEND_URL' );
-        return res.redirect(
-            `${frontendUrl}/auth/callback?token=${accessToken}&userId=${( user as any ).userId}`,
-        );
+        return res.redirect( `${frontendUrl}/auth/callback?token=${accessToken}` );
     }
 
     @Public()
@@ -84,11 +83,26 @@ export class AuthController {
     @UseGuards( AuthGuard( 'kakao' ) )
     @ApiOperation( { summary: '카카오 OAuth 콜백' } )
     async kakaoCallback( @Req() req: Request, @Res() res: Response ) {
-        const { accessToken, user } = await this.authService.socialLogin( req.user as SocialProfile );
+        const { accessToken } = await this.authService.socialLogin( req.user as SocialProfile );
         const frontendUrl = this.configService.get<string>( 'FRONTEND_URL' );
-        return res.redirect(
-            `${frontendUrl}/auth/callback?token=${accessToken}&userId=${( user as any ).userId}`,
-        );
+        return res.redirect( `${frontendUrl}/auth/callback?token=${accessToken}` );
+    }
+
+    @Get( 'me' )
+    @ApiBearerAuth( 'access-token' )
+    @ApiOperation( { summary: '내 정보 조회 (로그인 필요)' } )
+    async getMe( @CurrentUser( 'userId' ) userId: string ) {
+        return this.authService.getMe( userId );
+    }
+
+    @Patch( 'social-profile' )
+    @ApiBearerAuth( 'access-token' )
+    @ApiOperation( { summary: 'SNS 가입 추가 정보 입력', description: 'SNS 최초 로그인 후 이름/휴대폰/약관동의를 저장합니다.' } )
+    completeSocialProfile(
+        @CurrentUser( 'userId' ) userId: string,
+        @Body() dto: CompleteSocialProfileDto,
+    ) {
+        return this.authService.completeSocialProfile( userId, dto );
     }
 
     @Patch( 'change-password' )

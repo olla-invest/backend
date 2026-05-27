@@ -5,6 +5,9 @@ import { ConfigService } from '@nestjs/config';
 import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import * as fs from 'fs';
+import * as express from 'express';
+import * as path from 'path';
+import { addDefaultResponseSchemas } from './common/swagger/default-response-schemas';
 
 async function bootstrap() {
     const app = await NestFactory.create( AppModule );
@@ -33,6 +36,19 @@ async function bootstrap() {
         allowedHeaders: [ 'Content-Type', 'Authorization', 'X-Requested-With', 'ngrok-skip-browser-warning' ],
     } );
 
+    const stockImageDir = path.resolve(
+        process.cwd(),
+        configService.get<string>( 'STOCK_IMAGE_DIR', '../stock-image' ),
+    );
+    app.use(
+        '/stock-image',
+        express.static( stockImageDir, {
+            maxAge: '7d',
+            immutable: true,
+            fallthrough: false,
+        } ),
+    );
+
     // Swagger
     const swaggerConfig = new DocumentBuilder()
         .setTitle( '주식 서비스 API' )
@@ -43,10 +59,10 @@ async function bootstrap() {
             'access-token',
         )
         .build();
-    const document = SwaggerModule.createDocument( app, swaggerConfig );
+    const document = addDefaultResponseSchemas(SwaggerModule.createDocument( app, swaggerConfig ));
     SwaggerModule.setup( 'api-docs', app, document );
     const swaggerOutputPath = configService.get<string>( 'SWAGGER_OUTPUT_PATH', './swagger.json' );
-    fs.mkdirSync( require( 'path' ).dirname( swaggerOutputPath ), { recursive: true } );
+    fs.mkdirSync( path.dirname( swaggerOutputPath ), { recursive: true } );
     fs.writeFileSync( swaggerOutputPath, JSON.stringify( document, null, 2 ) );
 
     // Get port from environment or use default

@@ -3,6 +3,7 @@ import { CacheModule } from '@nestjs/cache-manager';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { redisStore } from 'cache-manager-redis-store';
 import { RedisPubSubService } from './redis-pubsub.service';
+import { RedisLockService } from './redis-lock.service';
 
 @Module( {
     imports: [
@@ -19,7 +20,7 @@ import { RedisPubSubService } from './redis-pubsub.service';
             isGlobal: true,
         } ),
     ],
-    providers: [ RedisPubSubService ],
-    exports: [ CacheModule, RedisPubSubService ],
+    providers: [ RedisPubSubService, RedisLockService ],
+    exports: [ CacheModule, RedisPubSubService, RedisLockService ],
 } )
 export class RedisModule {}

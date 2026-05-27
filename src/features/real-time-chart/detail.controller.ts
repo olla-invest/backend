@@ -28,7 +28,7 @@ export class DetailController {
   @Get('chart/:stockCode')
   async getDetailChart(
     @Param('stockCode') stockCode: string,
-    @Query('chartType') chartType: 'minute' | 'tick' | 'day' | 'week' | 'month' = 'day',
+    @Query('chartType') chartType: 'minute' | 'tick' | 'day' | 'week' | 'month' | 'year' = 'day',
     @Query('interval') interval: string = '1',
     @Query('startDate') startDate?: string,
     @Query('endDate') endDate?: string,
@@ -64,7 +64,7 @@ export class DetailController {
 
   private async getCandles(
     stockCode: string,
-    chartType: 'minute' | 'tick' | 'day' | 'week' | 'month',
+    chartType: 'minute' | 'tick' | 'day' | 'week' | 'month' | 'year',
     interval: string,
     startDate?: string,
     endDate?: string,
@@ -76,7 +76,8 @@ export class DetailController {
         return await this.chartService.getTickCandles(stockCode, interval as any);
       case 'day':
       case 'week':
-      case 'month': {
+      case 'month':
+      case 'year': {
         const start = startDate
           ? `${startDate.substring(0, 4)}-${startDate.substring(4, 6)}-${startDate.substring(6, 8)}`
           : `${new Date().getFullYear() - 1}-01-01`;

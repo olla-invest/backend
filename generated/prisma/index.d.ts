@@ -119,6 +119,11 @@ export type StockTradingValueSnapshot = $Result.DefaultSelection<Prisma.$StockTr
  */
 export type StockDailyMetrics = $Result.DefaultSelection<Prisma.$StockDailyMetricsPayload>
 /**
+ * Model CronRunLog
+ * 
+ */
+export type CronRunLog = $Result.DefaultSelection<Prisma.$CronRunLogPayload>
+/**
  * Model UserSubscription
  * 
  */
@@ -585,6 +590,16 @@ export class PrismaClient<
     * ```
     */
   get stockDailyMetrics(): Prisma.StockDailyMetricsDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.cronRunLog`: Exposes CRUD operations for the **CronRunLog** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more CronRunLogs
+    * const cronRunLogs = await prisma.cronRunLog.findMany()
+    * ```
+    */
+  get cronRunLog(): Prisma.CronRunLogDelegate<ExtArgs, ClientOptions>;
 
   /**
    * `prisma.userSubscription`: Exposes CRUD operations for the **UserSubscription** model.
@@ -1070,6 +1085,7 @@ export namespace Prisma {
     ThemeDailySnapshot: 'ThemeDailySnapshot',
     StockTradingValueSnapshot: 'StockTradingValueSnapshot',
     StockDailyMetrics: 'StockDailyMetrics',
+    CronRunLog: 'CronRunLog',
     UserSubscription: 'UserSubscription',
     PaymentCard: 'PaymentCard',
     Payment: 'Payment'
@@ -1088,7 +1104,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "theme" | "user" | "company" | "userWatchlist" | "userWatchlistTheme" | "tag" | "watchlistTag" | "rsFilterPreset" | "rsFilterPeriod" | "searchFilterPreset" | "stockPriceHistory" | "marketIndexHistory" | "kiwoomApiCallLog" | "batchJobHistory" | "kiwoomToken" | "stockCandle" | "stockTick" | "stockQuote" | "themeDailySnapshot" | "stockTradingValueSnapshot" | "stockDailyMetrics" | "userSubscription" | "paymentCard" | "payment"
+      modelProps: "theme" | "user" | "company" | "userWatchlist" | "userWatchlistTheme" | "tag" | "watchlistTag" | "rsFilterPreset" | "rsFilterPeriod" | "searchFilterPreset" | "stockPriceHistory" | "marketIndexHistory" | "kiwoomApiCallLog" | "batchJobHistory" | "kiwoomToken" | "stockCandle" | "stockTick" | "stockQuote" | "themeDailySnapshot" | "stockTradingValueSnapshot" | "stockDailyMetrics" | "cronRunLog" | "userSubscription" | "paymentCard" | "payment"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -2646,6 +2662,80 @@ export namespace Prisma {
           }
         }
       }
+      CronRunLog: {
+        payload: Prisma.$CronRunLogPayload<ExtArgs>
+        fields: Prisma.CronRunLogFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.CronRunLogFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CronRunLogPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.CronRunLogFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CronRunLogPayload>
+          }
+          findFirst: {
+            args: Prisma.CronRunLogFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CronRunLogPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.CronRunLogFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CronRunLogPayload>
+          }
+          findMany: {
+            args: Prisma.CronRunLogFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CronRunLogPayload>[]
+          }
+          create: {
+            args: Prisma.CronRunLogCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CronRunLogPayload>
+          }
+          createMany: {
+            args: Prisma.CronRunLogCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.CronRunLogCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CronRunLogPayload>[]
+          }
+          delete: {
+            args: Prisma.CronRunLogDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CronRunLogPayload>
+          }
+          update: {
+            args: Prisma.CronRunLogUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CronRunLogPayload>
+          }
+          deleteMany: {
+            args: Prisma.CronRunLogDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.CronRunLogUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.CronRunLogUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CronRunLogPayload>[]
+          }
+          upsert: {
+            args: Prisma.CronRunLogUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CronRunLogPayload>
+          }
+          aggregate: {
+            args: Prisma.CronRunLogAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateCronRunLog>
+          }
+          groupBy: {
+            args: Prisma.CronRunLogGroupByArgs<ExtArgs>
+            result: $Utils.Optional<CronRunLogGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.CronRunLogCountArgs<ExtArgs>
+            result: $Utils.Optional<CronRunLogCountAggregateOutputType> | number
+          }
+        }
+      }
       UserSubscription: {
         payload: Prisma.$UserSubscriptionPayload<ExtArgs>
         fields: Prisma.UserSubscriptionFieldRefs
@@ -2997,6 +3087,7 @@ export namespace Prisma {
     themeDailySnapshot?: ThemeDailySnapshotOmit
     stockTradingValueSnapshot?: StockTradingValueSnapshotOmit
     stockDailyMetrics?: StockDailyMetricsOmit
+    cronRunLog?: CronRunLogOmit
     userSubscription?: UserSubscriptionOmit
     paymentCard?: PaymentCardOmit
     payment?: PaymentOmit
@@ -5958,6 +6049,7 @@ export namespace Prisma {
     themeCode: number | null
     corpCode: string | null
     listedShares: bigint | null
+    tradingState: string | null
     createdAt: Date | null
     updatedAt: Date | null
     deletedAt: Date | null
@@ -5971,6 +6063,7 @@ export namespace Prisma {
     themeCode: number | null
     corpCode: string | null
     listedShares: bigint | null
+    tradingState: string | null
     createdAt: Date | null
     updatedAt: Date | null
     deletedAt: Date | null
@@ -5985,6 +6078,7 @@ export namespace Prisma {
     corpCode: number
     listedShares: number
     businessInfo: number
+    tradingState: number
     createdAt: number
     updatedAt: number
     deletedAt: number
@@ -6010,6 +6104,7 @@ export namespace Prisma {
     themeCode?: true
     corpCode?: true
     listedShares?: true
+    tradingState?: true
     createdAt?: true
     updatedAt?: true
     deletedAt?: true
@@ -6023,6 +6118,7 @@ export namespace Prisma {
     themeCode?: true
     corpCode?: true
     listedShares?: true
+    tradingState?: true
     createdAt?: true
     updatedAt?: true
     deletedAt?: true
@@ -6037,6 +6133,7 @@ export namespace Prisma {
     corpCode?: true
     listedShares?: true
     businessInfo?: true
+    tradingState?: true
     createdAt?: true
     updatedAt?: true
     deletedAt?: true
@@ -6138,6 +6235,7 @@ export namespace Prisma {
     corpCode: string | null
     listedShares: bigint | null
     businessInfo: JsonValue | null
+    tradingState: string | null
     createdAt: Date
     updatedAt: Date
     deletedAt: Date | null
@@ -6171,6 +6269,7 @@ export namespace Prisma {
     corpCode?: boolean
     listedShares?: boolean
     businessInfo?: boolean
+    tradingState?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     deletedAt?: boolean
@@ -6189,6 +6288,7 @@ export namespace Prisma {
     corpCode?: boolean
     listedShares?: boolean
     businessInfo?: boolean
+    tradingState?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     deletedAt?: boolean
@@ -6204,6 +6304,7 @@ export namespace Prisma {
     corpCode?: boolean
     listedShares?: boolean
     businessInfo?: boolean
+    tradingState?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     deletedAt?: boolean
@@ -6219,12 +6320,13 @@ export namespace Prisma {
     corpCode?: boolean
     listedShares?: boolean
     businessInfo?: boolean
+    tradingState?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     deletedAt?: boolean
   }
 
-  export type CompanyOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"companyId" | "companyName" | "stockCode" | "marketType" | "themeCode" | "corpCode" | "listedShares" | "businessInfo" | "createdAt" | "updatedAt" | "deletedAt", ExtArgs["result"]["company"]>
+  export type CompanyOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"companyId" | "companyName" | "stockCode" | "marketType" | "themeCode" | "corpCode" | "listedShares" | "businessInfo" | "tradingState" | "createdAt" | "updatedAt" | "deletedAt", ExtArgs["result"]["company"]>
   export type CompanyInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     theme?: boolean | Company$themeArgs<ExtArgs>
     watchlist?: boolean | Company$watchlistArgs<ExtArgs>
@@ -6254,6 +6356,7 @@ export namespace Prisma {
       corpCode: string | null
       listedShares: bigint | null
       businessInfo: Prisma.JsonValue | null
+      tradingState: string | null
       createdAt: Date
       updatedAt: Date
       deletedAt: Date | null
@@ -6691,6 +6794,7 @@ export namespace Prisma {
     readonly corpCode: FieldRef<"Company", 'String'>
     readonly listedShares: FieldRef<"Company", 'BigInt'>
     readonly businessInfo: FieldRef<"Company", 'Json'>
+    readonly tradingState: FieldRef<"Company", 'String'>
     readonly createdAt: FieldRef<"Company", 'DateTime'>
     readonly updatedAt: FieldRef<"Company", 'DateTime'>
     readonly deletedAt: FieldRef<"Company", 'DateTime'>
@@ -20228,6 +20332,10 @@ export namespace Prisma {
     volume: number | null
     tradingValue: number | null
     prevDayCompare: Decimal | null
+    adjOpenPrice: Decimal | null
+    adjHighPrice: Decimal | null
+    adjLowPrice: Decimal | null
+    adjClosePrice: Decimal | null
   }
 
   export type StockCandleSumAggregateOutputType = {
@@ -20238,6 +20346,10 @@ export namespace Prisma {
     volume: bigint | null
     tradingValue: bigint | null
     prevDayCompare: Decimal | null
+    adjOpenPrice: Decimal | null
+    adjHighPrice: Decimal | null
+    adjLowPrice: Decimal | null
+    adjClosePrice: Decimal | null
   }
 
   export type StockCandleMinAggregateOutputType = {
@@ -20252,6 +20364,10 @@ export namespace Prisma {
     volume: bigint | null
     tradingValue: bigint | null
     prevDayCompare: Decimal | null
+    adjOpenPrice: Decimal | null
+    adjHighPrice: Decimal | null
+    adjLowPrice: Decimal | null
+    adjClosePrice: Decimal | null
     createdAt: Date | null
   }
 
@@ -20267,6 +20383,10 @@ export namespace Prisma {
     volume: bigint | null
     tradingValue: bigint | null
     prevDayCompare: Decimal | null
+    adjOpenPrice: Decimal | null
+    adjHighPrice: Decimal | null
+    adjLowPrice: Decimal | null
+    adjClosePrice: Decimal | null
     createdAt: Date | null
   }
 
@@ -20282,6 +20402,10 @@ export namespace Prisma {
     volume: number
     tradingValue: number
     prevDayCompare: number
+    adjOpenPrice: number
+    adjHighPrice: number
+    adjLowPrice: number
+    adjClosePrice: number
     createdAt: number
     _all: number
   }
@@ -20295,6 +20419,10 @@ export namespace Prisma {
     volume?: true
     tradingValue?: true
     prevDayCompare?: true
+    adjOpenPrice?: true
+    adjHighPrice?: true
+    adjLowPrice?: true
+    adjClosePrice?: true
   }
 
   export type StockCandleSumAggregateInputType = {
@@ -20305,6 +20433,10 @@ export namespace Prisma {
     volume?: true
     tradingValue?: true
     prevDayCompare?: true
+    adjOpenPrice?: true
+    adjHighPrice?: true
+    adjLowPrice?: true
+    adjClosePrice?: true
   }
 
   export type StockCandleMinAggregateInputType = {
@@ -20319,6 +20451,10 @@ export namespace Prisma {
     volume?: true
     tradingValue?: true
     prevDayCompare?: true
+    adjOpenPrice?: true
+    adjHighPrice?: true
+    adjLowPrice?: true
+    adjClosePrice?: true
     createdAt?: true
   }
 
@@ -20334,6 +20470,10 @@ export namespace Prisma {
     volume?: true
     tradingValue?: true
     prevDayCompare?: true
+    adjOpenPrice?: true
+    adjHighPrice?: true
+    adjLowPrice?: true
+    adjClosePrice?: true
     createdAt?: true
   }
 
@@ -20349,6 +20489,10 @@ export namespace Prisma {
     volume?: true
     tradingValue?: true
     prevDayCompare?: true
+    adjOpenPrice?: true
+    adjHighPrice?: true
+    adjLowPrice?: true
+    adjClosePrice?: true
     createdAt?: true
     _all?: true
   }
@@ -20451,6 +20595,10 @@ export namespace Prisma {
     volume: bigint
     tradingValue: bigint | null
     prevDayCompare: Decimal | null
+    adjOpenPrice: Decimal | null
+    adjHighPrice: Decimal | null
+    adjLowPrice: Decimal | null
+    adjClosePrice: Decimal | null
     createdAt: Date
     _count: StockCandleCountAggregateOutputType | null
     _avg: StockCandleAvgAggregateOutputType | null
@@ -20485,6 +20633,10 @@ export namespace Prisma {
     volume?: boolean
     tradingValue?: boolean
     prevDayCompare?: boolean
+    adjOpenPrice?: boolean
+    adjHighPrice?: boolean
+    adjLowPrice?: boolean
+    adjClosePrice?: boolean
     createdAt?: boolean
   }, ExtArgs["result"]["stockCandle"]>
 
@@ -20500,6 +20652,10 @@ export namespace Prisma {
     volume?: boolean
     tradingValue?: boolean
     prevDayCompare?: boolean
+    adjOpenPrice?: boolean
+    adjHighPrice?: boolean
+    adjLowPrice?: boolean
+    adjClosePrice?: boolean
     createdAt?: boolean
   }, ExtArgs["result"]["stockCandle"]>
 
@@ -20515,6 +20671,10 @@ export namespace Prisma {
     volume?: boolean
     tradingValue?: boolean
     prevDayCompare?: boolean
+    adjOpenPrice?: boolean
+    adjHighPrice?: boolean
+    adjLowPrice?: boolean
+    adjClosePrice?: boolean
     createdAt?: boolean
   }, ExtArgs["result"]["stockCandle"]>
 
@@ -20530,10 +20690,14 @@ export namespace Prisma {
     volume?: boolean
     tradingValue?: boolean
     prevDayCompare?: boolean
+    adjOpenPrice?: boolean
+    adjHighPrice?: boolean
+    adjLowPrice?: boolean
+    adjClosePrice?: boolean
     createdAt?: boolean
   }
 
-  export type StockCandleOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"candleId" | "stockCode" | "candleType" | "candleTime" | "openPrice" | "highPrice" | "lowPrice" | "closePrice" | "volume" | "tradingValue" | "prevDayCompare" | "createdAt", ExtArgs["result"]["stockCandle"]>
+  export type StockCandleOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"candleId" | "stockCode" | "candleType" | "candleTime" | "openPrice" | "highPrice" | "lowPrice" | "closePrice" | "volume" | "tradingValue" | "prevDayCompare" | "adjOpenPrice" | "adjHighPrice" | "adjLowPrice" | "adjClosePrice" | "createdAt", ExtArgs["result"]["stockCandle"]>
 
   export type $StockCandlePayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "StockCandle"
@@ -20550,6 +20714,10 @@ export namespace Prisma {
       volume: bigint
       tradingValue: bigint | null
       prevDayCompare: Prisma.Decimal | null
+      adjOpenPrice: Prisma.Decimal | null
+      adjHighPrice: Prisma.Decimal | null
+      adjLowPrice: Prisma.Decimal | null
+      adjClosePrice: Prisma.Decimal | null
       createdAt: Date
     }, ExtArgs["result"]["stockCandle"]>
     composites: {}
@@ -20985,6 +21153,10 @@ export namespace Prisma {
     readonly volume: FieldRef<"StockCandle", 'BigInt'>
     readonly tradingValue: FieldRef<"StockCandle", 'BigInt'>
     readonly prevDayCompare: FieldRef<"StockCandle", 'Decimal'>
+    readonly adjOpenPrice: FieldRef<"StockCandle", 'Decimal'>
+    readonly adjHighPrice: FieldRef<"StockCandle", 'Decimal'>
+    readonly adjLowPrice: FieldRef<"StockCandle", 'Decimal'>
+    readonly adjClosePrice: FieldRef<"StockCandle", 'Decimal'>
     readonly createdAt: FieldRef<"StockCandle", 'DateTime'>
   }
     
@@ -27451,6 +27623,1083 @@ export namespace Prisma {
 
 
   /**
+   * Model CronRunLog
+   */
+
+  export type AggregateCronRunLog = {
+    _count: CronRunLogCountAggregateOutputType | null
+    _avg: CronRunLogAvgAggregateOutputType | null
+    _sum: CronRunLogSumAggregateOutputType | null
+    _min: CronRunLogMinAggregateOutputType | null
+    _max: CronRunLogMaxAggregateOutputType | null
+  }
+
+  export type CronRunLogAvgAggregateOutputType = {
+    durationMs: number | null
+  }
+
+  export type CronRunLogSumAggregateOutputType = {
+    durationMs: number | null
+  }
+
+  export type CronRunLogMinAggregateOutputType = {
+    runId: string | null
+    jobName: string | null
+    tradeDate: Date | null
+    status: string | null
+    startedAt: Date | null
+    finishedAt: Date | null
+    durationMs: number | null
+    errorMsg: string | null
+  }
+
+  export type CronRunLogMaxAggregateOutputType = {
+    runId: string | null
+    jobName: string | null
+    tradeDate: Date | null
+    status: string | null
+    startedAt: Date | null
+    finishedAt: Date | null
+    durationMs: number | null
+    errorMsg: string | null
+  }
+
+  export type CronRunLogCountAggregateOutputType = {
+    runId: number
+    jobName: number
+    tradeDate: number
+    status: number
+    startedAt: number
+    finishedAt: number
+    durationMs: number
+    errorMsg: number
+    metadata: number
+    _all: number
+  }
+
+
+  export type CronRunLogAvgAggregateInputType = {
+    durationMs?: true
+  }
+
+  export type CronRunLogSumAggregateInputType = {
+    durationMs?: true
+  }
+
+  export type CronRunLogMinAggregateInputType = {
+    runId?: true
+    jobName?: true
+    tradeDate?: true
+    status?: true
+    startedAt?: true
+    finishedAt?: true
+    durationMs?: true
+    errorMsg?: true
+  }
+
+  export type CronRunLogMaxAggregateInputType = {
+    runId?: true
+    jobName?: true
+    tradeDate?: true
+    status?: true
+    startedAt?: true
+    finishedAt?: true
+    durationMs?: true
+    errorMsg?: true
+  }
+
+  export type CronRunLogCountAggregateInputType = {
+    runId?: true
+    jobName?: true
+    tradeDate?: true
+    status?: true
+    startedAt?: true
+    finishedAt?: true
+    durationMs?: true
+    errorMsg?: true
+    metadata?: true
+    _all?: true
+  }
+
+  export type CronRunLogAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which CronRunLog to aggregate.
+     */
+    where?: CronRunLogWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of CronRunLogs to fetch.
+     */
+    orderBy?: CronRunLogOrderByWithRelationInput | CronRunLogOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: CronRunLogWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` CronRunLogs from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` CronRunLogs.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned CronRunLogs
+    **/
+    _count?: true | CronRunLogCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: CronRunLogAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: CronRunLogSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: CronRunLogMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: CronRunLogMaxAggregateInputType
+  }
+
+  export type GetCronRunLogAggregateType<T extends CronRunLogAggregateArgs> = {
+        [P in keyof T & keyof AggregateCronRunLog]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateCronRunLog[P]>
+      : GetScalarType<T[P], AggregateCronRunLog[P]>
+  }
+
+
+
+
+  export type CronRunLogGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: CronRunLogWhereInput
+    orderBy?: CronRunLogOrderByWithAggregationInput | CronRunLogOrderByWithAggregationInput[]
+    by: CronRunLogScalarFieldEnum[] | CronRunLogScalarFieldEnum
+    having?: CronRunLogScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: CronRunLogCountAggregateInputType | true
+    _avg?: CronRunLogAvgAggregateInputType
+    _sum?: CronRunLogSumAggregateInputType
+    _min?: CronRunLogMinAggregateInputType
+    _max?: CronRunLogMaxAggregateInputType
+  }
+
+  export type CronRunLogGroupByOutputType = {
+    runId: string
+    jobName: string
+    tradeDate: Date
+    status: string
+    startedAt: Date
+    finishedAt: Date | null
+    durationMs: number | null
+    errorMsg: string | null
+    metadata: JsonValue | null
+    _count: CronRunLogCountAggregateOutputType | null
+    _avg: CronRunLogAvgAggregateOutputType | null
+    _sum: CronRunLogSumAggregateOutputType | null
+    _min: CronRunLogMinAggregateOutputType | null
+    _max: CronRunLogMaxAggregateOutputType | null
+  }
+
+  type GetCronRunLogGroupByPayload<T extends CronRunLogGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<CronRunLogGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof CronRunLogGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], CronRunLogGroupByOutputType[P]>
+            : GetScalarType<T[P], CronRunLogGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type CronRunLogSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    runId?: boolean
+    jobName?: boolean
+    tradeDate?: boolean
+    status?: boolean
+    startedAt?: boolean
+    finishedAt?: boolean
+    durationMs?: boolean
+    errorMsg?: boolean
+    metadata?: boolean
+  }, ExtArgs["result"]["cronRunLog"]>
+
+  export type CronRunLogSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    runId?: boolean
+    jobName?: boolean
+    tradeDate?: boolean
+    status?: boolean
+    startedAt?: boolean
+    finishedAt?: boolean
+    durationMs?: boolean
+    errorMsg?: boolean
+    metadata?: boolean
+  }, ExtArgs["result"]["cronRunLog"]>
+
+  export type CronRunLogSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    runId?: boolean
+    jobName?: boolean
+    tradeDate?: boolean
+    status?: boolean
+    startedAt?: boolean
+    finishedAt?: boolean
+    durationMs?: boolean
+    errorMsg?: boolean
+    metadata?: boolean
+  }, ExtArgs["result"]["cronRunLog"]>
+
+  export type CronRunLogSelectScalar = {
+    runId?: boolean
+    jobName?: boolean
+    tradeDate?: boolean
+    status?: boolean
+    startedAt?: boolean
+    finishedAt?: boolean
+    durationMs?: boolean
+    errorMsg?: boolean
+    metadata?: boolean
+  }
+
+  export type CronRunLogOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"runId" | "jobName" | "tradeDate" | "status" | "startedAt" | "finishedAt" | "durationMs" | "errorMsg" | "metadata", ExtArgs["result"]["cronRunLog"]>
+
+  export type $CronRunLogPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "CronRunLog"
+    objects: {}
+    scalars: $Extensions.GetPayloadResult<{
+      runId: string
+      jobName: string
+      tradeDate: Date
+      status: string
+      startedAt: Date
+      finishedAt: Date | null
+      durationMs: number | null
+      errorMsg: string | null
+      metadata: Prisma.JsonValue | null
+    }, ExtArgs["result"]["cronRunLog"]>
+    composites: {}
+  }
+
+  type CronRunLogGetPayload<S extends boolean | null | undefined | CronRunLogDefaultArgs> = $Result.GetResult<Prisma.$CronRunLogPayload, S>
+
+  type CronRunLogCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<CronRunLogFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: CronRunLogCountAggregateInputType | true
+    }
+
+  export interface CronRunLogDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['CronRunLog'], meta: { name: 'CronRunLog' } }
+    /**
+     * Find zero or one CronRunLog that matches the filter.
+     * @param {CronRunLogFindUniqueArgs} args - Arguments to find a CronRunLog
+     * @example
+     * // Get one CronRunLog
+     * const cronRunLog = await prisma.cronRunLog.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends CronRunLogFindUniqueArgs>(args: SelectSubset<T, CronRunLogFindUniqueArgs<ExtArgs>>): Prisma__CronRunLogClient<$Result.GetResult<Prisma.$CronRunLogPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one CronRunLog that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {CronRunLogFindUniqueOrThrowArgs} args - Arguments to find a CronRunLog
+     * @example
+     * // Get one CronRunLog
+     * const cronRunLog = await prisma.cronRunLog.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends CronRunLogFindUniqueOrThrowArgs>(args: SelectSubset<T, CronRunLogFindUniqueOrThrowArgs<ExtArgs>>): Prisma__CronRunLogClient<$Result.GetResult<Prisma.$CronRunLogPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first CronRunLog that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CronRunLogFindFirstArgs} args - Arguments to find a CronRunLog
+     * @example
+     * // Get one CronRunLog
+     * const cronRunLog = await prisma.cronRunLog.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends CronRunLogFindFirstArgs>(args?: SelectSubset<T, CronRunLogFindFirstArgs<ExtArgs>>): Prisma__CronRunLogClient<$Result.GetResult<Prisma.$CronRunLogPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first CronRunLog that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CronRunLogFindFirstOrThrowArgs} args - Arguments to find a CronRunLog
+     * @example
+     * // Get one CronRunLog
+     * const cronRunLog = await prisma.cronRunLog.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends CronRunLogFindFirstOrThrowArgs>(args?: SelectSubset<T, CronRunLogFindFirstOrThrowArgs<ExtArgs>>): Prisma__CronRunLogClient<$Result.GetResult<Prisma.$CronRunLogPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more CronRunLogs that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CronRunLogFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all CronRunLogs
+     * const cronRunLogs = await prisma.cronRunLog.findMany()
+     * 
+     * // Get first 10 CronRunLogs
+     * const cronRunLogs = await prisma.cronRunLog.findMany({ take: 10 })
+     * 
+     * // Only select the `runId`
+     * const cronRunLogWithRunIdOnly = await prisma.cronRunLog.findMany({ select: { runId: true } })
+     * 
+     */
+    findMany<T extends CronRunLogFindManyArgs>(args?: SelectSubset<T, CronRunLogFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CronRunLogPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a CronRunLog.
+     * @param {CronRunLogCreateArgs} args - Arguments to create a CronRunLog.
+     * @example
+     * // Create one CronRunLog
+     * const CronRunLog = await prisma.cronRunLog.create({
+     *   data: {
+     *     // ... data to create a CronRunLog
+     *   }
+     * })
+     * 
+     */
+    create<T extends CronRunLogCreateArgs>(args: SelectSubset<T, CronRunLogCreateArgs<ExtArgs>>): Prisma__CronRunLogClient<$Result.GetResult<Prisma.$CronRunLogPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many CronRunLogs.
+     * @param {CronRunLogCreateManyArgs} args - Arguments to create many CronRunLogs.
+     * @example
+     * // Create many CronRunLogs
+     * const cronRunLog = await prisma.cronRunLog.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends CronRunLogCreateManyArgs>(args?: SelectSubset<T, CronRunLogCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many CronRunLogs and returns the data saved in the database.
+     * @param {CronRunLogCreateManyAndReturnArgs} args - Arguments to create many CronRunLogs.
+     * @example
+     * // Create many CronRunLogs
+     * const cronRunLog = await prisma.cronRunLog.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many CronRunLogs and only return the `runId`
+     * const cronRunLogWithRunIdOnly = await prisma.cronRunLog.createManyAndReturn({
+     *   select: { runId: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends CronRunLogCreateManyAndReturnArgs>(args?: SelectSubset<T, CronRunLogCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CronRunLogPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a CronRunLog.
+     * @param {CronRunLogDeleteArgs} args - Arguments to delete one CronRunLog.
+     * @example
+     * // Delete one CronRunLog
+     * const CronRunLog = await prisma.cronRunLog.delete({
+     *   where: {
+     *     // ... filter to delete one CronRunLog
+     *   }
+     * })
+     * 
+     */
+    delete<T extends CronRunLogDeleteArgs>(args: SelectSubset<T, CronRunLogDeleteArgs<ExtArgs>>): Prisma__CronRunLogClient<$Result.GetResult<Prisma.$CronRunLogPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one CronRunLog.
+     * @param {CronRunLogUpdateArgs} args - Arguments to update one CronRunLog.
+     * @example
+     * // Update one CronRunLog
+     * const cronRunLog = await prisma.cronRunLog.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends CronRunLogUpdateArgs>(args: SelectSubset<T, CronRunLogUpdateArgs<ExtArgs>>): Prisma__CronRunLogClient<$Result.GetResult<Prisma.$CronRunLogPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more CronRunLogs.
+     * @param {CronRunLogDeleteManyArgs} args - Arguments to filter CronRunLogs to delete.
+     * @example
+     * // Delete a few CronRunLogs
+     * const { count } = await prisma.cronRunLog.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends CronRunLogDeleteManyArgs>(args?: SelectSubset<T, CronRunLogDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more CronRunLogs.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CronRunLogUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many CronRunLogs
+     * const cronRunLog = await prisma.cronRunLog.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends CronRunLogUpdateManyArgs>(args: SelectSubset<T, CronRunLogUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more CronRunLogs and returns the data updated in the database.
+     * @param {CronRunLogUpdateManyAndReturnArgs} args - Arguments to update many CronRunLogs.
+     * @example
+     * // Update many CronRunLogs
+     * const cronRunLog = await prisma.cronRunLog.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more CronRunLogs and only return the `runId`
+     * const cronRunLogWithRunIdOnly = await prisma.cronRunLog.updateManyAndReturn({
+     *   select: { runId: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends CronRunLogUpdateManyAndReturnArgs>(args: SelectSubset<T, CronRunLogUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CronRunLogPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one CronRunLog.
+     * @param {CronRunLogUpsertArgs} args - Arguments to update or create a CronRunLog.
+     * @example
+     * // Update or create a CronRunLog
+     * const cronRunLog = await prisma.cronRunLog.upsert({
+     *   create: {
+     *     // ... data to create a CronRunLog
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the CronRunLog we want to update
+     *   }
+     * })
+     */
+    upsert<T extends CronRunLogUpsertArgs>(args: SelectSubset<T, CronRunLogUpsertArgs<ExtArgs>>): Prisma__CronRunLogClient<$Result.GetResult<Prisma.$CronRunLogPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of CronRunLogs.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CronRunLogCountArgs} args - Arguments to filter CronRunLogs to count.
+     * @example
+     * // Count the number of CronRunLogs
+     * const count = await prisma.cronRunLog.count({
+     *   where: {
+     *     // ... the filter for the CronRunLogs we want to count
+     *   }
+     * })
+    **/
+    count<T extends CronRunLogCountArgs>(
+      args?: Subset<T, CronRunLogCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], CronRunLogCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a CronRunLog.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CronRunLogAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends CronRunLogAggregateArgs>(args: Subset<T, CronRunLogAggregateArgs>): Prisma.PrismaPromise<GetCronRunLogAggregateType<T>>
+
+    /**
+     * Group by CronRunLog.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CronRunLogGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends CronRunLogGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: CronRunLogGroupByArgs['orderBy'] }
+        : { orderBy?: CronRunLogGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, CronRunLogGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetCronRunLogGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the CronRunLog model
+   */
+  readonly fields: CronRunLogFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for CronRunLog.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__CronRunLogClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the CronRunLog model
+   */
+  interface CronRunLogFieldRefs {
+    readonly runId: FieldRef<"CronRunLog", 'String'>
+    readonly jobName: FieldRef<"CronRunLog", 'String'>
+    readonly tradeDate: FieldRef<"CronRunLog", 'DateTime'>
+    readonly status: FieldRef<"CronRunLog", 'String'>
+    readonly startedAt: FieldRef<"CronRunLog", 'DateTime'>
+    readonly finishedAt: FieldRef<"CronRunLog", 'DateTime'>
+    readonly durationMs: FieldRef<"CronRunLog", 'Int'>
+    readonly errorMsg: FieldRef<"CronRunLog", 'String'>
+    readonly metadata: FieldRef<"CronRunLog", 'Json'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * CronRunLog findUnique
+   */
+  export type CronRunLogFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CronRunLog
+     */
+    select?: CronRunLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CronRunLog
+     */
+    omit?: CronRunLogOmit<ExtArgs> | null
+    /**
+     * Filter, which CronRunLog to fetch.
+     */
+    where: CronRunLogWhereUniqueInput
+  }
+
+  /**
+   * CronRunLog findUniqueOrThrow
+   */
+  export type CronRunLogFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CronRunLog
+     */
+    select?: CronRunLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CronRunLog
+     */
+    omit?: CronRunLogOmit<ExtArgs> | null
+    /**
+     * Filter, which CronRunLog to fetch.
+     */
+    where: CronRunLogWhereUniqueInput
+  }
+
+  /**
+   * CronRunLog findFirst
+   */
+  export type CronRunLogFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CronRunLog
+     */
+    select?: CronRunLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CronRunLog
+     */
+    omit?: CronRunLogOmit<ExtArgs> | null
+    /**
+     * Filter, which CronRunLog to fetch.
+     */
+    where?: CronRunLogWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of CronRunLogs to fetch.
+     */
+    orderBy?: CronRunLogOrderByWithRelationInput | CronRunLogOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for CronRunLogs.
+     */
+    cursor?: CronRunLogWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` CronRunLogs from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` CronRunLogs.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of CronRunLogs.
+     */
+    distinct?: CronRunLogScalarFieldEnum | CronRunLogScalarFieldEnum[]
+  }
+
+  /**
+   * CronRunLog findFirstOrThrow
+   */
+  export type CronRunLogFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CronRunLog
+     */
+    select?: CronRunLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CronRunLog
+     */
+    omit?: CronRunLogOmit<ExtArgs> | null
+    /**
+     * Filter, which CronRunLog to fetch.
+     */
+    where?: CronRunLogWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of CronRunLogs to fetch.
+     */
+    orderBy?: CronRunLogOrderByWithRelationInput | CronRunLogOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for CronRunLogs.
+     */
+    cursor?: CronRunLogWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` CronRunLogs from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` CronRunLogs.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of CronRunLogs.
+     */
+    distinct?: CronRunLogScalarFieldEnum | CronRunLogScalarFieldEnum[]
+  }
+
+  /**
+   * CronRunLog findMany
+   */
+  export type CronRunLogFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CronRunLog
+     */
+    select?: CronRunLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CronRunLog
+     */
+    omit?: CronRunLogOmit<ExtArgs> | null
+    /**
+     * Filter, which CronRunLogs to fetch.
+     */
+    where?: CronRunLogWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of CronRunLogs to fetch.
+     */
+    orderBy?: CronRunLogOrderByWithRelationInput | CronRunLogOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing CronRunLogs.
+     */
+    cursor?: CronRunLogWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` CronRunLogs from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` CronRunLogs.
+     */
+    skip?: number
+    distinct?: CronRunLogScalarFieldEnum | CronRunLogScalarFieldEnum[]
+  }
+
+  /**
+   * CronRunLog create
+   */
+  export type CronRunLogCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CronRunLog
+     */
+    select?: CronRunLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CronRunLog
+     */
+    omit?: CronRunLogOmit<ExtArgs> | null
+    /**
+     * The data needed to create a CronRunLog.
+     */
+    data: XOR<CronRunLogCreateInput, CronRunLogUncheckedCreateInput>
+  }
+
+  /**
+   * CronRunLog createMany
+   */
+  export type CronRunLogCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many CronRunLogs.
+     */
+    data: CronRunLogCreateManyInput | CronRunLogCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * CronRunLog createManyAndReturn
+   */
+  export type CronRunLogCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CronRunLog
+     */
+    select?: CronRunLogSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the CronRunLog
+     */
+    omit?: CronRunLogOmit<ExtArgs> | null
+    /**
+     * The data used to create many CronRunLogs.
+     */
+    data: CronRunLogCreateManyInput | CronRunLogCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * CronRunLog update
+   */
+  export type CronRunLogUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CronRunLog
+     */
+    select?: CronRunLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CronRunLog
+     */
+    omit?: CronRunLogOmit<ExtArgs> | null
+    /**
+     * The data needed to update a CronRunLog.
+     */
+    data: XOR<CronRunLogUpdateInput, CronRunLogUncheckedUpdateInput>
+    /**
+     * Choose, which CronRunLog to update.
+     */
+    where: CronRunLogWhereUniqueInput
+  }
+
+  /**
+   * CronRunLog updateMany
+   */
+  export type CronRunLogUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update CronRunLogs.
+     */
+    data: XOR<CronRunLogUpdateManyMutationInput, CronRunLogUncheckedUpdateManyInput>
+    /**
+     * Filter which CronRunLogs to update
+     */
+    where?: CronRunLogWhereInput
+    /**
+     * Limit how many CronRunLogs to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * CronRunLog updateManyAndReturn
+   */
+  export type CronRunLogUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CronRunLog
+     */
+    select?: CronRunLogSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the CronRunLog
+     */
+    omit?: CronRunLogOmit<ExtArgs> | null
+    /**
+     * The data used to update CronRunLogs.
+     */
+    data: XOR<CronRunLogUpdateManyMutationInput, CronRunLogUncheckedUpdateManyInput>
+    /**
+     * Filter which CronRunLogs to update
+     */
+    where?: CronRunLogWhereInput
+    /**
+     * Limit how many CronRunLogs to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * CronRunLog upsert
+   */
+  export type CronRunLogUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CronRunLog
+     */
+    select?: CronRunLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CronRunLog
+     */
+    omit?: CronRunLogOmit<ExtArgs> | null
+    /**
+     * The filter to search for the CronRunLog to update in case it exists.
+     */
+    where: CronRunLogWhereUniqueInput
+    /**
+     * In case the CronRunLog found by the `where` argument doesn't exist, create a new CronRunLog with this data.
+     */
+    create: XOR<CronRunLogCreateInput, CronRunLogUncheckedCreateInput>
+    /**
+     * In case the CronRunLog was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<CronRunLogUpdateInput, CronRunLogUncheckedUpdateInput>
+  }
+
+  /**
+   * CronRunLog delete
+   */
+  export type CronRunLogDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CronRunLog
+     */
+    select?: CronRunLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CronRunLog
+     */
+    omit?: CronRunLogOmit<ExtArgs> | null
+    /**
+     * Filter which CronRunLog to delete.
+     */
+    where: CronRunLogWhereUniqueInput
+  }
+
+  /**
+   * CronRunLog deleteMany
+   */
+  export type CronRunLogDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which CronRunLogs to delete
+     */
+    where?: CronRunLogWhereInput
+    /**
+     * Limit how many CronRunLogs to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * CronRunLog without action
+   */
+  export type CronRunLogDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CronRunLog
+     */
+    select?: CronRunLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CronRunLog
+     */
+    omit?: CronRunLogOmit<ExtArgs> | null
+  }
+
+
+  /**
    * Model UserSubscription
    */
 
@@ -31104,6 +32353,7 @@ export namespace Prisma {
     corpCode: 'corpCode',
     listedShares: 'listedShares',
     businessInfo: 'businessInfo',
+    tradingState: 'tradingState',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt',
     deletedAt: 'deletedAt'
@@ -31271,6 +32521,10 @@ export namespace Prisma {
     volume: 'volume',
     tradingValue: 'tradingValue',
     prevDayCompare: 'prevDayCompare',
+    adjOpenPrice: 'adjOpenPrice',
+    adjHighPrice: 'adjHighPrice',
+    adjLowPrice: 'adjLowPrice',
+    adjClosePrice: 'adjClosePrice',
     createdAt: 'createdAt'
   };
 
@@ -31384,6 +32638,21 @@ export namespace Prisma {
   };
 
   export type StockDailyMetricsScalarFieldEnum = (typeof StockDailyMetricsScalarFieldEnum)[keyof typeof StockDailyMetricsScalarFieldEnum]
+
+
+  export const CronRunLogScalarFieldEnum: {
+    runId: 'runId',
+    jobName: 'jobName',
+    tradeDate: 'tradeDate',
+    status: 'status',
+    startedAt: 'startedAt',
+    finishedAt: 'finishedAt',
+    durationMs: 'durationMs',
+    errorMsg: 'errorMsg',
+    metadata: 'metadata'
+  };
+
+  export type CronRunLogScalarFieldEnum = (typeof CronRunLogScalarFieldEnum)[keyof typeof CronRunLogScalarFieldEnum]
 
 
   export const UserSubscriptionScalarFieldEnum: {
@@ -31937,6 +33206,7 @@ export namespace Prisma {
     corpCode?: StringNullableFilter<"Company"> | string | null
     listedShares?: BigIntNullableFilter<"Company"> | bigint | number | null
     businessInfo?: JsonNullableFilter<"Company">
+    tradingState?: StringNullableFilter<"Company"> | string | null
     createdAt?: DateTimeFilter<"Company"> | Date | string
     updatedAt?: DateTimeFilter<"Company"> | Date | string
     deletedAt?: DateTimeNullableFilter<"Company"> | Date | string | null
@@ -31954,6 +33224,7 @@ export namespace Prisma {
     corpCode?: SortOrderInput | SortOrder
     listedShares?: SortOrderInput | SortOrder
     businessInfo?: SortOrderInput | SortOrder
+    tradingState?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     deletedAt?: SortOrderInput | SortOrder
@@ -31975,6 +33246,7 @@ export namespace Prisma {
     corpCode?: StringNullableFilter<"Company"> | string | null
     listedShares?: BigIntNullableFilter<"Company"> | bigint | number | null
     businessInfo?: JsonNullableFilter<"Company">
+    tradingState?: StringNullableFilter<"Company"> | string | null
     createdAt?: DateTimeFilter<"Company"> | Date | string
     updatedAt?: DateTimeFilter<"Company"> | Date | string
     deletedAt?: DateTimeNullableFilter<"Company"> | Date | string | null
@@ -31992,6 +33264,7 @@ export namespace Prisma {
     corpCode?: SortOrderInput | SortOrder
     listedShares?: SortOrderInput | SortOrder
     businessInfo?: SortOrderInput | SortOrder
+    tradingState?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     deletedAt?: SortOrderInput | SortOrder
@@ -32014,6 +33287,7 @@ export namespace Prisma {
     corpCode?: StringNullableWithAggregatesFilter<"Company"> | string | null
     listedShares?: BigIntNullableWithAggregatesFilter<"Company"> | bigint | number | null
     businessInfo?: JsonNullableWithAggregatesFilter<"Company">
+    tradingState?: StringNullableWithAggregatesFilter<"Company"> | string | null
     createdAt?: DateTimeWithAggregatesFilter<"Company"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"Company"> | Date | string
     deletedAt?: DateTimeNullableWithAggregatesFilter<"Company"> | Date | string | null
@@ -32795,6 +34069,10 @@ export namespace Prisma {
     volume?: BigIntFilter<"StockCandle"> | bigint | number
     tradingValue?: BigIntNullableFilter<"StockCandle"> | bigint | number | null
     prevDayCompare?: DecimalNullableFilter<"StockCandle"> | Decimal | DecimalJsLike | number | string | null
+    adjOpenPrice?: DecimalNullableFilter<"StockCandle"> | Decimal | DecimalJsLike | number | string | null
+    adjHighPrice?: DecimalNullableFilter<"StockCandle"> | Decimal | DecimalJsLike | number | string | null
+    adjLowPrice?: DecimalNullableFilter<"StockCandle"> | Decimal | DecimalJsLike | number | string | null
+    adjClosePrice?: DecimalNullableFilter<"StockCandle"> | Decimal | DecimalJsLike | number | string | null
     createdAt?: DateTimeFilter<"StockCandle"> | Date | string
   }
 
@@ -32810,6 +34088,10 @@ export namespace Prisma {
     volume?: SortOrder
     tradingValue?: SortOrderInput | SortOrder
     prevDayCompare?: SortOrderInput | SortOrder
+    adjOpenPrice?: SortOrderInput | SortOrder
+    adjHighPrice?: SortOrderInput | SortOrder
+    adjLowPrice?: SortOrderInput | SortOrder
+    adjClosePrice?: SortOrderInput | SortOrder
     createdAt?: SortOrder
   }
 
@@ -32829,6 +34111,10 @@ export namespace Prisma {
     volume?: BigIntFilter<"StockCandle"> | bigint | number
     tradingValue?: BigIntNullableFilter<"StockCandle"> | bigint | number | null
     prevDayCompare?: DecimalNullableFilter<"StockCandle"> | Decimal | DecimalJsLike | number | string | null
+    adjOpenPrice?: DecimalNullableFilter<"StockCandle"> | Decimal | DecimalJsLike | number | string | null
+    adjHighPrice?: DecimalNullableFilter<"StockCandle"> | Decimal | DecimalJsLike | number | string | null
+    adjLowPrice?: DecimalNullableFilter<"StockCandle"> | Decimal | DecimalJsLike | number | string | null
+    adjClosePrice?: DecimalNullableFilter<"StockCandle"> | Decimal | DecimalJsLike | number | string | null
     createdAt?: DateTimeFilter<"StockCandle"> | Date | string
   }, "candleId" | "stockCode_candleType_candleTime">
 
@@ -32844,6 +34130,10 @@ export namespace Prisma {
     volume?: SortOrder
     tradingValue?: SortOrderInput | SortOrder
     prevDayCompare?: SortOrderInput | SortOrder
+    adjOpenPrice?: SortOrderInput | SortOrder
+    adjHighPrice?: SortOrderInput | SortOrder
+    adjLowPrice?: SortOrderInput | SortOrder
+    adjClosePrice?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     _count?: StockCandleCountOrderByAggregateInput
     _avg?: StockCandleAvgOrderByAggregateInput
@@ -32867,6 +34157,10 @@ export namespace Prisma {
     volume?: BigIntWithAggregatesFilter<"StockCandle"> | bigint | number
     tradingValue?: BigIntNullableWithAggregatesFilter<"StockCandle"> | bigint | number | null
     prevDayCompare?: DecimalNullableWithAggregatesFilter<"StockCandle"> | Decimal | DecimalJsLike | number | string | null
+    adjOpenPrice?: DecimalNullableWithAggregatesFilter<"StockCandle"> | Decimal | DecimalJsLike | number | string | null
+    adjHighPrice?: DecimalNullableWithAggregatesFilter<"StockCandle"> | Decimal | DecimalJsLike | number | string | null
+    adjLowPrice?: DecimalNullableWithAggregatesFilter<"StockCandle"> | Decimal | DecimalJsLike | number | string | null
+    adjClosePrice?: DecimalNullableWithAggregatesFilter<"StockCandle"> | Decimal | DecimalJsLike | number | string | null
     createdAt?: DateTimeWithAggregatesFilter<"StockCandle"> | Date | string
   }
 
@@ -33416,6 +34710,81 @@ export namespace Prisma {
     updatedAt?: DateTimeWithAggregatesFilter<"StockDailyMetrics"> | Date | string
   }
 
+  export type CronRunLogWhereInput = {
+    AND?: CronRunLogWhereInput | CronRunLogWhereInput[]
+    OR?: CronRunLogWhereInput[]
+    NOT?: CronRunLogWhereInput | CronRunLogWhereInput[]
+    runId?: UuidFilter<"CronRunLog"> | string
+    jobName?: StringFilter<"CronRunLog"> | string
+    tradeDate?: DateTimeFilter<"CronRunLog"> | Date | string
+    status?: StringFilter<"CronRunLog"> | string
+    startedAt?: DateTimeFilter<"CronRunLog"> | Date | string
+    finishedAt?: DateTimeNullableFilter<"CronRunLog"> | Date | string | null
+    durationMs?: IntNullableFilter<"CronRunLog"> | number | null
+    errorMsg?: StringNullableFilter<"CronRunLog"> | string | null
+    metadata?: JsonNullableFilter<"CronRunLog">
+  }
+
+  export type CronRunLogOrderByWithRelationInput = {
+    runId?: SortOrder
+    jobName?: SortOrder
+    tradeDate?: SortOrder
+    status?: SortOrder
+    startedAt?: SortOrder
+    finishedAt?: SortOrderInput | SortOrder
+    durationMs?: SortOrderInput | SortOrder
+    errorMsg?: SortOrderInput | SortOrder
+    metadata?: SortOrderInput | SortOrder
+  }
+
+  export type CronRunLogWhereUniqueInput = Prisma.AtLeast<{
+    runId?: string
+    jobName_tradeDate?: CronRunLogJobNameTradeDateCompoundUniqueInput
+    AND?: CronRunLogWhereInput | CronRunLogWhereInput[]
+    OR?: CronRunLogWhereInput[]
+    NOT?: CronRunLogWhereInput | CronRunLogWhereInput[]
+    jobName?: StringFilter<"CronRunLog"> | string
+    tradeDate?: DateTimeFilter<"CronRunLog"> | Date | string
+    status?: StringFilter<"CronRunLog"> | string
+    startedAt?: DateTimeFilter<"CronRunLog"> | Date | string
+    finishedAt?: DateTimeNullableFilter<"CronRunLog"> | Date | string | null
+    durationMs?: IntNullableFilter<"CronRunLog"> | number | null
+    errorMsg?: StringNullableFilter<"CronRunLog"> | string | null
+    metadata?: JsonNullableFilter<"CronRunLog">
+  }, "runId" | "jobName_tradeDate">
+
+  export type CronRunLogOrderByWithAggregationInput = {
+    runId?: SortOrder
+    jobName?: SortOrder
+    tradeDate?: SortOrder
+    status?: SortOrder
+    startedAt?: SortOrder
+    finishedAt?: SortOrderInput | SortOrder
+    durationMs?: SortOrderInput | SortOrder
+    errorMsg?: SortOrderInput | SortOrder
+    metadata?: SortOrderInput | SortOrder
+    _count?: CronRunLogCountOrderByAggregateInput
+    _avg?: CronRunLogAvgOrderByAggregateInput
+    _max?: CronRunLogMaxOrderByAggregateInput
+    _min?: CronRunLogMinOrderByAggregateInput
+    _sum?: CronRunLogSumOrderByAggregateInput
+  }
+
+  export type CronRunLogScalarWhereWithAggregatesInput = {
+    AND?: CronRunLogScalarWhereWithAggregatesInput | CronRunLogScalarWhereWithAggregatesInput[]
+    OR?: CronRunLogScalarWhereWithAggregatesInput[]
+    NOT?: CronRunLogScalarWhereWithAggregatesInput | CronRunLogScalarWhereWithAggregatesInput[]
+    runId?: UuidWithAggregatesFilter<"CronRunLog"> | string
+    jobName?: StringWithAggregatesFilter<"CronRunLog"> | string
+    tradeDate?: DateTimeWithAggregatesFilter<"CronRunLog"> | Date | string
+    status?: StringWithAggregatesFilter<"CronRunLog"> | string
+    startedAt?: DateTimeWithAggregatesFilter<"CronRunLog"> | Date | string
+    finishedAt?: DateTimeNullableWithAggregatesFilter<"CronRunLog"> | Date | string | null
+    durationMs?: IntNullableWithAggregatesFilter<"CronRunLog"> | number | null
+    errorMsg?: StringNullableWithAggregatesFilter<"CronRunLog"> | string | null
+    metadata?: JsonNullableWithAggregatesFilter<"CronRunLog">
+  }
+
   export type UserSubscriptionWhereInput = {
     AND?: UserSubscriptionWhereInput | UserSubscriptionWhereInput[]
     OR?: UserSubscriptionWhereInput[]
@@ -33953,6 +35322,7 @@ export namespace Prisma {
     corpCode?: string | null
     listedShares?: bigint | number | null
     businessInfo?: NullableJsonNullValueInput | InputJsonValue
+    tradingState?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     deletedAt?: Date | string | null
@@ -33970,6 +35340,7 @@ export namespace Prisma {
     corpCode?: string | null
     listedShares?: bigint | number | null
     businessInfo?: NullableJsonNullValueInput | InputJsonValue
+    tradingState?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     deletedAt?: Date | string | null
@@ -33985,6 +35356,7 @@ export namespace Prisma {
     corpCode?: NullableStringFieldUpdateOperationsInput | string | null
     listedShares?: NullableBigIntFieldUpdateOperationsInput | bigint | number | null
     businessInfo?: NullableJsonNullValueInput | InputJsonValue
+    tradingState?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -34002,6 +35374,7 @@ export namespace Prisma {
     corpCode?: NullableStringFieldUpdateOperationsInput | string | null
     listedShares?: NullableBigIntFieldUpdateOperationsInput | bigint | number | null
     businessInfo?: NullableJsonNullValueInput | InputJsonValue
+    tradingState?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -34018,6 +35391,7 @@ export namespace Prisma {
     corpCode?: string | null
     listedShares?: bigint | number | null
     businessInfo?: NullableJsonNullValueInput | InputJsonValue
+    tradingState?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     deletedAt?: Date | string | null
@@ -34031,6 +35405,7 @@ export namespace Prisma {
     corpCode?: NullableStringFieldUpdateOperationsInput | string | null
     listedShares?: NullableBigIntFieldUpdateOperationsInput | bigint | number | null
     businessInfo?: NullableJsonNullValueInput | InputJsonValue
+    tradingState?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -34045,6 +35420,7 @@ export namespace Prisma {
     corpCode?: NullableStringFieldUpdateOperationsInput | string | null
     listedShares?: NullableBigIntFieldUpdateOperationsInput | bigint | number | null
     businessInfo?: NullableJsonNullValueInput | InputJsonValue
+    tradingState?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -34837,6 +36213,10 @@ export namespace Prisma {
     volume: bigint | number
     tradingValue?: bigint | number | null
     prevDayCompare?: Decimal | DecimalJsLike | number | string | null
+    adjOpenPrice?: Decimal | DecimalJsLike | number | string | null
+    adjHighPrice?: Decimal | DecimalJsLike | number | string | null
+    adjLowPrice?: Decimal | DecimalJsLike | number | string | null
+    adjClosePrice?: Decimal | DecimalJsLike | number | string | null
     createdAt?: Date | string
   }
 
@@ -34852,6 +36232,10 @@ export namespace Prisma {
     volume: bigint | number
     tradingValue?: bigint | number | null
     prevDayCompare?: Decimal | DecimalJsLike | number | string | null
+    adjOpenPrice?: Decimal | DecimalJsLike | number | string | null
+    adjHighPrice?: Decimal | DecimalJsLike | number | string | null
+    adjLowPrice?: Decimal | DecimalJsLike | number | string | null
+    adjClosePrice?: Decimal | DecimalJsLike | number | string | null
     createdAt?: Date | string
   }
 
@@ -34867,6 +36251,10 @@ export namespace Prisma {
     volume?: BigIntFieldUpdateOperationsInput | bigint | number
     tradingValue?: NullableBigIntFieldUpdateOperationsInput | bigint | number | null
     prevDayCompare?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    adjOpenPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    adjHighPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    adjLowPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    adjClosePrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -34882,6 +36270,10 @@ export namespace Prisma {
     volume?: BigIntFieldUpdateOperationsInput | bigint | number
     tradingValue?: NullableBigIntFieldUpdateOperationsInput | bigint | number | null
     prevDayCompare?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    adjOpenPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    adjHighPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    adjLowPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    adjClosePrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -34897,6 +36289,10 @@ export namespace Prisma {
     volume: bigint | number
     tradingValue?: bigint | number | null
     prevDayCompare?: Decimal | DecimalJsLike | number | string | null
+    adjOpenPrice?: Decimal | DecimalJsLike | number | string | null
+    adjHighPrice?: Decimal | DecimalJsLike | number | string | null
+    adjLowPrice?: Decimal | DecimalJsLike | number | string | null
+    adjClosePrice?: Decimal | DecimalJsLike | number | string | null
     createdAt?: Date | string
   }
 
@@ -34912,6 +36308,10 @@ export namespace Prisma {
     volume?: BigIntFieldUpdateOperationsInput | bigint | number
     tradingValue?: NullableBigIntFieldUpdateOperationsInput | bigint | number | null
     prevDayCompare?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    adjOpenPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    adjHighPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    adjLowPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    adjClosePrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -34927,6 +36327,10 @@ export namespace Prisma {
     volume?: BigIntFieldUpdateOperationsInput | bigint | number
     tradingValue?: NullableBigIntFieldUpdateOperationsInput | bigint | number | null
     prevDayCompare?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    adjOpenPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    adjHighPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    adjLowPrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    adjClosePrice?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -35585,6 +36989,90 @@ export namespace Prisma {
     strengthContinuationDays?: NullableIntFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type CronRunLogCreateInput = {
+    runId?: string
+    jobName: string
+    tradeDate: Date | string
+    status: string
+    startedAt?: Date | string
+    finishedAt?: Date | string | null
+    durationMs?: number | null
+    errorMsg?: string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+  }
+
+  export type CronRunLogUncheckedCreateInput = {
+    runId?: string
+    jobName: string
+    tradeDate: Date | string
+    status: string
+    startedAt?: Date | string
+    finishedAt?: Date | string | null
+    durationMs?: number | null
+    errorMsg?: string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+  }
+
+  export type CronRunLogUpdateInput = {
+    runId?: StringFieldUpdateOperationsInput | string
+    jobName?: StringFieldUpdateOperationsInput | string
+    tradeDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    status?: StringFieldUpdateOperationsInput | string
+    startedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    finishedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    durationMs?: NullableIntFieldUpdateOperationsInput | number | null
+    errorMsg?: NullableStringFieldUpdateOperationsInput | string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+  }
+
+  export type CronRunLogUncheckedUpdateInput = {
+    runId?: StringFieldUpdateOperationsInput | string
+    jobName?: StringFieldUpdateOperationsInput | string
+    tradeDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    status?: StringFieldUpdateOperationsInput | string
+    startedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    finishedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    durationMs?: NullableIntFieldUpdateOperationsInput | number | null
+    errorMsg?: NullableStringFieldUpdateOperationsInput | string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+  }
+
+  export type CronRunLogCreateManyInput = {
+    runId?: string
+    jobName: string
+    tradeDate: Date | string
+    status: string
+    startedAt?: Date | string
+    finishedAt?: Date | string | null
+    durationMs?: number | null
+    errorMsg?: string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+  }
+
+  export type CronRunLogUpdateManyMutationInput = {
+    runId?: StringFieldUpdateOperationsInput | string
+    jobName?: StringFieldUpdateOperationsInput | string
+    tradeDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    status?: StringFieldUpdateOperationsInput | string
+    startedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    finishedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    durationMs?: NullableIntFieldUpdateOperationsInput | number | null
+    errorMsg?: NullableStringFieldUpdateOperationsInput | string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+  }
+
+  export type CronRunLogUncheckedUpdateManyInput = {
+    runId?: StringFieldUpdateOperationsInput | string
+    jobName?: StringFieldUpdateOperationsInput | string
+    tradeDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    status?: StringFieldUpdateOperationsInput | string
+    startedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    finishedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    durationMs?: NullableIntFieldUpdateOperationsInput | number | null
+    errorMsg?: NullableStringFieldUpdateOperationsInput | string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
   }
 
   export type UserSubscriptionCreateInput = {
@@ -36442,6 +37930,7 @@ export namespace Prisma {
     corpCode?: SortOrder
     listedShares?: SortOrder
     businessInfo?: SortOrder
+    tradingState?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     deletedAt?: SortOrder
@@ -36460,6 +37949,7 @@ export namespace Prisma {
     themeCode?: SortOrder
     corpCode?: SortOrder
     listedShares?: SortOrder
+    tradingState?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     deletedAt?: SortOrder
@@ -36473,6 +37963,7 @@ export namespace Prisma {
     themeCode?: SortOrder
     corpCode?: SortOrder
     listedShares?: SortOrder
+    tradingState?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     deletedAt?: SortOrder
@@ -37246,6 +38737,10 @@ export namespace Prisma {
     volume?: SortOrder
     tradingValue?: SortOrder
     prevDayCompare?: SortOrder
+    adjOpenPrice?: SortOrder
+    adjHighPrice?: SortOrder
+    adjLowPrice?: SortOrder
+    adjClosePrice?: SortOrder
     createdAt?: SortOrder
   }
 
@@ -37257,6 +38752,10 @@ export namespace Prisma {
     volume?: SortOrder
     tradingValue?: SortOrder
     prevDayCompare?: SortOrder
+    adjOpenPrice?: SortOrder
+    adjHighPrice?: SortOrder
+    adjLowPrice?: SortOrder
+    adjClosePrice?: SortOrder
   }
 
   export type StockCandleMaxOrderByAggregateInput = {
@@ -37271,6 +38770,10 @@ export namespace Prisma {
     volume?: SortOrder
     tradingValue?: SortOrder
     prevDayCompare?: SortOrder
+    adjOpenPrice?: SortOrder
+    adjHighPrice?: SortOrder
+    adjLowPrice?: SortOrder
+    adjClosePrice?: SortOrder
     createdAt?: SortOrder
   }
 
@@ -37286,6 +38789,10 @@ export namespace Prisma {
     volume?: SortOrder
     tradingValue?: SortOrder
     prevDayCompare?: SortOrder
+    adjOpenPrice?: SortOrder
+    adjHighPrice?: SortOrder
+    adjLowPrice?: SortOrder
+    adjClosePrice?: SortOrder
     createdAt?: SortOrder
   }
 
@@ -37297,6 +38804,10 @@ export namespace Prisma {
     volume?: SortOrder
     tradingValue?: SortOrder
     prevDayCompare?: SortOrder
+    adjOpenPrice?: SortOrder
+    adjHighPrice?: SortOrder
+    adjLowPrice?: SortOrder
+    adjClosePrice?: SortOrder
   }
 
   export type DecimalNullableWithAggregatesFilter<$PrismaModel = never> = {
@@ -37745,6 +39256,53 @@ export namespace Prisma {
     tradingValue?: SortOrder
     ma50?: SortOrder
     strengthContinuationDays?: SortOrder
+  }
+
+  export type CronRunLogJobNameTradeDateCompoundUniqueInput = {
+    jobName: string
+    tradeDate: Date | string
+  }
+
+  export type CronRunLogCountOrderByAggregateInput = {
+    runId?: SortOrder
+    jobName?: SortOrder
+    tradeDate?: SortOrder
+    status?: SortOrder
+    startedAt?: SortOrder
+    finishedAt?: SortOrder
+    durationMs?: SortOrder
+    errorMsg?: SortOrder
+    metadata?: SortOrder
+  }
+
+  export type CronRunLogAvgOrderByAggregateInput = {
+    durationMs?: SortOrder
+  }
+
+  export type CronRunLogMaxOrderByAggregateInput = {
+    runId?: SortOrder
+    jobName?: SortOrder
+    tradeDate?: SortOrder
+    status?: SortOrder
+    startedAt?: SortOrder
+    finishedAt?: SortOrder
+    durationMs?: SortOrder
+    errorMsg?: SortOrder
+  }
+
+  export type CronRunLogMinOrderByAggregateInput = {
+    runId?: SortOrder
+    jobName?: SortOrder
+    tradeDate?: SortOrder
+    status?: SortOrder
+    startedAt?: SortOrder
+    finishedAt?: SortOrder
+    durationMs?: SortOrder
+    errorMsg?: SortOrder
+  }
+
+  export type CronRunLogSumOrderByAggregateInput = {
+    durationMs?: SortOrder
   }
 
   export type EnumSubscriptionStatusFilter<$PrismaModel = never> = {
@@ -39648,6 +41206,7 @@ export namespace Prisma {
     corpCode?: string | null
     listedShares?: bigint | number | null
     businessInfo?: NullableJsonNullValueInput | InputJsonValue
+    tradingState?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     deletedAt?: Date | string | null
@@ -39663,6 +41222,7 @@ export namespace Prisma {
     corpCode?: string | null
     listedShares?: bigint | number | null
     businessInfo?: NullableJsonNullValueInput | InputJsonValue
+    tradingState?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     deletedAt?: Date | string | null
@@ -39770,6 +41330,7 @@ export namespace Prisma {
     corpCode?: StringNullableFilter<"Company"> | string | null
     listedShares?: BigIntNullableFilter<"Company"> | bigint | number | null
     businessInfo?: JsonNullableFilter<"Company">
+    tradingState?: StringNullableFilter<"Company"> | string | null
     createdAt?: DateTimeFilter<"Company"> | Date | string
     updatedAt?: DateTimeFilter<"Company"> | Date | string
     deletedAt?: DateTimeNullableFilter<"Company"> | Date | string | null
@@ -40566,6 +42127,7 @@ export namespace Prisma {
     corpCode?: string | null
     listedShares?: bigint | number | null
     businessInfo?: NullableJsonNullValueInput | InputJsonValue
+    tradingState?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     deletedAt?: Date | string | null
@@ -40582,6 +42144,7 @@ export namespace Prisma {
     corpCode?: string | null
     listedShares?: bigint | number | null
     businessInfo?: NullableJsonNullValueInput | InputJsonValue
+    tradingState?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     deletedAt?: Date | string | null
@@ -40693,6 +42256,7 @@ export namespace Prisma {
     corpCode?: NullableStringFieldUpdateOperationsInput | string | null
     listedShares?: NullableBigIntFieldUpdateOperationsInput | bigint | number | null
     businessInfo?: NullableJsonNullValueInput | InputJsonValue
+    tradingState?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -40709,6 +42273,7 @@ export namespace Prisma {
     corpCode?: NullableStringFieldUpdateOperationsInput | string | null
     listedShares?: NullableBigIntFieldUpdateOperationsInput | bigint | number | null
     businessInfo?: NullableJsonNullValueInput | InputJsonValue
+    tradingState?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -41382,6 +42947,7 @@ export namespace Prisma {
     corpCode?: string | null
     listedShares?: bigint | number | null
     businessInfo?: NullableJsonNullValueInput | InputJsonValue
+    tradingState?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     deletedAt?: Date | string | null
@@ -41398,6 +42964,7 @@ export namespace Prisma {
     corpCode?: string | null
     listedShares?: bigint | number | null
     businessInfo?: NullableJsonNullValueInput | InputJsonValue
+    tradingState?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     deletedAt?: Date | string | null
@@ -41428,6 +42995,7 @@ export namespace Prisma {
     corpCode?: NullableStringFieldUpdateOperationsInput | string | null
     listedShares?: NullableBigIntFieldUpdateOperationsInput | bigint | number | null
     businessInfo?: NullableJsonNullValueInput | InputJsonValue
+    tradingState?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -41444,6 +43012,7 @@ export namespace Prisma {
     corpCode?: NullableStringFieldUpdateOperationsInput | string | null
     listedShares?: NullableBigIntFieldUpdateOperationsInput | bigint | number | null
     businessInfo?: NullableJsonNullValueInput | InputJsonValue
+    tradingState?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -42112,6 +43681,7 @@ export namespace Prisma {
     corpCode?: string | null
     listedShares?: bigint | number | null
     businessInfo?: NullableJsonNullValueInput | InputJsonValue
+    tradingState?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     deletedAt?: Date | string | null
@@ -42146,6 +43716,7 @@ export namespace Prisma {
     corpCode?: NullableStringFieldUpdateOperationsInput | string | null
     listedShares?: NullableBigIntFieldUpdateOperationsInput | bigint | number | null
     businessInfo?: NullableJsonNullValueInput | InputJsonValue
+    tradingState?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -42161,6 +43732,7 @@ export namespace Prisma {
     corpCode?: NullableStringFieldUpdateOperationsInput | string | null
     listedShares?: NullableBigIntFieldUpdateOperationsInput | bigint | number | null
     businessInfo?: NullableJsonNullValueInput | InputJsonValue
+    tradingState?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -42176,6 +43748,7 @@ export namespace Prisma {
     corpCode?: NullableStringFieldUpdateOperationsInput | string | null
     listedShares?: NullableBigIntFieldUpdateOperationsInput | bigint | number | null
     businessInfo?: NullableJsonNullValueInput | InputJsonValue
+    tradingState?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null

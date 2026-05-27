@@ -100,6 +100,50 @@ export interface KiwoomMonthCandleResponse {
   return_msg: string;
 }
 
+// 차트 조회 응답 (연봉)
+export interface KiwoomYearCandleResponse {
+  stk_cd: string;
+  stk_yr_pole_chart_qry: KiwoomDayCandleData[];
+  return_code: number;
+  return_msg: string;
+}
+
+// 당일전일체결 데이터 (ka10084, /api/dostk/stkinfo)
+export interface KiwoomTodayPreviousExecutionData {
+  tm: string;
+  cur_prc: string;
+  pred_pre: string;
+  pre_rt: string;
+  pri_sel_bid_unit: string;
+  pri_buy_bid_unit: string;
+  cntr_trde_qty: string;
+  sign: string;
+  acc_trde_qty: string;
+  acc_trde_prica: string;
+  cntr_str: string;
+  stex_tp?: string;
+}
+
+export interface KiwoomTodayPreviousExecutionResponse {
+  tdy_pred_cntr: KiwoomTodayPreviousExecutionData[];
+  return_code?: number;
+  return_msg?: string;
+  returnCode?: number;
+  returnMsg?: string;
+}
+
+// 종목기본정보 (ka10001, /api/dostk/stkinfo)
+export interface KiwoomStockBasicInfoResponse {
+  stk_cd?: string;
+  stk_nm?: string;
+  mac?: string; // 시가총액
+  return_code?: number;
+  return_msg?: string;
+  returnCode?: number;
+  returnMsg?: string;
+  [key: string]: any;
+}
+
 // 실시간 체결 데이터 (0B)
 export interface KiwoomTickData {
   '20': string; // 체결시간

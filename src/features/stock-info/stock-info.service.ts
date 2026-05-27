@@ -2,9 +2,11 @@ import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../../common/prisma/prisma.service';
 import { DartRestService } from '../../integrations/dart/dart-rest.service';
+import { KiwoomRestService } from '../../integrations/kiwoom/rest/kiwoom-rest.service';
 import axios from 'axios';
 import AdmZip = require('adm-zip');
 import * as cheerio from 'cheerio';
+import { convertOriginUrlToMediaName } from './news-media.util';
 
 // KSIC 업종코드 → 업종명 매핑 (앞자리 매칭, 긴 코드 우선)
 const KSIC_NAME: Record<string, string> = {
@@ -84,6 +86,13 @@ function getDefaultYear(): string {
   return String(new Date().getFullYear() - 1);
 }
 
+function parseNumericString(value?: string | number | null): number | null {
+  if (value == null || value === '') return null;
+  const parsed = Number(String(value).replace(/[,+\s]/g, ''));
+  if (!Number.isFinite(parsed)) return null;
+  return Math.abs(parsed);
+}
+
 export interface QuarterAmounts {
   q1: number | null;
   q2: number | null;
@@ -99,6 +108,7 @@ export class StockInfoService {
     private readonly prisma: PrismaService,
     private readonly dart: DartRestService,
     private readonly config: ConfigService,
+    private readonly kiwoomRest: KiwoomRestService,
   ) {}
 
   /**
@@ -147,7 +157,7 @@ export class StockInfoService {
   async getCompanyOverview(stockCode: string) {
     const corpCode = await this.getCorpCode(stockCode);
 
-    const [dartData, company, latestCandle] = await Promise.all([
+    const [dartData, company, latestCandle, kiwoomBasicInfo] = await Promise.all([
       this.dart.getCompanyInfo(corpCode),
       this.prisma.company.findFirst({
         where: { stockCode, deletedAt: null },
@@ -158,15 +168,21 @@ export class StockInfoService {
         orderBy: { candleTime: 'desc' },
         select: { closePrice: true },
       }),
+      this.kiwoomRest.getStockBasicInfo(stockCode).catch((error) => {
+        this.logger.warn(`Kiwoom market cap unavailable for ${stockCode}: ${error.message}`);
+        return null;
+      }),
     ]);
 
     if (dartData.status !== '000') throw new Error(`DART 기업개황 오류: ${dartData.message}`);
 
     const listedShares = company?.listedShares ?? null;
     const closePrice = latestCandle ? Number(latestCandle.closePrice) : null;
-    const marketCap = listedShares && closePrice
+    const calculatedMarketCap = listedShares && closePrice
       ? Number(listedShares) * closePrice
       : null;
+    const kiwoomMarketCap = this.extractKiwoomMarketCap(kiwoomBasicInfo);
+    const marketCap = kiwoomMarketCap ?? calculatedMarketCap;
 
     return {
       stockCode,
@@ -184,9 +200,28 @@ export class StockInfoService {
       phone: dartData.phn_no,
       listedShares: listedShares ? Number(listedShares) : null,
       marketCap,
+      marketCapSource: kiwoomMarketCap != null ? 'kiwoom' : (marketCap != null ? 'calculated' : null),
       theme: company?.theme?.themeName ?? null,
       businessInfo: company?.businessInfo ?? null,
     };
+  }
+
+  private extractKiwoomMarketCap(data: any): number | null {
+    if (!data) return null;
+
+    const raw =
+      data.mac ??
+      data.marketCap ??
+      data.market_cap ??
+      data.mkt_cap ??
+      data.mrkt_cap ??
+      data.stk_mkt_cap;
+
+    const parsed = parseNumericString(raw);
+    if (parsed == null) return null;
+
+    // 키움 ka10001의 mac은 보통 억원 단위로 내려온다.
+    return parsed * 100_000_000;
   }
 
   /**
@@ -544,11 +579,20 @@ export class StockInfoService {
       },
     });
 
+    const items = (res.data.items || []).map((item: any) => {
+      const originUrl = item.originUrl ?? item.originallink;
+      return {
+        ...item,
+        originUrl,
+        mediaName: convertOriginUrlToMediaName(originUrl),
+      };
+    });
+
     return {
       stockCode,
       companyName: company.companyName,
       total: res.data.total,
-      items: res.data.items,
+      items,
     };
   }
 
@@ -556,6 +600,9 @@ export class StockInfoService {
    * 종목정보 탭 통합 조회 (기업개황 + 손익 + 현금흐름 + 재무지표)
    */
   async getStockInfoSummary(stockCode: string, year?: string) {
+    const bsnsYear = year || getDefaultYear();
+    const emptyQuarters = { q1: null, q2: null, q3: null, q4: null };
+
     const [overview, income, cashFlow, indicators] = await Promise.allSettled([
       this.getCompanyOverview(stockCode),
       this.getIncomeStatement(stockCode, year),
@@ -566,9 +613,29 @@ export class StockInfoService {
     return {
       stockCode,
       overview: overview.status === 'fulfilled' ? overview.value : null,
-      income: income.status === 'fulfilled' ? income.value : null,
-      cashFlow: cashFlow.status === 'fulfilled' ? cashFlow.value : null,
-      indicators: indicators.status === 'fulfilled' ? indicators.value : null,
+      income: income.status === 'fulfilled' ? income.value : {
+        stockCode,
+        year: bsnsYear,
+        fsDiv: 'OFS',
+        revenue: emptyQuarters,
+        operatingIncome: emptyQuarters,
+        netIncome: emptyQuarters,
+      },
+      cashFlow: cashFlow.status === 'fulfilled' ? cashFlow.value : {
+        stockCode,
+        year: bsnsYear,
+        operatingCashFlow: emptyQuarters,
+        investingCashFlow: emptyQuarters,
+        financingCashFlow: emptyQuarters,
+      },
+      indicators: indicators.status === 'fulfilled' ? indicators.value : {
+        stockCode,
+        year: bsnsYear,
+        q1: { profitability: {}, stability: {}, activity: {} },
+        q2: { profitability: {}, stability: {}, activity: {} },
+        q3: { profitability: {}, stability: {}, activity: {} },
+        q4: { profitability: {}, stability: {}, activity: {} },
+      },
     };
   }
 }

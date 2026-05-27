@@ -1,11 +1,11 @@
-import { IsNotEmpty, IsString, MinLength, MaxLength } from 'class-validator';
+import { IsNotEmpty, IsOptional, IsString, MinLength, MaxLength } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class ChangePasswordDto {
-    @ApiProperty( { example: 'currentPassword123!', description: '현재 비밀번호' } )
+    @ApiProperty( { example: 'currentPassword123!', description: '현재 비밀번호 (임시 비밀번호 변경 시 생략 가능)' , required: false } )
+    @IsOptional()
     @IsString()
-    @IsNotEmpty( { message: '현재 비밀번호를 입력해주세요' } )
-    currentPassword: string;
+    currentPassword?: string;
 
     @ApiProperty( { example: 'newPassword123!', description: '새 비밀번호 (8자 이상)' } )
     @IsString()

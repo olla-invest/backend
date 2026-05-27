@@ -175,6 +175,7 @@ export class InitialSetupService {
           companyName: stock.name,
           stockCode: stock.code,
           marketType: mappedMarketType,
+          tradingState: stock.state || null,
         },
       });
 

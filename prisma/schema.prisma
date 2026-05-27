@@ -161,6 +161,7 @@ model Company {
   corpCode      String?    @map("corp_code") @db.VarChar(8)
   listedShares  BigInt?    @map("listed_shares")
   businessInfo  Json?      @map("business_info") @db.JsonB
+  tradingState  String?    @map("trading_state") @db.VarChar(20)
   createdAt     DateTime   @default(now()) @map("created_at")
   updatedAt   DateTime   @default(now()) @updatedAt @map("updated_at")
   deletedAt   DateTime?  @map("deleted_at")
@@ -399,20 +400,24 @@ model KiwoomToken {
   @@map("kiwoom_tokens")
 }
 
-// 14. 주식 캔들 데이터 테이블 (분봉/틱봉)
+// 14. 주식 캔들 데이터 테이블 (일봉)
 model StockCandle {
   candleId       String   @id @default(uuid()) @map("candle_id") @db.Uuid
   stockCode      String   @map("stock_code") @db.VarChar(20)
-  candleType     String   @map("candle_type") @db.VarChar(10) // '1min', '3min', '5min', '1tick', '3tick' etc
-  candleTime     DateTime @map("candle_time")
+  candleType     String   @map("candle_type") @db.VarChar(10) // 'day'
+  candleTime     DateTime @map("candle_time") @db.Date
   openPrice      Decimal  @map("open_price") @db.Decimal(15, 2)
   highPrice      Decimal  @map("high_price") @db.Decimal(15, 2)
   lowPrice       Decimal  @map("low_price") @db.Decimal(15, 2)
   closePrice     Decimal  @map("close_price") @db.Decimal(15, 2)
-  volume         BigInt
-  tradingValue   BigInt?  @map("trading_value")
-  prevDayCompare Decimal? @map("prev_day_compare") @db.Decimal(15, 2)
-  createdAt      DateTime @default(now()) @map("created_at")
+  volume              BigInt
+  tradingValue        BigInt?  @map("trading_value")
+  prevDayCompare      Decimal? @map("prev_day_compare") @db.Decimal(15, 2)
+  adjOpenPrice        Decimal? @map("adj_open_price") @db.Decimal(15, 2)   // 수정주가 시가
+  adjHighPrice        Decimal? @map("adj_high_price") @db.Decimal(15, 2)   // 수정주가 고가
+  adjLowPrice         Decimal? @map("adj_low_price") @db.Decimal(15, 2)    // 수정주가 저가
+  adjClosePrice       Decimal? @map("adj_close_price") @db.Decimal(15, 2)  // 수정주가 종가
+  createdAt           DateTime @default(now()) @map("created_at")
 
   @@unique([stockCode, candleType, candleTime], map: "uk_stock_candle")
   @@index([stockCode, candleType, candleTime(sort: Desc)], map: "idx_stock_candle_query")
@@ -544,6 +549,23 @@ model StockDailyMetrics {
   @@index([stockCode, tradeDate(sort: Desc)], map: "idx_stock_metrics_code_date")
   @@index([marketType, tradeDate], map: "idx_stock_metrics_market_date")
   @@map("stock_daily_metrics")
+}
+
+// 19-1. 크론 실행 이력 (catch-up / 모니터링용)
+model CronRunLog {
+  runId       String   @id @default(uuid()) @map("run_id") @db.Uuid
+  jobName     String   @map("job_name") @db.VarChar(80)
+  tradeDate   DateTime @map("trade_date") @db.Date
+  status      String   @map("status") @db.VarChar(16) // RUNNING / SUCCESS / FAILED
+  startedAt   DateTime @default(now()) @map("started_at")
+  finishedAt  DateTime? @map("finished_at")
+  durationMs  Int?     @map("duration_ms")
+  errorMsg    String?  @map("error_msg") @db.Text
+  metadata    Json?    @map("metadata")
+
+  @@unique([jobName, tradeDate], map: "uk_cron_run_log_job_date")
+  @@index([jobName, status, tradeDate(sort: Desc)], map: "idx_cron_run_log_status")
+  @@map("cron_run_log")
 }
 
 // =============================================

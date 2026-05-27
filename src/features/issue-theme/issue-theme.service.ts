@@ -1,11 +1,20 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { Cron } from '@nestjs/schedule';
 import { PrismaService } from '../../common/prisma/prisma.service';
 import { RealtimePriceCacheService } from '../real-time-chart/realtime-price-cache.service';
 import { KiwoomRestService } from '../../integrations/kiwoom/rest/kiwoom-rest.service';
 
+interface TradingValueChange {
+  label: string;
+  ratio: number | null;
+  currentAccTradingValue: number | null;
+  prevSameTimeAccTradingValue: number | null;
+}
+
 @Injectable()
 export class IssueThemeService {
   private readonly logger = new Logger(IssueThemeService.name);
+  private readonly minPrevTradingValueForRatio = 0;
 
   constructor(
     private readonly prisma: PrismaService,
@@ -26,6 +35,121 @@ export class IssueThemeService {
     const hh = String(kst.getUTCHours()).padStart(2, '0');
     const mm = String(Math.floor(kst.getUTCMinutes() / 10) * 10).padStart(2, '0');
     return `${hh}${mm}`;
+  }
+
+  private isMarketOpenNow(): boolean {
+    const kst = this.getKstNow();
+    const hours = kst.getUTCHours();
+    const minutes = kst.getUTCMinutes();
+
+    if (hours < 9 || hours > 15) return false;
+    if (hours === 15 && minutes >= 30) return false;
+    return true;
+  }
+
+  private async getLiveTradingValueChanges(
+    stockCodes: string[],
+    prices: Map<string, { accAmount: number }>,
+    metricsMap: Map<string, any>,
+    tradeDate: Date,
+  ): Promise<Map<string, TradingValueChange>> {
+    if (stockCodes.length === 0) return new Map();
+
+    const isMarketOpen = this.isMarketOpenNow();
+    const snapshotTime = this.getCurrentSnapshotTime();
+    const fallback: TradingValueChange = {
+      label: '-',
+      ratio: null,
+      currentAccTradingValue: null,
+      prevSameTimeAccTradingValue: null,
+    };
+
+    const tradingValueChangeMap = new Map(stockCodes.map((code) => [code, fallback]));
+    const todayDate = this.dateOnly(tradeDate);
+    const prevSnapshotDate = await this.prisma.stockTradingValueSnapshot.findFirst({
+      where: { stockCode: { in: stockCodes }, snapshotDate: { lt: todayDate } },
+      orderBy: { snapshotDate: 'desc' },
+      select: { snapshotDate: true },
+    });
+
+    let prevIntradayMap = new Map<string, number>();
+    if (prevSnapshotDate) {
+      const prevSnapshots = await this.prisma.stockTradingValueSnapshot.findMany({
+        where: {
+          stockCode: { in: stockCodes },
+          snapshotDate: prevSnapshotDate.snapshotDate,
+          snapshotTime: { lte: snapshotTime },
+        },
+        orderBy: [{ stockCode: 'asc' }, { snapshotTime: 'desc' }],
+      });
+      for (const snapshot of prevSnapshots) {
+        if (!prevIntradayMap.has(snapshot.stockCode)) {
+          prevIntradayMap.set(snapshot.stockCode, Number(snapshot.accTradingValue));
+        }
+      }
+    }
+
+    let prevDailyMap = new Map<string, number>();
+    const prevMetricDate = await this.prisma.stockDailyMetrics.findFirst({
+      where: { stockCode: { in: stockCodes }, tradeDate: { lt: tradeDate } },
+      orderBy: { tradeDate: 'desc' },
+      select: { tradeDate: true },
+    });
+    if (prevMetricDate) {
+      const prevMetrics = await this.prisma.stockDailyMetrics.findMany({
+        where: { stockCode: { in: stockCodes }, tradeDate: prevMetricDate.tradeDate },
+        select: { stockCode: true, tradingValue: true },
+      });
+      prevDailyMap = new Map(
+        prevMetrics
+          .filter((m) => m.tradingValue != null)
+          .map((m) => [m.stockCode, Number(m.tradingValue)]),
+      );
+    }
+
+    for (const stockCode of stockCodes) {
+      const realtimeAccAmount = prices.get(stockCode)?.accAmount;
+      const currentAccTradingValue =
+        isMarketOpen && realtimeAccAmount && realtimeAccAmount > 0
+          ? realtimeAccAmount
+          : metricsMap.get(stockCode)?.tradingValue != null
+            ? Number(metricsMap.get(stockCode).tradingValue)
+            : null;
+
+      const prevSameTimeAccTradingValue =
+        isMarketOpen && realtimeAccAmount && realtimeAccAmount > 0
+          ? prevIntradayMap.get(stockCode) ?? prevDailyMap.get(stockCode) ?? null
+          : prevDailyMap.get(stockCode) ?? null;
+
+      if (
+        currentAccTradingValue == null ||
+        prevSameTimeAccTradingValue == null ||
+        prevSameTimeAccTradingValue <= this.minPrevTradingValueForRatio
+      ) {
+        tradingValueChangeMap.set(stockCode, {
+          ...fallback,
+          currentAccTradingValue,
+          prevSameTimeAccTradingValue,
+        });
+        continue;
+      }
+
+      const ratio = currentAccTradingValue / prevSameTimeAccTradingValue;
+      tradingValueChangeMap.set(stockCode, {
+        label: `${ratio.toFixed(1)}배`,
+        ratio,
+        currentAccTradingValue,
+        prevSameTimeAccTradingValue,
+      });
+    }
+
+    return tradingValueChangeMap;
+  }
+
+  private dateOnly(d: Date): Date {
+    const out = new Date(d);
+    out.setUTCHours(0, 0, 0, 0);
+    return out;
   }
 
   /** metrics에 DF 필터(DF1/DF2/DF3) 적용 */
@@ -163,17 +287,13 @@ export class IssueThemeService {
     // 실시간 가격
     const prices = this.realtimeCache.getPrices(filteredCodes);
 
-    // 전일 동시간 거래대금 스냅샷
-    const snapshotTime = this.getCurrentSnapshotTime();
-    const kstToday = this.getKstNow();
-    const todayDate = new Date(Date.UTC(kstToday.getUTCFullYear(), kstToday.getUTCMonth(), kstToday.getUTCDate()));
-    const yesterdayDate = new Date(todayDate);
-    yesterdayDate.setUTCDate(yesterdayDate.getUTCDate() - 1);
-
-    const prevSnapshots = await this.prisma.stockTradingValueSnapshot.findMany({
-      where: { stockCode: { in: filteredCodes }, snapshotDate: yesterdayDate, snapshotTime },
-    });
-    const prevTradingMap = new Map(prevSnapshots.map((s) => [s.stockCode, Number(s.accTradingValue)]));
+    // 거래대금 변화는 팝업 로딩 중 키움 API를 호출하지 않고 캐시/DB 스냅샷으로 계산한다.
+    const tradingValueChangeMap = await this.getLiveTradingValueChanges(
+      filteredCodes,
+      prices,
+      metricsMap,
+      tradeDate,
+    );
 
     // 등락률/거래대금 집계
     const changeRates: number[] = [];
@@ -184,17 +304,17 @@ export class IssueThemeService {
       const rt = prices.get(code);
       const changeRate = rt ? rt.changeRate : (m.priceChangeRate1d ? Number(m.priceChangeRate1d) : 0);
       const currentPrice = rt ? rt.currentPrice : Number(m.closePrice);
-      const accAmount = rt ? rt.accAmount : 0;
 
       changeRates.push(changeRate);
 
-      // 거래대금 변화 배율
-      const prevAcc = prevTradingMap.get(code);
-      let tradingValueRatio: string = '-';
-      if (prevAcc != null && prevAcc > 1_000_000) {
-        const ratio = accAmount / prevAcc;
-        tradingValueRatio = `${Math.round(ratio * 10) / 10}배`;
-        if (ratio >= 2.0) highVolumeCount++;
+      const tradingValueChange = tradingValueChangeMap.get(code) ?? {
+        label: '-',
+        ratio: null,
+        currentAccTradingValue: null,
+        prevSameTimeAccTradingValue: null,
+      };
+      if (tradingValueChange.ratio != null && tradingValueChange.ratio >= 2.0) {
+        highVolumeCount++;
       }
 
       return {
@@ -203,7 +323,11 @@ export class IssueThemeService {
         currentPrice,
         changeRate,
         rsScore: Number(m.relativeStrengthScore),
-        tradingValueRatio,
+        tradingValue: m.tradingValue != null ? m.tradingValue.toString() : null,
+        tradingValueRatio: tradingValueChange.label,
+        tradingValueChange: tradingValueChange.label,
+        currentAccTradingValue: tradingValueChange.currentAccTradingValue,
+        prevSameTimeAccTradingValue: tradingValueChange.prevSameTimeAccTradingValue,
       };
     });
 
@@ -309,6 +433,7 @@ export class IssueThemeService {
   // ─── 스냅샷 저장 ──────────────────────────────────────────────────
 
   /** 테마 일별 스냅샷 저장 (장 마감 후 1회 호출) */
+  @Cron('50 15 * * 1-5', { timeZone: 'Asia/Seoul' })
   async saveThemeSnapshot() {
     const { tradeDate, metrics } = await this.getFilteredMetrics();
     if (!tradeDate) return { saved: 0 };
@@ -385,7 +510,117 @@ export class IssueThemeService {
     return { saved: themeList.length, date: snapshotDate.toISOString().split('T')[0] };
   }
 
+  async backfillThemeSnapshots(days: number = 60) {
+    const normalizedDays = Math.min(Math.max(Math.floor(days) || 60, 1), 365);
+
+    const inserted = await this.prisma.$queryRawUnsafe<{ snapshot_date: Date; theme_code: number }[]>(
+      `
+      WITH target_dates AS (
+        SELECT DISTINCT trade_date
+        FROM stock_daily_metrics
+        ORDER BY trade_date DESC
+        LIMIT $1
+      ), filtered AS (
+        SELECT
+          m.trade_date,
+          co.theme_code,
+          COALESCE(m.price_change_rate_1d, 0)::numeric AS change_rate
+        FROM stock_daily_metrics m
+        JOIN companies co ON co.stock_code = m.stock_code
+        JOIN target_dates td ON td.trade_date = m.trade_date
+        WHERE co.theme_code IS NOT NULL
+          AND co.deleted_at IS NULL
+          AND m.passed_static_filters = TRUE
+          AND m.low_price_52w IS NOT NULL
+          AND m.close_price >= m.low_price_52w * 1.3
+          AND m.high_price_52w IS NOT NULL
+          AND m.close_price >= m.high_price_52w * 0.75
+          AND m.ma_50 IS NOT NULL
+          AND m.close_price > m.ma_50
+      ), grouped AS (
+        SELECT
+          trade_date,
+          theme_code,
+          COUNT(*)::int AS total_count,
+          COUNT(*) FILTER (WHERE change_rate > 0)::int AS rising_count,
+          ROUND((COUNT(*) FILTER (WHERE change_rate > 0)::numeric / NULLIF(COUNT(*), 0)) * 100, 2) AS rising_ratio,
+          AVG(change_rate) AS avg_change_rate,
+          COUNT(*) FILTER (WHERE change_rate >= 1)::int AS up_count,
+          COUNT(*) FILTER (WHERE change_rate <= -1)::int AS down_count,
+          (COUNT(*) - COUNT(*) FILTER (WHERE change_rate >= 1) - COUNT(*) FILTER (WHERE change_rate <= -1))::int AS flat_count
+        FROM filtered
+        GROUP BY trade_date, theme_code
+      ), ranked AS (
+        SELECT
+          trade_date,
+          theme_code,
+          DENSE_RANK() OVER (PARTITION BY trade_date ORDER BY rising_ratio DESC) AS rank,
+          rising_count,
+          total_count,
+          rising_ratio,
+          avg_change_rate,
+          up_count,
+          flat_count,
+          down_count
+        FROM grouped
+      )
+      INSERT INTO theme_daily_snapshots (
+        snapshot_id,
+        theme_code,
+        snapshot_date,
+        rank,
+        rising_count,
+        total_count,
+        rising_ratio,
+        avg_change_rate,
+        high_volume_count,
+        up_count,
+        flat_count,
+        down_count
+      )
+      SELECT
+        gen_random_uuid(),
+        theme_code,
+        trade_date,
+        rank,
+        rising_count,
+        total_count,
+        rising_ratio,
+        avg_change_rate,
+        0,
+        up_count,
+        flat_count,
+        down_count
+      FROM ranked
+      ON CONFLICT (theme_code, snapshot_date) DO NOTHING
+      RETURNING snapshot_date, theme_code
+      `,
+      normalizedDays,
+    );
+
+    const dateRows = await this.prisma.$queryRawUnsafe<{ snapshot_date: Date; count: number }[]>(
+      `
+      SELECT snapshot_date, COUNT(*)::int AS count
+      FROM theme_daily_snapshots
+      GROUP BY snapshot_date
+      ORDER BY snapshot_date DESC
+      LIMIT $1
+      `,
+      normalizedDays,
+    );
+
+    return {
+      days: normalizedDays,
+      inserted: inserted.length,
+      snapshotDates: dateRows.map((row) => ({
+        date: row.snapshot_date.toISOString().slice(0, 10),
+        count: row.count,
+      })),
+    };
+  }
+
   /** 거래대금 스냅샷 저장 (10분 단위 호출) */
+  @Cron('*/10 9-15 * * 1-5', { timeZone: 'Asia/Seoul' })
   async saveTradingValueSnapshot() {
     const snapshotTime = this.getCurrentSnapshotTime();
     const kstNow = this.getKstNow();

@@ -70,6 +70,14 @@ export class IssueThemeController {
     return this.issueThemeService.saveThemeSnapshot();
   }
 
+  @Post('snapshot/theme/backfill')
+  @Public()
+  @ApiOperation( { summary: '[관리자] 테마 일별 스냅샷 백필', description: 'stock_daily_metrics 기준으로 최근 N거래일 테마 순위를 재계산합니다.' } )
+  @ApiQuery( { name: 'days', required: false, example: '60', description: '백필할 최근 거래일 수' } )
+  async backfillThemeSnapshots(@Query('days') days: string = '60') {
+    return this.issueThemeService.backfillThemeSnapshots(Number(days));
+  }
+
   @Post('snapshot/trading-value')
   @Public()
   @ApiOperation( { summary: '[관리자] 거래대금 스냅샷 저장', description: '10분 단위 실행' } )

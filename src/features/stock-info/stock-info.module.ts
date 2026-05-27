@@ -4,9 +4,10 @@ import { StockInfoController } from './stock-info.controller';
 import { StockInfoService } from './stock-info.service';
 import { DartModule } from '../../integrations/dart/dart.module';
 import { PrismaModule } from '../../common/prisma/prisma.module';
+import { KiwoomModule } from '../../integrations/kiwoom/kiwoom.module';
 
 @Module({
-  imports: [ConfigModule, DartModule, PrismaModule],
+  imports: [ConfigModule, DartModule, PrismaModule, KiwoomModule],
   controllers: [StockInfoController],
   providers: [StockInfoService],
   exports: [StockInfoService],

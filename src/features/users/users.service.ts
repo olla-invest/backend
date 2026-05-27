@@ -1,4 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { AuthProvider } from '../../../generated/prisma';
 import { PrismaService } from '../../common/prisma/prisma.service';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 
@@ -16,6 +17,7 @@ export class UsersService {
                 name: true,
                 phone: true,
                 provider: true,
+                socialId: true,
                 planType: true,
                 marketingConsent: true,
                 createdAt: true,
@@ -26,7 +28,10 @@ export class UsersService {
             throw new NotFoundException( '사용자를 찾을 수 없습니다.' );
         }
 
-        return user;
+        return {
+            ...user,
+            snsLinkedYn: this.isSocialProfileCompleted( user ),
+        };
     }
 
     async updateProfile( userId: string, dto: UpdateProfileDto ) {
@@ -84,5 +89,14 @@ export class UsersService {
         return this.prisma.user.findFirst( {
             where: { email, deletedAt: null },
         } );
+    }
+
+    private isSocialAccount( user: { provider: AuthProvider; socialId?: string | null } ): boolean {
+        return user.provider !== AuthProvider.LOCAL && !!user.socialId;
+    }
+
+    private isSocialProfileCompleted( user: { provider: AuthProvider; socialId?: string | null; name?: string | null; phone?: string | null } ): boolean {
+        if ( !this.isSocialAccount( user ) ) return false;
+        return !!user.name && user.name !== '미연동 계정' && !!user.phone;
     }
 }

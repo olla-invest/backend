@@ -155,6 +155,7 @@ exports.Prisma.CompanyScalarFieldEnum = {
   corpCode: 'corpCode',
   listedShares: 'listedShares',
   businessInfo: 'businessInfo',
+  tradingState: 'tradingState',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   deletedAt: 'deletedAt'
@@ -283,6 +284,10 @@ exports.Prisma.StockCandleScalarFieldEnum = {
   volume: 'volume',
   tradingValue: 'tradingValue',
   prevDayCompare: 'prevDayCompare',
+  adjOpenPrice: 'adjOpenPrice',
+  adjHighPrice: 'adjHighPrice',
+  adjLowPrice: 'adjLowPrice',
+  adjClosePrice: 'adjClosePrice',
   createdAt: 'createdAt'
 };
 
@@ -378,6 +383,18 @@ exports.Prisma.StockDailyMetricsScalarFieldEnum = {
   strengthContinuationDays: 'strengthContinuationDays',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
+};
+
+exports.Prisma.CronRunLogScalarFieldEnum = {
+  runId: 'runId',
+  jobName: 'jobName',
+  tradeDate: 'tradeDate',
+  status: 'status',
+  startedAt: 'startedAt',
+  finishedAt: 'finishedAt',
+  durationMs: 'durationMs',
+  errorMsg: 'errorMsg',
+  metadata: 'metadata'
 };
 
 exports.Prisma.UserSubscriptionScalarFieldEnum = {
@@ -538,6 +555,7 @@ exports.Prisma.ModelName = {
   ThemeDailySnapshot: 'ThemeDailySnapshot',
   StockTradingValueSnapshot: 'StockTradingValueSnapshot',
   StockDailyMetrics: 'StockDailyMetrics',
+  CronRunLog: 'CronRunLog',
   UserSubscription: 'UserSubscription',
   PaymentCard: 'PaymentCard',
   Payment: 'Payment'

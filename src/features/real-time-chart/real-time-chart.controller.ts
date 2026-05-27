@@ -1,9 +1,10 @@
 import { Controller, Get, Post, Query, Param, Body } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiParam, ApiQuery, ApiBody } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiParam, ApiQuery, ApiBody, ApiOkResponse } from '@nestjs/swagger';
 import { RealTimeChartService } from './real-time-chart.service';
 import { InitialSetupService } from './initial-setup.service';
 import { StockMetricsService } from './stock-metrics.service';
 import { Public } from '../../common/auth/decorators/public.decorator';
+import { RealTimeChartResultDto } from './dto/real-time-chart-result.dto';
 
 @ApiTags( '실시간 차트 (Real-time Chart)' )
 @Controller('real-time-chart')
@@ -53,12 +54,14 @@ export class RealTimeChartController {
   @ApiOperation( { summary: '일봉 차트 조회 (종목상세용, ~3년치)' } )
   @ApiParam( { name: 'stockCode', example: '005930' } )
   @ApiQuery( { name: 'baseDate', required: false, example: '20260404', description: '기준일자 (YYYYMMDD, 생략 시 오늘)' } )
+  @ApiQuery( { name: 'adjustedPrice', required: false, example: '1', description: '수정주가구분 (0: 비조정, 1: 수정주가, 기본값 1)' } )
   async getDayCandlesDetail(
     @Param('stockCode') stockCode: string,
     @Query('baseDate') baseDate: string,
+    @Query('adjustedPrice') adjustedPrice: '0' | '1',
   ) {
     const formattedDate = baseDate || new Date().toISOString().split('T')[0].replace(/-/g, '');
-    return await this.chartService.getDayCandlesDetail(stockCode, formattedDate);
+    return await this.chartService.getDayCandlesDetail(stockCode, formattedDate, adjustedPrice === '0' ? '0' : '1');
   }
 
   @Get('candles/week/:stockCode')
@@ -85,6 +88,18 @@ export class RealTimeChartController {
     return await this.chartService.getMonthCandles(stockCode, formattedDate);
   }
 
+  @Get('candles/year/:stockCode')
+  @ApiOperation( { summary: '연봉 차트 조회' } )
+  @ApiParam( { name: 'stockCode', example: '005930' } )
+  @ApiQuery( { name: 'baseDate', required: false, example: '20260404', description: '기준일자 (YYYYMMDD)' } )
+  async getYearCandles(
+    @Param('stockCode') stockCode: string,
+    @Query('baseDate') baseDate: string,
+  ) {
+    const formattedDate = baseDate || new Date().toISOString().split('T')[0].replace(/-/g, '');
+    return await this.chartService.getYearCandles(stockCode, formattedDate);
+  }
+
   @Get('summary/:stockCode')
   @ApiOperation( { summary: '종목 상세 요약', description: '현재가, 전일대비, 거래량, 거래대금, 1일 고저, 52주 고저' } )
   @ApiParam( { name: 'stockCode', example: '005930' } )
@@ -95,7 +110,7 @@ export class RealTimeChartController {
   @Get('stored/:stockCode')
   @ApiOperation( { summary: 'DB 저장 캔들 데이터 조회', description: '분봉/틱봉은 키움 API 실시간 조회, 일/주/월봉은 DB 조회' } )
   @ApiParam( { name: 'stockCode', example: '005930' } )
-  @ApiQuery( { name: 'chartType', required: false, enum: ['minute','tick','day','week','month'] } )
+  @ApiQuery( { name: 'chartType', required: false, enum: ['minute','tick','day','week','month','year'] } )
   @ApiQuery( { name: 'interval', required: false, example: '1' } )
   @ApiQuery( { name: 'startDate', required: false, example: '20260101' } )
   @ApiQuery( { name: 'endDate', required: false, example: '20260404' } )
@@ -119,6 +134,7 @@ export class RealTimeChartController {
       day: 'day',
       week: 'week',
       month: 'month',
+      year: 'year',
     };
     const candleType = candleTypeMap[chartType] ?? 'day';
     return await this.chartService.getStoredCandles(
@@ -187,6 +203,7 @@ export class RealTimeChartController {
   @ApiQuery( { name: 'rsPeriods', required: false, example: '63,126,252', description: 'RS 계산 기간' } )
   @ApiQuery( { name: 'rsWeights', required: false, example: '50,30,20', description: 'RS 가중치' } )
   @ApiQuery( { name: 'rsDates', required: false, example: '2026-02-09,2026-01-15,2025-11-10', description: 'RS 계산 날짜' } )
+  @ApiOkResponse( { type: RealTimeChartResultDto } )
   async getStockList(
     @Query('marketType') marketType: '0' | '10' | 'all' = 'all',
     @Query('page') page: string = '1',
@@ -229,6 +246,7 @@ export class RealTimeChartController {
       },
     },
   } )
+  @ApiOkResponse( { type: RealTimeChartResultDto } )
   async getStockListWithRangeRS(
     @Body('marketType') marketType: '0' | '10' | 'all' = 'all',
     @Body('page') page: number = 1,
@@ -265,22 +283,53 @@ export class RealTimeChartController {
 
   @Post('backfill/day')
   @ApiOperation( { summary: '[관리자] 전체 종목 일봉 백필', description: 'Fire-and-forget. 최대 750일.' } )
-  @ApiBody( { schema: { example: { marketType: 'all', days: 130 } } } )
+  @ApiBody( { schema: { example: { marketType: 'all', days: 330 } } } )
   async backfillDayCandles(
     @Body('marketType') marketType: '0' | '10' | 'all' = 'all',
-    @Body('days') days: number = 130,
+    @Body('days') days: number = 330,
   ) {
     const markets: ('0' | '10')[] = marketType === 'all' ? ['0', '10'] : [marketType];
 
+    this.chartService.collectIndexCandles()
+      .then((indexResult) => {
+        console.log('Index candle backfill done:', indexResult);
+        for (const market of markets) {
+          this.chartService.backfillDayCandles(market, days)
+            .then((result) => console.log(`Backfill done: market=${market}`, result))
+            .catch((err) => console.error(`Backfill failed: market=${market}`, err));
+        }
+      })
+      .catch((err) => console.error('Index candle backfill failed:', err));
+
+    return {
+      success: true,
+      message: `Index + day candle backfill started (markets: ${markets.join(',')}, days: ${days}). Check server logs for progress.`,
+    };
+  }
+
+  @Post('backfill/higher-timeframes')
+  @ApiOperation( { summary: '[관리자] 전체/선택 종목 주봉·월봉·연봉 백필', description: 'Fire-and-forget. stock_candles에 candle_type week/month/year로 저장.' } )
+  @ApiBody( { schema: { example: { marketType: 'all', candleTypes: ['week', 'month', 'year'], stockCodes: ['327260'] } } } )
+  async backfillHigherTimeframeCandles(
+    @Body('marketType') marketType: '0' | '10' | 'all' = 'all',
+    @Body('candleTypes') candleTypes: Array<'week' | 'month' | 'year'> = ['week', 'month', 'year'],
+    @Body('stockCodes') stockCodes?: string[],
+  ) {
+    const markets: ('0' | '10')[] = stockCodes?.length
+      ? [marketType === '10' ? '10' : '0']
+      : marketType === 'all'
+        ? ['0', '10']
+        : [marketType];
+
     for (const market of markets) {
-      this.chartService.backfillDayCandles(market, days)
-        .then((result) => console.log(`Backfill done: market=${market}`, result))
-        .catch((err) => console.error(`Backfill failed: market=${market}`, err));
+      this.chartService.backfillHigherTimeframeCandles(market, candleTypes, stockCodes)
+        .then((result) => console.log(`Higher timeframe backfill done: market=${market}`, result))
+        .catch((err) => console.error(`Higher timeframe backfill failed: market=${market}`, err));
     }
 
     return {
       success: true,
-      message: `Day candle backfill started (markets: ${markets.join(',')}, days: ${days}). Check server logs for progress.`,
+      message: `Higher timeframe backfill started (markets: ${markets.join(',')}, types: ${candleTypes.join(',')}). Check server logs for progress.`,
     };
   }
 

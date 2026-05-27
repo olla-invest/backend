@@ -10,6 +10,9 @@ import {
   KiwoomDayCandleResponse,
   KiwoomWeekCandleResponse,
   KiwoomMonthCandleResponse,
+  KiwoomYearCandleResponse,
+  KiwoomTodayPreviousExecutionResponse,
+  KiwoomStockBasicInfoResponse,
   KiwoomStockListResponse,
   KiwoomSectorDayCandleResponse,
   KiwoomSectorCurrentPriceResponse,
@@ -158,6 +161,132 @@ export class KiwoomRestService {
   }
 
   /**
+   * 당일/전일 체결 데이터 조회 (ka10084)
+   */
+  async getTodayPreviousExecutions(
+    stockCode: string,
+    todayPrevious: '1' | '2',
+    tickMinute: '0' | '1' = '1',
+    time = '',
+    retryOnAuthError = true,
+  ): Promise<KiwoomTodayPreviousExecutionResponse> {
+    const startTime = Date.now();
+
+    try {
+      const token = await this.authService.ensureValidToken();
+      const requestData = {
+        stk_cd: stockCode,
+        tdy_pred: todayPrevious,
+        tic_min: tickMinute,
+        tm: time,
+      };
+
+      const response = await this.httpClient.post<KiwoomTodayPreviousExecutionResponse>(
+        '/api/dostk/stkinfo',
+        requestData,
+        {
+          headers: {
+            'api-id': 'ka10084',
+            authorization: `Bearer ${token}`,
+          },
+        },
+      );
+
+      const returnCode = response.data.return_code ?? response.data.returnCode;
+      if (returnCode === 3 && retryOnAuthError) {
+        this.logger.warn(`Token authentication failed for ka10084 ${stockCode}. Retrying...`);
+        await this.authService.invalidateAllTokens();
+        return this.getTodayPreviousExecutions(
+          stockCode,
+          todayPrevious,
+          tickMinute,
+          time,
+          false,
+        );
+      }
+
+      await this.logApiCall({
+        apiName: 'ka10084-stkinfo',
+        stockCode,
+        requestData,
+        responseStatus: 'SUCCESS',
+        responseMessage: response.data.return_msg ?? response.data.returnMsg,
+        responseTimeMs: Date.now() - startTime,
+      });
+
+      return response.data;
+    } catch (error) {
+      await this.logApiCall({
+        apiName: 'ka10084-stkinfo',
+        stockCode,
+        requestData: { tdy_pred: todayPrevious, tic_min: tickMinute, tm: time },
+        responseStatus: 'ERROR',
+        responseMessage: error.message,
+        responseTimeMs: Date.now() - startTime,
+      });
+
+      this.logger.error(`Failed to fetch today/previous executions for ${stockCode}`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * 종목기본정보 조회 (ka10001)
+   */
+  async getStockBasicInfo(
+    stockCode: string,
+    retryOnAuthError = true,
+  ): Promise<KiwoomStockBasicInfoResponse> {
+    const startTime = Date.now();
+
+    try {
+      const token = await this.authService.ensureValidToken();
+      const requestData = { stk_cd: stockCode };
+
+      const response = await this.httpClient.post<KiwoomStockBasicInfoResponse>(
+        '/api/dostk/stkinfo',
+        requestData,
+        {
+          headers: {
+            'api-id': 'ka10001',
+            authorization: `Bearer ${token}`,
+          },
+        },
+      );
+
+      const returnCode = response.data.return_code ?? response.data.returnCode;
+      if (returnCode === 3 && retryOnAuthError) {
+        this.logger.warn(`Token authentication failed for ka10001 ${stockCode}. Retrying...`);
+        await this.authService.invalidateAllTokens();
+        return this.getStockBasicInfo(stockCode, false);
+      }
+
+      await this.logApiCall({
+        apiName: 'ka10001',
+        stockCode,
+        requestData,
+        responseStatus: 'SUCCESS',
+        responseMessage: response.data.return_msg ?? response.data.returnMsg,
+        responseTimeMs: Date.now() - startTime,
+      });
+
+      return response.data;
+    } catch (error) {
+      await this.logApiCall({
+        apiName: 'ka10001',
+        stockCode,
+        requestData: { stk_cd: stockCode },
+        responseStatus: 'ERROR',
+        responseMessage: error.message,
+        responseTimeMs: Date.now() - startTime,
+      });
+
+      this.logger.error(`Failed to fetch stock basic info for ${stockCode}`, error);
+      throw error;
+    }
+  }
+
+  /**
    * 일봉 차트 데이터 조회
    */
   async getDayCandles(
@@ -223,6 +352,7 @@ export class KiwoomRestService {
     stockCode: string,
     baseDate: string,
     maxCandles = 750,
+    adjustedPrice: '0' | '1' = '1',
   ): Promise<KiwoomDayCandleResponse> {
     const startTime = Date.now();
     const allCandles: KiwoomDayCandleData[] = [];
@@ -244,7 +374,7 @@ export class KiwoomRestService {
 
         const response = await this.httpClient.post<KiwoomDayCandleResponse>(
           '/api/dostk/chart',
-          { stk_cd: stockCode, base_dt: baseDate, upd_stkpc_tp: '1' },
+          { stk_cd: stockCode, base_dt: baseDate, upd_stkpc_tp: adjustedPrice },
           { headers },
         );
 
@@ -421,6 +551,76 @@ export class KiwoomRestService {
       });
 
       this.logger.error(`Failed to fetch month candles for ${stockCode}`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * 연봉 차트 연속조회 (ka10084)
+   * maxCandles 기본값 30 ≈ 30년치
+   */
+  async getYearCandles(
+    stockCode: string,
+    baseDate: string,
+    maxCandles = 30,
+  ): Promise<KiwoomYearCandleResponse> {
+    const startTime = Date.now();
+    const allCandles: KiwoomDayCandleData[] = [];
+    let contYn = '';
+    let nextKey = '';
+
+    try {
+      const token = await this.authService.ensureValidToken();
+
+      do {
+        const headers: Record<string, string> = {
+          'api-id': 'ka10084',
+          authorization: `Bearer ${token}`,
+        };
+        if (contYn === 'Y') {
+          headers['cont-yn'] = contYn;
+          headers['next-key'] = nextKey;
+        }
+
+        const response = await this.httpClient.post<KiwoomYearCandleResponse>(
+          '/api/dostk/chart',
+          { stk_cd: stockCode, base_dt: baseDate, upd_stkpc_tp: '1' },
+          { headers },
+        );
+
+        allCandles.push(...response.data.stk_yr_pole_chart_qry);
+        contYn = response.headers['cont-yn'] || '';
+        nextKey = response.headers['next-key'] || '';
+
+        this.logger.debug(`Year candles: ${allCandles.length}/${maxCandles}, cont: ${contYn}`);
+      } while (contYn === 'Y' && allCandles.length < maxCandles);
+
+      await this.logApiCall({
+        apiName: 'ka10084',
+        stockCode,
+        requestData: { base_dt: baseDate },
+        responseStatus: 'SUCCESS',
+        responseMessage: `${allCandles.length} candles`,
+        responseTimeMs: Date.now() - startTime,
+      });
+
+      return {
+        stk_cd: stockCode,
+        stk_yr_pole_chart_qry: allCandles.slice(0, maxCandles),
+        return_code: 0,
+        return_msg: '정상적으로 처리되었습니다',
+      };
+    } catch (error) {
+      await this.logApiCall({
+        apiName: 'ka10084',
+        stockCode,
+        requestData: { base_dt: baseDate },
+        responseStatus: 'ERROR',
+        responseMessage: error.message,
+        responseTimeMs: Date.now() - startTime,
+      });
+
+      this.logger.error(`Failed to fetch year candles for ${stockCode}`, error);
       throw error;
     }
   }

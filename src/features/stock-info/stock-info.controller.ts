@@ -1,7 +1,8 @@
 import { Controller, Get, Post, Param, Query, ParseIntPipe, DefaultValuePipe } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiParam, ApiQuery } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiParam, ApiQuery, ApiOkResponse } from '@nestjs/swagger';
 import { StockInfoService } from './stock-info.service';
 import { Public } from '../../common/auth/decorators/public.decorator';
+import { StockNewsResponseDto } from './dto/news-response.dto';
 
 @ApiTags( '종목정보 (Stock Info)' )
 @Controller('stock-info')
@@ -61,6 +62,7 @@ export class StockInfoController {
   @ApiQuery( { name: 'display', required: false, example: 10, description: '결과 수 (기본 10)' } )
   @ApiQuery( { name: 'sort', required: false, enum: ['date', 'sim'], description: '정렬 (date: 최신순, sim: 관련도순)' } )
   @ApiQuery( { name: 'start', required: false, example: 1, description: '시작 위치 (기본 1)' } )
+  @ApiOkResponse( { type: StockNewsResponseDto } )
   async getNews(
     @Param('stockCode') stockCode: string,
     @Query('display', new DefaultValuePipe(10), ParseIntPipe) display: number,

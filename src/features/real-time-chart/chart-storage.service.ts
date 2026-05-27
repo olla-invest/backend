@@ -3,17 +3,14 @@ import { OnEvent } from '@nestjs/event-emitter';
 import { PrismaService } from '../../common/prisma/prisma.service';
 import { KiwoomTickData, KiwoomQuoteData } from '../../integrations/kiwoom/types/kiwoom.types';
 import { Decimal } from '@generated/prisma/runtime/client';
+import { isKrxTradingDay } from '../../common/utils/market-calendar.util';
 
 @Injectable()
 export class ChartStorageService {
   private readonly logger = new Logger(ChartStorageService.name);
-  private candleBuffers = new Map<string, CandleBuffer>(); // key: stockCode_candleType
 
   constructor(private readonly prisma: PrismaService) {}
 
-  /**
-   * 실시간 체결 데이터 수신 (0B)
-   */
   @OnEvent('kiwoom.realtime.0B')
   async handleTickData(event: {
     stockCode: string;
@@ -21,21 +18,13 @@ export class ChartStorageService {
     values: KiwoomTickData;
   }): Promise<void> {
     const { stockCode, values } = event;
-
     try {
-      // 틱 데이터 저장
       await this.saveTickData(stockCode, values);
-
-      // 1분봉 캔들 업데이트
-      await this.updateMinuteCandle(stockCode, values);
     } catch (error) {
       this.logger.error(`Failed to handle tick data for ${stockCode}`, error);
     }
   }
 
-  /**
-   * 실시간 호가 데이터 수신 (0D)
-   */
   @OnEvent('kiwoom.realtime.0D')
   async handleQuoteData(event: {
     stockCode: string;
@@ -43,7 +32,6 @@ export class ChartStorageService {
     values: KiwoomQuoteData;
   }): Promise<void> {
     const { stockCode, values } = event;
-
     try {
       await this.saveQuoteData(stockCode, values);
     } catch (error) {
@@ -51,19 +39,16 @@ export class ChartStorageService {
     }
   }
 
-  /**
-   * 틱 데이터 저장
-   */
   private async saveTickData(stockCode: string, values: KiwoomTickData): Promise<void> {
-    const tickTime = this.parseTime(values['20']); // 체결시간 (HHmmss)
-    const price = this.parseDecimal(values['10']); // 현재가
-    const volume = this.parseBigInt(values['15']); // 거래량
-    const prevDayCompare = this.parseDecimal(values['11']); // 전일대비
-    const changeRate = this.parseDecimal(values['12']); // 등락율
-    const askPrice = this.parseDecimal(values['27']); // 매도호가
-    const bidPrice = this.parseDecimal(values['28']); // 매수호가
-    const accVolume = this.parseBigInt(values['13']); // 누적거래량
-    const accTradingValue = this.parseBigInt(values['14']); // 누적거래대금
+    const tickTime = this.parseTime(values['20']);
+    const price = this.parseDecimal(values['10']);
+    const volume = this.parseBigInt(values['15']);
+    const prevDayCompare = this.parseDecimal(values['11']);
+    const changeRate = this.parseDecimal(values['12']);
+    const askPrice = this.parseDecimal(values['27']);
+    const bidPrice = this.parseDecimal(values['28']);
+    const accVolume = this.parseBigInt(values['13']);
+    const accTradingValue = this.parseBigInt(values['14']);
 
     await this.prisma.stockTick.create({
       data: {
@@ -79,15 +64,10 @@ export class ChartStorageService {
         accTradingValue,
       },
     });
-
   }
 
-  /**
-   * 호가 데이터 저장
-   */
   private async saveQuoteData(stockCode: string, values: KiwoomQuoteData): Promise<void> {
-    const quoteTime = this.parseTime(values['21']); // 호가시간
-
+    const quoteTime = this.parseTime(values['21']);
     await this.prisma.stockQuote.create({
       data: {
         stockCode,
@@ -116,67 +96,9 @@ export class ChartStorageService {
         totalBidVolume: this.parseBigInt(values['125']),
       },
     });
-
   }
 
-  /**
-   * 1분봉 캔들 업데이트
-   */
-  private async updateMinuteCandle(stockCode: string, values: KiwoomTickData): Promise<void> {
-    const tickTime = this.parseTime(values['20']);
-    const price = this.parseDecimal(values['10']);
-    const volume = this.parseBigInt(values['15']);
-
-    // 1분 단위로 캔들 시간 정규화 (초 제거)
-    const candleTime = new Date(tickTime);
-    candleTime.setSeconds(0, 0);
-
-    const bufferKey = `${stockCode}_1min`;
-
-    if (!this.candleBuffers.has(bufferKey)) {
-      this.candleBuffers.set(bufferKey, {
-        stockCode,
-        candleType: '1min',
-        candleTime,
-        openPrice: price,
-        highPrice: price,
-        lowPrice: price,
-        closePrice: price,
-        volume: volume,
-      });
-    } else {
-      const buffer = this.candleBuffers.get(bufferKey)!;
-
-      // 새로운 분봉 시작
-      if (buffer.candleTime.getTime() !== candleTime.getTime()) {
-        // 기존 캔들 저장
-        await this.saveCandle(buffer);
-
-        // 새 캔들 버퍼 생성
-        this.candleBuffers.set(bufferKey, {
-          stockCode,
-          candleType: '1min',
-          candleTime,
-          openPrice: price,
-          highPrice: price,
-          lowPrice: price,
-          closePrice: price,
-          volume: volume,
-        });
-      } else {
-        // 기존 캔들 업데이트
-        buffer.highPrice = this.max(buffer.highPrice, price);
-        buffer.lowPrice = this.min(buffer.lowPrice, price);
-        buffer.closePrice = price;
-        buffer.volume = buffer.volume + volume;
-      }
-    }
-  }
-
-  /**
-   * 캔들 데이터 저장
-   */
-  async saveCandle(candle: CandleBuffer | {
+  async saveCandle(candle: {
     stockCode: string;
     candleType: string;
     candleTime: Date;
@@ -186,8 +108,70 @@ export class ChartStorageService {
     closePrice: number | Decimal;
     volume: bigint;
     tradingValue?: bigint | null;
+    adjOpenPrice?: number | Decimal | null;
+    adjHighPrice?: number | Decimal | null;
+    adjLowPrice?: number | Decimal | null;
+    adjClosePrice?: number | Decimal | null;
   }): Promise<void> {
-    const tradingValue = 'tradingValue' in candle ? candle.tradingValue : undefined;
+    // [Patch 2] 일봉은 한국거래소 거래일에만 저장.
+    if (candle.candleType === 'day' && !isKrxTradingDay(candle.candleTime)) {
+      this.logger.warn(
+        `[saveCandle] Skip non-trading day candle ${candle.stockCode} @ ${candle.candleTime.toISOString()}`,
+      );
+      return;
+    }
+
+    // [Patch 5] 거래정지일 빈값 캔들 → 직전 정상 거래일 종가로 채워 저장
+    let openPriceFinal = candle.openPrice;
+    let highPriceFinal = candle.highPrice;
+    let lowPriceFinal = candle.lowPrice;
+    let closePriceFinal = candle.closePrice;
+    let adjOpenPriceFinal = candle.adjOpenPrice ?? null;
+    let adjHighPriceFinal = candle.adjHighPrice ?? null;
+    let adjLowPriceFinal = candle.adjLowPrice ?? null;
+    let adjClosePriceFinal = candle.adjClosePrice ?? null;
+    let tradingValueFinal = candle.tradingValue;
+
+    if (candle.candleType === 'day' && candle.volume === 0n) {
+      const closeNum = this.toNumberSafe(candle.closePrice);
+      if (closeNum <= 0) {
+        const prior = await this.prisma.stockCandle.findFirst({
+          where: {
+            stockCode: candle.stockCode,
+            candleType: 'day',
+            candleTime: { lt: candle.candleTime },
+            volume: { gt: 0n },
+          },
+          orderBy: { candleTime: 'desc' },
+          select: { closePrice: true, adjClosePrice: true },
+        });
+        if (prior) {
+          const fillClose = prior.closePrice;
+          const fillAdjClose = prior.adjClosePrice ?? prior.closePrice;
+          openPriceFinal = fillClose;
+          highPriceFinal = fillClose;
+          lowPriceFinal = fillClose;
+          closePriceFinal = fillClose;
+          adjOpenPriceFinal = fillAdjClose;
+          adjHighPriceFinal = fillAdjClose;
+          adjLowPriceFinal = fillAdjClose;
+          adjClosePriceFinal = fillAdjClose;
+          tradingValueFinal = 0n;
+          this.logger.log(
+            `[saveCandle] Suspended-day fill ${candle.stockCode} @ ${candle.candleTime
+              .toISOString()
+              .slice(0, 10)} -> close=${fillClose.toString()}`,
+          );
+        } else {
+          this.logger.warn(
+            `[saveCandle] Suspended-day ${candle.stockCode} @ ${candle.candleTime
+              .toISOString()
+              .slice(0, 10)} but no prior close found - keep raw`,
+          );
+        }
+      }
+    }
+
     await this.prisma.stockCandle.upsert({
       where: {
         stockCode_candleType_candleTime: {
@@ -197,22 +181,30 @@ export class ChartStorageService {
         },
       },
       update: {
-        highPrice: candle.highPrice,
-        lowPrice: candle.lowPrice,
-        closePrice: candle.closePrice,
+        highPrice: highPriceFinal,
+        lowPrice: lowPriceFinal,
+        closePrice: closePriceFinal,
         volume: candle.volume,
-        ...(tradingValue !== undefined && { tradingValue }),
+        ...(tradingValueFinal !== undefined && { tradingValue: tradingValueFinal }),
+        adjOpenPrice: adjOpenPriceFinal,
+        adjHighPrice: adjHighPriceFinal,
+        adjLowPrice: adjLowPriceFinal,
+        adjClosePrice: adjClosePriceFinal,
       },
       create: {
         stockCode: candle.stockCode,
         candleType: candle.candleType,
         candleTime: candle.candleTime,
-        openPrice: candle.openPrice,
-        highPrice: candle.highPrice,
-        lowPrice: candle.lowPrice,
-        closePrice: candle.closePrice,
+        openPrice: openPriceFinal,
+        highPrice: highPriceFinal,
+        lowPrice: lowPriceFinal,
+        closePrice: closePriceFinal,
         volume: candle.volume,
-        tradingValue: tradingValue ?? null,
+        tradingValue: tradingValueFinal ?? null,
+        adjOpenPrice: adjOpenPriceFinal,
+        adjHighPrice: adjHighPriceFinal,
+        adjLowPrice: adjLowPriceFinal,
+        adjClosePrice: adjClosePriceFinal,
       },
     });
 
@@ -221,37 +213,22 @@ export class ChartStorageService {
     );
   }
 
-  /**
-   * 과거 캔들 데이터 조회
-   */
-  async getCandles(
-    stockCode: string,
-    candleType: string,
-    startTime: Date,
-    endTime: Date,
-  ) {
+  private toNumberSafe(v: number | Decimal | null | undefined): number {
+    if (v == null) return 0;
+    if (typeof v === 'number') return v;
+    if (typeof (v as any).toNumber === 'function') return (v as Decimal).toNumber();
+    return Number(v as any);
+  }
+
+  async getCandles(stockCode: string, candleType: string, startTime: Date, endTime: Date) {
     return await this.prisma.stockCandle.findMany({
-      where: {
-        stockCode,
-        candleType,
-        candleTime: {
-          gte: startTime,
-          lte: endTime,
-        },
-      },
-      orderBy: {
-        candleTime: 'desc',
-      },
+      where: { stockCode, candleType, candleTime: { gte: startTime, lte: endTime } },
+      orderBy: { candleTime: 'desc' },
     });
   }
 
-  /**
-   * 여러 종목의 최근 종가 조회 (일봉 기준)
-   */
   async getLatestClosingPrices(stockCodes: string[]): Promise<Map<string, number>> {
     const priceMap = new Map<string, number>();
-
-    // 각 종목별 최신 일봉 데이터 조회
     const latestCandles = await this.prisma.$queryRaw<
       Array<{ stockCode: string; closePrice: any }>
     >`
@@ -263,18 +240,12 @@ export class ChartStorageService {
         AND candle_type = 'day'
       ORDER BY stock_code, candle_time DESC
     `;
-
-    // Map으로 변환
     latestCandles.forEach((candle) => {
       priceMap.set(candle.stockCode, Number(candle.closePrice));
     });
-
     return priceMap;
   }
 
-  /**
-   * DB에 저장된 가장 최근 일봉 날짜 조회
-   */
   async getLatestDayCandleDate(): Promise<Date | null> {
     const latest = await this.prisma.stockCandle.findFirst({
       where: { candleType: 'day' },
@@ -285,73 +256,193 @@ export class ChartStorageService {
   }
 
   /**
-   * 일봉 데이터가 N일 이상 존재하는지 확인
+   * [Patch 2] 잔존 비거래일 일봉 캔들 정리
    */
+  async cleanupNonTradingDayCandles(lookbackDays = 400, deleteLimit = 50_000): Promise<number> {
+    const today = new Date();
+    const from = new Date(today);
+    from.setUTCDate(from.getUTCDate() - lookbackDays);
+    from.setUTCHours(0, 0, 0, 0);
+
+    const distinctTimes = await this.prisma.stockCandle.findMany({
+      where: { candleType: 'day', candleTime: { gte: from, lte: today } },
+      distinct: ['candleTime'],
+      select: { candleTime: true },
+      orderBy: { candleTime: 'asc' },
+    });
+
+    const nonTradingDates = distinctTimes
+      .map((r) => r.candleTime)
+      .filter((d) => !isKrxTradingDay(d));
+
+    if (nonTradingDates.length === 0) {
+      this.logger.log('[cleanupNonTradingDayCandles] no residual non-trading-day candles found');
+      return 0;
+    }
+
+    this.logger.warn(
+      `[cleanupNonTradingDayCandles] Found ${nonTradingDates.length} non-trading dates with residual candles`,
+    );
+
+    let total = 0;
+    for (const d of nonTradingDates) {
+      if (total >= deleteLimit) break;
+      const res = await this.prisma.stockCandle.deleteMany({
+        where: { candleType: 'day', candleTime: d },
+      });
+      total += res.count;
+      if (res.count > 0) {
+        this.logger.warn(
+          `[cleanupNonTradingDayCandles] Deleted ${res.count} candles for ${d.toISOString().slice(0, 10)}`,
+        );
+      }
+    }
+    this.logger.warn(`[cleanupNonTradingDayCandles] DONE. total deleted=${total}`);
+    return total;
+  }
+
+  /**
+   * [Patch 5] 기존 빈 거래정지 일봉 백필
+   */
+  async backfillSuspendedDayCandles(lookbackDays = 400, updateLimit = 100_000): Promise<number> {
+    const today = new Date();
+    const from = new Date(today);
+    from.setUTCDate(from.getUTCDate() - lookbackDays);
+    from.setUTCHours(0, 0, 0, 0);
+
+    const empties = await this.prisma.stockCandle.findMany({
+      where: {
+        candleType: 'day',
+        candleTime: { gte: from, lte: today },
+        volume: 0n,
+        closePrice: 0,
+      },
+      select: { stockCode: true, candleTime: true },
+      orderBy: [{ stockCode: 'asc' }, { candleTime: 'asc' }],
+    });
+
+    if (empties.length === 0) {
+      this.logger.log('[backfillSuspendedDayCandles] no empty halt candles found');
+      return 0;
+    }
+
+    this.logger.warn(
+      `[backfillSuspendedDayCandles] Found ${empties.length} empty halt candles; backfilling...`,
+    );
+
+    let updated = 0;
+    const byStock = new Map<string, Date[]>();
+    for (const e of empties) {
+      if (!byStock.has(e.stockCode)) byStock.set(e.stockCode, []);
+      byStock.get(e.stockCode)!.push(e.candleTime);
+    }
+
+    for (const [stockCode, times] of byStock) {
+      if (updated >= updateLimit) break;
+      times.sort((a, b) => a.getTime() - b.getTime());
+
+      let priorClose: any = null;
+      let priorAdjClose: any = null;
+
+      const firstPrior = await this.prisma.stockCandle.findFirst({
+        where: {
+          stockCode,
+          candleType: 'day',
+          candleTime: { lt: times[0] },
+          volume: { gt: 0n },
+        },
+        orderBy: { candleTime: 'desc' },
+        select: { closePrice: true, adjClosePrice: true },
+      });
+      if (firstPrior) {
+        priorClose = firstPrior.closePrice;
+        priorAdjClose = firstPrior.adjClosePrice ?? firstPrior.closePrice;
+      }
+
+      for (const t of times) {
+        if (updated >= updateLimit) break;
+
+        if (!priorClose) {
+          const p = await this.prisma.stockCandle.findFirst({
+            where: {
+              stockCode,
+              candleType: 'day',
+              candleTime: { lt: t },
+              volume: { gt: 0n },
+            },
+            orderBy: { candleTime: 'desc' },
+            select: { closePrice: true, adjClosePrice: true },
+          });
+          if (!p) {
+            this.logger.warn(
+              `[backfillSuspendedDayCandles] no prior close for ${stockCode} @ ${t
+                .toISOString()
+                .slice(0, 10)} - skip`,
+            );
+            continue;
+          }
+          priorClose = p.closePrice;
+          priorAdjClose = p.adjClosePrice ?? p.closePrice;
+        }
+
+        await this.prisma.stockCandle.update({
+          where: {
+            stockCode_candleType_candleTime: {
+              stockCode,
+              candleType: 'day',
+              candleTime: t,
+            },
+          },
+          data: {
+            openPrice: priorClose,
+            highPrice: priorClose,
+            lowPrice: priorClose,
+            closePrice: priorClose,
+            adjOpenPrice: priorAdjClose,
+            adjHighPrice: priorAdjClose,
+            adjLowPrice: priorAdjClose,
+            adjClosePrice: priorAdjClose,
+            tradingValue: 0n,
+          },
+        });
+        updated++;
+      }
+    }
+
+    this.logger.warn(
+      `[backfillSuspendedDayCandles] DONE. updated=${updated} / found=${empties.length}`,
+    );
+    return updated;
+  }
+
   async hasSufficientHistory(days: number): Promise<boolean> {
     const oldest = await this.prisma.stockCandle.findFirst({
       where: { candleType: 'day' },
       orderBy: { candleTime: 'asc' },
       select: { candleTime: true },
     });
-
     if (!oldest) return false;
-
     const now = new Date();
     const diffMs = now.getTime() - oldest.candleTime.getTime();
     const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
     return diffDays >= days;
   }
 
-  /**
-   * 시간 파싱 (HHmmss -> Date)
-   */
   private parseTime(timeStr: string): Date {
     const now = new Date();
     const hour = parseInt(timeStr.substring(0, 2));
     const minute = parseInt(timeStr.substring(2, 4));
     const second = parseInt(timeStr.substring(4, 6));
-
     return new Date(now.getFullYear(), now.getMonth(), now.getDate(), hour, minute, second);
   }
 
-  /**
-   * Decimal 파싱 (부호 제거)
-   */
   private parseDecimal(value: string): Decimal {
     const cleaned = (value || '0').replace(/[+\-,\s]/g, '').trim();
     return new Decimal(cleaned || '0');
   }
 
-  /**
-   * BigInt 파싱 (부호/공백/소수점 제거)
-   */
   private parseBigInt(value: string): bigint {
     const cleaned = (value || '0').replace(/[+\-,\s]/g, '').trim().split('.')[0];
     return BigInt(cleaned || '0');
   }
-
-  /**
-   * Decimal 최대값
-   */
-  private max(a: Decimal, b: Decimal): Decimal {
-    return new Decimal(a).greaterThan(b) ? a : b;
-  }
-
-  /**
-   * Decimal 최소값
-   */
-  private min(a: Decimal, b: Decimal): Decimal {
-    return new Decimal(a).lessThan(b) ? a : b;
-  }
-}
-
-interface CandleBuffer {
-  stockCode: string;
-  candleType: string;
-  candleTime: Date;
-  openPrice: Decimal;
-  highPrice: Decimal;
-  lowPrice: Decimal;
-  closePrice: Decimal;
-  volume: bigint;
 }

@@ -16,6 +16,7 @@ import { LoginDto } from './dto/login.dto';
 import { FindIdDto } from './dto/find-id.dto';
 import { FindPasswordDto } from './dto/find-password.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
+import { CompleteSocialProfileDto } from './dto/complete-social-profile.dto';
 import { JwtPayload } from './strategies/jwt.strategy';
 import { SocialProfile } from './types/social-profile.type';
 
@@ -165,9 +166,11 @@ export class AuthService {
             throw new BadRequestException( '소셜 로그인 계정은 비밀번호를 변경할 수 없습니다.' );
         }
 
-        const isCurrentPasswordValid = await bcrypt.compare( dto.currentPassword, user.password );
-        if ( !isCurrentPasswordValid ) {
-            throw new UnauthorizedException( '현재 비밀번호가 일치하지 않습니다.' );
+        if ( dto.currentPassword ) {
+            const isCurrentPasswordValid = await bcrypt.compare( dto.currentPassword, user.password );
+            if ( !isCurrentPasswordValid ) {
+                throw new UnauthorizedException( '현재 비밀번호가 일치하지 않습니다.' );
+            }
         }
 
         if ( dto.newPassword !== dto.confirmPassword ) {
@@ -247,7 +250,65 @@ export class AuthService {
                 email: user.email,
                 name: user.name,
                 provider: user.provider,
+                snsLinkedYn: this.isSocialProfileCompleted( user ),
             },
+        };
+    }
+
+    async getMe( userId: string ) {
+        const user = await this.prisma.user.findUnique( {
+            where: { userId, deletedAt: null },
+        } );
+
+        if ( !user ) {
+            throw new NotFoundException( '사용자를 찾을 수 없습니다.' );
+        }
+
+        return {
+            userId: user.userId,
+            username: user.username,
+            email: user.email,
+            name: user.name,
+            provider: user.provider,
+            phone: user.phone,
+            snsLinkedYn: this.isSocialProfileCompleted( user ),
+        };
+    }
+
+    async completeSocialProfile( userId: string, dto: CompleteSocialProfileDto ) {
+        if ( !dto.agreeService || !dto.agreePrivacy ) {
+            throw new BadRequestException( '필수 약관에 동의해주세요' );
+        }
+
+        const user = await this.prisma.user.findUnique( {
+            where: { userId, deletedAt: null },
+        } );
+
+        if ( !user ) {
+            throw new NotFoundException( '사용자를 찾을 수 없습니다.' );
+        }
+
+        if ( !this.isSocialAccount( user ) ) {
+            throw new BadRequestException( 'SNS 로그인 계정만 추가 정보를 등록할 수 있습니다.' );
+        }
+
+        const updated = await this.prisma.user.update( {
+            where: { userId },
+            data: {
+                name: dto.name,
+                phone: dto.phone,
+                marketingConsent: dto.agreeMarketing ?? false,
+            },
+        } );
+
+        return {
+            userId: updated.userId,
+            username: updated.username,
+            email: updated.email,
+            name: updated.name,
+            phone: updated.phone,
+            provider: updated.provider,
+            snsLinkedYn: this.isSocialProfileCompleted( updated ),
         };
     }
 
@@ -265,6 +326,15 @@ export class AuthService {
         const last = username.slice( -1 );
         const masked = '*'.repeat( username.length - 5 );
         return visible + masked + last;
+    }
+
+    private isSocialAccount( user: { provider: AuthProvider; socialId?: string | null } ): boolean {
+        return user.provider !== AuthProvider.LOCAL && !!user.socialId;
+    }
+
+    private isSocialProfileCompleted( user: { provider: AuthProvider; socialId?: string | null; name?: string | null; phone?: string | null } ): boolean {
+        if ( !this.isSocialAccount( user ) ) return false;
+        return !!user.name && user.name !== '미연동 계정' && !!user.phone;
     }
 
     private generateTempPassword(): string {

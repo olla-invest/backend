@@ -12,12 +12,16 @@ import { DetailController } from './detail.controller';
 import { KiwoomModule } from '../../integrations/kiwoom/kiwoom.module';
 import { PrismaModule } from '../../common/prisma/prisma.module';
 import { StockInfoModule } from '../stock-info/stock-info.module';
+import { RedisModule } from '../../common/redis/redis.module';
+import { CronModule } from '../../common/cron/cron.module';
 
 @Module({
   imports: [
     KiwoomModule,
     PrismaModule,
     StockInfoModule,
+    RedisModule,
+    CronModule,
     EventEmitterModule.forRoot(),
   ],
   controllers: [RealTimeChartController, DetailController],
