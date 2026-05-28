@@ -39,14 +39,14 @@ async function bootstrap() {
     );
 
     // Enable CORS
-    const corsOrigin = configService.get( 'CORS_ORIGIN', 'http://localhost:3000' );
+    const corsOrigin = configService.get( 'CORS_ORIGIN', 'http://localhost:3000,http://localhost:5174' );
     const corsCredentials = configService.get( 'CORS_CREDENTIALS', 'true' ) === 'true';
 
     app.enableCors( {
         origin: corsOrigin === '*' ? true : corsOrigin.split( ',' ).map( ( origin: string ) => origin.trim() ),
         credentials: corsCredentials,
         methods: [ 'GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS' ],
-        allowedHeaders: [ 'Content-Type', 'Authorization', 'X-Requested-With', 'ngrok-skip-browser-warning' ],
+        allowedHeaders: [ 'Content-Type', 'Authorization', 'X-Requested-With', 'x-admin-api-key', 'ngrok-skip-browser-warning' ],
     } );
 
     const stockImageDir = path.resolve(
