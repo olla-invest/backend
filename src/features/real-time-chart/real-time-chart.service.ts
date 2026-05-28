@@ -191,6 +191,185 @@ export class RealTimeChartService implements OnModuleInit {
     };
   }
 
+  async getAdminDailyMetrics(params: {
+    tradeDate?: string;
+    marketType?: string;
+    page?: number;
+    pageSize?: number;
+    search?: string;
+    passedStaticFilters?: boolean;
+    mode?: 'aggregated' | 'raw';
+  }) {
+    const page = Math.max(1, Number(params.page) || 1);
+    const pageSize = Math.min(200, Math.max(1, Number(params.pageSize) || 50));
+    const mode = params.mode || 'aggregated';
+    const dateText = params.tradeDate?.replace(/-/g, '');
+    const latest = dateText
+      ? new Date(`${dateText.slice(0, 4)}-${dateText.slice(4, 6)}-${dateText.slice(6, 8)}T00:00:00.000Z`)
+      : await this.metricsService.getLatestTradeDate(params.marketType);
+
+    if (!latest) {
+      return { page, pageSize, totalCount: 0, totalPages: 0, tradeDate: null, rows: [], dates: [] };
+    }
+
+    const where: any = { tradeDate: latest };
+    if (mode === 'aggregated') {
+      where.passedStaticFilters = true;
+      where.rank = { gt: 0 };
+    } else if (params.passedStaticFilters !== undefined) {
+      where.passedStaticFilters = params.passedStaticFilters;
+    }
+    if (params.search?.trim()) where.stockCode = { contains: params.search.trim() };
+
+    const [allRows, dates] = await Promise.all([
+      this.prisma.stockDailyMetrics.findMany({
+        where,
+        orderBy: [{ rank: 'asc' }, { stockCode: 'asc' }],
+      }),
+      this.prisma.stockDailyMetrics.findMany({
+        distinct: ['tradeDate'],
+        orderBy: { tradeDate: 'desc' },
+        take: 30,
+        select: { tradeDate: true },
+      }),
+    ]);
+
+    const companies = await this.prisma.company.findMany({
+      where: { stockCode: { in: allRows.map((row) => row.stockCode) } },
+      select: { stockCode: true, companyName: true, marketType: true },
+    });
+    const companyMap = new Map(companies.map((company) => [company.stockCode, company]));
+    const marketMatches = (row: typeof allRows[number]) => {
+      if (!params.marketType || params.marketType === 'all') return true;
+      const company = companyMap.get(row.stockCode);
+      return company?.marketType === (params.marketType === '0' ? 'KOSPI' : 'KOSDAQ');
+    };
+    const passesDynamicFilters = (row: typeof allRows[number]) => {
+      if (mode !== 'aggregated') return true;
+      if (row.lowPrice52w == null || row.highPrice52w == null || row.ma50 == null) return false;
+      const close = Number(row.closePrice);
+      return (
+        close >= Number(row.lowPrice52w) * 1.3 &&
+        close >= Number(row.highPrice52w) * 0.75 &&
+        close > Number(row.ma50)
+      );
+    };
+    const filteredRows = allRows
+      .filter((row) => marketMatches(row))
+      .filter((row) => passesDynamicFilters(row));
+    const totalCount = filteredRows.length;
+    const rows = filteredRows.slice((page - 1) * pageSize, page * pageSize);
+    const movingAverageMap = await this.getAdminMovingAverageMap(
+      rows.map((row) => row.stockCode),
+      latest,
+    );
+
+    return {
+      page,
+      pageSize,
+      totalCount,
+      totalPages: Math.ceil(totalCount / pageSize),
+      tradeDate: latest.toISOString().split('T')[0],
+      mode,
+      dates: dates.map((date) => date.tradeDate.toISOString().split('T')[0]),
+      rows: rows.map((row, index) => {
+        const company = companyMap.get(row.stockCode);
+        const movingAverages = movingAverageMap.get(row.stockCode);
+        return {
+          metricId: row.metricId,
+          stockCode: row.stockCode,
+          companyName: company?.companyName || '-',
+          marketType: company?.marketType || row.marketType,
+          rank: mode === 'aggregated' ? (page - 1) * pageSize + index + 1 : row.rank,
+          storedRank: row.rank,
+          closePrice: Number(row.closePrice),
+          relativeStrengthScore: Number(row.relativeStrengthScore),
+          isNewHigh: row.isNewHigh,
+          highPrice52w: row.highPrice52w ? Number(row.highPrice52w) : null,
+          lowPrice52w: row.lowPrice52w ? Number(row.lowPrice52w) : null,
+          priceChange1d: row.priceChange1d ? Number(row.priceChange1d) : null,
+          priceChangeRate1d: row.priceChangeRate1d ? Number(row.priceChangeRate1d) : null,
+          volume1d: row.volume1d?.toString() || null,
+          tradingValue: row.tradingValue?.toString() || null,
+          ma50: row.ma50 ? Number(row.ma50) : null,
+          ma150: movingAverages?.ma150 ?? null,
+          ma200: movingAverages?.ma200 ?? null,
+          ma200Uptrend: movingAverages?.ma200Uptrend ?? null,
+          passedStaticFilters: row.passedStaticFilters,
+          isVolatilityContraction: row.isVolatilityContraction,
+          isPriceCompression: row.isPriceCompression,
+          isTrendTemplate: row.isTrendTemplate,
+          strengthContinuationDays: row.strengthContinuationDays,
+          createdAt: row.createdAt,
+          updatedAt: row.updatedAt,
+        };
+      }),
+    };
+  }
+
+  private async getAdminMovingAverageMap(stockCodes: string[], tradeDate: Date): Promise<Map<string, {
+    ma150: number | null;
+    ma200: number | null;
+    ma200Uptrend: boolean | null;
+  }>> {
+    const result = new Map<string, { ma150: number | null; ma200: number | null; ma200Uptrend: boolean | null }>();
+    if (stockCodes.length === 0) return result;
+
+    const from = new Date(tradeDate);
+    from.setUTCDate(from.getUTCDate() - 420);
+
+    const candles = await this.prisma.stockCandle.findMany({
+      where: {
+        stockCode: { in: stockCodes },
+        candleType: 'day',
+        candleTime: { gte: from, lte: tradeDate },
+      },
+      orderBy: [{ stockCode: 'asc' }, { candleTime: 'asc' }],
+      select: {
+        stockCode: true,
+        candleTime: true,
+        closePrice: true,
+        adjClosePrice: true,
+        volume: true,
+      },
+    });
+
+    const candlesByStock = new Map<string, typeof candles>();
+    for (const candle of candles) {
+      if (!isKrxTradingDay(candle.candleTime) || candle.volume <= 0n) continue;
+      if (!candlesByStock.has(candle.stockCode)) candlesByStock.set(candle.stockCode, []);
+      candlesByStock.get(candle.stockCode)!.push(candle);
+    }
+
+    const average = (items: typeof candles) =>
+      items.reduce((sum, candle) => {
+        const price = (candle.adjClosePrice ?? candle.closePrice).toNumber();
+        return sum + price;
+      }, 0) / items.length;
+
+    for (const stockCode of stockCodes) {
+      const stockCandles = candlesByStock.get(stockCode) ?? [];
+      const ma150Slice = stockCandles.slice(-150);
+      const ma200Slice = stockCandles.slice(-200);
+      const ma150 = ma150Slice.length >= 150 ? average(ma150Slice) : null;
+      const ma200 = ma200Slice.length >= 200 ? average(ma200Slice) : null;
+      const ma200Uptrend = (() => {
+        if (stockCandles.length < 220) return null;
+        let prev = -Infinity;
+        for (let i = 20; i >= 0; i--) {
+          const slice = stockCandles.slice(-200 - i, i === 0 ? undefined : -i);
+          const ma = average(slice);
+          if (ma <= prev) return false;
+          prev = ma;
+        }
+        return true;
+      })();
+      result.set(stockCode, { ma150, ma200, ma200Uptrend });
+    }
+
+    return result;
+  }
+
   /**
    * 실시간 WebSocket 연결 상태 조회
    */

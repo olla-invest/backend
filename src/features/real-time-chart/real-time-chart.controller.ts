@@ -204,6 +204,29 @@ export class RealTimeChartController {
     return this.chartService.getRealtimeStatus();
   }
 
+  @Get('admin/metrics')
+  @UseGuards(AdminApiKeyGuard)
+  @ApiOperation( { summary: '[관리자] 일자별 메트릭 조회' } )
+  async getAdminDailyMetrics(
+    @Query('tradeDate') tradeDate?: string,
+    @Query('marketType') marketType: '0' | '10' | 'all' = 'all',
+    @Query('page') page?: string,
+    @Query('pageSize') pageSize?: string,
+    @Query('search') search?: string,
+    @Query('passedStaticFilters') passedStaticFilters?: string,
+    @Query('mode') mode?: 'aggregated' | 'raw',
+  ) {
+    return this.chartService.getAdminDailyMetrics({
+      tradeDate,
+      marketType,
+      page: page ? Number(page) : undefined,
+      pageSize: pageSize ? Number(pageSize) : undefined,
+      search,
+      passedStaticFilters: passedStaticFilters === undefined ? undefined : passedStaticFilters === 'true',
+      mode: mode === 'raw' ? 'raw' : 'aggregated',
+    });
+  }
+
   @Post('realtime/ensure-connection')
   @UseGuards(AdminApiKeyGuard)
   @ApiOperation( { summary: '[관리자] 실시간 연결 확인 및 재연결' } )
