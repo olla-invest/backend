@@ -166,7 +166,11 @@ export class AuthService {
             throw new BadRequestException( '소셜 로그인 계정은 비밀번호를 변경할 수 없습니다.' );
         }
 
-        if ( dto.currentPassword ) {
+        // 임시 비밀번호 상태가 아닌 경우 현재 비밀번호 검증 필수
+        if ( !user.isTempPassword ) {
+            if ( !dto.currentPassword ) {
+                throw new BadRequestException( '현재 비밀번호를 입력해주세요.' );
+            }
             const isCurrentPasswordValid = await bcrypt.compare( dto.currentPassword, user.password );
             if ( !isCurrentPasswordValid ) {
                 throw new UnauthorizedException( '현재 비밀번호가 일치하지 않습니다.' );

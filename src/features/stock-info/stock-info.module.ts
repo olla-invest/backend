@@ -5,11 +5,12 @@ import { StockInfoService } from './stock-info.service';
 import { DartModule } from '../../integrations/dart/dart.module';
 import { PrismaModule } from '../../common/prisma/prisma.module';
 import { KiwoomModule } from '../../integrations/kiwoom/kiwoom.module';
+import { AdminApiKeyGuard } from '../../common/auth/guards/admin-api-key.guard';
 
 @Module({
   imports: [ConfigModule, DartModule, PrismaModule, KiwoomModule],
   controllers: [StockInfoController],
-  providers: [StockInfoService],
+  providers: [StockInfoService, AdminApiKeyGuard],
   exports: [StockInfoService],
 })
 export class StockInfoModule {}

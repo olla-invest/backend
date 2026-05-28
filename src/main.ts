@@ -7,14 +7,27 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import * as fs from 'fs';
 import * as express from 'express';
 import * as path from 'path';
+import session = require('express-session');
 import { addDefaultResponseSchemas } from './common/swagger/default-response-schemas';
 
 async function bootstrap() {
-    const app = await NestFactory.create( AppModule );
+    const app = await NestFactory.create( AppModule, { rawBody: true } );
 
     // Use Winston logger
     app.useLogger( app.get( WINSTON_MODULE_NEST_PROVIDER ) );
     const configService = app.get( ConfigService );
+
+    // OAuth CSRF 방어용 세션 (state 파라미터 검증에만 사용, 인증 세션 아님)
+    app.use( session( {
+        secret: configService.get<string>( 'SESSION_SECRET', 'olla-oauth-state-secret' ),
+        resave: false,
+        saveUninitialized: false,
+        cookie: {
+            httpOnly: true,
+            secure: configService.get( 'NODE_ENV' ) === 'production',
+            maxAge: 10 * 60 * 1000, // 10분 (OAuth 플로우 완료 시간)
+        },
+    } ) );
 
     // Enable validation
     app.useGlobalPipes(

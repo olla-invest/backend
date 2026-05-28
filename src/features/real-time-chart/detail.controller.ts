@@ -2,6 +2,7 @@ import { Controller, Get, Post, Param, Query, Body } from '@nestjs/common';
 import { RealTimeChartService } from './real-time-chart.service';
 import { StockInfoService } from '../stock-info/stock-info.service';
 import { Public } from '../../common/auth/decorators/public.decorator';
+import { DateStringPipe, EnumPipe, RegexPipe, RsFiltersPipe, StockCodePipe } from '../../common/pipes/input-validation.pipes';
 
 @Controller('real-time-chart/detail')
 @Public()
@@ -27,25 +28,22 @@ export class DetailController {
    */
   @Get('chart/:stockCode')
   async getDetailChart(
-    @Param('stockCode') stockCode: string,
-    @Query('chartType') chartType: 'minute' | 'tick' | 'day' | 'week' | 'month' | 'year' = 'day',
-    @Query('interval') interval: string = '1',
-    @Query('startDate') startDate?: string,
-    @Query('endDate') endDate?: string,
-    @Query('historyStartDate') historyStartDate?: string,
-    @Query('historyEndDate') historyEndDate?: string,
+    @Param('stockCode', new StockCodePipe()) stockCode: string,
+    @Query('chartType', new EnumPipe(['minute', 'tick', 'day', 'week', 'month', 'year'] as const, 'chartType', true)) chartType: 'minute' | 'tick' | 'day' | 'week' | 'month' | 'year' = 'day',
+    @Query('interval', new EnumPipe(['1', '3', '5', '10', '15', '30', '45', '60'] as const, 'interval', true)) interval: string = '1',
+    @Query('startDate', new DateStringPipe('startDate', true)) startDate?: string,
+    @Query('endDate', new DateStringPipe('endDate', true)) endDate?: string,
+    @Query('historyStartDate', new DateStringPipe('historyStartDate', true)) historyStartDate?: string,
+    @Query('historyEndDate', new DateStringPipe('historyEndDate', true)) historyEndDate?: string,
   ) {
     const today = new Date();
     const todayStr = `${today.getFullYear()}${String(today.getMonth() + 1).padStart(2, '0')}${String(today.getDate()).padStart(2, '0')}`;
 
-    const toIso = (yyyymmdd: string) =>
-      `${yyyymmdd.substring(0, 4)}-${yyyymmdd.substring(4, 6)}-${yyyymmdd.substring(6, 8)}`;
-
     const histStart = historyStartDate
-      ? toIso(historyStartDate)
+      ? this.toIsoDate(historyStartDate)
       : `${today.getFullYear() - 1}-01-01`;
     const histEnd = historyEndDate
-      ? toIso(historyEndDate)
+      ? this.toIsoDate(historyEndDate)
       : today.toISOString().split('T')[0];
 
     const [summary, candles, priceHistory] = await Promise.allSettled([
@@ -79,14 +77,20 @@ export class DetailController {
       case 'month':
       case 'year': {
         const start = startDate
-          ? `${startDate.substring(0, 4)}-${startDate.substring(4, 6)}-${startDate.substring(6, 8)}`
+          ? this.toIsoDate(startDate)
           : `${new Date().getFullYear() - 1}-01-01`;
         const end = endDate
-          ? `${endDate.substring(0, 4)}-${endDate.substring(4, 6)}-${endDate.substring(6, 8)}`
+          ? this.toIsoDate(endDate)
           : new Date().toISOString().split('T')[0];
         return await this.chartService.getStoredCandles(stockCode, chartType, start, end);
       }
     }
+  }
+
+  private toIsoDate(date: string): string {
+    if (date.includes('T')) return date.split('T')[0];
+    if (date.includes('-')) return date;
+    return `${date.substring(0, 4)}-${date.substring(4, 6)}-${date.substring(6, 8)}`;
   }
 
   /**
@@ -105,10 +109,10 @@ export class DetailController {
    */
   @Post('rs-history/:stockCode')
   async getRsHistory(
-    @Param('stockCode') stockCode: string,
-    @Body('startDate') startDate: string,
-    @Body('endDate') endDate: string,
-    @Body('rsFilters') rsFilters?: Array<{
+    @Param('stockCode', new StockCodePipe()) stockCode: string,
+    @Body('startDate', new DateStringPipe('startDate')) startDate: string,
+    @Body('endDate', new DateStringPipe('endDate', true)) endDate: string,
+    @Body('rsFilters', new RsFiltersPipe(true)) rsFilters?: Array<{
       rsStartDate: string;
       rsEndDate: string;
       strength: number;
@@ -128,8 +132,8 @@ export class DetailController {
    */
   @Get('stock-info/:stockCode')
   async getStockInfo(
-    @Param('stockCode') stockCode: string,
-    @Query('year') year?: string,
+    @Param('stockCode', new StockCodePipe()) stockCode: string,
+    @Query('year', new RegexPipe(/^\d{4}$/, 'year', true)) year?: string,
   ) {
     return await this.stockInfoService.getStockInfoSummary(stockCode, year);
   }

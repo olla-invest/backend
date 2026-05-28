@@ -14,6 +14,7 @@ import { PrismaModule } from '../../common/prisma/prisma.module';
 import { StockInfoModule } from '../stock-info/stock-info.module';
 import { RedisModule } from '../../common/redis/redis.module';
 import { CronModule } from '../../common/cron/cron.module';
+import { AdminApiKeyGuard } from '../../common/auth/guards/admin-api-key.guard';
 
 @Module({
   imports: [
@@ -33,6 +34,7 @@ import { CronModule } from '../../common/cron/cron.module';
     ChartGateway,
     RealtimePriceCacheService,
     DataSchedulerService,
+    AdminApiKeyGuard,
   ],
   exports: [RealTimeChartService, RealtimePriceCacheService],
 })

@@ -1,0 +1,58 @@
+,,,,,
+ □  종가 ,,,,,
+정보상품,업무명,URI,설명,제공시간,비 고
+ 증권A,주식 종목 리스트,/v2/market/stocks/{marketcode}/lists,종목리스트,6:30,"(공통) 시장구분을 '유가증권' 선택
+  - Marketcode (Kospi)"
+,주식 종목 마스터,/v2/market/stocks/{marketcode}/{issuecode}/master,종목배치,6:30,
+,주식 종목 마스터(요구형),/v2/market/stocks/{marketcode}/{issuecode}/selectivemaster,종목배치-종목별 고객이 요구하는 항목만 조회 결과로 전송함,6:30,
+,주식 종목 종가,/v2/market/stocks/{marketcode}/{issuecode}/closeprice,종목 당일 종가제공,"전일,당일 15:40이후",
+,주식 공매도 일별조회,/v2/market/stocks/{marketcode}/{issuecode}/shortsell,18시 이후 제공,"전일,당일18:00이후",
+,주식 외국인 보유율 히스토리,/v2/market/stocks/{marketcode}/{issuecode}/foreignhistory,종목 외국인 보유율 과거 데이터 제공,6:30,
+,주식 종목 히스토리,/v2/market/stocks/{marketcode}/{issuecode}/history,종목 일별 과거 데이터 제공,6:30,
+ 증권B,주식 종목 리스트,/v2/market/stocks/{marketcode}/lists,종목리스트,6:30,"(공통) 시장구분을  '코스닥시장',코넥스시장 선택
+ - Marketcode (Kosdaq,Konex)"
+,주식 종목 마스터,/v2/market/stocks/{marketcode}/{issuecode}/master,종목배치,6:30,
+,주식 종목 마스터(요구형),/v2/market/stocks/{marketcode}/{issuecode}/selectivemaster,종목배치-종목별 고객이 요구하는 항목만 조회 결과로 전송함,6:30,
+,주식 종목 종가,/v2/market/stocks/{marketcode}/{issuecode}/closeprice,종목 당일 종가제공,"전일,당일 15:40이후",
+,주식 공매도 일별조회,/v2/market/stocks/{marketcode}/{issuecode}/shortsell,18시 이후 제공,"전일,당일18:00이후",
+,주식 외국인 보유율 히스토리,/v2/market/stocks/{marketcode}/{issuecode}/foreignhistory,종목 외국인 보유율 과거 데이터 제공,6:30,
+,주식 종목 히스토리,/v2/market/stocks/{marketcode}/{issuecode}/history,종목 일별 과거 데이터 제공,6:30,
+증권C,주식 종목 리스트,/v2/market/stocks/{marketcode}/lists,종목리스트,6:30,"(공통) ETF/ETN/ELW 조회가능, 
+  시장구분을 '유가증권' 선택
+  - Marketcode (Kospi) 선책하고, ETF/ETN/ELW종목 조회"
+,주식 종목 마스터,/v2/market/stocks/{marketcode}/{issuecode}/master,종목배치,6:30,
+,주식 종목 마스터(요구형),/v2/market/stocks/{marketcode}/{issuecode}/selectivemaster,종목배치-종목별 고객이 요구하는 항목만 조회 결과로 전송함,6:30,
+,주식 종목 종가,/v2/market/stocks/{marketcode}/{issuecode}/closeprice,종목 당일 종가제공,"전일,당일 15:40이후",
+,주식 공매도 일별조회,/v2/market/stocks/{marketcode}/{issuecode}/shortsell,18시 이후 제공,"전일,당일18:00이후",
+,주식 외국인 보유율 히스토리,/v2/market/stocks/{marketcode}/{issuecode}/foreignhistory,종목 외국인 보유율 과거 데이터 제공,6:30,
+,주식 종목 히스토리,/v2/market/stocks/{marketcode}/{issuecode}/history,종목 일별 과거 데이터 제공,6:30,
+파생상품A,상품/지수선물 종목 리스트,/v2/market/futures/{marketcode}/lists,종목리스트,6:30,"(공통) 시장구분은 '파생'이고, 
+   Marektcode  및 연결선물코드는 
+   '시장코드 및 연결선쿨 코드표 참조"
+,상품/지수선물 종목 마스터,/v2/market/futures/{marketcode}/{issuecode}/master,선물 종목에 대한 기초 자료 제공,6:30,
+,상품/지수선물 종목 종가,/v2/market/futures/{marketcode}/{issuecode}/closeprice,선물 당일 종가제공,15:50,
+,상품/지수선물 종목 히스토리,/v2/market/futures/{marketcode}/{issuecode}/history,상품/지수선물 종목 일별 과거데이터 제공(연결선물코드 지원-코드표1),6:30,
+,상품/지수 옵션 종목 리스트,/v2/market/options/{marketcode}/lists,종목리스트,6:30,
+,상품/지수 옵션 종목 마스터,/v2/market/options/{marketcode}/{issuecode}/master,옵션 종목에 대한 기초 자료 제공,6:30,
+,상품/지수옵션 종목 종가,/v2/market/options/{marketcode}/{issuecode}/closeprice,옵션 당일 종가제공,"전일,당일 15:50이후",
+,상품/지수옵션 종목 히스토리,/v2/market/options/{marketcode}/{issuecode}/history,상품/지수옵션 종목 일별 과거 데이터 제공,6:30,
+파생상품B,,n/a,제공서비스 없음 ,,유로스톡스 50 선물
+일반상품 A,,n/a,제공서비스 없음 ,,"금현물, 배출권, "
+KRX채권 A,,n/a,제공서비스 없음 ,,장내채권
+KRX 지수 1,업종 종가,/v2/market/index/{marketcode}/{issuecode}/closeindex,업종 당일 종가제공,"전일,당일 15:40이후",
+,업종 지수,/v2/market/index/{marketcode}/{issuecode}/index,전체 업종지수(KOSPI/KOSDAQ지수 포함),실시간,
+,업종 히스토리,/v2/market/index/{marketcode}/{issuecode}/history,전체 업종 일별 과거 데이터 제공(KOSPI/KOSDAQ지수 포함),6:30,
+,KOSPI/KOSDAQ지수 투자자 마감정보,/v2/market/stocks/{marketcode}/investors,KOSPI/KOSDAQ 투자자 마감정보(업종-투자자별 참고),"전일,당일 15:40이후",
+KRX 지수 2,업종 종가,/v2/market/index/{marketcode}/{issuecode}/closeindex,업종 당일 종가제공,"전일,당일 15:40이후",
+,업종 지수,/v2/market/index/{marketcode}/{issuecode}/index,전체 업종지수(KOSPI/KOSDAQ지수 포함),실시간,
+,업종 히스토리,/v2/market/index/{marketcode}/{issuecode}/history,전체 업종 일별 과거 데이터 제공(KOSPI/KOSDAQ지수 포함),6:30,
+,KOSPI/KOSDAQ지수 투자자 마감정보,/v2/market/stocks/{marketcode}/investors,KOSPI/KOSDAQ 투자자 마감정보(업종-투자자별 참고),"전일,당일 15:40이후",
+시장조치 ,유가증권시장,n/a,제공서비스 없음 ,,
+,코스닥시장,n/a,제공서비스 없음 ,,
+,코넥스시장,n/a,제공서비스 없음 ,,
+신용거래,유가증권시장,n/a,제공서비스 없음 ,,
+,코스닥시장,n/a,제공서비스 없음 ,,
+,코넥스시장,n/a,제공서비스 없음 ,,
+종목별 투자자,유가증권시장,/v2/market/stocks/{marketcode}/{issuecode}/investors,장마감후 종목별투자자별 매매동향,"전일,당일 15:30이후",
+정보,코스닥시장,/v2/market/stocks/{marketcode}/{issuecode}/investors,장마감후 종목별투자자별 매매동향,"전일,당일 15:30이후",
+,코넥스시장,/v2/market/stocks/{marketcode}/{issuecode}/investors,장마감후 종목별투자자별 매매동향,"전일,당일 15:30이후",

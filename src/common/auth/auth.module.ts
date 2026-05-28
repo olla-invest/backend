@@ -12,7 +12,7 @@ import { EmailModule } from '../email/email.module';
 
 @Module( {
     imports: [
-        PassportModule.register( { defaultStrategy: 'jwt' } ),
+        PassportModule.register( { defaultStrategy: 'jwt', session: true } ),
         JwtModule.registerAsync( {
             imports: [ ConfigModule ],
             inject: [ ConfigService ],

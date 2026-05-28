@@ -175,7 +175,7 @@ export class InitialSetupService {
           companyName: stock.name,
           stockCode: stock.code,
           marketType: mappedMarketType,
-          tradingState: stock.state || null,
+          tradingState: this.normalizeTradingState(stock.state),
         },
       });
 
@@ -187,6 +187,19 @@ export class InitialSetupService {
     );
 
     return { savedCount, skippedCount };
+  }
+
+  private normalizeTradingState(state?: string | null): string | null {
+    if (!state) return null;
+
+    const normalized = state.trim();
+    if (!normalized) return null;
+
+    if (normalized.includes('정지')) {
+      return '거래정지';
+    }
+
+    return normalized.slice(0, 20);
   }
 
   /**

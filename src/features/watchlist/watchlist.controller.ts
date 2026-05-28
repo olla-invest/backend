@@ -1,7 +1,8 @@
-import { Controller, Get, Post, Delete, Param, Body, ParseIntPipe } from '@nestjs/common';
+import { Controller, Get, Post, Delete, Param, Body } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth, ApiParam, ApiBody } from '@nestjs/swagger';
 import { WatchlistService } from './watchlist.service';
 import { CurrentUser } from '../../common/auth/decorators/current-user.decorator';
+import { IntRangePipe, StockCodePipe } from '../../common/pipes/input-validation.pipes';
 
 @ApiTags( '관심종목/테마 (Watchlist)' )
 @ApiBearerAuth( 'access-token' )
@@ -22,7 +23,7 @@ export class WatchlistController {
   @ApiBody( { schema: { example: { stockCode: '005930' } } } )
   async addStock(
     @CurrentUser('userId') userId: string,
-    @Body('stockCode') stockCode: string,
+    @Body('stockCode', new StockCodePipe()) stockCode: string,
   ) {
     return this.watchlistService.addStock(userId, stockCode);
   }
@@ -32,7 +33,7 @@ export class WatchlistController {
   @ApiParam( { name: 'stockCode', example: '005930', description: '종목코드' } )
   async removeStock(
     @CurrentUser('userId') userId: string,
-    @Param('stockCode') stockCode: string,
+    @Param('stockCode', new StockCodePipe()) stockCode: string,
   ) {
     return this.watchlistService.removeStock(userId, stockCode);
   }
@@ -50,7 +51,7 @@ export class WatchlistController {
   @ApiBody( { schema: { example: { themeCode: 101 } } } )
   async addTheme(
     @CurrentUser('userId') userId: string,
-    @Body('themeCode', ParseIntPipe) themeCode: number,
+    @Body('themeCode', new IntRangePipe('themeCode', 1, 999999)) themeCode: number,
   ) {
     return this.watchlistService.addTheme(userId, themeCode);
   }
@@ -60,7 +61,7 @@ export class WatchlistController {
   @ApiParam( { name: 'themeCode', example: 101, description: '테마코드' } )
   async removeTheme(
     @CurrentUser('userId') userId: string,
-    @Param('themeCode', ParseIntPipe) themeCode: number,
+    @Param('themeCode', new IntRangePipe('themeCode', 1, 999999)) themeCode: number,
   ) {
     return this.watchlistService.removeTheme(userId, themeCode);
   }

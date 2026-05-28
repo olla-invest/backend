@@ -758,7 +758,7 @@ export class KiwoomRestService {
 
     try {
       const token = await this.authService.ensureValidToken();
-      this.logger.log(`Fetching stock list for market type: ${marketType}`);
+      this.logger.debug(`Fetching stock list for market type: ${marketType}`);
 
       do {
         const headers: Record<string, string> = {

@@ -1244,17 +1244,11 @@ export class RealTimeChartService implements OnModuleInit {
           this.kiwoomRest.getStockList('10'),
         ]);
         const allList = [...kospiResult.list, ...kosdaqResult.list];
-        this.syncTradingStates(allList).catch((e) =>
-          this.logger.warn(`[fetchStockList] syncTradingStates failed: ${e.message}`),
-        );
         validStocks = allList.filter(
           (s: any) => s.code.match(/^\d{6}$/) && !s.code.endsWith('5') && !this.isHaltedState(s.state),
         );
       } else {
         const result = await this.kiwoomRest.getStockList(marketType);
-        this.syncTradingStates(result.list).catch((e) =>
-          this.logger.warn(`[fetchStockList] syncTradingStates failed: ${e.message}`),
-        );
         validStocks = result.list.filter(
           (s: any) => s.code.match(/^\d{6}$/) && !s.code.endsWith('5') && !this.isHaltedState(s.state),
         );
@@ -1328,6 +1322,19 @@ export class RealTimeChartService implements OnModuleInit {
     return state.includes('정지');
   }
 
+  private normalizeTradingState(state?: string | null): string | null {
+    if (!state) return null;
+
+    const normalized = state.trim();
+    if (!normalized) return null;
+
+    if (this.isHaltedState(normalized)) {
+      return '거래정지';
+    }
+
+    return normalized.slice(0, 20);
+  }
+
   async syncTradingStates(stocks?: any[]): Promise<void> {
     if (!stocks) {
       const [kospi, kosdaq] = await Promise.all([
@@ -1349,7 +1356,7 @@ export class RealTimeChartService implements OnModuleInit {
       uniqueStocks.map((s) =>
         this.prisma.company.updateMany({
           where: { stockCode: s.code, deletedAt: null },
-          data: { tradingState: s.state || null },
+          data: { tradingState: this.normalizeTradingState(s.state) },
         }),
       ),
     );
@@ -2119,11 +2126,15 @@ export class RealTimeChartService implements OnModuleInit {
   async getStoredCandles(
     stockCode: string,
     candleType: string,
-    startDate: string,
-    endDate: string,
+    startDate?: string,
+    endDate?: string,
   ) {
-    const startTime = new Date(startDate);
-    const endTime = new Date(endDate);
+    const now = new Date();
+    const defaultStart = new Date(now);
+    defaultStart.setFullYear(defaultStart.getFullYear() - 1);
+
+    const startTime = this.parseDateInput(startDate, defaultStart);
+    const endTime = this.parseDateInput(endDate, now);
     endTime.setUTCHours(23, 59, 59, 999);
 
     // 일봉/주봉/월봉/연봉은 오늘 미완성 캔들 제외 → 전 거래일까지만
@@ -2184,13 +2195,35 @@ export class RealTimeChartService implements OnModuleInit {
     return candleTime.toISOString();
   }
 
+  private parseDateInput(dateStr: string | undefined, fallback: Date): Date {
+    if (!dateStr) return new Date(fallback);
+    if (/^\d{8}$/.test(dateStr)) {
+      return new Date(`${dateStr.slice(0, 4)}-${dateStr.slice(4, 6)}-${dateStr.slice(6, 8)}`);
+    }
+    return new Date(dateStr);
+  }
+
   /**
    * YYYYMMDD 문자열 → Date 변환
    */
+  private normalizeYYYYMMDD(dateStr: string): string {
+    return dateStr.includes('-') ? dateStr.replace(/-/g, '') : dateStr;
+  }
+
+  private formatYYYYMMDD(dateStr: string): string {
+    const normalized = this.normalizeYYYYMMDD(dateStr);
+    return `${normalized.slice(0, 4)}-${normalized.slice(4, 6)}-${normalized.slice(6, 8)}`;
+  }
+
+  private formatDateToYYYYMMDD(date: Date): string {
+    return date.toISOString().split('T')[0].replace(/-/g, '');
+  }
+
   private parseYYYYMMDD(dateStr: string): Date {
-    const y = dateStr.substring(0, 4);
-    const m = dateStr.substring(4, 6);
-    const d = dateStr.substring(6, 8);
+    const normalized = this.normalizeYYYYMMDD(dateStr);
+    const y = normalized.substring(0, 4);
+    const m = normalized.substring(4, 6);
+    const d = normalized.substring(6, 8);
     return new Date(`${y}-${m}-${d}`);
   }
 
@@ -2207,15 +2240,20 @@ export class RealTimeChartService implements OnModuleInit {
     // rsFilters → 기간(달력일 수)과 가중치로 변환
     let periods: number[];
     let weights: number[];
+    const normalizedRsFilters = rsFilters?.map((f) => ({
+      rsStartDate: this.normalizeYYYYMMDD(f.rsStartDate),
+      rsEndDate: this.normalizeYYYYMMDD(f.rsEndDate),
+      strength: f.strength,
+    }));
 
-    if (rsFilters && rsFilters.length > 0) {
-      periods = rsFilters.map((f) => {
+    if (normalizedRsFilters && normalizedRsFilters.length > 0) {
+      periods = normalizedRsFilters.map((f) => {
         const from = this.parseYYYYMMDD(f.rsStartDate); // 이전 날짜 (earlier)
         const to = this.parseYYYYMMDD(f.rsEndDate);     // 이후 날짜 (later)
         const diffDays = Math.floor((to.getTime() - from.getTime()) / (1000 * 60 * 60 * 24));
         return diffDays > 0 ? diffDays : 63;
       });
-      weights = rsFilters.map((f) => f.strength);
+      weights = normalizedRsFilters.map((f) => f.strength);
     } else {
       periods = [63];
       weights = [100];
@@ -2233,6 +2271,24 @@ export class RealTimeChartService implements OnModuleInit {
     const fetchStart = this.parseYYYYMMDD(startDate);
     fetchStart.setDate(fetchStart.getDate() - bufferDays);
     const fetchEnd = this.parseYYYYMMDD(endDate);
+    const appliedRsFilters = normalizedRsFilters && normalizedRsFilters.length > 0
+      ? normalizedRsFilters
+      : (() => {
+        const defaultStart = new Date(fetchEnd);
+        defaultStart.setDate(defaultStart.getDate() - periods[0]);
+        return [{
+          rsStartDate: this.formatDateToYYYYMMDD(defaultStart),
+          rsEndDate: this.normalizeYYYYMMDD(endDate),
+          strength: weights[0],
+        }];
+      })();
+    const longestFilter = appliedRsFilters.reduce((max, filter) => {
+      const filterDays = this.parseYYYYMMDD(filter.rsEndDate).getTime() - this.parseYYYYMMDD(filter.rsStartDate).getTime();
+      const maxDays = this.parseYYYYMMDD(max.rsEndDate).getTime() - this.parseYYYYMMDD(max.rsStartDate).getTime();
+      return filterDays > maxDays ? filter : max;
+    });
+    const queryStartDate = this.formatYYYYMMDD(longestFilter.rsStartDate);
+    const queryEndDate = this.formatYYYYMMDD(longestFilter.rsEndDate);
 
     // 종목 + 지수 일봉 조회
     const [stockCandles, indexCandles] = await Promise.all([
@@ -2247,6 +2303,25 @@ export class RealTimeChartService implements OnModuleInit {
     ]);
 
     // startDate 이후 거래일만 결과로 반환 (버퍼 기간 제외)
+    const filtersWithPeriods = appliedRsFilters.map((filter, index) => {
+      if (!normalizedRsFilters || normalizedRsFilters.length === 0) {
+        return { ...filter, period: periods[index] ?? 63 };
+      }
+
+      const filterStart = this.parseYYYYMMDD(filter.rsStartDate);
+      const filterEnd = this.parseYYYYMMDD(filter.rsEndDate);
+      const tradingDayCount = indexCandles.filter((c) => {
+        const candleDate = c.candleTime;
+        return candleDate >= filterStart && candleDate <= filterEnd;
+      }).length;
+
+      return {
+        ...filter,
+        period: tradingDayCount > 0 ? tradingDayCount : periods[index],
+      };
+    });
+    const tradingPeriods = filtersWithPeriods.map((filter) => filter.period);
+
     const rangeStart = this.parseYYYYMMDD(startDate);
     const tradeDatesInRange = stockCandles.filter((c) => c.candleTime >= rangeStart);
 
@@ -2266,7 +2341,7 @@ export class RealTimeChartService implements OnModuleInit {
       const indexNow = lastIndex.closePrice.toNumber();
 
       const rsValues: number[] = [];
-      for (const period of periods) {
+      for (const period of tradingPeriods) {
         if (stockUpTo.length <= period || indexUpTo.length <= period) {
           rsValues.push(0);
           continue;
@@ -2298,7 +2373,17 @@ export class RealTimeChartService implements OnModuleInit {
       data.push({ date: dateStr, rsRaw: parseFloat(weightedRS.toFixed(6)) });
     }
 
-    return { stockCode, indexCode, periods, weights, count: data.length, data };
+    return {
+      stockCode,
+      indexCode,
+      periods: tradingPeriods,
+      weights,
+      rsFilters: filtersWithPeriods,
+      queryStartDate,
+      queryEndDate,
+      count: data.length,
+      data,
+    };
   }
 
   /**

@@ -1,9 +1,11 @@
-import { Controller, Get, Post, Delete, Param, Query, ParseIntPipe, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Delete, Param, Query, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth, ApiParam, ApiQuery } from '@nestjs/swagger';
 import { IssueThemeService } from './issue-theme.service';
 import { Public } from '../../common/auth/decorators/public.decorator';
 import { OptionalJwtAuthGuard } from '../../common/auth/guards/optional-jwt-auth.guard';
+import { AdminApiKeyGuard } from '../../common/auth/guards/admin-api-key.guard';
 import { CurrentUser } from '../../common/auth/decorators/current-user.decorator';
+import { IntRangePipe } from '../../common/pipes/input-validation.pipes';
 
 @ApiTags( '이슈테마 (Issue Theme)' )
 @Controller('issue-theme')
@@ -16,10 +18,10 @@ export class IssueThemeController {
   @ApiQuery( { name: 'display', required: false, example: '20', description: '페이지당 항목 수' } )
   @ApiQuery( { name: 'page', required: false, example: '1', description: '페이지 번호' } )
   async getThemeList(
-    @Query('display') display: string = '20',
-    @Query('page') page: string = '1',
+    @Query('display', new IntRangePipe('display', 1, 100, true)) display: number = 20,
+    @Query('page', new IntRangePipe('page', 1, 10000, true)) page: number = 1,
   ) {
-    return this.issueThemeService.getThemeList(Number(display), Number(page));
+    return this.issueThemeService.getThemeList(display, page);
   }
 
   @Get(':themeCode')
@@ -28,7 +30,7 @@ export class IssueThemeController {
   @ApiOperation( { summary: '테마 상세 조회', description: '기본정보, 인사이트 문구, 종목 테이블. 로그인 시 isFavorite 반환.' } )
   @ApiParam( { name: 'themeCode', example: 101, description: '테마코드' } )
   async getThemeDetail(
-    @Param('themeCode', ParseIntPipe) themeCode: number,
+    @Param('themeCode', new IntRangePipe('themeCode', 1, 999999)) themeCode: number,
     @CurrentUser('userId') userId: string | undefined,
   ) {
     return this.issueThemeService.getThemeDetail(themeCode, userId);
@@ -39,7 +41,7 @@ export class IssueThemeController {
   @ApiOperation( { summary: '테마 즐겨찾기 추가 (로그인 필요)' } )
   @ApiParam( { name: 'themeCode', example: 101, description: '테마코드' } )
   async addFavorite(
-    @Param('themeCode', ParseIntPipe) themeCode: number,
+    @Param('themeCode', new IntRangePipe('themeCode', 1, 999999)) themeCode: number,
     @CurrentUser('userId') userId: string,
   ) {
     return this.issueThemeService.addFavorite(userId, themeCode);
@@ -50,36 +52,36 @@ export class IssueThemeController {
   @ApiOperation( { summary: '테마 즐겨찾기 삭제 (로그인 필요)' } )
   @ApiParam( { name: 'themeCode', example: 101, description: '테마코드' } )
   async removeFavorite(
-    @Param('themeCode', ParseIntPipe) themeCode: number,
+    @Param('themeCode', new IntRangePipe('themeCode', 1, 999999)) themeCode: number,
     @CurrentUser('userId') userId: string,
   ) {
     return this.issueThemeService.removeFavorite(userId, themeCode);
   }
 
   @Post('sync-themes')
-  @Public()
+  @UseGuards(AdminApiKeyGuard)
   @ApiOperation( { summary: '[관리자] 테마 동기화', description: '키움 API upName → themes 테이블 + company.theme_code 동기화 (최초 1회)' } )
   async syncThemes() {
     return this.issueThemeService.syncThemes();
   }
 
   @Post('snapshot/theme')
-  @Public()
+  @UseGuards(AdminApiKeyGuard)
   @ApiOperation( { summary: '[관리자] 테마 일별 스냅샷 저장', description: '장 마감 후 1회 실행' } )
   async saveThemeSnapshot() {
     return this.issueThemeService.saveThemeSnapshot();
   }
 
   @Post('snapshot/theme/backfill')
-  @Public()
+  @UseGuards(AdminApiKeyGuard)
   @ApiOperation( { summary: '[관리자] 테마 일별 스냅샷 백필', description: 'stock_daily_metrics 기준으로 최근 N거래일 테마 순위를 재계산합니다.' } )
   @ApiQuery( { name: 'days', required: false, example: '60', description: '백필할 최근 거래일 수' } )
-  async backfillThemeSnapshots(@Query('days') days: string = '60') {
-    return this.issueThemeService.backfillThemeSnapshots(Number(days));
+  async backfillThemeSnapshots(@Query('days', new IntRangePipe('days', 1, 365, true)) days: number = 60) {
+    return this.issueThemeService.backfillThemeSnapshots(days);
   }
 
   @Post('snapshot/trading-value')
-  @Public()
+  @UseGuards(AdminApiKeyGuard)
   @ApiOperation( { summary: '[관리자] 거래대금 스냅샷 저장', description: '10분 단위 실행' } )
   async saveTradingValueSnapshot() {
     return this.issueThemeService.saveTradingValueSnapshot();

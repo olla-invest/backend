@@ -32,7 +32,23 @@
       "Bash(PGPASSWORD=kiwoom@2026 psql:*)",
       "Bash(TOKEN=\"utebABgZrmv5-DI6TNrPkkCrYVLBRnOsD-qm5_yyz3ta2caBmhJ4N9ke8PPHEAn0RRWMtbaI8khU2MMWJjdO0A\")",
       "Bash(npm run dev:*)",
-      "Bash(set:*)"
+      "Bash(set:*)",
+      "Read(//c/Users/user/.claude/projects/c--Users-user-Documents-backend/memory/**)",
+      "Bash(python3 -c \":*)",
+      "Read(//c/Users/user/.claude/projects/c--Users-user-Documents-backend/90ea4b46-3dfc-49ae-8117-8d71ddad65da/tool-results/**)",
+      "Bash(docker ps --format \"{{.Names}}\\\\t{{.Ports}}\")",
+      "Bash(docker exec kiwoom-postgres psql -U kiwoom_user -d investment_db -c \"SELECT candle_type, COUNT\\(*\\)::int as cnt FROM stock_candles GROUP BY candle_type ORDER BY cnt DESC;\")",
+      "Bash(pm2 list *)",
+      "PowerShell(Stop-Process -Id 16580 -Force)",
+      "PowerShell(Start-Process -FilePath \"node\" -ArgumentList \"--enable-source-maps C:\\\\Users\\\\user\\\\Documents\\\\backend\\\\dist\\\\main\" -WorkingDirectory \"C:\\\\Users\\\\user\\\\Documents\\\\backend\" -WindowStyle Hidden)",
+      "PowerShell(Start-Sleep -Seconds 8; \\(Invoke-WebRequest -Uri \"http://localhost:3000/real-time-chart/status\" -UseBasicParsing -TimeoutSec 10\\).Content)",
+      "PowerShell(Get-Process -Name \"node\" -ErrorAction SilentlyContinue)",
+      "PowerShell(Start-Process -FilePath \"node\" -ArgumentList \"--max-old-space-size=4096 dist/main\" -WorkingDirectory \"C:\\\\Users\\\\user\\\\Documents\\\\backend\" -WindowStyle Hidden -RedirectStandardOutput \"C:\\\\tmp\\\\server_out.log\" -RedirectStandardError \"C:\\\\tmp\\\\server_err.log\")",
+      "PowerShell($p = \\(Get-NetTCPConnection -LocalPort 3000 -State Listen -ErrorAction SilentlyContinue\\).OwningProcess; Write-Output \"PID: $p\"; if \\($p -and $p -ne 0\\) { Stop-Process -Id $p -Force; Start-Sleep -Seconds 2; Write-Output \"종료됨\" } else { Write-Output \"이미 없음\" })",
+      "PowerShell(Start-Sleep -Seconds 8; try { \\(Invoke-WebRequest -Uri \"http://localhost:3000/real-time-chart/status\" -UseBasicParsing -TimeoutSec 10\\).Content } catch { \"아직 기동중...\" })",
+      "Bash(Get-Content C:\\\\tmp\\\\server_out.log -Tail 50)",
+      "Bash(nohup node --enable-source-maps dist/main)",
+      "Bash(echo \"Server PID: $!\")"
     ],
     "additionalDirectories": [
       "c:\\Users\\user\\Documents\\front\\frontend\\src\\pages\\home\\components"

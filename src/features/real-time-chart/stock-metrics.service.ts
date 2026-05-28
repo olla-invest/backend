@@ -165,7 +165,7 @@ export class StockMetricsService {
    */
   async getLatestMetrics(stockCodes: string[], marketType?: string): Promise<Map<string, any>> {
     const _mem = process.memoryUsage();
-    this.logger.log(
+    this.logger.debug(
       `[getLatestMetrics] START stockCodes=${stockCodes.length} ` +
       `heap=${Math.round(_mem.heapUsed/1024/1024)}MB/${Math.round(_mem.heapTotal/1024/1024)}MB rss=${Math.round(_mem.rss/1024/1024)}MB`,
     );

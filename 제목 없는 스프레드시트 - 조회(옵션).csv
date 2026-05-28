@@ -1,0 +1,222 @@
+■  조회 - 옵션,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+상품/지수옵션 종목 리스트,,,,,,,
+GET /v3/market/closed/derivative/options/{marketcode}/lists,,,,,,,
+,,,,,,,
+응답 리스트,,,,,,,
+NO,항목명,,,한글명,모드,길이,설명
+1,trdDd,,,"체결일자,거래일자,매매일자",string,8,YYYYMMDD
+1,isuLists,,,종목리스트,Array,4, 
+2,,isuCd,,종목코드,string,12,표준코드
+3,,isuSrtCd,,종목단축코드,string,9,에) KR4201KC1756 → 201KC175
+4,,isuKorNm,,종목한글명,string,80, 
+5,,isuKorAbbrv,,종목한글약명,string,40,가나다
+,,,,,,,
+,,,,,,,
+상품/지수옵션 종목 마스터,,,,,,,
+GET /v3/market/closed/derivative/options/{marketcode}/{issucode}/master,,,,,,,
+,,,,,,,
+응답 리스트,,,,,,,
+NO,항목명,,,한글명,모드,길이,설명
+1,trdDd,,,"체결일자,거래일자,매매일자",string,8,YYYYMMDD
+1,isuCd,,,종목코드,string,12,표준코드
+2,isuSrtCd,,,종목단축코드,string,9,에) KR4201KC1756 → 201KC175
+3,isuKorNm,,,종목한글명,string,80, 
+4,isuKorAbbrv,,,종목한글약명,string,40,가나다
+5,listDd,,,상장일자,string,8,YYYYMMDD
+6,prcLmtStep1Uplmtprc,,,가격제한1단계상한가,number,12,
+7,prcLmtStep1Lwlmtprc,,,가격제한1단계하한가,number,12,
+8,prcLmtStep2Uplmtprc,,,가격제한2단계상한가,number,12,
+9,prcLmtStep2Lwlmtprc,,,가격제한2단계하한가,number,12,
+10,prcLmtStep3Uplmtprc,,,가격제한3단계상한가,number,12,
+11,prcLmtStep3Lwlmtprc,,,가격제한3단계하한가,number,12,
+12,basPrc,,,"기준가격,기준가액",number,11,
+13,ulyId,,,기초자산명,string,3,기초자산명
+14,lsttrdDd,,,최종거래일자,nuber,8, 
+15,expDd,,,만기년월,string,8,권리행사 가능한 만기년월
+16,업종,,,행사가격,number,18, 
+17,setlmult,,,거래승수,number,22, 약정대금 및 결제시 사용하는 계산승수
+18,remainDys,,,잔존일수,number,8, 
+19,setlTheoPrc,,,정산이론가격,number,16, 
+20,basTheoPrc,,,기준이론가격,number,16, 
+21,prevddClsprc,,,전일종가,number,11, 
+22,prevddOpnprc,,,전일시가,number,11, 
+23,prevddHgprc,,,전일고가,number,11, 
+24,prevddLwprc,,,전일저가,number,11, 
+25,setlPrcTheoPrcDivrgRt,,,정산가격이론가격괴리율,number,13, 
+26,prevddOpnintQty,,,전일미결제약정수량,number,12, 
+27,impVolt,,,내재변동성,number,11, 
+28,inlistHgstprc,,,상장중최고가,number,11, 
+29,inlistLwstprc,,,상장중최저가,number,11, 
+30,midyyHgstprc,,,연중최고가,number,11, 
+31,midyyLwstprc,,,상장중최저가일자,number,11, 
+32,inlistHgstprcDd,,,상장중최고가일자,string,8, 
+33,inlistLwstprcDd,,,상장중최저가일자,string,8, 
+34,midyyHgstprcDd,,,연중최고가일자,string,8, 
+35,midyyLwstprcDd,,,연중최저가일자,string,8, 
+36,prevddAccTrdvol ,,,"전일체결수량,전일거래량",number,15, 
+37,prevddAccTrdval ,,,전일거래대금,number,22, 
+38,cdInt,,,CD금리,number,7,
+,,,,,,,
+,,,,,,,
+상품/지수옵션 종가,,,,,,,
+GET /v3/market/closed/derivative/options/{marketcode}/{issucode}/closeprice,,,,,,,
+,,,,,,,
+응답 리스트,,,,,,,
+NO,항목명,,,한글명,데이터 타입,길이,설명
+1,#ERROR!,,,종목단축코드,#ERROR!,#ERROR!,에) KR4101C90009 → K101C9000
+2,#ERROR!,,,전일대비구분코드,#ERROR!,#ERROR!,#ERROR!
+3,#ERROR!,,,전일대비가격,#ERROR!,#ERROR!,#ERROR!
+4,#ERROR!,,,시가,#ERROR!,#ERROR!,#ERROR!
+5,#ERROR!,,,고가,#ERROR!,#ERROR!,#ERROR!
+6,#ERROR!,,,저가,#ERROR!,#ERROR!,#ERROR!
+7,#ERROR!,,,체결가격,#ERROR!,#ERROR!,#ERROR!
+8,#ERROR!,,,"누적체결수량,누적거래량",#ERROR!,#ERROR!,#ERROR!
+9,#ERROR!,,,누적거래대금,#ERROR!,#ERROR!,#ERROR!
+,,,,,,,
+상품/지수옵션 종목 체결,,,,,,,
+GET /v3/market/realtime/derivative/options/{marketcode}/{issuecode}/price,,,,,,,
+,,,,,,,
+응답 리스트,,,,,,,
+NO,항목명,,,한글명,데이터 타입,길이,설명
+1,isuCd,,,종목코드,string,12,표준코드
+2,trdPrc,,,체결가격,number,11,
+3,trdvol,,,"체결수량,거래량",number,10,
+4,trdTm,,,"체결시각,거래시각",string,8,"HHMMSSmm 형태로 시간전송
+ - 정규장 개시전 또는 정규장 체결 발생 이전 : 0
+ - 장운영시그널, 대량체결 포함
+※ 장운영시그널
+ 정규장마감(15:00):31000000/장종료시간외마감(15:30):41000000/단일가마감(18:00):81000000/
+ 일반Buy-in마감(18:00):91000007/당일Buy-in마감(18:00):91000008
+※ 대량체결시  
+ 장전대량매매체결:51000000/장중대량매매체결:61000000/장후대량매매체결:71000000"
+5,opnprc,,,시가,number,11,
+6,hgprc,,,고가,number,11,
+7,lwprc,,,저가,number,11,
+8,accTrdvol,,,"누적체결수량,누적거래량",number,12,일반체결수량+협의대량체결수량
+9,accTrdval,,,누적거래대금,number,22,일반체결대금+협의대량체결대금 (단위:원)
+10,negoBlkAccTrdvol,,,협의대량누적체결수량,number,12, 
+11,lstTrdTpCd,,,최종매도매수구분코드,string,1,"1:매도,2:매수(최종으로 들어온 호가의 매도매수구분값)"
+12,realtmUplmtprc,,,실시간상한가,number,11,
+13,realtmLwlmtprc,,,실시간하한가,number,11,
+,,,,,,,
+,,,,,,,
+상품/지수옵션 종목 호가,,,,,,,
+GET /v3/market/realtime/derivative/options/{marketcode}/{issuecode}/oederbook,,,,,,,
+,,,,,,,
+응답 리스트,,,,,,,
+NO,항목명,,,한글명,데이터 타입,길이,설명
+1,isuSrtCd,,,종목단축코드,string,12,
+2,bidTotOrdRqty,,,매수총호가잔량,number,12, 
+3,bidStep1BstordPrc,,,매수1단계우선호가가격,number,11, 
+4,bidStep1BstordRqty,,,매수1단계우선호가잔량,number,12, 
+5,bidStep2BstordPrc,,,매수2단계우선호가가격,number,11, 
+6,bidStep2BstordRqty,,,매수2단계우선호가잔량,number,12, 
+7,bidStep3BstordPrc,,,매수3단계우선호가가격,number,11, 
+8,bidStep3BstordRqty,,,매수3단계우선호가잔량,number,12, 
+9,bidStep4BstordPrc,,,매수4단계우선호가가격,number,11, 
+10,bidStep4BstordRqty,,,매수4단계우선호가잔량,number,12, 
+11,bidStep5BstordPrc,,,매수5단계우선호가가격,number,11, 
+12,bidStep5BstordRqty,,,매수5단계우선호가잔량,number,12, 
+13,askTotOrdRqty,,,매도총호가잔량,number,12, 
+14,askStep1BstordPrc,,,매도1단계우선호가가격,number,11, 
+15,askStep1BstordRqty,,,매도1단계우선호가잔량,number,12, 
+16,askStep2BstordPrc,,,매도2단계우선호가가격,number,11, 
+17,askStep2BstordRqty,,,매도2단계우선호가잔량,number,12, 
+18,askStep3BstordPrc,,,매도3단계우선호가가격,number,11, 
+19,askStep3BstordRqty,,,매도3단계우선호가잔량,number,12, 
+20,askStep4BstordPrc,,,매도4단계우선호가가격,number,11, 
+21,askStep4BstordRqty,,,매도4단계우선호가잔량,number,12, 
+22,askStep5BstordPrc,,,매도5단계우선호가가격,number,11, 
+23,askStep5BstordRqty,,,매도5단계우선호가잔량,number,12, 
+24,bidValidOrdCnt,,,매수유효호가건수,number,11, 
+25,bidStep1BstordCnt,,,매수1단계우선호가건수,number,11, 
+26,bidStep2BstordCnt,,,매수2단계우선호가건수,number,11, 
+27,bidStep3BstordCnt,,,매수3단계우선호가건수,number,11, 
+28,bidStep4BstordCnt,,,매수4단계우선호가건수,number,11, 
+29,bidStep5BstordCnt,,,매수5단계우선호가건수,number,11, 
+30,askValidOrdCnt,,,매도유효호가건수,number,11, 
+31,askStep1BstordCnt,,,매도1단계우선호가건수,number,11, 
+32,askStep2BstordCnt,,,매도2단계우선호가건수,number,11, 
+33,askStep3BstordCnt,,,매도3단계우선호가건수,number,11, 
+34,askStep4BstordCnt,,,매도4단계우선호가건수,number,11, 
+35,askStep5BstordCnt,,,매도5단계우선호가건수,number,11, 
+36,ordAcptTm,,,호가접수시각,string,11,HHMMSSmm
+37,deemTrdPrc,,,예상체결가격,number,11, 
+,,,,,,,
+,,,,,,,
+,,,,,,,
+시장별 투자자별 매매동향,,,,,,,
+GET /v3/market/realtime/derivative/options/{marketcode}/market/investors,,,,,,,
+,,,,,,,
+응답 리스트,,,,,,,
+NO,항목명,,,한글명,모드,길이,설명
+1,Tm,,,장시간,string,8,HHMMSSmm
+2,invstLists,,,투자자리스트,Array,4, 
+3,,invstCd,,투자자코드,string,4,☞별첨 '투자자코드표' 참조
+4,,#ERROR!,,옵션콜누적매도체결수량,#ERROR!,#ERROR!,#ERROR!
+5,,#ERROR!,,옵션콜누적매도거래대금,#ERROR!,#ERROR!,#ERROR!
+6,,#ERROR!,,옵션콜누적매수체결수량,#ERROR!,#ERROR!,#ERROR!
+7,,#ERROR!,,옵션콜누적매수거래대금,#ERROR!,#ERROR!,#ERROR!
+8,,#ERROR!,,옵션풋누적매도체결수량,#ERROR!,#ERROR!,#ERROR!
+9,,#ERROR!,,옵션풋누적매도거래대금,#ERROR!,#ERROR!,#ERROR!
+10,,#ERROR!,,옵션풋누적매수체결수량,#ERROR!,#ERROR!,#ERROR!
+11,,#ERROR!,,옵션풋누적매수거래대금,#ERROR!,#ERROR!,#ERROR!
+,,,,,,,
+,,,,,,,
+,,,,,,,
+상품/지수옵션 일중,,,,,,,
+GET /v3/market/realtime/derivative/options/{marketcode}/{issuecode}/intraday,,,,,,,
+,,,,,,,
+요청 매개변수,,,,,,,* 최대 100건 까지만 조회 가능
+NO,항목명,,,한글명,데이터 타입,필수,설명
+1,#ERROR!,,,일중전송주기구분코드,#ERROR!,Y,#ERROR!
+2,inqStrtDd,,,조회시작일자,string,N,
+3,#ERROR!,,,"개시시각,시작시각",#ERROR!,Y,#ERROR!
+4,#ERROR!,,,종료시각,#ERROR!,Y,#ERROR!
+,,,,,,,
+응답 리스트,,,,,,,
+NO,항목명,,,한글명,데이터 타입,길이,설명
+1,#ERROR!,,,종목단축코드,#ERROR!,#ERROR!,#ERROR!
+2,#ERROR!,,,종목명,#ERROR!,#ERROR!,#ERROR!
+3,#ERROR!,,,과거리스트,#ERROR!,#ERROR!,#ERROR!
+4,,#ERROR!,,일중시간,#ERROR!,#ERROR!,#ERROR!
+5,,#ERROR!,,일중시가,#ERROR!,#ERROR!,#ERROR!
+6,,#ERROR!,,일중고가,#ERROR!,#ERROR!,#ERROR!
+7,,#ERROR!,,일중저가,#ERROR!,#ERROR!,#ERROR!
+8,,#ERROR!,,일중종가,#ERROR!,#ERROR!,#ERROR!
+9,,inddTrdvol,,일중거래량,number,11,"일중데이타(10초, 1분, 10분) 구간 거래량"
+10,,inddTrdval,,일중거래대금,number,11,"일중데이타(10초, 1분, 10분) 구간 거래대금"
+11,,inddAccTrdvol,,일중누적거래량,number,11,일중 누적거래량
+12,,inddAccTrdval,,일중누적대금,number,11,일중 누적거래대금
+,,,,,,,
+상품/지수옵션 종목 히스토리,,,,,,,
+GET /v3/market/closed/derivative/options/{marketcode}/{issucode}/history,,,,,,,
+,,,,,,,
+요청 매개변수,,,,,,,
+NO,항목명,,,한글명,데이터 타입,필수,설명
+3,trnsmCycleTpCd,,,전송주기구분코드,string,Y,D:일 W:주 M:월 
+4,inqStrtDd,,,조회시작일자,string,Y,일주월차트
+5,inqEndDd,,,조회종료일자,string,Y,일주월차트
+6,reqCnt,,,요청건수,number,Y,최대 100건
+,,,,,,,
+응답 리스트,,,,,,,
+NO,항목명,,,한글명,데이터 타입,길이,설명
+1,isuSrtCd,,,종목단축코드,string,9,에) KR4201KC1756 → 201KC175
+2,isuKorNm,,,종목명,string,80, 
+3,hisLists,,,과거리스트,Array,4, 
+4,,trdDd,,"체결일자,거래일자,매매일자",string,8,YYYYMMDD
+5,,trdPrc,,체결가격,number,11,
+6,,cmpprevddTpCd,,전일대비부호,string,1, 
+7,,cmpprevddPrc,,전일대비가격,number,11, 
+8,,accTrdvol,,"누적체결수량,누적거래량",number,12,
+9,,accTrdval,,누적거래대금,number,22,
+10,,opnprc,,시가,number,11,
+11,,hgprc,,고가,number,11,
+12,,lwprc,,저가,number,11,
+13,,opnintQty,,미결제약정수량,number,10, 

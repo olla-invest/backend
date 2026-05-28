@@ -41,6 +41,7 @@ export class RegisterDto {
     @ApiProperty( { example: '01012345678', description: '휴대폰번호' } )
     @IsString()
     @IsNotEmpty( { message: '휴대폰번호를 입력해주세요' } )
+    @Matches( /^01[0-9]{8,9}$/, { message: '휴대폰번호 형식이 올바르지 않습니다' } )
     @MaxLength( 20 )
     phone: string;
 

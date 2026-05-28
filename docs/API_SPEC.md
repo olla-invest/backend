@@ -575,8 +575,14 @@ DB 조회 (월봉). 월 시작일(1일) 기준 time.
 {
   "stockCode": "005930",
   "indexCode": "INDEX_KOSPI",
-  "periods": [92, 62],
+  "periods": [63, 43],
   "weights": [50, 50],
+  "rsFilters": [
+    { "rsStartDate": "20251001", "rsEndDate": "20260101", "strength": 50, "period": 63 },
+    { "rsStartDate": "20260101", "rsEndDate": "20260304", "strength": 50, "period": 43 }
+  ],
+  "queryStartDate": "2025-10-01",
+  "queryEndDate": "2026-01-01",
   "count": 125,
   "data": [
     { "date": "20250304", "rsRaw": 1.023456 },
@@ -590,8 +596,12 @@ DB 조회 (월봉). 월 시작일(1일) 기준 time.
 | 필드 | 타입 | 설명 |
 |------|------|------|
 | `indexCode` | string | 비교 지수 코드 (`INDEX_KOSPI` \| `INDEX_KOSDAQ`) |
-| `periods` | number[] | rsFilters에서 계산된 기간(달력일) 배열 |
+| `periods` | number[] | rsFilters에서 계산된 거래일 수 배열 |
 | `weights` | number[] | 각 기간 가중치 배열 |
+| `rsFilters` | array | 적용된 RS 필터 목록. 날짜는 `YYYYMMDD` 형식 |
+| `rsFilters[].period` | number | 해당 날짜 범위의 거래일 수 |
+| `queryStartDate` | string | 가장 긴 RS 필터의 시작일 (`YYYY-MM-DD`) |
+| `queryEndDate` | string | 가장 긴 RS 필터의 종료일 (`YYYY-MM-DD`) |
 | `count` | number | 반환 데이터 포인트 수 |
 | `data[].date` | string | 거래일 (`YYYYMMDD`) |
 | `data[].rsRaw` | number | 가중 평균 RS 원값 (1.0 기준, 1 이상이면 시장 대비 강세) |
