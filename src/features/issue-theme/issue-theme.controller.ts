@@ -21,7 +21,7 @@ export class IssueThemeController {
   @ApiQuery( { name: 'minTotalCount', required: false, example: '3', description: '집계 대상 종목 최소 개수' } )
   @ApiQuery( { name: 'minThemeScore', required: false, example: '70', description: '테마 종합 점수 최소값' } )
   async getThemeList(
-    @Query('display', new IntRangePipe('display', 1, 100, true)) display: number = 20,
+    @Query('display', new IntRangePipe('display', 1, 300, true)) display: number = 20,
     @Query('page', new IntRangePipe('page', 1, 10000, true)) page: number = 1,
     @Query('minAvgRsScore', new IntRangePipe('minAvgRsScore', 0, 100, true)) minAvgRsScore?: number,
     @Query('minTotalCount', new IntRangePipe('minTotalCount', 1, 1000, true)) minTotalCount?: number,
