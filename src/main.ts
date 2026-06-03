@@ -16,15 +16,18 @@ async function bootstrap() {
     // Use Winston logger
     app.useLogger( app.get( WINSTON_MODULE_NEST_PROVIDER ) );
     const configService = app.get( ConfigService );
+    app.getHttpAdapter().getInstance().set( 'trust proxy', 1 );
 
     // OAuth CSRF 방어용 세션 (state 파라미터 검증에만 사용, 인증 세션 아님)
     app.use( session( {
         secret: configService.get<string>( 'SESSION_SECRET', 'olla-oauth-state-secret' ),
         resave: false,
         saveUninitialized: false,
+        proxy: true,
         cookie: {
             httpOnly: true,
             secure: configService.get( 'NODE_ENV' ) === 'production',
+            sameSite: 'lax',
             maxAge: 10 * 60 * 1000, // 10분 (OAuth 플로우 완료 시간)
         },
     } ) );
