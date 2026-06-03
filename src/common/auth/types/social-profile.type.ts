@@ -5,4 +5,5 @@ export interface SocialProfile {
     socialId: string;
     email: string;
     name: string | null;
+    phone?: string | null;
 }

@@ -20,16 +20,28 @@ export class NaverStrategy extends PassportStrategy( Strategy, 'naver' ) {
         _refreshToken: string,
         profile: any,
     ): Promise<SocialProfile> {
+        const response = profile._json?.response ?? {};
+        const socialId = String( response.id ?? profile.id );
         const email: string =
+            response.email ??
+            profile.email ??
             profile._json?.email ??
             profile.emails?.[0]?.value ??
-            `naver_${profile.id}@naver.social`;
+            `naver_${socialId}@naver.social`;
+        const phone = this.normalizePhone( response.mobile ?? profile._json?.mobile );
 
         return {
             provider: 'NAVER',
-            socialId: String( profile.id ),
+            socialId,
             email,
-            name: profile._json?.name ?? profile.displayName ?? null,
+            name: response.name ?? profile._json?.name ?? profile.displayName ?? null,
+            phone,
         };
+    }
+
+    private normalizePhone( phone?: string | null ): string | null {
+        if ( !phone ) return null;
+        const digits = phone.replace( /\D/g, '' );
+        return /^01[0-9]{8,9}$/.test( digits ) ? digits : null;
     }
 }

@@ -1,5 +1,6 @@
 import {
     IsBoolean,
+    IsEmail,
     IsNotEmpty,
     IsOptional,
     IsString,
@@ -9,11 +10,11 @@ import {
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class CompleteSocialProfileDto {
-    @ApiProperty( { example: '홍길동', description: '이름' } )
-    @IsString()
-    @IsNotEmpty( { message: '이름을 입력해주세요' } )
+    @ApiProperty( { example: 'john@example.com', description: '이메일' } )
+    @IsEmail( {}, { message: '올바른 이메일 형식을 입력해주세요' } )
+    @IsNotEmpty()
     @MaxLength( 100 )
-    name: string;
+    email: string;
 
     @ApiProperty( { example: '01012345678', description: '휴대폰번호' } )
     @IsString()
@@ -21,6 +22,12 @@ export class CompleteSocialProfileDto {
     @Matches( /^01[0-9]{8,9}$/, { message: '올바른 휴대폰 번호를 입력해주세요' } )
     @MaxLength( 20 )
     phone: string;
+
+    @ApiProperty( { example: '홍길동', description: '이름' } )
+    @IsString()
+    @IsNotEmpty( { message: '이름을 입력해주세요' } )
+    @MaxLength( 100 )
+    name: string;
 
     @ApiProperty( { example: true, description: '서비스 이용약관 동의' } )
     @IsBoolean()

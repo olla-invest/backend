@@ -352,6 +352,29 @@ export class RealTimeChartController {
     };
   }
 
+  @Post('backfill/day/adj-anomaly')
+  @UseGuards(AdminApiKeyGuard)
+  @ApiOperation( { summary: '[관리자] 수정주가 이상 종목 자동 감지 후 재수집', description: '전일 대비 adj_close_price가 threshold 이상 변동한 종목을 DB에서 자동 조회 후 백필. Fire-and-forget.' } )
+  @ApiBody( { schema: { example: { threshold: 0.3, days: 400 } } } )
+  async backfillAdjAnomalyStocks(
+    @Body('threshold', new NumberRangePipe('threshold', 0.01, 10, true)) threshold: number = 0.3,
+    @Body('days', new IntRangePipe('days', 1, 1000, true)) days: number = 400,
+  ) {
+    return await this.chartService.backfillAdjAnomalyStocks(threshold, days);
+  }
+
+  @Post('backfill/day/stocks')
+  @UseGuards(AdminApiKeyGuard)
+  @ApiOperation( { summary: '[관리자] 특정 종목 일봉 재수집', description: '원주가+수정주가 동시 수집. 기본 400일.' } )
+  @ApiBody( { schema: { example: { stockCodes: ['027040', '258790'], days: 400 } } } )
+  async backfillSpecificStocks(
+    @Body('stockCodes', new StockCodeArrayPipe(false, 100)) stockCodes: string[],
+    @Body('days', new IntRangePipe('days', 1, 1000, true)) days: number = 400,
+  ) {
+    const results = await this.chartService.backfillSpecificStocks(stockCodes, days);
+    return { success: true, results };
+  }
+
   @Post('backfill/higher-timeframes')
   @UseGuards(AdminApiKeyGuard)
   @ApiOperation( { summary: '[관리자] 전체/선택 종목 주봉·월봉·연봉 백필', description: 'Fire-and-forget. stock_candles에 candle_type week/month/year로 저장.' } )
@@ -541,5 +564,27 @@ export class RealTimeChartController {
     @Body('tradeDate', new RegexPipe(/^\d{8}$/, 'tradeDate', true)) tradeDate?: string,
   ) {
     return await this.metricsService.calculateCustomRsLog(stockCodes, tradeDate);
+  }
+
+  @Post('metrics/rs-filter-log')
+  @UseGuards(AdminApiKeyGuard)
+  @ApiOperation( { summary: '[디버그] RS 필터 기반 종목 로그 생성', description: 'rsPeriods/rsWeights/rsDates 커스텀 필터를 적용해 RS 계산 후 log 파일로 저장. stockCodes 생략 시 전체 종목 대상. rsDates는 YYYYMMDD 또는 YYYY-MM-DD 형식' } )
+  @ApiBody( {
+    schema: {
+      example: {
+        tradeDate: '20260303',
+        rsPeriods: '20,63,126,252',
+        rsWeights: '25,25,25,25',
+      },
+    },
+  } )
+  async calculateRsFilterLog(
+    @Body('stockCodes', new StockCodeArrayPipe(true, 5000)) stockCodes: string[] | undefined,
+    @Body('tradeDate', new RegexPipe(/^\d{8}$/, 'tradeDate', true)) tradeDate?: string,
+    @Body('rsPeriods', new CsvIntPipe('rsPeriods', 1, 1000, true, 10)) rsPeriods?: string,
+    @Body('rsWeights', new CsvIntPipe('rsWeights', 0, 100, true, 10)) rsWeights?: string,
+    @Body('rsDates', new CsvDatePipe('rsDates', true, 10)) rsDates?: string,
+  ) {
+    return await this.metricsService.calculateRsFilterLog(stockCodes, tradeDate, rsPeriods, rsWeights, rsDates);
   }
 }

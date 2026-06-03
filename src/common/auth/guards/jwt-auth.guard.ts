@@ -1,4 +1,4 @@
-import { Injectable, ExecutionContext } from '@nestjs/common';
+import { Injectable, ExecutionContext, UnauthorizedException } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { Reflector } from '@nestjs/core';
 import { IS_PUBLIC_KEY } from '../decorators/public.decorator';
@@ -27,5 +27,13 @@ export class JwtAuthGuard extends AuthGuard( 'jwt' ) {
         }
 
         return super.canActivate( context );
+    }
+
+    handleRequest<TUser = any>( err: any, user: any ): TUser {
+        if ( err || !user ) {
+            throw err || new UnauthorizedException( '인증 정보가 없습니다. Authorization Bearer 토큰을 전달해주세요.' );
+        }
+
+        return user as TUser;
     }
 }

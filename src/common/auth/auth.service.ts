@@ -198,32 +198,25 @@ export class AuthService {
 
     async socialLogin( profile: SocialProfile ): Promise<{ accessToken: string; user: object }> {
         const provider = AuthProvider[ profile.provider ];
+        const isFallbackEmail = this.isFallbackSocialEmail( profile.email );
 
-        // 1. 기존 소셜 계정 조회
         let user = await this.prisma.user.findFirst( {
             where: { provider, socialId: profile.socialId, deletedAt: null },
         } );
 
         if ( !user ) {
-            // 2. 같은 이메일의 기존 LOCAL 계정 확인 (fallback 이메일 제외)
-            const isFallbackEmail =
-                profile.email.endsWith( '@naver.social' ) ||
-                profile.email.endsWith( '@kakao.social' );
-
             if ( !isFallbackEmail ) {
                 const emailUser = await this.prisma.user.findFirst( {
                     where: { email: profile.email, deletedAt: null },
                 } );
                 if ( emailUser ) {
                     throw new ConflictException(
-                        `이미 해당 이메일로 가입된 계정이 있습니다. 일반 로그인을 이용해주세요.`,
+                        '이미 해당 이메일로 가입된 계정이 있습니다. 일반 로그인을 이용해주세요.',
                     );
                 }
             }
 
-            // 3. 신규 사용자 생성
-            const rawUsername = `${profile.provider.toLowerCase()}_${profile.socialId}`;
-            const username = rawUsername.substring( 0, 50 );
+            const username = await this.generateUniqueSocialUsername( provider );
 
             user = await this.prisma.user.create( {
                 data: {
@@ -233,9 +226,45 @@ export class AuthService {
                     provider,
                     socialId: profile.socialId,
                     name: profile.name ?? null,
+                    phone: profile.phone ?? null,
                     marketingConsent: false,
                 },
             } );
+        } else {
+            const updateData: {
+                email?: string;
+                name?: string | null;
+                phone?: string | null;
+            } = {};
+
+            if ( !isFallbackEmail && this.isFallbackSocialEmail( user.email ) && user.email !== profile.email ) {
+                const emailUser = await this.prisma.user.findFirst( {
+                    where: {
+                        email: profile.email,
+                        deletedAt: null,
+                        NOT: { userId: user.userId },
+                    },
+                } );
+
+                if ( !emailUser ) {
+                    updateData.email = profile.email;
+                }
+            }
+
+            if ( profile.name && ( !user.name || user.name === '미연동 계정' ) ) {
+                updateData.name = profile.name;
+            }
+
+            if ( profile.phone && !user.phone ) {
+                updateData.phone = profile.phone;
+            }
+
+            if ( Object.keys( updateData ).length > 0 ) {
+                user = await this.prisma.user.update( {
+                    where: { userId: user.userId },
+                    data: updateData,
+                } );
+            }
         }
 
         const payload: JwtPayload = {
@@ -296,9 +325,28 @@ export class AuthService {
             throw new BadRequestException( 'SNS 로그인 계정만 추가 정보를 등록할 수 있습니다.' );
         }
 
+        if ( dto.email !== user.email ) {
+            const existingEmail = await this.prisma.user.findFirst( {
+                where: {
+                    email: dto.email,
+                    deletedAt: null,
+                    NOT: { userId },
+                },
+            } );
+            if ( existingEmail ) {
+                throw new ConflictException( '이미 사용 중인 이메일입니다.' );
+            }
+        }
+
+        const username = this.isLegacySocialUsername( user )
+            ? await this.generateUniqueSocialUsername( user.provider )
+            : user.username;
+
         const updated = await this.prisma.user.update( {
             where: { userId },
             data: {
+                username,
+                email: dto.email,
                 name: dto.name,
                 phone: dto.phone,
                 marketingConsent: dto.agreeMarketing ?? false,
@@ -336,42 +384,57 @@ export class AuthService {
         return user.provider !== AuthProvider.LOCAL && !!user.socialId;
     }
 
-    private isSocialProfileCompleted( user: { provider: AuthProvider; socialId?: string | null; name?: string | null; phone?: string | null } ): boolean {
+    private isSocialProfileCompleted( user: { provider: AuthProvider; socialId?: string | null; email: string; name?: string | null; phone?: string | null } ): boolean {
         if ( !this.isSocialAccount( user ) ) return false;
-        return !!user.name && user.name !== '미연동 계정' && !!user.phone;
+        return !this.isFallbackSocialEmail( user.email ) && !!user.name && !!user.phone;
+    }
+
+    private isFallbackSocialEmail( email: string ): boolean {
+        return email.endsWith( '@naver.social' ) || email.endsWith( '@kakao.social' );
+    }
+
+    private isLegacySocialUsername( user: { provider: AuthProvider; socialId?: string | null; username: string } ): boolean {
+        if ( !user.socialId ) return false;
+        return user.username === `${user.provider.toLowerCase()}_${user.socialId}`.substring( 0, 50 );
+    }
+
+    private async generateUniqueSocialUsername( provider: AuthProvider ): Promise<string> {
+        const prefix = provider.toLowerCase();
+
+        for ( let attempt = 0; attempt < 20; attempt++ ) {
+            const randomLength = attempt < 10 ? 4 : 8;
+            const username = `${prefix}${this.generateRandomAlphaNumeric( randomLength )}`;
+            const existing = await this.prisma.user.findFirst( {
+                where: { username, deletedAt: null },
+                select: { userId: true },
+            } );
+
+            if ( !existing ) return username;
+        }
+
+        throw new ConflictException( '중복되지 않는 아이디를 생성하지 못했습니다. 다시 시도해주세요.' );
+    }
+
+    private generateRandomAlphaNumeric( length: number ): string {
+        const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
+        return Array.from( { length }, () => chars[ crypto.randomInt( 0, chars.length ) ] ).join( '' );
     }
 
     private generateTempPassword(): string {
-        const upper = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-        const lower = 'abcdefghijklmnopqrstuvwxyz';
-        const digits = '0123456789';
-        const special = '!@#$%^&*';
-        const all = upper + lower + digits + special;
-
-        const getRandom = ( chars: string ) =>
-            chars[ crypto.randomInt( 0, chars.length ) ];
-
-        // Ensure at least one of each required character type
-        const required = [
-            getRandom( upper ),
-            getRandom( upper ),
-            getRandom( lower ),
-            getRandom( lower ),
-            getRandom( digits ),
-            getRandom( digits ),
-            getRandom( special ),
-            getRandom( special ),
+        const animalWords = [
+            'bear', 'wolf', 'lion', 'swan', 'tiger',
+            'eagle', 'otter', 'panda', 'zebra', 'koala',
+            'horse', 'whale', 'shark', 'mouse', 'camel',
+            'sheep', 'goose', 'llama', 'bison', 'raven',
+            'moose', 'lemur', 'gecko', 'badger', 'beaver',
+            'falcon', 'jaguar', 'rabbit', 'monkey',
         ];
+        const specialChars = '#!@&';
 
-        const remaining = Array.from( { length: 4 }, () => getRandom( all ) );
-        const password = [ ...required, ...remaining ];
+        const word = animalWords[ crypto.randomInt( 0, animalWords.length ) ];
+        const special = specialChars[ crypto.randomInt( 0, specialChars.length ) ];
+        const number = crypto.randomInt( 100, 10000 );
 
-        // Shuffle
-        for ( let i = password.length - 1; i > 0; i-- ) {
-            const j = crypto.randomInt( 0, i + 1 );
-            [ password[ i ], password[ j ] ] = [ password[ j ], password[ i ] ];
-        }
-
-        return password.join( '' );
+        return `${word}${special}${number}`;
     }
 }

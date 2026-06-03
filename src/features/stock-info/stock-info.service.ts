@@ -157,7 +157,7 @@ export class StockInfoService {
   async getCompanyOverview(stockCode: string) {
     const corpCode = await this.getCorpCode(stockCode);
 
-    const [dartData, company, latestCandle, kiwoomBasicInfo] = await Promise.all([
+    const [dartData, company, latestCandle, kiwoomBasicInfo, naverThemes] = await Promise.all([
       this.dart.getCompanyInfo(corpCode),
       this.prisma.company.findFirst({
         where: { stockCode, deletedAt: null },
@@ -171,6 +171,15 @@ export class StockInfoService {
       this.kiwoomRest.getStockBasicInfo(stockCode).catch((error) => {
         this.logger.warn(`Kiwoom market cap unavailable for ${stockCode}: ${error.message}`);
         return null;
+      }),
+      this.prisma.stockTheme.findMany({
+        where: { stockCode, source: 'NAVER', theme: { deletedAt: null } },
+        select: {
+          themeCode: true,
+          inclusionReason: true,
+          theme: { select: { themeName: true } },
+        },
+        orderBy: { themeCode: 'asc' },
       }),
     ]);
 
@@ -202,6 +211,12 @@ export class StockInfoService {
       marketCap,
       marketCapSource: kiwoomMarketCap != null ? 'kiwoom' : (marketCap != null ? 'calculated' : null),
       theme: company?.theme?.themeName ?? null,
+      industryTheme: company?.theme?.themeName ?? null,
+      themes: naverThemes.map((item) => ({
+        themeCode: item.themeCode,
+        themeName: item.theme.themeName,
+        inclusionReason: item.inclusionReason,
+      })),
       businessInfo: company?.businessInfo ?? null,
     };
   }

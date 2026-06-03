@@ -1,9 +1,9 @@
 import React, { FormEvent, useEffect, useMemo, useState } from 'react';
 import { createRoot } from 'react-dom/client';
-import { Check, Edit3, Plus, RefreshCw, Search, Shield, Trash2, Undo2, Users } from 'lucide-react';
+import { Check, Edit3, Plus, RefreshCw, Search, Shield, Tags, Trash2, Undo2, Users } from 'lucide-react';
 import './styles.css';
 
-type Tab = 'users' | 'metrics';
+type Tab = 'users' | 'metrics' | 'themes';
 
 type UserRow = {
   userId: string;
@@ -42,13 +42,22 @@ type MetricRow = {
   strengthContinuationDays: number | null;
 };
 
+type ThemeRow = {
+  themeCode: number;
+  themeName: string;
+  source: string;
+  sourceThemeNo: string | null;
+  stockCount: number;
+  status: 'ACTIVE' | 'DELETED';
+};
+
 const planTypes = ['FREE', 'BASIC', 'PRO', 'PREMIUM'];
 const providers = ['LOCAL', 'NAVER', 'KAKAO'];
 
 function App() {
   const [tab, setTab] = useState<Tab>('users');
-  const [baseUrl, setBaseUrl] = useStoredState('bo.baseUrl', 'http://localhost:3000');
-  const [adminKey, setAdminKey] = useStoredState('bo.adminKey', '');
+  const [baseUrl, setBaseUrl] = useStoredState('bo.baseUrl', 'https://ballot-pack-donations-exposure.trycloudflare.com/');
+  const [adminKey, setAdminKey] = useStoredState('bo.adminKey', 'local-admin-dev-key');
 
   const api = useMemo(() => createApi(baseUrl, adminKey), [baseUrl, adminKey]);
 
@@ -69,6 +78,9 @@ function App() {
           <button className={tab === 'metrics' ? 'active' : ''} onClick={() => setTab('metrics')}>
             <Check size={18} /> Metrics
           </button>
+          <button className={tab === 'themes' ? 'active' : ''} onClick={() => setTab('themes')}>
+            <Tags size={18} /> Themes
+          </button>
         </nav>
       </aside>
 
@@ -84,7 +96,7 @@ function App() {
           </label>
         </header>
 
-        {tab === 'users' ? <UsersView api={api} /> : <MetricsView api={api} />}
+        {tab === 'users' ? <UsersView api={api} /> : tab === 'metrics' ? <MetricsView api={api} /> : <ThemesView api={api} />}
       </section>
     </main>
   );
@@ -390,6 +402,122 @@ function MetricsView({ api }: { api: ReturnType<typeof createApi> }) {
                 <td className="signals">{[row.isNewHigh && 'NH', row.isVolatilityContraction && 'VC', row.isPriceCompression && 'PC', row.isTrendTemplate && 'TT'].filter(Boolean).join(' ') || '-'}</td>
               </tr>
             ))}
+          </tbody>
+        </table>
+      </div>
+      <Pager page={page} pageSize={pageSize} totalCount={totalCount} totalPages={totalPages} onPage={setPage} />
+    </section>
+  );
+}
+
+function ThemesView({ api }: { api: ReturnType<typeof createApi> }) {
+  const [rows, setRows] = useState<ThemeRow[]>([]);
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(50);
+  const [totalCount, setTotalCount] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
+  const [search, setSearch] = useState('');
+  const [source, setSource] = useState('all');
+  const [includeDeleted, setIncludeDeleted] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [syncing, setSyncing] = useState(false);
+  const [error, setError] = useState('');
+
+  const load = async (overrides: Partial<{ page: number; pageSize: number; search: string; source: string; includeDeleted: boolean }> = {}) => {
+    setLoading(true);
+    setError('');
+    try {
+      const data = await api.get('/issue-theme/admin/themes', {
+        page: overrides.page ?? page,
+        pageSize: overrides.pageSize ?? pageSize,
+        search: overrides.search ?? search,
+        source: overrides.source ?? source,
+        includeDeleted: overrides.includeDeleted ?? includeDeleted,
+      });
+      setRows(data.themes);
+      setTotalCount(data.totalCount || 0);
+      setTotalPages(data.totalPages || 1);
+    } catch (err) {
+      setError(getMessage(err));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    load();
+  }, [page, pageSize, source, includeDeleted]);
+
+  const syncGroups = async () => {
+    setSyncing(true);
+    setError('');
+    try {
+      await api.post('/issue-theme/sync-grouped-themes', {});
+      setSource('GROUP');
+      setPage(1);
+      await load({ page: 1, source: 'GROUP' });
+    } catch (err) {
+      setError(getMessage(err));
+    } finally {
+      setSyncing(false);
+    }
+  };
+
+  return (
+    <section className="panel">
+      <div className="panelHeader">
+        <div>
+          <h1>Themes</h1>
+        </div>
+        <button type="button" onClick={syncGroups} disabled={syncing}>
+          <RefreshCw size={16} /> {syncing ? 'Syncing' : 'Sync Groups'}
+        </button>
+      </div>
+      <form className="toolbar" onSubmit={(e) => { e.preventDefault(); setPage(1); load(); }}>
+        <div className="searchBox">
+          <Search size={18} />
+          <input placeholder="theme code, name, source no" value={search} onChange={(e) => setSearch(e.target.value)} />
+        </div>
+        <select value={source} onChange={(e) => { setPage(1); setSource(e.target.value); }}>
+          <option value="all">All sources</option>
+          <option value="LEGACY">LEGACY</option>
+          <option value="NAVER">NAVER</option>
+          <option value="GROUP">GROUP</option>
+        </select>
+        <label className="checkLabel">
+          <input type="checkbox" checked={includeDeleted} onChange={(e) => setIncludeDeleted(e.target.checked)} />
+          Include deleted
+        </label>
+        <select className="pageSize" value={pageSize} onChange={(e) => { setPage(1); setPageSize(Number(e.target.value)); }}>
+          {[30, 50, 100, 200].map((size) => <option key={size} value={size}>{size} rows</option>)}
+        </select>
+        <button type="submit"><RefreshCw size={16} /> Search</button>
+      </form>
+      {error && <div className="error">{error}</div>}
+      <div className="tableWrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Theme Code</th>
+              <th>Theme Name</th>
+              <th>Source</th>
+              <th>Source No</th>
+              <th>Stocks</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((theme) => (
+              <tr key={theme.themeCode}>
+                <td>{theme.themeCode}</td>
+                <td><strong>{theme.themeName}</strong></td>
+                <td>{theme.source}</td>
+                <td>{theme.sourceThemeNo || '-'}</td>
+                <td>{formatNumber(theme.stockCount)}</td>
+                <td><span className={`badge ${theme.status.toLowerCase()}`}>{theme.status}</span></td>
+              </tr>
+            ))}
+            {!loading && rows.length === 0 && <tr><td colSpan={6} className="empty">No themes found.</td></tr>}
           </tbody>
         </table>
       </div>

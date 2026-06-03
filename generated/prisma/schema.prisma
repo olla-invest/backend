@@ -96,22 +96,61 @@ enum BillingCycle {
 
 // 1. 테마 마스터 테이블
 model Theme {
-  themeCode Int       @id @map("theme_code")
-  themeName String    @map("theme_name") @db.VarChar(100)
-  imageUrl  String?   @map("image_url") @db.VarChar(500)
-  createdAt DateTime  @default(now()) @map("created_at")
-  updatedAt DateTime  @default(now()) @updatedAt @map("updated_at")
-  deletedAt DateTime? @map("deleted_at")
+  themeCode     Int       @id @map("theme_code")
+  themeName     String    @map("theme_name") @db.VarChar(100)
+  imageUrl      String?   @map("image_url") @db.VarChar(500)
+  source        String    @default("LEGACY") @db.VarChar(30)
+  sourceThemeNo String?   @map("source_theme_no") @db.VarChar(50)
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @default(now()) @updatedAt @map("updated_at")
+  deletedAt     DateTime? @map("deleted_at")
 
   // Relations
-  companies      Company[]
-  dailySnapshots ThemeDailySnapshot[]
-  watchlistUsers UserWatchlistTheme[]
+  companies       Company[]
+  stockThemes     StockTheme[]
+  dailySnapshots  ThemeDailySnapshot[]
+  watchlistUsers  UserWatchlistTheme[]
+  groupThemeLinks ThemeGroupTheme[]    @relation("ThemeGroupLinks")
+  childThemeLinks ThemeGroupTheme[]    @relation("ThemeChildLinks")
 
   @@unique([themeName, deletedAt], map: "uk_themes_name")
+  @@unique([source, sourceThemeNo], map: "uk_themes_source_theme_no")
+  @@index([source], map: "idx_themes_source")
   @@index([themeName], map: "idx_themes_name")
   @@index([deletedAt], map: "idx_themes_deleted_at")
   @@map("themes")
+}
+
+model ThemeGroupTheme {
+  groupThemeCode Int      @map("group_theme_code")
+  themeCode      Int      @map("theme_code")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @default(now()) @updatedAt @map("updated_at")
+
+  groupTheme Theme @relation("ThemeGroupLinks", fields: [groupThemeCode], references: [themeCode])
+  theme      Theme @relation("ThemeChildLinks", fields: [themeCode], references: [themeCode])
+
+  @@id([groupThemeCode, themeCode])
+  @@index([themeCode], map: "idx_theme_group_themes_theme_code")
+  @@map("theme_group_themes")
+}
+
+model StockTheme {
+  themeCode       Int      @map("theme_code")
+  stockCode       String   @map("stock_code") @db.VarChar(20)
+  stockName       String?  @map("stock_name") @db.VarChar(100)
+  inclusionReason String?  @map("inclusion_reason") @db.Text
+  source          String   @default("NAVER") @db.VarChar(30)
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @default(now()) @updatedAt @map("updated_at")
+
+  theme Theme @relation(fields: [themeCode], references: [themeCode])
+
+  @@id([themeCode, stockCode])
+  @@index([stockCode], map: "idx_stock_themes_stock_code")
+  @@index([themeCode], map: "idx_stock_themes_theme_code")
+  @@index([source], map: "idx_stock_themes_source")
+  @@map("stock_themes")
 }
 
 // 2. 사용자 테이블
@@ -489,6 +528,8 @@ model ThemeDailySnapshot {
   totalCount      Int      @map("total_count") // 전체 종목 수 (실시간차트 기준)
   risingRatio     Decimal  @map("rising_ratio") @db.Decimal(5, 2) // 상승 비율 (%)
   avgChangeRate   Decimal  @map("avg_change_rate") @db.Decimal(8, 4) // 평균 등락률 (%)
+  avgRsScore      Decimal  @default(0) @map("avg_rs_score") @db.Decimal(5, 2)
+  themeScore      Decimal  @default(0) @map("theme_score") @db.Decimal(6, 2)
   highVolumeCount Int      @default(0) @map("high_volume_count") // 거래대금 급증 종목 수
   upCount         Int      @default(0) @map("up_count") // 상승 종목 수 (등락률 >= +1%)
   flatCount       Int      @default(0) @map("flat_count") // 보합 종목 수 (-1% ~ +1%)

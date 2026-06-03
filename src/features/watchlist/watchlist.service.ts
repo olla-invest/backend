@@ -53,11 +53,14 @@ export class WatchlistService {
     const todayMap = new Map(todayMetrics.map((m) => [m.stockCode, m]));
     const prevMap = new Map(prevMetrics.map((m) => [m.stockCode, m]));
 
+    const stocks = watchlist.map((w) =>
+      this.buildStockItem(w, todayMap.get(w.company.stockCode) ?? null, prevMap.get(w.company.stockCode) ?? null),
+    );
+    stocks.sort((a, b) => this.compareNullableRank(a.rank, b.rank) || a.companyName.localeCompare(b.companyName, 'ko'));
+
     return {
       tradeDate: latestDate,
-      stocks: watchlist.map((w) =>
-        this.buildStockItem(w, todayMap.get(w.company.stockCode) ?? null, prevMap.get(w.company.stockCode) ?? null),
-      ),
+      stocks,
     };
   }
 
@@ -190,8 +193,7 @@ export class WatchlistService {
       return this.buildThemeItem(w, today, prev);
     });
 
-    // 가나다순
-    themes.sort((a, b) => a.themeName.localeCompare(b.themeName, 'ko'));
+    themes.sort((a, b) => this.compareNullableRank(a.rank, b.rank) || a.themeName.localeCompare(b.themeName, 'ko'));
 
     return { themes };
   }
@@ -430,14 +432,20 @@ export class WatchlistService {
   }
 
   private async recommendTheme(watchlistStocks: any[], watchlistThemeCodes: Set<number>, dayIndex: number) {
-    // 1순위: 관심종목이 속한 테마 중 관심테마에 없는 것 → 테마 순위 가장 높은 1개
-    const stockThemeCodes = [
-      ...new Set(
-        watchlistStocks
-          .map((w) => w.company.themeCode)
-          .filter((tc): tc is number => tc != null && !watchlistThemeCodes.has(tc)),
-      ),
-    ];
+    // 1순위: 관심종목이 속한 네이버 테마 중 관심테마에 없는 것 → 테마 순위 가장 높은 1개
+    const watchlistStockCodes = watchlistStocks.map((w) => w.company.stockCode).filter(Boolean);
+    const stockThemeRows = watchlistStockCodes.length > 0
+      ? await this.prisma.stockTheme.findMany({
+          where: {
+            stockCode: { in: watchlistStockCodes },
+            source: 'NAVER',
+            themeCode: { notIn: Array.from(watchlistThemeCodes) },
+            theme: { deletedAt: null },
+          },
+          select: { themeCode: true },
+        })
+      : [];
+    const stockThemeCodes = [...new Set(stockThemeRows.map((row) => row.themeCode))];
 
     if (stockThemeCodes.length > 0) {
       const latestSnapshot = await this.prisma.themeDailySnapshot.findFirst({
@@ -537,23 +545,31 @@ export class WatchlistService {
 
     // 1순위: 관심테마 내 종목 중 RS 상위 top5 → 1개 노출
     if (watchlistThemeCodes.size > 0) {
-      const themeCompanies = await this.prisma.company.findMany({
-        where: { themeCode: { in: Array.from(watchlistThemeCodes) }, deletedAt: null },
-        select: { stockCode: true, companyId: true, companyName: true, marketType: true },
+      const themeStocks = await this.prisma.stockTheme.findMany({
+        where: {
+          themeCode: { in: Array.from(watchlistThemeCodes) },
+          source: 'NAVER',
+          theme: { deletedAt: null },
+        },
+        select: { stockCode: true },
       });
-      const candidateCodes = themeCompanies
-        .filter((c) => !watchlistStockCodes.has(c.stockCode))
-        .map((c) => c.stockCode);
+      const candidateCodes = [...new Set(themeStocks.map((row) => row.stockCode))]
+        .filter((code) => !watchlistStockCodes.has(code));
 
       if (candidateCodes.length > 0) {
+        const themeCompanies = await this.prisma.company.findMany({
+          where: { stockCode: { in: candidateCodes }, deletedAt: null },
+          select: { stockCode: true, companyId: true, companyName: true, marketType: true },
+        });
+        const existingCandidateCodes = new Set(themeCompanies.map((company) => company.stockCode));
         const latestMetric = await this.prisma.stockDailyMetrics.findFirst({
-          where: { stockCode: { in: candidateCodes } },
+          where: { stockCode: { in: Array.from(existingCandidateCodes) } },
           orderBy: { tradeDate: 'desc' },
           select: { tradeDate: true },
         });
         if (latestMetric) {
           const top5 = await this.prisma.stockDailyMetrics.findMany({
-            where: { stockCode: { in: candidateCodes }, tradeDate: latestMetric.tradeDate },
+            where: { stockCode: { in: Array.from(existingCandidateCodes) }, tradeDate: latestMetric.tradeDate },
             orderBy: { relativeStrengthScore: 'desc' },
             take: 5,
           });
@@ -711,14 +727,28 @@ export class WatchlistService {
         companyName: w.company.companyName,
         marketType: w.company.marketType,
         addedDate: w.addedDate,
+        rank: m?.rank ?? null,
+        prevRank: null,
+        rankChange: null,
         closePrice: m ? Number(m.closePrice) : null,
         priceChangeRate1d: m?.priceChangeRate1d != null ? Number(m.priceChangeRate1d) : null,
+        relativeStrengthScore: m ? Number(m.relativeStrengthScore) : null,
       });
     }
 
     // addedDate 내림차순
-    items.sort((a, b) => new Date(b.addedDate).getTime() - new Date(a.addedDate).getTime());
+    items.sort((a, b) =>
+      this.compareNullableRank(a.rank, b.rank) ||
+      new Date(b.addedDate).getTime() - new Date(a.addedDate).getTime(),
+    );
 
     return { items };
+  }
+
+  private compareNullableRank(a?: number | null, b?: number | null) {
+    if (a == null && b == null) return 0;
+    if (a == null) return 1;
+    if (b == null) return -1;
+    return a - b;
   }
 }

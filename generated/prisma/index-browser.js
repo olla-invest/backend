@@ -124,9 +124,28 @@ exports.Prisma.ThemeScalarFieldEnum = {
   themeCode: 'themeCode',
   themeName: 'themeName',
   imageUrl: 'imageUrl',
+  source: 'source',
+  sourceThemeNo: 'sourceThemeNo',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   deletedAt: 'deletedAt'
+};
+
+exports.Prisma.ThemeGroupThemeScalarFieldEnum = {
+  groupThemeCode: 'groupThemeCode',
+  themeCode: 'themeCode',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.StockThemeScalarFieldEnum = {
+  themeCode: 'themeCode',
+  stockCode: 'stockCode',
+  stockName: 'stockName',
+  inclusionReason: 'inclusionReason',
+  source: 'source',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
 };
 
 exports.Prisma.UserScalarFieldEnum = {
@@ -344,6 +363,8 @@ exports.Prisma.ThemeDailySnapshotScalarFieldEnum = {
   totalCount: 'totalCount',
   risingRatio: 'risingRatio',
   avgChangeRate: 'avgChangeRate',
+  avgRsScore: 'avgRsScore',
+  themeScore: 'themeScore',
   highVolumeCount: 'highVolumeCount',
   upCount: 'upCount',
   flatCount: 'flatCount',
@@ -535,6 +556,8 @@ exports.PaymentStatus = exports.$Enums.PaymentStatus = {
 
 exports.Prisma.ModelName = {
   Theme: 'Theme',
+  ThemeGroupTheme: 'ThemeGroupTheme',
+  StockTheme: 'StockTheme',
   User: 'User',
   Company: 'Company',
   UserWatchlist: 'UserWatchlist',
