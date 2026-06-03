@@ -1,7 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { OnEvent } from '@nestjs/event-emitter';
 import { PrismaService } from '../../common/prisma/prisma.service';
-import { KiwoomTickData, KiwoomQuoteData } from '../../integrations/kiwoom/types/kiwoom.types';
 import { Decimal } from '@generated/prisma/runtime/client';
 import { isKrxTradingDay } from '../../common/utils/market-calendar.util';
 
@@ -10,93 +8,6 @@ export class ChartStorageService {
   private readonly logger = new Logger(ChartStorageService.name);
 
   constructor(private readonly prisma: PrismaService) {}
-
-  @OnEvent('kiwoom.realtime.0B')
-  async handleTickData(event: {
-    stockCode: string;
-    type: string;
-    values: KiwoomTickData;
-  }): Promise<void> {
-    const { stockCode, values } = event;
-    try {
-      await this.saveTickData(stockCode, values);
-    } catch (error) {
-      this.logger.error(`Failed to handle tick data for ${stockCode}`, error);
-    }
-  }
-
-  @OnEvent('kiwoom.realtime.0D')
-  async handleQuoteData(event: {
-    stockCode: string;
-    type: string;
-    values: KiwoomQuoteData;
-  }): Promise<void> {
-    const { stockCode, values } = event;
-    try {
-      await this.saveQuoteData(stockCode, values);
-    } catch (error) {
-      this.logger.error(`Failed to handle quote data for ${stockCode}`, error);
-    }
-  }
-
-  private async saveTickData(stockCode: string, values: KiwoomTickData): Promise<void> {
-    const tickTime = this.parseTime(values['20']);
-    const price = this.parseDecimal(values['10']);
-    const volume = this.parseBigInt(values['15']);
-    const prevDayCompare = this.parseDecimal(values['11']);
-    const changeRate = this.parseDecimal(values['12']);
-    const askPrice = this.parseDecimal(values['27']);
-    const bidPrice = this.parseDecimal(values['28']);
-    const accVolume = this.parseBigInt(values['13']);
-    const accTradingValue = this.parseBigInt(values['14']);
-
-    await this.prisma.stockTick.create({
-      data: {
-        stockCode,
-        tickTime,
-        price,
-        volume,
-        prevDayCompare,
-        changeRate,
-        askPrice,
-        bidPrice,
-        accVolume,
-        accTradingValue,
-      },
-    });
-  }
-
-  private async saveQuoteData(stockCode: string, values: KiwoomQuoteData): Promise<void> {
-    const quoteTime = this.parseTime(values['21']);
-    await this.prisma.stockQuote.create({
-      data: {
-        stockCode,
-        quoteTime,
-        askPrice1: this.parseDecimal(values['41']),
-        askVolume1: this.parseBigInt(values['61']),
-        bidPrice1: this.parseDecimal(values['51']),
-        bidVolume1: this.parseBigInt(values['71']),
-        askPrice2: this.parseDecimal(values['42']),
-        askVolume2: this.parseBigInt(values['62']),
-        bidPrice2: this.parseDecimal(values['52']),
-        bidVolume2: this.parseBigInt(values['72']),
-        askPrice3: this.parseDecimal(values['43']),
-        askVolume3: this.parseBigInt(values['63']),
-        bidPrice3: this.parseDecimal(values['53']),
-        bidVolume3: this.parseBigInt(values['73']),
-        askPrice4: this.parseDecimal(values['44']),
-        askVolume4: this.parseBigInt(values['64']),
-        bidPrice4: this.parseDecimal(values['54']),
-        bidVolume4: this.parseBigInt(values['74']),
-        askPrice5: this.parseDecimal(values['45']),
-        askVolume5: this.parseBigInt(values['65']),
-        bidPrice5: this.parseDecimal(values['55']),
-        bidVolume5: this.parseBigInt(values['75']),
-        totalAskVolume: this.parseBigInt(values['121']),
-        totalBidVolume: this.parseBigInt(values['125']),
-      },
-    });
-  }
 
   async saveCandle(candle: {
     stockCode: string;
@@ -428,21 +339,4 @@ export class ChartStorageService {
     return diffDays >= days;
   }
 
-  private parseTime(timeStr: string): Date {
-    const now = new Date();
-    const hour = parseInt(timeStr.substring(0, 2));
-    const minute = parseInt(timeStr.substring(2, 4));
-    const second = parseInt(timeStr.substring(4, 6));
-    return new Date(now.getFullYear(), now.getMonth(), now.getDate(), hour, minute, second);
-  }
-
-  private parseDecimal(value: string): Decimal {
-    const cleaned = (value || '0').replace(/[+\-,\s]/g, '').trim();
-    return new Decimal(cleaned || '0');
-  }
-
-  private parseBigInt(value: string): bigint {
-    const cleaned = (value || '0').replace(/[+\-,\s]/g, '').trim().split('.')[0];
-    return BigInt(cleaned || '0');
-  }
 }

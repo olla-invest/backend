@@ -310,50 +310,6 @@ exports.Prisma.StockCandleScalarFieldEnum = {
   createdAt: 'createdAt'
 };
 
-exports.Prisma.StockTickScalarFieldEnum = {
-  tickId: 'tickId',
-  stockCode: 'stockCode',
-  tickTime: 'tickTime',
-  price: 'price',
-  volume: 'volume',
-  prevDayCompare: 'prevDayCompare',
-  changeRate: 'changeRate',
-  askPrice: 'askPrice',
-  bidPrice: 'bidPrice',
-  accVolume: 'accVolume',
-  accTradingValue: 'accTradingValue',
-  createdAt: 'createdAt'
-};
-
-exports.Prisma.StockQuoteScalarFieldEnum = {
-  quoteId: 'quoteId',
-  stockCode: 'stockCode',
-  quoteTime: 'quoteTime',
-  askPrice1: 'askPrice1',
-  askVolume1: 'askVolume1',
-  bidPrice1: 'bidPrice1',
-  bidVolume1: 'bidVolume1',
-  askPrice2: 'askPrice2',
-  askVolume2: 'askVolume2',
-  bidPrice2: 'bidPrice2',
-  bidVolume2: 'bidVolume2',
-  askPrice3: 'askPrice3',
-  askVolume3: 'askVolume3',
-  bidPrice3: 'bidPrice3',
-  bidVolume3: 'bidVolume3',
-  askPrice4: 'askPrice4',
-  askVolume4: 'askVolume4',
-  bidPrice4: 'bidPrice4',
-  bidVolume4: 'bidVolume4',
-  askPrice5: 'askPrice5',
-  askVolume5: 'askVolume5',
-  bidPrice5: 'bidPrice5',
-  bidVolume5: 'bidVolume5',
-  totalAskVolume: 'totalAskVolume',
-  totalBidVolume: 'totalBidVolume',
-  createdAt: 'createdAt'
-};
-
 exports.Prisma.ThemeDailySnapshotScalarFieldEnum = {
   snapshotId: 'snapshotId',
   themeCode: 'themeCode',
@@ -573,8 +529,6 @@ exports.Prisma.ModelName = {
   BatchJobHistory: 'BatchJobHistory',
   KiwoomToken: 'KiwoomToken',
   StockCandle: 'StockCandle',
-  StockTick: 'StockTick',
-  StockQuote: 'StockQuote',
   ThemeDailySnapshot: 'ThemeDailySnapshot',
   StockTradingValueSnapshot: 'StockTradingValueSnapshot',
   StockDailyMetrics: 'StockDailyMetrics',
