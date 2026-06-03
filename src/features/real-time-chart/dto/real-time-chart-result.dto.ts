@@ -30,6 +30,14 @@ export class RankHistoryDto {
   threeDaysAgo: number | null;
 }
 
+export class StockThemeDto {
+  @ApiProperty({ example: 100123, description: 'Naver crawled theme code' })
+  themeCode: number;
+
+  @ApiProperty({ example: 'Semiconductor', description: 'Naver crawled theme name' })
+  themeName: string;
+}
+
 export class RealTimeChartResultItem {
   @ApiProperty({ example: '005930', description: '화면 식별자(종목코드)' })
   id: string;
@@ -72,6 +80,9 @@ export class RealTimeChartResultItem {
 
   @ApiProperty({ example: '반도체', description: '업종/테마명 원본' })
   upName: string;
+
+  @ApiProperty({ type: [StockThemeDto], description: 'Naver crawled stock themes' })
+  themes: StockThemeDto[];
 
   @ApiProperty({ type: RankHistoryDto, description: '최근 순위 이력' })
   rankHistory: RankHistoryDto;

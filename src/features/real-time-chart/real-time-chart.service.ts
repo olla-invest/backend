@@ -784,6 +784,7 @@ export class RealTimeChartService implements OnModuleInit {
     // ?섏씠吏?ㅼ씠?섎맂 醫낅ぉ?ㅼ쓽 醫낃? 諛??쒖쐞 蹂??議고쉶
     const pageStockCodes = paginatedData.map((d) => d.stock.code);
     const closingPrices = await this.chartStorage.getLatestClosingPrices(pageStockCodes);
+    const naverThemesMap = await this.getNaverThemesByStockCodes(pageStockCodes);
 
     // ?먮룞 ?ㅼ떆媛?援щ룆 (諛깃렇?쇱슫?쒖뿉??鍮꾨룞湲??ㅽ뻾)
     this.autoSubscribeStocks(pageStockCodes).catch((error) => {
@@ -828,6 +829,8 @@ export class RealTimeChartService implements OnModuleInit {
         const priceChangeRateText = this.formatPriceChangeRateText(realtimePrice, metrics);
         const investmentIndicators = await this.buildInvestmentIndicators(s.code, metrics);
         const investmentIndicatorsText = this.formatInvestmentIndicators(investmentIndicators);
+        const naverThemes = naverThemesMap.get(s.code) ?? [];
+        const naverThemeText = naverThemes.map((theme) => theme.themeName).join(', ');
 
         return {
           id: s.code,
@@ -842,8 +845,9 @@ export class RealTimeChartService implements OnModuleInit {
           investmentIndicators: priceChangeRateText,
           investmentIndicatorItems: investmentIndicators,
           investmentIndicatorsDtl: investmentIndicatorsText,
-          theme: s.upName || '-',
-          upName: s.upName || '-',
+          theme: naverThemeText || s.upName || '-',
+          upName: naverThemeText || s.upName || '-',
+          themes: naverThemes,
           rankHistory: {
             today: rankHistory[0] || null,
             oneDayAgo: rankHistory[1] || null,
@@ -992,6 +996,7 @@ export class RealTimeChartService implements OnModuleInit {
     // ?섏씠吏?ㅼ씠?섎맂 醫낅ぉ?ㅼ쓽 醫낃? 議고쉶
     const pageStockCodes = paginatedData.map((d) => d.stock.code);
     const closingPrices = await this.chartStorage.getLatestClosingPrices(pageStockCodes);
+    const naverThemesMap = await this.getNaverThemesByStockCodes(pageStockCodes);
 
     // ?먮룞 ?ㅼ떆媛?援щ룆
     this.autoSubscribeStocks(pageStockCodes).catch((error) => {
@@ -1044,6 +1049,8 @@ export class RealTimeChartService implements OnModuleInit {
         const priceChangeRateText = this.formatPriceChangeRateText(realtimePrice, metrics);
         const investmentIndicators = await this.buildInvestmentIndicators(s.code, metrics);
         const investmentIndicatorsText = this.formatInvestmentIndicators(investmentIndicators);
+        const naverThemes = naverThemesMap.get(s.code) ?? [];
+        const naverThemeText = naverThemes.map((theme) => theme.themeName).join(', ');
 
         return {
           id: s.code,
@@ -1058,8 +1065,9 @@ export class RealTimeChartService implements OnModuleInit {
           investmentIndicators: priceChangeRateText,
           investmentIndicatorItems: investmentIndicators,
           investmentIndicatorsDtl: investmentIndicatorsText,
-          theme: s.upName || '-',
-          upName: s.upName || '-',
+          theme: naverThemeText || s.upName || '-',
+          upName: naverThemeText || s.upName || '-',
+          themes: naverThemes,
           rankHistory: {
             today: rankHistory[0]?.rank || null,
             oneDayAgo: rankHistory[1]?.rank || null,
@@ -1189,6 +1197,7 @@ export class RealTimeChartService implements OnModuleInit {
     // 醫낃? 諛??ㅼ떆媛?媛寃?議고쉶
     const pageStockCodes = paginatedData.map((d) => d.stock.code);
     const closingPrices = await this.chartStorage.getLatestClosingPrices(pageStockCodes);
+    const naverThemesMap = await this.getNaverThemesByStockCodes(pageStockCodes);
 
     this.autoSubscribeStocks(pageStockCodes).catch((error) => {
       this.logger.warn(`Auto-subscribe failed: ${error.message}`);
@@ -1221,6 +1230,8 @@ export class RealTimeChartService implements OnModuleInit {
         const priceChangeRateText = this.formatPriceChangeRateText(realtimePrice, metrics);
         const investmentIndicators = await this.buildInvestmentIndicators(s.code, metrics);
         const investmentIndicatorsText = this.formatInvestmentIndicators(investmentIndicators);
+        const naverThemes = naverThemesMap.get(s.code) ?? [];
+        const naverThemeText = naverThemes.map((theme) => theme.themeName).join(', ');
 
         return {
           id: s.code,
@@ -1235,8 +1246,9 @@ export class RealTimeChartService implements OnModuleInit {
           investmentIndicators: priceChangeRateText,
           investmentIndicatorItems: investmentIndicators,
           investmentIndicatorsDtl: investmentIndicatorsText,
-          theme: s.upName || '-',
-          upName: s.upName || '-',
+          theme: naverThemeText || s.upName || '-',
+          upName: naverThemeText || s.upName || '-',
+          themes: naverThemes,
           rankHistory: {
             today: rankHistory[0]?.rank || null,
             oneDayAgo: rankHistory[1]?.rank || null,
@@ -1664,6 +1676,35 @@ export class RealTimeChartService implements OnModuleInit {
     });
 
     return new Set(stockThemes.map((row) => row.stockCode));
+  }
+
+  private async getNaverThemesByStockCodes(
+    stockCodes: string[],
+  ): Promise<Map<string, Array<{ themeCode: number; themeName: string }>>> {
+    const result = new Map<string, Array<{ themeCode: number; themeName: string }>>();
+    if (stockCodes.length === 0) return result;
+
+    const stockThemes = await this.prisma.stockTheme.findMany({
+      where: {
+        source: 'NAVER',
+        stockCode: { in: stockCodes },
+        theme: { deletedAt: null },
+      },
+      select: {
+        stockCode: true,
+        themeCode: true,
+        theme: { select: { themeName: true } },
+      },
+      orderBy: { themeCode: 'asc' },
+    });
+
+    for (const row of stockThemes) {
+      const themes = result.get(row.stockCode) ?? [];
+      themes.push({ themeCode: row.themeCode, themeName: row.theme.themeName });
+      result.set(row.stockCode, themes);
+    }
+
+    return result;
   }
 
   private matchesTheme(
