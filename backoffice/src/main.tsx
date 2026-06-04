@@ -633,8 +633,8 @@ function formatRate(value: number | null) {
   return `${value > 0 ? '+' : ''}${value.toFixed(2)}%`;
 }
 
-function formatRsRaw(value: number | null) {
-  if (value === null || Number.isNaN(value)) return '-';
+function formatRsRaw(value: number | null | undefined) {
+  if (value === null || value === undefined || Number.isNaN(value)) return '-';
   return value.toFixed(4);
 }
 
