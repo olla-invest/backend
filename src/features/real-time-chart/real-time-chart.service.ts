@@ -2556,6 +2556,7 @@ export class RealTimeChartService implements OnModuleInit {
     startDate?: string,
     endDate?: string,
     snapshot?: StockDetailSnapshot | null,
+    options?: { maskUnfixedPrices?: boolean },
   ) {
     const now = new Date();
     const defaultStart = new Date(now);
@@ -2586,6 +2587,10 @@ export class RealTimeChartService implements OnModuleInit {
       : realtimePrice
       ? this.applyRealtimeToStoredCandles(candles, candleType, realtimePrice, currentPeriodCandle)
       : candles;
+    const shouldMaskUnfixedPrices =
+      options?.maskUnfixedPrices === true &&
+      ['day', 'week', 'month', 'year'].includes(candleType) &&
+      this.isKrxMarketSessionNow();
 
     return {
       stockCode,
@@ -2611,16 +2616,25 @@ export class RealTimeChartService implements OnModuleInit {
           time,
           period: time,
           candleTime: c.candleTime.toISOString(),
-          open: String(c.openPrice),
-          high: String(c.highPrice),
-          low: String(c.lowPrice),
-          close: String(c.closePrice),
+          open: shouldMaskUnfixedPrices ? '-' : String(c.openPrice),
+          high: shouldMaskUnfixedPrices ? '-' : String(c.highPrice),
+          low: shouldMaskUnfixedPrices ? '-' : String(c.lowPrice),
+          close: shouldMaskUnfixedPrices ? '-' : String(c.closePrice),
           volume: c.volume.toString(),
           tradingValue: c.tradingValue?.toString() || null,
-          changeRate: changeRateText,
+          changeRate: shouldMaskUnfixedPrices ? '-' : changeRateText,
         };
       }),
     };
+  }
+
+  private isKrxMarketSessionNow(): boolean {
+    const now = new Date();
+    if (!isKrxTradingDay(now)) return false;
+
+    const nowKst = new Date(now.getTime() + 9 * 60 * 60 * 1000);
+    const minutes = nowKst.getUTCHours() * 60 + nowKst.getUTCMinutes();
+    return minutes >= 9 * 60 && minutes <= 16 * 60;
   }
 
   private async buildCurrentPeriodAggregateCandle(

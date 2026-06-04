@@ -100,6 +100,8 @@ export interface QuarterAmounts {
   q4: number | null;
 }
 
+type QuarterKey = keyof QuarterAmounts;
+
 @Injectable()
 export class StockInfoService {
   private readonly logger = new Logger(StockInfoService.name);
@@ -573,6 +575,69 @@ export class StockInfoService {
     };
   }
 
+  private async getTotalAssetsByQuarter(stockCode: string, year: string): Promise<QuarterAmounts> {
+    const corpCode = await this.getCorpCode(stockCode);
+
+    const [q1Res, h1Res, q3Res, annRes] = await Promise.allSettled([
+      this.dart.getFullFinancials(corpCode, year, REPRT_Q1),
+      this.dart.getFullFinancials(corpCode, year, REPRT_H1),
+      this.dart.getFullFinancials(corpCode, year, REPRT_Q3),
+      this.dart.getFullFinancials(corpCode, year, REPRT_ANNUAL),
+    ]);
+
+    const parseAmt = (val: string | undefined): number | null =>
+      val ? parseInt(val.replace(/,/g, ''), 10) : null;
+
+    const pickAssets = (res: PromiseSettledResult<any>): number | null => {
+      if (res.status !== 'fulfilled' || res.value.status !== '000') return null;
+      const list: any[] = res.value.list || [];
+      const bsItems = list.filter((i) => i.sj_div === 'BS');
+      const cfs = bsItems.filter((i) => i.fs_div === 'CFS');
+      const items = cfs.length > 0 ? cfs : bsItems.filter((i) => i.fs_div === 'OFS');
+      const item = items.find((i) => i.account_nm === '자산총계' || i.account_nm?.includes('자산총계'));
+      return parseAmt(item?.thstrm_amount);
+    };
+
+    return {
+      q1: pickAssets(q1Res),
+      q2: pickAssets(h1Res),
+      q3: pickAssets(q3Res),
+      q4: pickAssets(annRes),
+    };
+  }
+
+  private formatRatio(numerator: number | null, denominator: number | null): string | null {
+    if (numerator == null || denominator == null || denominator === 0) return null;
+    return ((numerator / denominator) * 100).toFixed(3).replace(/\.?0+$/, '');
+  }
+
+  private withDerivedProfitabilityMetrics(
+    indicators: any,
+    income: { revenue: QuarterAmounts; operatingIncome: QuarterAmounts; netIncome: QuarterAmounts },
+    totalAssets: QuarterAmounts,
+  ) {
+    const quarters: QuarterKey[] = ['q1', 'q2', 'q3', 'q4'];
+    const result = { ...indicators };
+
+    for (const q of quarters) {
+      const quarter = result[q] ?? { profitability: {}, stability: {}, activity: {} };
+      const profitability = { ...(quarter.profitability ?? {}) };
+
+      profitability['영업이익률'] = profitability['영업이익률']
+        ?? this.formatRatio(income.operatingIncome[q], income.revenue[q]);
+
+      profitability['ROA'] = profitability['ROA']
+        ?? this.formatRatio(income.netIncome[q], totalAssets[q]);
+
+      result[q] = {
+        ...quarter,
+        profitability,
+      };
+    }
+
+    return result;
+  }
+
   /**
    * 네이버 뉴스 검색 (종목명 기준)
    */
@@ -618,24 +683,38 @@ export class StockInfoService {
     const bsnsYear = year || getDefaultYear();
     const emptyQuarters = { q1: null, q2: null, q3: null, q4: null };
 
-    const [overview, income, cashFlow, indicators] = await Promise.allSettled([
+    const [overview, income, cashFlow, indicators, totalAssets] = await Promise.allSettled([
       this.getCompanyOverview(stockCode),
       this.getIncomeStatement(stockCode, year),
       this.getCashFlow(stockCode, year),
       this.getFinancialIndicators(stockCode, year),
+      this.getTotalAssetsByQuarter(stockCode, bsnsYear),
     ]);
+
+    const incomeValue = income.status === 'fulfilled' ? income.value : {
+      stockCode,
+      year: bsnsYear,
+      fsDiv: 'OFS',
+      revenue: emptyQuarters,
+      operatingIncome: emptyQuarters,
+      netIncome: emptyQuarters,
+    };
+
+    const indicatorsValue = indicators.status === 'fulfilled' ? indicators.value : {
+      stockCode,
+      year: bsnsYear,
+      q1: { profitability: {}, stability: {}, activity: {} },
+      q2: { profitability: {}, stability: {}, activity: {} },
+      q3: { profitability: {}, stability: {}, activity: {} },
+      q4: { profitability: {}, stability: {}, activity: {} },
+    };
+
+    const totalAssetsValue = totalAssets.status === 'fulfilled' ? totalAssets.value : emptyQuarters;
 
     return {
       stockCode,
       overview: overview.status === 'fulfilled' ? overview.value : null,
-      income: income.status === 'fulfilled' ? income.value : {
-        stockCode,
-        year: bsnsYear,
-        fsDiv: 'OFS',
-        revenue: emptyQuarters,
-        operatingIncome: emptyQuarters,
-        netIncome: emptyQuarters,
-      },
+      income: incomeValue,
       cashFlow: cashFlow.status === 'fulfilled' ? cashFlow.value : {
         stockCode,
         year: bsnsYear,
@@ -643,14 +722,7 @@ export class StockInfoService {
         investingCashFlow: emptyQuarters,
         financingCashFlow: emptyQuarters,
       },
-      indicators: indicators.status === 'fulfilled' ? indicators.value : {
-        stockCode,
-        year: bsnsYear,
-        q1: { profitability: {}, stability: {}, activity: {} },
-        q2: { profitability: {}, stability: {}, activity: {} },
-        q3: { profitability: {}, stability: {}, activity: {} },
-        q4: { profitability: {}, stability: {}, activity: {} },
-      },
+      indicators: this.withDerivedProfitabilityMetrics(indicatorsValue, incomeValue, totalAssetsValue),
     };
   }
 }

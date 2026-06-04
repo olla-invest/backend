@@ -47,10 +47,6 @@ export class IssueThemeService {
   private readonly groupThemeCodeOffset = 200000;
   private groupedThemeCache: Promise<GroupedThemeDefinition[]> | null = null;
 
-  private clamp(value: number, min: number, max: number): number {
-    return Math.min(max, Math.max(min, value));
-  }
-
   private round2(value: number): number {
     return Math.round(value * 100) / 100;
   }
@@ -191,23 +187,6 @@ export class IssueThemeService {
 
   private getOpenToCurrentChangeRate(m: any, rt?: RealtimePrice): number {
     return this.getStockPriceSnapshot(m, rt).changeRate;
-  }
-
-  private calculateThemeScore(params: {
-    avgRsScore: number;
-    totalCount: number;
-    risingRatio: number;
-    avgChangeRate?: number;
-    maxTotalCount?: number;
-  }): number {
-    const countScore = params.maxTotalCount && params.maxTotalCount > 0
-      ? this.clamp((params.totalCount / params.maxTotalCount) * 100, 0, 100)
-      : this.clamp((Math.log10(params.totalCount + 1) / Math.log10(21)) * 100, 0, 100);
-    const rawScore =
-      params.avgRsScore * 0.5 +
-      countScore * 0.3 +
-      params.risingRatio * 0.2;
-    return this.round2(rawScore);
   }
 
   constructor(
@@ -480,35 +459,33 @@ export class IssueThemeService {
 
     // 상승비율 계산
     const themeList: any[] = [];
-    const maxTotalCount = Math.max(...Array.from(themeGroups.values()).map((group) => group.changeRates.length), 0);
     for (const [themeCode, { themeName, changeRates, rsScores }] of themeGroups) {
       const totalCount = changeRates.length;
       const risingCount = changeRates.filter((r) => r > 0).length;
       const risingRatio = totalCount > 0 ? (risingCount / totalCount) * 100 : 0;
       const avgChangeRate = changeRates.reduce((a, b) => a + b, 0) / (changeRates.length || 1);
       const avgRsScore = rsScores.reduce((a, b) => a + b, 0) / (rsScores.length || 1);
-      const themeScore = this.calculateThemeScore({ avgRsScore, totalCount, risingRatio, maxTotalCount });
+      const roundedRisingRatio = this.round2(risingRatio);
+      const themeScore = roundedRisingRatio;
       const upCount = changeRates.filter((r) => r >= 1).length;
       const downCount = changeRates.filter((r) => r <= -1).length;
       const flatCount = totalCount - upCount - downCount;
       if (filters.minAvgRsScore != null && avgRsScore < filters.minAvgRsScore) continue;
       if (filters.minTotalCount != null && totalCount < filters.minTotalCount) continue;
       if (filters.minThemeScore != null && themeScore < filters.minThemeScore) continue;
-      themeList.push({ themeCode, themeName, totalCount, risingCount, risingRatio: this.round2(risingRatio), avgChangeRate: this.round2(avgChangeRate), avgRsScore: this.round2(avgRsScore), themeScore, upCount, flatCount, downCount });
+      themeList.push({ themeCode, themeName, totalCount, risingCount, risingRatio: roundedRisingRatio, avgChangeRate: this.round2(avgChangeRate), avgRsScore: this.round2(avgRsScore), themeScore, upCount, flatCount, downCount });
     }
 
-    // 순위 산출 (평균 RS 50%, 집계 종목수 30%, 상승률 20%)
+    // 순위 산출: 상승 종목 비율 내림차순, 동률은 동일 순위(dense rank)
     themeList.sort((a, b) =>
-      b.themeScore - a.themeScore ||
-      b.avgRsScore - a.avgRsScore ||
-      b.totalCount - a.totalCount ||
+      b.risingRatio - a.risingRatio ||
       a.themeName.localeCompare(b.themeName, 'ko'),
     );
     let rank = 1;
     for (let i = 0; i < themeList.length; i++) {
       if (
         i > 0 &&
-        themeList[i].themeScore === themeList[i - 1].themeScore
+        themeList[i].risingRatio === themeList[i - 1].risingRatio
       ) {
         themeList[i].rank = themeList[i - 1].rank;
       } else {
@@ -842,7 +819,7 @@ export class IssueThemeService {
       const risingRatio = totalCount > 0 ? (risingCount / totalCount) * 100 : 0;
       const avgChangeRate = changeRates.reduce((a, b) => a + b, 0) / (changeRates.length || 1);
       const avgRsScore = rsScores.reduce((a, b) => a + b, 0) / (rsScores.length || 1);
-      const themeScore = this.calculateThemeScore({ avgRsScore, totalCount, risingRatio, avgChangeRate });
+      const themeScore = this.round2(risingRatio);
       const upCount = changeRates.filter((r) => r >= 1).length;
       const downCount = changeRates.filter((r) => r <= -1).length;
       const flatCount = totalCount - upCount - downCount;
@@ -850,18 +827,13 @@ export class IssueThemeService {
     }
 
     themeList.sort((a, b) =>
-      b.themeScore - a.themeScore ||
-      b.avgRsScore - a.avgRsScore ||
       b.risingRatio - a.risingRatio ||
-      b.avgChangeRate - a.avgChangeRate ||
-      b.totalCount - a.totalCount,
+      b.themeCode - a.themeCode,
     );
     let rank = 1;
     for (let i = 0; i < themeList.length; i++) {
       if (
         i > 0 &&
-        themeList[i].themeScore === themeList[i - 1].themeScore &&
-        themeList[i].avgRsScore === themeList[i - 1].avgRsScore &&
         themeList[i].risingRatio === themeList[i - 1].risingRatio
       ) {
         themeList[i].rank = themeList[i - 1].rank;
@@ -958,18 +930,7 @@ export class IssueThemeService {
           rising_ratio,
           avg_change_rate,
           avg_rs_score,
-          ROUND((
-            (
-              avg_rs_score * 0.50 +
-              LEAST(100, GREATEST(0, (LN(total_count + 1) / LN(21)) * 100)) * 0.35 +
-              rising_ratio * 0.15
-            ) *
-            CASE
-              WHEN total_count <= 1 THEN 0.70
-              WHEN total_count = 2 THEN 0.85
-              ELSE 1
-            END
-          )::numeric, 2) AS theme_score,
+          rising_ratio AS theme_score,
           up_count,
           flat_count,
           down_count
@@ -978,7 +939,7 @@ export class IssueThemeService {
         SELECT
           trade_date,
           theme_code,
-          DENSE_RANK() OVER (PARTITION BY trade_date ORDER BY theme_score DESC, avg_rs_score DESC, rising_ratio DESC, avg_change_rate DESC, total_count DESC) AS rank,
+          DENSE_RANK() OVER (PARTITION BY trade_date ORDER BY rising_ratio DESC) AS rank,
           rising_count,
           total_count,
           rising_ratio,

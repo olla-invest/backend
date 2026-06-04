@@ -126,21 +126,26 @@ export class RealTimeChartController {
   @ApiOperation( { summary: 'DB 저장 캔들 데이터 조회', description: '분봉/틱봉은 키움 API 실시간 조회, 일/주/월봉은 DB 조회' } )
   @ApiParam( { name: 'stockCode', example: '005930' } )
   @ApiQuery( { name: 'chartType', required: false, enum: ['minute','tick','day','week','month','year'] } )
+  @ApiQuery( { name: 'candleType', required: false, enum: ['minute','tick','day','week','month','year'], description: 'Legacy alias for chartType' } )
   @ApiQuery( { name: 'interval', required: false, example: '1' } )
   @ApiQuery( { name: 'startDate', required: false, example: '20260101' } )
   @ApiQuery( { name: 'endDate', required: false, example: '20260404' } )
   async getStoredCandles(
     @Param('stockCode', new StockCodePipe()) stockCode: string,
     @Query('chartType', new EnumPipe(['minute','tick','day','week','month','year'] as const, 'chartType', true)) chartType: string,
+    @Query('candleType', new EnumPipe(['minute','tick','day','week','month','year'] as const, 'candleType', true)) candleTypeParam: string,
     @Query('interval', new EnumPipe(['1','3','5','10','15','30','45','60'] as const, 'interval', true)) interval: string,
     @Query('startDate', new DateStringPipe('startDate', true)) startDate: string,
     @Query('endDate', new DateStringPipe('endDate', true)) endDate: string,
   ) {
-    if (chartType === 'minute') {
+    const requestedChartType = chartType || candleTypeParam || 'day';
+    const shouldMaskUnfixedPrices = Boolean(candleTypeParam);
+
+    if (requestedChartType === 'minute') {
       const intervalVal = (interval || '1') as '1' | '3' | '5' | '10' | '15' | '30' | '45' | '60';
       return await this.chartService.getMinuteCandles(stockCode, intervalVal);
     }
-    if (chartType === 'tick') {
+    if (requestedChartType === 'tick') {
       const intervalVal = (interval || '1') as '1' | '3' | '5' | '10' | '30';
       return await this.chartService.getTickCandles(stockCode, intervalVal);
     }
@@ -151,12 +156,14 @@ export class RealTimeChartController {
       month: 'month',
       year: 'year',
     };
-    const candleType = candleTypeMap[chartType] ?? 'day';
+    const candleType = candleTypeMap[requestedChartType] ?? 'day';
     return await this.chartService.getStoredCandles(
       stockCode,
       candleType,
       startDate,
       endDate,
+      null,
+      { maskUnfixedPrices: shouldMaskUnfixedPrices },
     );
   }
 
