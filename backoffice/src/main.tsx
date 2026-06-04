@@ -28,6 +28,7 @@ type MetricRow = {
   rank: number;
   closePrice: number;
   relativeStrengthScore: number;
+  rsRaw: number | null;
   priceChangeRate1d: number | null;
   tradingValue: string | null;
   ma50: number | null;
@@ -305,6 +306,8 @@ function MetricsView({ api }: { api: ReturnType<typeof createApi> }) {
   const [totalPages, setTotalPages] = useState(1);
   const [search, setSearch] = useState('');
   const [error, setError] = useState('');
+  const [notice, setNotice] = useState('');
+  const [recalculating, setRecalculating] = useState(false);
 
   const load = async () => {
     setError('');
@@ -338,6 +341,33 @@ function MetricsView({ api }: { api: ReturnType<typeof createApi> }) {
         <div>
           <h1>Daily Metrics</h1>
         </div>
+        <button type="button" className="primary" onClick={async () => {
+          const targetDate = (tradeDate || dates[0] || '').replace(/-/g, '');
+          if (!targetDate) {
+            setError('재집계할 거래일이 없습니다.');
+            return;
+          }
+          if (!window.confirm(`${targetDate} 전체 메트릭스를 재집계할까요?`)) return;
+          setRecalculating(true);
+          setError('');
+          setNotice('');
+          try {
+            await api.post('/real-time-chart/metrics/calculate', {
+              marketType: 'all',
+              tradeDate: targetDate,
+              writeLogFile: false,
+            });
+            setNotice(`${targetDate} 전체 재집계가 완료되었습니다.`);
+            setPage(1);
+            await load();
+          } catch (err) {
+            setError(getMessage(err));
+          } finally {
+            setRecalculating(false);
+          }
+        }} disabled={recalculating}>
+          <RefreshCw size={16} /> {recalculating ? '재집계 중' : '전체 재집계'}
+        </button>
       </div>
       <form className="toolbar" onSubmit={(e) => { e.preventDefault(); setPage(1); load(); }}>
         <select value={tradeDate} onChange={(e) => setTradeDate(e.target.value)}>
@@ -365,6 +395,7 @@ function MetricsView({ api }: { api: ReturnType<typeof createApi> }) {
         <button type="submit"><RefreshCw size={16} /> 조회</button>
       </form>
       {error && <div className="error">{error}</div>}
+      {notice && <div className="notice">{notice}</div>}
       <div className="tableWrap">
         <table>
           <thead>
@@ -373,6 +404,7 @@ function MetricsView({ api }: { api: ReturnType<typeof createApi> }) {
               <th>종목</th>
               <th>시장</th>
               <th>RS Score</th>
+              <th>RS Raw</th>
               <th>종가</th>
               <th>등락률</th>
               <th>거래대금</th>
@@ -391,6 +423,7 @@ function MetricsView({ api }: { api: ReturnType<typeof createApi> }) {
                 <td><strong>{row.companyName}</strong><span className="sub">{row.stockCode}</span></td>
                 <td>{row.marketType}</td>
                 <td>{row.relativeStrengthScore.toFixed(2)}</td>
+                <td>{formatRsRaw(row.rsRaw)}</td>
                 <td>{formatNumber(row.closePrice)}</td>
                 <td className={row.priceChangeRate1d && row.priceChangeRate1d > 0 ? 'up' : row.priceChangeRate1d && row.priceChangeRate1d < 0 ? 'down' : ''}>{formatRate(row.priceChangeRate1d)}</td>
                 <td>{formatBig(row.tradingValue)}</td>
@@ -598,6 +631,11 @@ function formatBig(value: string | null) {
 function formatRate(value: number | null) {
   if (value === null || Number.isNaN(value)) return '-';
   return `${value > 0 ? '+' : ''}${value.toFixed(2)}%`;
+}
+
+function formatRsRaw(value: number | null) {
+  if (value === null || Number.isNaN(value)) return '-';
+  return value.toFixed(4);
 }
 
 function formatUptrend(value: boolean | null) {

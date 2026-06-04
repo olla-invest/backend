@@ -7,7 +7,7 @@ import { StockMetricsService } from './stock-metrics.service';
 import { RealtimePriceCacheService } from './realtime-price-cache.service';
 import { PrismaService } from '../../common/prisma/prisma.service';
 import { mapUpNameToThemeCode } from '../../common/constants/theme-codes';
-import { isKrxTradingDay } from '../../common/utils/market-calendar.util';
+import { getKrxTradingDateByOffset, isKrxTradingDay } from '../../common/utils/market-calendar.util';
 
 interface StockListCache {
   data: any[];
@@ -370,6 +370,7 @@ export class RealTimeChartService implements OnModuleInit {
       rows.map((row) => row.stockCode),
       latest,
     );
+    const rsRawMap = await this.getAdminRsRawMap(rows, latest, companyMap);
 
     return {
       page,
@@ -391,6 +392,7 @@ export class RealTimeChartService implements OnModuleInit {
           storedRank: row.rank,
           closePrice: Number(row.closePrice),
           relativeStrengthScore: Number(row.relativeStrengthScore),
+          rsRaw: rsRawMap.get(row.stockCode) ?? null,
           isNewHigh: row.isNewHigh,
           highPrice52w: row.highPrice52w ? Number(row.highPrice52w) : null,
           lowPrice52w: row.lowPrice52w ? Number(row.lowPrice52w) : null,
@@ -412,6 +414,82 @@ export class RealTimeChartService implements OnModuleInit {
         };
       }),
     };
+  }
+
+  private async getAdminRsRawMap(
+    rows: Array<{ stockCode: string; closePrice: unknown }>,
+    tradeDate: Date,
+    companyMap: Map<string, { stockCode: string; companyName: string; marketType: string }>,
+  ): Promise<Map<string, number | null>> {
+    const result = new Map<string, number | null>();
+    if (rows.length === 0) return result;
+
+    const tradeDateStr = tradeDate.toISOString().slice(0, 10);
+    const refDateStr = getKrxTradingDateByOffset(tradeDateStr, 63);
+    const stockCodes = rows.map((row) => row.stockCode);
+    const indexCodes = ['INDEX_KOSPI', 'INDEX_KOSDAQ'];
+
+    const [stockRefs, indexCandles] = await Promise.all([
+      this.prisma.stockCandle.findMany({
+        where: {
+          stockCode: { in: stockCodes },
+          candleType: 'day',
+          candleTime: { lte: new Date(`${refDateStr}T00:00:00.000Z`) },
+        },
+        orderBy: [{ stockCode: 'asc' }, { candleTime: 'desc' }],
+        distinct: ['stockCode'],
+        select: {
+          stockCode: true,
+          closePrice: true,
+          adjClosePrice: true,
+        },
+      }),
+      this.prisma.stockCandle.findMany({
+        where: {
+          stockCode: { in: indexCodes },
+          candleType: 'day',
+          candleTime: {
+            in: [
+              new Date(`${tradeDateStr}T00:00:00.000Z`),
+              new Date(`${refDateStr}T00:00:00.000Z`),
+            ],
+          },
+        },
+        select: {
+          stockCode: true,
+          candleTime: true,
+          closePrice: true,
+          adjClosePrice: true,
+        },
+      }),
+    ]);
+
+    const stockRefMap = new Map(stockRefs.map((candle) => [
+      candle.stockCode,
+      Number(candle.adjClosePrice ?? candle.closePrice),
+    ]));
+    const indexMap = new Map<string, number>();
+    for (const candle of indexCandles) {
+      indexMap.set(`${candle.stockCode}:${candle.candleTime.toISOString().slice(0, 10)}`, Number(candle.adjClosePrice ?? candle.closePrice));
+    }
+
+    for (const row of rows) {
+      const company = companyMap.get(row.stockCode);
+      const indexCode = company?.marketType === 'KOSDAQ' ? 'INDEX_KOSDAQ' : 'INDEX_KOSPI';
+      const closePrice = Number(row.closePrice);
+      const close63Ago = stockRefMap.get(row.stockCode);
+      const idxCloseNow = indexMap.get(`${indexCode}:${tradeDateStr}`);
+      const idx63Ago = indexMap.get(`${indexCode}:${refDateStr}`);
+
+      if (!close63Ago || !idxCloseNow || !idx63Ago || close63Ago <= 0 || idx63Ago <= 0) {
+        result.set(row.stockCode, null);
+        continue;
+      }
+
+      result.set(row.stockCode, (closePrice / close63Ago) / (idxCloseNow / idx63Ago));
+    }
+
+    return result;
   }
 
   private async getAdminMovingAverageMap(stockCodes: string[], tradeDate: Date): Promise<Map<string, {
