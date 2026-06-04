@@ -2627,8 +2627,7 @@ export class RealTimeChartService implements OnModuleInit {
   }
 
   private formatSignedPercent(value: number): string {
-    const sign = value > 0 ? '+' : '';
-    return `${sign}${value.toFixed(2)}%`;
+    return `${value.toFixed(2)}%`;
   }
 
   private formatSignedPercentInput(value: string | number): string {
