@@ -38,6 +38,17 @@ export class StockThemeDto {
   themeName: string;
 }
 
+export class ThemeListDto {
+  @ApiProperty({ example: 100123, description: 'Naver crawled theme code' })
+  themeCode: number;
+
+  @ApiProperty({ example: 'Semiconductor', description: 'Naver crawled theme name' })
+  themeName: string;
+
+  @ApiPropertyOptional({ example: '123', nullable: true, description: 'Original Naver theme number' })
+  sourceThemeNo?: string | null;
+}
+
 export class RealTimeChartResultItem {
   @ApiProperty({ example: '005930', description: '화면 식별자(종목코드)' })
   id: string;
@@ -157,6 +168,9 @@ export class RealTimeChartResultDto {
 
   @ApiProperty({ type: RealTimeChartMetaDto })
   meta: RealTimeChartMetaDto;
+
+  @ApiProperty({ type: [ThemeListDto], description: 'Full Naver crawled theme list for filters' })
+  themeList: ThemeListDto[];
 
   @ApiProperty({ type: [RealTimeChartResultItem] })
   stocks: RealTimeChartResultItem[];

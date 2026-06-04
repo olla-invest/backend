@@ -911,6 +911,7 @@ export class RealTimeChartService implements OnModuleInit {
 
     // 理쒖떊 嫄곕옒??議고쉶 (硫뷀??곗씠?곗슜)
     const latestTradeDate = await this.metricsService.getLatestTradeDate();
+    const themeList = await this.getNaverThemeList();
     return {
       marketType,
       page,
@@ -926,6 +927,7 @@ export class RealTimeChartService implements OnModuleInit {
         queryStartDate: latestTradeDate ? (() => { const d = new Date(latestTradeDate); d.setDate(d.getDate() - Math.round(63 * 1.5)); return d.toISOString().split('T')[0]; })() : null,
         queryEndDate: latestTradeDate?.toISOString().split('T')[0] || null,
       },
+      themeList,
       stocks: await Promise.all(paginatedData.map(async (item, index) => {
         const s = item.stock;
         const metrics = item.metrics;
@@ -1148,6 +1150,7 @@ export class RealTimeChartService implements OnModuleInit {
         queryEndDate: latestTradeDate?.toISOString().split('T')[0] || null,
         customRS: { periods, weights },
       },
+      themeList: await this.getNaverThemeList(),
       stocks: await Promise.all(paginatedData.map(async (item, index) => {
         const s = item.stock;
         const metrics = item.metrics;
@@ -1315,6 +1318,7 @@ export class RealTimeChartService implements OnModuleInit {
     });
 
     const realtimePrices = allRealtimePrices;
+    const themeList = await this.getNaverThemeList();
 
     return {
       marketType,
@@ -1331,6 +1335,7 @@ export class RealTimeChartService implements OnModuleInit {
         queryEndDate: (() => { const toMs = (s: string) => new Date(`${s.slice(0,4)}-${s.slice(4,6)}-${s.slice(6,8)}`).getTime(); const longest = rsFilters.reduce((max, f) => (toMs(f.rsEndDate) - toMs(f.rsStartDate)) > (toMs(max.rsEndDate) - toMs(max.rsStartDate)) ? f : max); return `${longest.rsEndDate.slice(0,4)}-${longest.rsEndDate.slice(4,6)}-${longest.rsEndDate.slice(6,8)}`; })(),
         rangeRS: { filters: rsFilters, periods, weights, logFile: rsFilterResult.logFile },
       },
+      themeList,
       stocks: await Promise.all(paginatedData.map(async (item, index) => {
         const s = item.stock;
         const metrics = item.metrics;
@@ -1818,6 +1823,21 @@ export class RealTimeChartService implements OnModuleInit {
     }
 
     return result;
+  }
+
+  private async getNaverThemeList(): Promise<Array<{ themeCode: number; themeName: string; sourceThemeNo: string | null }>> {
+    return this.prisma.theme.findMany({
+      where: {
+        source: 'NAVER',
+        deletedAt: null,
+      },
+      select: {
+        themeCode: true,
+        themeName: true,
+        sourceThemeNo: true,
+      },
+      orderBy: { themeName: 'asc' },
+    });
   }
 
   private formatDisplayTheme(
