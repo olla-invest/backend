@@ -2552,10 +2552,19 @@ export class RealTimeChartService implements OnModuleInit {
         this.logger.warn(`Detail chart auto-subscribe failed: ${error.message}`);
       });
     }
+    const currentPeriodCandle =
+      ['week', 'month', 'year'].includes(candleType) && (snapshot || realtimePrice)
+        ? await this.buildCurrentPeriodAggregateCandle(
+          stockCode,
+          candleType as HigherTimeframeCandleType,
+          snapshot,
+          realtimePrice,
+        )
+        : null;
     const responseCandles = snapshot
-      ? this.applySnapshotToStoredCandles(candles, candleType, snapshot)
+      ? this.applySnapshotToStoredCandles(candles, candleType, snapshot, currentPeriodCandle)
       : realtimePrice
-      ? this.applyRealtimeToStoredCandles(candles, candleType, realtimePrice)
+      ? this.applyRealtimeToStoredCandles(candles, candleType, realtimePrice, currentPeriodCandle)
       : candles;
 
     return {
@@ -2594,7 +2603,68 @@ export class RealTimeChartService implements OnModuleInit {
     };
   }
 
-  private applySnapshotToStoredCandles(candles: any[], candleType: string, snapshot: StockDetailSnapshot): any[] {
+  private async buildCurrentPeriodAggregateCandle(
+    stockCode: string,
+    candleType: HigherTimeframeCandleType,
+    snapshot?: StockDetailSnapshot | null,
+    realtimePrice?: any,
+  ): Promise<any | null> {
+    const today = this.todayKstDateOnly();
+    const todayKey = today.toISOString().split('T')[0];
+    const currentPrice = Number(snapshot?.currentPrice ?? realtimePrice?.currentPrice);
+    if (!Number.isFinite(currentPrice) || currentPrice <= 0) return null;
+
+    const periodStart = this.getCurrentStoredPeriodStart(candleType, today);
+    const periodEnd = new Date(today);
+    periodEnd.setUTCHours(23, 59, 59, 999);
+
+    const dayCandles = await this.chartStorage.getCandles(stockCode, 'day', periodStart, periodEnd);
+    const existingToday = dayCandles.find((c) => c.candleTime.toISOString().split('T')[0] === todayKey);
+    const openPrice = Number(existingToday?.openPrice ?? realtimePrice?.openPrice ?? currentPrice);
+    const highSource = Number(snapshot?.dayHigh ?? realtimePrice?.highPrice ?? currentPrice);
+    const lowSource = Number(snapshot?.dayLow ?? realtimePrice?.lowPrice ?? currentPrice);
+    const highPrice = Math.max(Number(existingToday?.highPrice ?? currentPrice), currentPrice, highSource);
+    const lowPrice = Math.min(Number(existingToday?.lowPrice ?? currentPrice), currentPrice, lowSource);
+    const volume = this.toNonNegativeBigInt(snapshot?.volume ?? realtimePrice?.accVolume);
+    const tradingValue = this.normalizeTradingValueToWon(snapshot?.tradingValue ?? realtimePrice?.accAmount);
+
+    const todayCandle = {
+      ...(existingToday ?? {}),
+      candleTime: today,
+      openPrice,
+      highPrice,
+      lowPrice,
+      closePrice: currentPrice,
+      volume: volume > 0n ? volume : (existingToday?.volume ?? 0n),
+      tradingValue: tradingValue > 0n ? tradingValue : (existingToday?.tradingValue ?? null),
+    };
+    const aggregateSource = [
+      todayCandle,
+      ...dayCandles.filter((c) => c.candleTime.toISOString().split('T')[0] !== todayKey),
+    ];
+
+    const oldest = aggregateSource[aggregateSource.length - 1];
+    const latest = aggregateSource[0];
+    const aggregateTradingValue = aggregateSource.reduce((sum, c) => sum + (c.tradingValue ?? 0n), 0n);
+
+    return {
+      candleTime: periodStart,
+      openPrice: Number(oldest.openPrice),
+      highPrice: Math.max(...aggregateSource.map((c) => Number(c.highPrice))),
+      lowPrice: Math.min(...aggregateSource.map((c) => Number(c.lowPrice))),
+      closePrice: Number(latest.closePrice),
+      volume: aggregateSource.reduce((sum, c) => sum + (c.volume ?? 0n), 0n),
+      tradingValue: aggregateTradingValue > 0n ? aggregateTradingValue : null,
+      changeRateOverride: snapshot?.changeRate ?? realtimePrice?.changeRate,
+    };
+  }
+
+  private applySnapshotToStoredCandles(
+    candles: any[],
+    candleType: string,
+    snapshot: StockDetailSnapshot,
+    currentPeriodCandle?: any | null,
+  ): any[] {
     if (!['day', 'week', 'month', 'year'].includes(candleType)) return candles;
 
     const today = this.todayKstDateOnly();
@@ -2629,48 +2699,35 @@ export class RealTimeChartService implements OnModuleInit {
     }
 
     const currentPeriodStart = this.getCurrentStoredPeriodStart(candleType, today);
+    const aggregateCandle = currentPeriodCandle ?? {
+      candleTime: currentPeriodStart,
+      openPrice: currentPrice,
+      highPrice: Math.max(currentPrice, dayHigh),
+      lowPrice: Math.min(currentPrice, dayLow),
+      closePrice: currentPrice,
+      volume,
+      tradingValue: tradingValue > 0n ? tradingValue : null,
+      changeRateOverride: snapshot.changeRate,
+    };
 
     if (candles.length === 0) {
-      return [{
-        candleTime: currentPeriodStart,
-        openPrice: currentPrice,
-        highPrice: Math.max(currentPrice, dayHigh),
-        lowPrice: Math.min(currentPrice, dayLow),
-        closePrice: currentPrice,
-        volume,
-        tradingValue: tradingValue > 0n ? tradingValue : null,
-        changeRateOverride: snapshot.changeRate,
-      }];
+      return [aggregateCandle];
     }
 
     const latest = candles[0];
     if (!this.isSameStoredCandlePeriod(latest.candleTime, today, candleType)) {
-      return [{
-        candleTime: currentPeriodStart,
-        openPrice: currentPrice,
-        highPrice: Math.max(currentPrice, dayHigh),
-        lowPrice: Math.min(currentPrice, dayLow),
-        closePrice: currentPrice,
-        volume,
-        tradingValue: tradingValue > 0n ? tradingValue : null,
-        changeRateOverride: snapshot.changeRate,
-      }, ...candles];
+      return [aggregateCandle, ...candles];
     }
 
-    const adjustedLatest = {
-      ...latest,
-      highPrice: Math.max(Number(latest.highPrice), currentPrice, dayHigh),
-      lowPrice: Math.min(Number(latest.lowPrice), currentPrice, dayLow),
-      closePrice: currentPrice,
-      volume: volume > 0n ? volume : latest.volume,
-      tradingValue: tradingValue > 0n ? tradingValue : latest.tradingValue,
-      changeRateOverride: snapshot.changeRate,
-    };
-
-    return [adjustedLatest, ...candles.slice(1)];
+    return [{ ...latest, ...aggregateCandle }, ...candles.slice(1)];
   }
 
-  private applyRealtimeToStoredCandles(candles: any[], candleType: string, realtimePrice: any): any[] {
+  private applyRealtimeToStoredCandles(
+    candles: any[],
+    candleType: string,
+    realtimePrice: any,
+    currentPeriodCandle?: any | null,
+  ): any[] {
     if (!['day', 'week', 'month', 'year'].includes(candleType)) return candles;
 
     const today = this.todayKstDateOnly();
@@ -2701,44 +2758,27 @@ export class RealTimeChartService implements OnModuleInit {
       return [realtimeDayCandle, ...candles];
     }
 
+    const aggregateCandle = currentPeriodCandle ?? {
+      candleTime: this.getCurrentStoredPeriodStart(candleType, today),
+      openPrice,
+      highPrice,
+      lowPrice,
+      closePrice: currentPrice,
+      volume,
+      tradingValue: tradingValue > 0n ? tradingValue : null,
+      changeRateOverride: realtimePrice.changeRate,
+    };
+
     if (candles.length === 0) {
-      return [{
-        candleTime: this.getCurrentStoredPeriodStart(candleType, today),
-        openPrice,
-        highPrice,
-        lowPrice,
-        closePrice: currentPrice,
-        volume,
-        tradingValue: tradingValue > 0n ? tradingValue : null,
-        changeRateOverride: realtimePrice.changeRate,
-      }];
+      return [aggregateCandle];
     }
 
     const latest = candles[0];
     if (!this.isSameStoredCandlePeriod(latest.candleTime, today, candleType)) {
-      return [{
-        candleTime: this.getCurrentStoredPeriodStart(candleType, today),
-        openPrice: currentPrice,
-        highPrice: Math.max(currentPrice, highPrice),
-        lowPrice: Math.min(currentPrice, lowPrice),
-        closePrice: currentPrice,
-        volume,
-        tradingValue: tradingValue > 0n ? tradingValue : null,
-        changeRateOverride: realtimePrice.changeRate,
-      }, ...candles];
+      return [aggregateCandle, ...candles];
     }
 
-    const adjustedLatest = {
-      ...latest,
-      highPrice: Math.max(Number(latest.highPrice), currentPrice, highPrice),
-      lowPrice: Math.min(Number(latest.lowPrice), currentPrice, lowPrice),
-      closePrice: currentPrice,
-      volume: volume > 0n ? volume : latest.volume,
-      tradingValue: tradingValue > 0n ? tradingValue : latest.tradingValue,
-      changeRateOverride: realtimePrice.changeRate,
-    };
-
-    return [adjustedLatest, ...candles.slice(1)];
+    return [{ ...latest, ...aggregateCandle }, ...candles.slice(1)];
   }
 
   private getCurrentStoredPeriodStart(candleType: string, today: Date): Date {
