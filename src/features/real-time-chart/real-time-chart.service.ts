@@ -1,4 +1,5 @@
-﻿import { Injectable, Logger, OnModuleInit, Inject } from '@nestjs/common';
+import { Injectable, Logger, OnModuleInit, Inject } from '@nestjs/common';
+import { OnEvent } from '@nestjs/event-emitter';
 import { KiwoomRestService } from '../../integrations/kiwoom/rest/kiwoom-rest.service';
 import { IRealtimeSource, REALTIME_SOURCE_TOKEN } from '../../integrations/kiwoom/websocket/realtime-source.interface';
 import { ChartStorageService } from './chart-storage.service';
@@ -43,6 +44,8 @@ export class RealTimeChartService implements OnModuleInit {
   private readonly trendTemplateFinancialCache = new Map<string, { value: boolean; expiresAt: number }>();
   private readonly CACHE_TTL = 60 * 60 * 1000; // 1?쒓컙 (諛由ъ큹)
   private readonly FINANCIAL_CACHE_TTL = 24 * 60 * 60 * 1000;
+  private readonly REALTIME_CANDLE_SAVE_THROTTLE_MS = 30 * 1000;
+  private readonly realtimeCandleSavedAt = new Map<string, number>();
   private initializationComplete = false;
   private lastDataUpdate: Date | null = null;
 
@@ -67,6 +70,100 @@ export class RealTimeChartService implements OnModuleInit {
     // 諛깃렇?쇱슫?쒖뿉??鍮꾨룞湲곕줈 珥덇린???ㅽ뻾 (?쒕쾭 ?쒖옉??釉붾줈?뱁븯吏 ?딆쓬)
     this.initializeData().catch((error) => {
       this.logger.error(`Data initialization failed: ${error.message}`, error.stack);
+    });
+  }
+
+  @OnEvent('kiwoom.realtime.0B')
+  async handleRealtimeCandlePersistence(payload: {
+    stockCode: string;
+    type: string;
+    values: Record<string, string>;
+  }): Promise<void> {
+    const { stockCode, values } = payload;
+    const nowMs = Date.now();
+    const lastSavedAt = this.realtimeCandleSavedAt.get(stockCode) ?? 0;
+    if (nowMs - lastSavedAt < this.REALTIME_CANDLE_SAVE_THROTTLE_MS) return;
+    this.realtimeCandleSavedAt.set(stockCode, nowMs);
+
+    try {
+      await this.upsertRealtimeCandles(stockCode, values);
+    } catch (error) {
+      this.logger.warn(`Realtime candle upsert failed: ${stockCode} - ${(error as Error).message}`);
+    }
+  }
+
+  private async upsertRealtimeCandles(stockCode: string, values: Record<string, string>): Promise<void> {
+    const currentPrice = this.parsePrice(values['10'] || '0');
+    if (!Number.isFinite(currentPrice) || currentPrice <= 0) return;
+
+    const openPrice = this.parsePrice(values['16'] || values['10'] || '0') || currentPrice;
+    const highPrice = Math.max(this.parsePrice(values['17'] || values['10'] || '0') || currentPrice, currentPrice);
+    const lowPrice = Math.min(this.parsePrice(values['18'] || values['10'] || '0') || currentPrice, currentPrice);
+    const volume = this.toNonNegativeBigInt(values['13']);
+    const tradingValue = this.normalizeTradingValueToWon(values['14']);
+    const today = this.todayKstDateOnly();
+
+    await this.chartStorage.saveCandle({
+      stockCode,
+      candleType: 'day',
+      candleTime: today,
+      openPrice,
+      highPrice,
+      lowPrice,
+      closePrice: currentPrice,
+      volume,
+      tradingValue,
+      adjOpenPrice: openPrice,
+      adjHighPrice: highPrice,
+      adjLowPrice: lowPrice,
+      adjClosePrice: currentPrice,
+    });
+
+    await Promise.all(
+      (['week', 'month', 'year'] as const).map((candleType) =>
+        this.upsertRealtimeAggregateCandle(stockCode, candleType, today),
+      ),
+    );
+  }
+
+  private async upsertRealtimeAggregateCandle(
+    stockCode: string,
+    candleType: HigherTimeframeCandleType,
+    today: Date,
+  ): Promise<void> {
+    const periodStart = this.getCurrentStoredPeriodStart(candleType, today);
+    const periodEnd = new Date(today);
+    periodEnd.setUTCHours(23, 59, 59, 999);
+
+    const dayCandles = await this.chartStorage.getCandles(stockCode, 'day', periodStart, periodEnd);
+    if (dayCandles.length === 0) return;
+
+    const oldest = dayCandles[dayCandles.length - 1];
+    const latest = dayCandles[0];
+    const highPrice = Math.max(...dayCandles.map((c) => Number(c.highPrice)));
+    const lowPrice = Math.min(...dayCandles.map((c) => Number(c.lowPrice)));
+    const volume = dayCandles.reduce((sum, c) => sum + (c.volume ?? 0n), 0n);
+    const tradingValue = dayCandles.reduce(
+      (sum, c) => sum + (c.tradingValue ?? 0n),
+      0n,
+    );
+    const openPrice = Number(oldest.openPrice);
+    const closePrice = Number(latest.closePrice);
+
+    await this.chartStorage.saveCandle({
+      stockCode,
+      candleType,
+      candleTime: periodStart,
+      openPrice,
+      highPrice,
+      lowPrice,
+      closePrice,
+      volume,
+      tradingValue: tradingValue > 0n ? tradingValue : null,
+      adjOpenPrice: openPrice,
+      adjHighPrice: highPrice,
+      adjLowPrice: lowPrice,
+      adjClosePrice: closePrice,
     });
   }
 
