@@ -26,6 +26,16 @@ export interface InvestmentIndicator {
   value?: string;
 }
 
+export interface StockDetailSnapshot {
+  currentPrice: number;
+  prevDayCompare?: number;
+  changeRate?: string | number | null;
+  volume?: string | number | bigint | null;
+  tradingValue?: string | number | bigint | null;
+  dayHigh?: number | null;
+  dayLow?: number | null;
+}
+
 @Injectable()
 export class RealTimeChartService implements OnModuleInit {
   private readonly logger = new Logger(RealTimeChartService.name);
@@ -831,6 +841,7 @@ export class RealTimeChartService implements OnModuleInit {
         const investmentIndicatorsText = this.formatInvestmentIndicators(investmentIndicators);
         const naverThemes = naverThemesMap.get(s.code) ?? [];
         const naverThemeText = naverThemes.map((theme) => theme.themeName).join(', ');
+        const displayTheme = this.formatDisplayTheme(naverThemes, s.upName);
 
         return {
           id: s.code,
@@ -845,8 +856,9 @@ export class RealTimeChartService implements OnModuleInit {
           investmentIndicators: priceChangeRateText,
           investmentIndicatorItems: investmentIndicators,
           investmentIndicatorsDtl: investmentIndicatorsText,
-          theme: naverThemeText || s.upName || '-',
-          upName: naverThemeText || s.upName || '-',
+          theme: displayTheme,
+          upName: displayTheme,
+          themeFull: naverThemeText || s.upName || '-',
           themes: naverThemes,
           rankHistory: {
             today: rankHistory[0] || null,
@@ -1051,6 +1063,7 @@ export class RealTimeChartService implements OnModuleInit {
         const investmentIndicatorsText = this.formatInvestmentIndicators(investmentIndicators);
         const naverThemes = naverThemesMap.get(s.code) ?? [];
         const naverThemeText = naverThemes.map((theme) => theme.themeName).join(', ');
+        const displayTheme = this.formatDisplayTheme(naverThemes, s.upName);
 
         return {
           id: s.code,
@@ -1065,8 +1078,9 @@ export class RealTimeChartService implements OnModuleInit {
           investmentIndicators: priceChangeRateText,
           investmentIndicatorItems: investmentIndicators,
           investmentIndicatorsDtl: investmentIndicatorsText,
-          theme: naverThemeText || s.upName || '-',
-          upName: naverThemeText || s.upName || '-',
+          theme: displayTheme,
+          upName: displayTheme,
+          themeFull: naverThemeText || s.upName || '-',
           themes: naverThemes,
           rankHistory: {
             today: rankHistory[0]?.rank || null,
@@ -1232,6 +1246,7 @@ export class RealTimeChartService implements OnModuleInit {
         const investmentIndicatorsText = this.formatInvestmentIndicators(investmentIndicators);
         const naverThemes = naverThemesMap.get(s.code) ?? [];
         const naverThemeText = naverThemes.map((theme) => theme.themeName).join(', ');
+        const displayTheme = this.formatDisplayTheme(naverThemes, s.upName);
 
         return {
           id: s.code,
@@ -1246,8 +1261,9 @@ export class RealTimeChartService implements OnModuleInit {
           investmentIndicators: priceChangeRateText,
           investmentIndicatorItems: investmentIndicators,
           investmentIndicatorsDtl: investmentIndicatorsText,
-          theme: naverThemeText || s.upName || '-',
-          upName: naverThemeText || s.upName || '-',
+          theme: displayTheme,
+          upName: displayTheme,
+          themeFull: naverThemeText || s.upName || '-',
           themes: naverThemes,
           rankHistory: {
             today: rankHistory[0]?.rank || null,
@@ -1705,6 +1721,15 @@ export class RealTimeChartService implements OnModuleInit {
     }
 
     return result;
+  }
+
+  private formatDisplayTheme(
+    themes: Array<{ themeCode: number; themeName: string }>,
+    fallback?: string,
+  ): string {
+    if (themes.length === 0) return fallback || '-';
+    if (themes.length === 1) return themes[0].themeName;
+    return `${themes[0].themeName} 외 ${themes.length - 1}개`;
   }
 
   private matchesTheme(
@@ -2413,6 +2438,7 @@ export class RealTimeChartService implements OnModuleInit {
     candleType: string,
     startDate?: string,
     endDate?: string,
+    snapshot?: StockDetailSnapshot | null,
   ) {
     const now = new Date();
     const defaultStart = new Date(now);
@@ -2429,19 +2455,23 @@ export class RealTimeChartService implements OnModuleInit {
         this.logger.warn(`Detail chart auto-subscribe failed: ${error.message}`);
       });
     }
-    const responseCandles = realtimePrice
+    const responseCandles = snapshot
+      ? this.applySnapshotToStoredCandles(candles, candleType, snapshot)
+      : realtimePrice
       ? this.applyRealtimeToStoredCandles(candles, candleType, realtimePrice)
       : candles;
 
     return {
       stockCode,
       candleType,
-      candles: responseCandles.map((c) => {
-        const openPrice = Number(c.openPrice);
+      candles: responseCandles.map((c, index) => {
         const closePrice = Number(c.closePrice);
+        const prevClosePrice = index + 1 < responseCandles.length
+          ? Number(responseCandles[index + 1].closePrice)
+          : null;
         const changeRate =
-          openPrice > 0
-            ? ((closePrice - openPrice) / openPrice) * 100
+          prevClosePrice && prevClosePrice > 0
+            ? ((closePrice - prevClosePrice) / prevClosePrice) * 100
             : null;
 
         const time = this.formatStoredCandleTime(c.candleTime, candleType);
@@ -2456,10 +2486,60 @@ export class RealTimeChartService implements OnModuleInit {
           close: String(c.closePrice),
           volume: c.volume.toString(),
           tradingValue: c.tradingValue?.toString() || null,
-          changeRate: changeRate !== null ? changeRate.toFixed(2) : null,
+          changeRate: changeRate !== null ? this.formatSignedPercent(changeRate) : null,
         };
       }),
     };
+  }
+
+  private applySnapshotToStoredCandles(candles: any[], candleType: string, snapshot: StockDetailSnapshot): any[] {
+    if (!['day', 'week', 'month', 'year'].includes(candleType)) return candles;
+
+    const today = this.todayKstDateOnly();
+    const todayKey = today.toISOString().split('T')[0];
+    const currentPrice = Number(snapshot.currentPrice);
+    if (!Number.isFinite(currentPrice) || currentPrice <= 0) return candles;
+
+    const volume = this.toNonNegativeBigInt(snapshot.volume);
+    const tradingValue = this.normalizeTradingValueToWon(snapshot.tradingValue);
+    const dayHigh = Number(snapshot.dayHigh || currentPrice);
+    const dayLow = Number(snapshot.dayLow || currentPrice);
+
+    if (candleType === 'day') {
+      const todayIndex = candles.findIndex((c) => c.candleTime.toISOString().split('T')[0] === todayKey);
+      const base = todayIndex >= 0 ? candles[todayIndex] : {};
+      const realtimeDayCandle = {
+        ...base,
+        candleTime: today,
+        openPrice: Number(base.openPrice || currentPrice),
+        highPrice: Math.max(Number(base.highPrice || currentPrice), currentPrice, dayHigh),
+        lowPrice: Math.min(Number(base.lowPrice || currentPrice), currentPrice, dayLow),
+        closePrice: currentPrice,
+        volume: volume > 0n ? volume : (base.volume ?? 0n),
+        tradingValue: tradingValue > 0n ? tradingValue : (base.tradingValue ?? null),
+      };
+
+      if (todayIndex >= 0) {
+        return candles.map((c, index) => index === todayIndex ? realtimeDayCandle : c);
+      }
+      return [realtimeDayCandle, ...candles];
+    }
+
+    if (candles.length === 0) return candles;
+
+    const latest = candles[0];
+    if (!this.isSameStoredCandlePeriod(latest.candleTime, today, candleType)) return candles;
+
+    const adjustedLatest = {
+      ...latest,
+      highPrice: Math.max(Number(latest.highPrice), currentPrice, dayHigh),
+      lowPrice: Math.min(Number(latest.lowPrice), currentPrice, dayLow),
+      closePrice: currentPrice,
+      volume: volume > 0n ? volume : latest.volume,
+      tradingValue: tradingValue > 0n ? tradingValue : latest.tradingValue,
+    };
+
+    return [adjustedLatest, ...candles.slice(1)];
   }
 
   private applyRealtimeToStoredCandles(candles: any[], candleType: string, realtimePrice: any): any[] {
@@ -2472,7 +2552,7 @@ export class RealTimeChartService implements OnModuleInit {
     const highPrice = Number(realtimePrice.highPrice || currentPrice);
     const lowPrice = Number(realtimePrice.lowPrice || currentPrice);
     const volume = BigInt(Math.max(0, Math.trunc(Number(realtimePrice.accVolume || 0))));
-    const tradingValue = BigInt(Math.max(0, Math.trunc(Number(realtimePrice.accAmount || 0))));
+    const tradingValue = this.normalizeTradingValueToWon(realtimePrice.accAmount);
 
     if (candleType === 'day') {
       const todayIndex = candles.findIndex((c) => c.candleTime.toISOString().split('T')[0] === todayKey);
@@ -2537,6 +2617,28 @@ export class RealTimeChartService implements OnModuleInit {
     if (candleType === 'month') return isoDate.slice(0, 7);
     if (candleType === 'year') return isoDate.slice(0, 4);
     return candleTime.toISOString();
+  }
+
+  private formatSignedPercent(value: number): string {
+    const sign = value > 0 ? '+' : '';
+    return `${sign}${value.toFixed(2)}%`;
+  }
+
+  private toNonNegativeBigInt(value: string | number | bigint | null | undefined): bigint {
+    if (value == null) return 0n;
+    if (typeof value === 'bigint') return value > 0n ? value : 0n;
+    const parsed = Number(String(value).replace(/,/g, ''));
+    if (!Number.isFinite(parsed) || parsed <= 0) return 0n;
+    return BigInt(Math.trunc(parsed));
+  }
+
+  private normalizeTradingValueToWon(value: string | number | bigint | null | undefined): bigint {
+    const raw = this.toNonNegativeBigInt(value);
+    if (raw === 0n) return 0n;
+
+    // Kiwoom daily/realtime trading value is often delivered in million KRW units.
+    // Stored candles use KRW, so normalize small values to the same scale.
+    return raw < 10_000_000n ? raw * 1_000_000n : raw;
   }
 
   private parseDateInput(dateStr: string | undefined, fallback: Date): Date {

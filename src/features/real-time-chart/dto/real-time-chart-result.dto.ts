@@ -81,6 +81,9 @@ export class RealTimeChartResultItem {
   @ApiProperty({ example: '반도체', description: '업종/테마명 원본' })
   upName: string;
 
+  @ApiProperty({ example: '반도체 장비, 2차전지, OLED', description: 'Full Naver crawled theme names' })
+  themeFull: string;
+
   @ApiProperty({ type: [StockThemeDto], description: 'Naver crawled stock themes' })
   themes: StockThemeDto[];
 

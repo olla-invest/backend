@@ -1,5 +1,5 @@
 import { Controller, Get, Post, Param, Query, Body } from '@nestjs/common';
-import { RealTimeChartService } from './real-time-chart.service';
+import { RealTimeChartService, StockDetailSnapshot } from './real-time-chart.service';
 import { StockInfoService } from '../stock-info/stock-info.service';
 import { Public } from '../../common/auth/decorators/public.decorator';
 import { DateStringPipe, EnumPipe, RegexPipe, RsFiltersPipe, StockCodePipe } from '../../common/pipes/input-validation.pipes';
@@ -46,10 +46,16 @@ export class DetailController {
       ? this.toIsoDate(historyEndDate)
       : today.toISOString().split('T')[0];
 
-    const [summary, candles, priceHistory] = await Promise.allSettled([
-      this.chartService.getStockSummary(stockCode),
-      this.getCandles(stockCode, chartType, interval, startDate, endDate ?? todayStr),
-      this.chartService.getStoredCandles(stockCode, 'day', histStart, histEnd),
+    const summary = await this.chartService.getStockSummary(stockCode)
+      .then((value) => ({ status: 'fulfilled' as const, value }))
+      .catch((reason) => ({ status: 'rejected' as const, reason }));
+    const summarySnapshot = summary.status === 'fulfilled'
+      ? this.toSummarySnapshot(summary.value)
+      : null;
+
+    const [candles, priceHistory] = await Promise.allSettled([
+      this.getCandles(stockCode, chartType, interval, startDate, endDate ?? todayStr, summarySnapshot),
+      this.chartService.getStoredCandles(stockCode, 'day', histStart, histEnd, summarySnapshot),
     ]);
 
     return {
@@ -66,6 +72,7 @@ export class DetailController {
     interval: string,
     startDate?: string,
     endDate?: string,
+    snapshot?: StockDetailSnapshot | null,
   ) {
     switch (chartType) {
       case 'minute':
@@ -82,9 +89,21 @@ export class DetailController {
         const end = endDate
           ? this.toIsoDate(endDate)
           : new Date().toISOString().split('T')[0];
-        return await this.chartService.getStoredCandles(stockCode, chartType, start, end);
+        return await this.chartService.getStoredCandles(stockCode, chartType, start, end, snapshot);
       }
     }
+  }
+
+  private toSummarySnapshot(summary: any): StockDetailSnapshot {
+    return {
+      currentPrice: Number(summary.currentPrice),
+      prevDayCompare: summary.prevDayCompare,
+      changeRate: summary.changeRate,
+      volume: summary.volume,
+      tradingValue: summary.tradingValue,
+      dayHigh: summary.dayHigh,
+      dayLow: summary.dayLow,
+    };
   }
 
   private toIsoDate(date: string): string {
