@@ -2473,6 +2473,11 @@ export class RealTimeChartService implements OnModuleInit {
           prevClosePrice && prevClosePrice > 0
             ? ((closePrice - prevClosePrice) / prevClosePrice) * 100
             : null;
+        const changeRateText = c.changeRateOverride != null
+          ? this.formatSignedPercentInput(c.changeRateOverride)
+          : changeRate !== null
+            ? this.formatSignedPercent(changeRate)
+            : null;
 
         const time = this.formatStoredCandleTime(c.candleTime, candleType);
 
@@ -2486,7 +2491,7 @@ export class RealTimeChartService implements OnModuleInit {
           close: String(c.closePrice),
           volume: c.volume.toString(),
           tradingValue: c.tradingValue?.toString() || null,
-          changeRate: changeRate !== null ? this.formatSignedPercent(changeRate) : null,
+          changeRate: changeRateText,
         };
       }),
     };
@@ -2517,6 +2522,7 @@ export class RealTimeChartService implements OnModuleInit {
         closePrice: currentPrice,
         volume: volume > 0n ? volume : (base.volume ?? 0n),
         tradingValue: tradingValue > 0n ? tradingValue : (base.tradingValue ?? null),
+        changeRateOverride: snapshot.changeRate,
       };
 
       if (todayIndex >= 0) {
@@ -2537,6 +2543,7 @@ export class RealTimeChartService implements OnModuleInit {
       closePrice: currentPrice,
       volume: volume > 0n ? volume : latest.volume,
       tradingValue: tradingValue > 0n ? tradingValue : latest.tradingValue,
+      changeRateOverride: snapshot.changeRate,
     };
 
     return [adjustedLatest, ...candles.slice(1)];
@@ -2622,6 +2629,12 @@ export class RealTimeChartService implements OnModuleInit {
   private formatSignedPercent(value: number): string {
     const sign = value > 0 ? '+' : '';
     return `${sign}${value.toFixed(2)}%`;
+  }
+
+  private formatSignedPercentInput(value: string | number): string {
+    const numeric = Number(String(value).replace(/[%+,]/g, ''));
+    if (!Number.isFinite(numeric)) return String(value);
+    return this.formatSignedPercent(numeric);
   }
 
   private toNonNegativeBigInt(value: string | number | bigint | null | undefined): bigint {
