@@ -569,8 +569,12 @@ export class WatchlistService {
         });
         if (latestMetric) {
           const top5 = await this.prisma.stockDailyMetrics.findMany({
-            where: { stockCode: { in: Array.from(existingCandidateCodes) }, tradeDate: latestMetric.tradeDate },
-            orderBy: { relativeStrengthScore: 'desc' },
+            where: {
+              stockCode: { in: Array.from(existingCandidateCodes) },
+              tradeDate: latestMetric.tradeDate,
+              rank: { gt: 0 },
+            },
+            orderBy: { rank: 'asc' },
             take: 5,
           });
           if (top5.length > 0) {
@@ -598,6 +602,7 @@ export class WatchlistService {
       where: {
         tradeDate: latestMetric.tradeDate,
         stockCode: { notIn: Array.from(watchlistStockCodes) },
+        rank: { gt: 0 },
       },
       orderBy: { rank: 'asc' },
       take: 10,
@@ -737,10 +742,7 @@ export class WatchlistService {
     }
 
     // addedDate 내림차순
-    items.sort((a, b) =>
-      this.compareNullableRank(a.rank, b.rank) ||
-      new Date(b.addedDate).getTime() - new Date(a.addedDate).getTime(),
-    );
+    items.sort((a, b) => new Date(b.addedDate).getTime() - new Date(a.addedDate).getTime());
 
     return { items };
   }
