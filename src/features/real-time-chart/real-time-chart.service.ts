@@ -2703,8 +2703,8 @@ export class RealTimeChartService implements OnModuleInit {
           high: maskThisCandle ? '-' : String(c.highPrice),
           low: maskThisCandle ? '-' : String(c.lowPrice),
           close: maskThisCandle ? '-' : String(c.closePrice),
-          volume: c.volume.toString(),
-          tradingValue: c.tradingValue?.toString() || null,
+          volume: maskThisCandle ? '-' : c.volume.toString(),
+          tradingValue: maskThisCandle ? '-' : c.tradingValue?.toString() || null,
           changeRate: maskThisCandle ? '-' : changeRateText,
         };
       }),
