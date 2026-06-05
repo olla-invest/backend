@@ -2669,6 +2669,7 @@ export class RealTimeChartService implements OnModuleInit {
       options?.maskUnfixedPrices === true &&
       ['day', 'week', 'month', 'year'].includes(candleType) &&
       this.isKrxMarketSessionNow();
+    const today = shouldMaskUnfixedPrices ? this.todayKstDateOnly() : null;
 
     return {
       stockCode,
@@ -2678,8 +2679,12 @@ export class RealTimeChartService implements OnModuleInit {
         const prevClosePrice = index + 1 < responseCandles.length
           ? Number(responseCandles[index + 1].closePrice)
           : null;
+        const maskThisCandle =
+          shouldMaskUnfixedPrices &&
+          today != null &&
+          this.isSameStoredCandlePeriod(c.candleTime, today, candleType);
         const changeRate =
-          prevClosePrice && prevClosePrice > 0
+          Number.isFinite(closePrice) && prevClosePrice != null && Number.isFinite(prevClosePrice) && prevClosePrice > 0
             ? ((closePrice - prevClosePrice) / prevClosePrice) * 100
             : null;
         const changeRateText = c.changeRateOverride != null
@@ -2694,13 +2699,13 @@ export class RealTimeChartService implements OnModuleInit {
           time,
           period: time,
           candleTime: c.candleTime.toISOString(),
-          open: shouldMaskUnfixedPrices ? '-' : String(c.openPrice),
-          high: shouldMaskUnfixedPrices ? '-' : String(c.highPrice),
-          low: shouldMaskUnfixedPrices ? '-' : String(c.lowPrice),
-          close: shouldMaskUnfixedPrices ? '-' : String(c.closePrice),
+          open: maskThisCandle ? '-' : String(c.openPrice),
+          high: maskThisCandle ? '-' : String(c.highPrice),
+          low: maskThisCandle ? '-' : String(c.lowPrice),
+          close: maskThisCandle ? '-' : String(c.closePrice),
           volume: c.volume.toString(),
           tradingValue: c.tradingValue?.toString() || null,
-          changeRate: shouldMaskUnfixedPrices ? '-' : changeRateText,
+          changeRate: maskThisCandle ? '-' : changeRateText,
         };
       }),
     };
