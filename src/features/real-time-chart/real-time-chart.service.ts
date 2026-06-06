@@ -2644,7 +2644,13 @@ export class RealTimeChartService implements OnModuleInit {
     const endTime = this.parseDateInput(endDate, now);
     endTime.setUTCHours(23, 59, 59, 999);
 
-    const candles = await this.chartStorage.getCandles(stockCode, candleType, startTime, endTime);
+    const [candles, previousCandle] = await Promise.all([
+      this.chartStorage.getCandles(stockCode, candleType, startTime, endTime),
+      this.prisma.stockCandle.findFirst({
+        where: { stockCode, candleType, candleTime: { lt: startTime } },
+        orderBy: { candleTime: 'desc' },
+      }),
+    ]);
     const realtimePrice = this.getUsableRealtimePrice(this.realtimeCache.getPrice(stockCode));
     if (!realtimePrice && ['day', 'week', 'month', 'year'].includes(candleType)) {
       this.autoSubscribeStocks([stockCode]).catch((error) => {
@@ -2680,13 +2686,15 @@ export class RealTimeChartService implements OnModuleInit {
       this.isKrxMarketSessionNow();
     const today = shouldMaskUnfixedPrices ? this.todayKstDateOnly() : null;
 
+    const calculationCandles = previousCandle ? [...responseCandles, previousCandle] : responseCandles;
+
     return {
       stockCode,
       candleType,
       candles: responseCandles.map((c, index) => {
         const closePrice = Number(c.closePrice);
-        const prevClosePrice = index + 1 < responseCandles.length
-          ? Number(responseCandles[index + 1].closePrice)
+        const prevClosePrice = index + 1 < calculationCandles.length
+          ? Number(calculationCandles[index + 1].closePrice)
           : null;
         const maskThisCandle =
           shouldMaskUnfixedPrices &&
