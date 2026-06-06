@@ -1002,7 +1002,7 @@ export class RealTimeChartService implements OnModuleInit {
         dataDate: latestTradeDate?.toISOString().split('T')[0] || null, // ?곗씠??湲곗? 嫄곕옒??
         lastUpdatedAt: this.lastDataUpdate?.toISOString() || null, // 留덉?留??곗씠??媛깆떊 ?쒓컙
         isInitialized: this.initializationComplete, // 珥덇린???꾨즺 ?щ?
-        queryStartDate: latestTradeDate ? (() => { const d = new Date(latestTradeDate); d.setDate(d.getDate() - Math.round(63 * 1.5)); return d.toISOString().split('T')[0]; })() : null,
+        queryStartDate: latestTradeDate ? getKrxTradingDateByOffset(latestTradeDate.toISOString().slice(0, 10), 63) : null,
         queryEndDate: latestTradeDate?.toISOString().split('T')[0] || null,
       },
       themeList,
@@ -1224,7 +1224,7 @@ export class RealTimeChartService implements OnModuleInit {
         dataDate: latestTradeDate?.toISOString().split('T')[0] || null,
         lastUpdatedAt: this.lastDataUpdate?.toISOString() || null,
         isInitialized: this.initializationComplete,
-        queryStartDate: latestTradeDate ? (() => { const maxPeriod = periods.length > 0 ? Math.max(...periods) : 63; const d = new Date(latestTradeDate); d.setDate(d.getDate() - Math.round(maxPeriod * 1.5)); return d.toISOString().split('T')[0]; })() : null,
+        queryStartDate: latestTradeDate ? (() => { const maxPeriod = periods.length > 0 ? Math.max(...periods) : 63; return getKrxTradingDateByOffset(latestTradeDate.toISOString().slice(0, 10), maxPeriod); })() : null,
         queryEndDate: latestTradeDate?.toISOString().split('T')[0] || null,
         customRS: { periods, weights },
       },
