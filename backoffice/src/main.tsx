@@ -54,13 +54,13 @@ type ThemeRow = {
 
 const planTypes = ['FREE', 'BASIC', 'PRO', 'PREMIUM'];
 const providers = ['LOCAL', 'NAVER', 'KAKAO'];
+const apiBaseUrl = 'https://api.ollainvest.com';
 
 function App() {
   const [tab, setTab] = useState<Tab>('users');
-  const [baseUrl, setBaseUrl] = useStoredState('bo.baseUrl', 'https://ballot-pack-donations-exposure.trycloudflare.com/');
   const [adminKey, setAdminKey] = useStoredState('bo.adminKey', 'local-admin-dev-key');
 
-  const api = useMemo(() => createApi(baseUrl, adminKey), [baseUrl, adminKey]);
+  const api = useMemo(() => createApi(apiBaseUrl, adminKey), [adminKey]);
 
   return (
     <main className="app">
@@ -87,10 +87,6 @@ function App() {
 
       <section className="content">
         <header className="topbar">
-          <label>
-            API URL
-            <input value={baseUrl} onChange={(event) => setBaseUrl(event.target.value)} />
-          </label>
           <label>
             Admin Key
             <input type="password" value={adminKey} onChange={(event) => setAdminKey(event.target.value)} />
@@ -584,7 +580,11 @@ function Pager({ page, pageSize, totalCount, totalPages, onPage }: {
 
 function createApi(baseUrl: string, adminKey: string) {
   const request = async (path: string, options: RequestInit = {}) => {
-    const response = await fetch(`${baseUrl.replace(/\/$/, '')}${path}`, {
+    const normalizedBaseUrl = baseUrl.trim().replace(/\/$/, '');
+    if (!normalizedBaseUrl) {
+      throw new Error('API URL is required.');
+    }
+    const response = await fetch(`${normalizedBaseUrl}${path}`, {
       ...options,
       headers: {
         'Content-Type': 'application/json',
