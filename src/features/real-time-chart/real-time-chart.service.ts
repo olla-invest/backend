@@ -2651,6 +2651,13 @@ export class RealTimeChartService implements OnModuleInit {
         this.logger.warn(`Detail chart auto-subscribe failed: ${error.message}`);
       });
     }
+    const storedPeriodCandle = ['week', 'month', 'year'].includes(candleType)
+      ? await this.buildStoredPeriodAggregateCandle(
+        stockCode,
+        candleType as HigherTimeframeCandleType,
+        endTime,
+      )
+      : null;
     const currentPeriodCandle =
       ['week', 'month', 'year'].includes(candleType) && (snapshot || realtimePrice)
         ? await this.buildCurrentPeriodAggregateCandle(
@@ -2659,11 +2666,13 @@ export class RealTimeChartService implements OnModuleInit {
           snapshot,
           realtimePrice,
         )
-        : null;
+        : storedPeriodCandle;
     const responseCandles = snapshot
       ? this.applySnapshotToStoredCandles(candles, candleType, snapshot, currentPeriodCandle)
       : realtimePrice
       ? this.applyRealtimeToStoredCandles(candles, candleType, realtimePrice, currentPeriodCandle)
+      : currentPeriodCandle
+      ? this.applyAggregateToStoredCandles(candles, candleType, endTime, currentPeriodCandle)
       : candles;
     const shouldMaskUnfixedPrices =
       options?.maskUnfixedPrices === true &&
@@ -2774,6 +2783,50 @@ export class RealTimeChartService implements OnModuleInit {
       tradingValue: aggregateTradingValue > 0n ? aggregateTradingValue : null,
       changeRateOverride: snapshot?.changeRate ?? realtimePrice?.changeRate,
     };
+  }
+
+  private async buildStoredPeriodAggregateCandle(
+    stockCode: string,
+    candleType: HigherTimeframeCandleType,
+    anchorDate: Date,
+  ): Promise<any | null> {
+    const periodStart = this.getCurrentStoredPeriodStart(candleType, anchorDate);
+    const periodEnd = new Date(anchorDate);
+    periodEnd.setUTCHours(23, 59, 59, 999);
+
+    const dayCandles = await this.chartStorage.getCandles(stockCode, 'day', periodStart, periodEnd);
+    if (dayCandles.length === 0) return null;
+
+    const latest = dayCandles[0];
+    const oldest = dayCandles[dayCandles.length - 1];
+    const aggregateTradingValue = dayCandles.reduce((sum, c) => sum + (c.tradingValue ?? 0n), 0n);
+
+    return {
+      candleTime: periodStart,
+      openPrice: Number(oldest.openPrice),
+      highPrice: Math.max(...dayCandles.map((c) => Number(c.highPrice))),
+      lowPrice: Math.min(...dayCandles.map((c) => Number(c.lowPrice))),
+      closePrice: Number(latest.closePrice),
+      volume: dayCandles.reduce((sum, c) => sum + (c.volume ?? 0n), 0n),
+      tradingValue: aggregateTradingValue > 0n ? aggregateTradingValue : null,
+    };
+  }
+
+  private applyAggregateToStoredCandles(
+    candles: any[],
+    candleType: string,
+    anchorDate: Date,
+    aggregateCandle: any,
+  ): any[] {
+    if (!['week', 'month', 'year'].includes(candleType)) return candles;
+    if (candles.length === 0) return [aggregateCandle];
+
+    const latest = candles[0];
+    if (!this.isSameStoredCandlePeriod(latest.candleTime, anchorDate, candleType)) {
+      return [aggregateCandle, ...candles];
+    }
+
+    return [{ ...latest, ...aggregateCandle }, ...candles.slice(1)];
   }
 
   private applySnapshotToStoredCandles(
