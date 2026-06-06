@@ -371,42 +371,14 @@ export class IssueThemeService {
     minTotalCount?: number;
     minThemeScore?: number;
   } = {}) {
-    const allNaverThemes = await this.prisma.theme.findMany({
-      where: { source: this.naverThemeSource, deletedAt: null },
-      select: { themeCode: true, themeName: true },
-      orderBy: { themeName: 'asc' },
-    });
-
     const { tradeDate, metrics } = await this.getFilteredMetrics();
     if (!tradeDate) {
-      const themeList = allNaverThemes
-        .map((theme) => ({
-          themeCode: theme.themeCode,
-          themeName: theme.themeName,
-          totalCount: 0,
-          risingCount: 0,
-          risingRatio: 0,
-          avgChangeRate: 0,
-          avgRsScore: 0,
-          themeScore: 0,
-          upCount: 0,
-          flatCount: 0,
-          downCount: 0,
-          rank: null,
-          rankChange: null,
-        }))
-        .filter((theme) => {
-          if (filters.minAvgRsScore != null && theme.avgRsScore < filters.minAvgRsScore) return false;
-          if (filters.minTotalCount != null && theme.totalCount < filters.minTotalCount) return false;
-          if (filters.minThemeScore != null && theme.themeScore < filters.minThemeScore) return false;
-          return true;
-        });
       return {
         updatedAt: null,
-        total: themeList.length,
+        total: 0,
         page,
         display,
-        themes: themeList.slice((page - 1) * display, page * display),
+        themes: [],
       };
     }
 
@@ -426,15 +398,6 @@ export class IssueThemeService {
       changeRates: number[];
       rsScores: number[];
     }>();
-
-    for (const theme of allNaverThemes) {
-      themeGroups.set(theme.themeCode, {
-        themeName: theme.themeName,
-        stockCodes: new Set<string>(),
-        changeRates: [],
-        rsScores: [],
-      });
-    }
 
     for (const row of stockThemeRows) {
       const m = metricsMap.get(row.stockCode);
@@ -461,6 +424,7 @@ export class IssueThemeService {
     const themeList: any[] = [];
     for (const [themeCode, { themeName, changeRates, rsScores }] of themeGroups) {
       const totalCount = changeRates.length;
+      if (totalCount === 0) continue;
       const risingCount = changeRates.filter((r) => r > 0).length;
       const risingRatio = totalCount > 0 ? (risingCount / totalCount) * 100 : 0;
       const avgChangeRate = changeRates.reduce((a, b) => a + b, 0) / (changeRates.length || 1);
