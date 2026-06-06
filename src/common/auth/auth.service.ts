@@ -216,7 +216,7 @@ export class AuthService {
                 }
             }
 
-            const username = await this.generateUniqueSocialUsername( provider );
+            const username = this.generateUniqueSocialUsername( provider );
 
             user = await this.prisma.user.create( {
                 data: {
@@ -280,7 +280,7 @@ export class AuthService {
             user: {
                 userId: user.userId,
                 username: user.username,
-                email: user.email,
+                email: this.isFallbackSocialEmail( user.email ) ? null : user.email,
                 name: user.name,
                 provider: user.provider,
                 snsLinkedYn: this.isSocialProfileCompleted( user ),
@@ -339,7 +339,7 @@ export class AuthService {
         }
 
         const username = this.isLegacySocialUsername( user )
-            ? await this.generateUniqueSocialUsername( user.provider )
+            ? this.generateUniqueSocialUsername( user.provider )
             : user.username;
 
         const updated = await this.prisma.user.update( {
@@ -398,26 +398,10 @@ export class AuthService {
         return user.username === `${user.provider.toLowerCase()}_${user.socialId}`.substring( 0, 50 );
     }
 
-    private async generateUniqueSocialUsername( provider: AuthProvider ): Promise<string> {
+    private generateUniqueSocialUsername( provider: AuthProvider ): string {
         const prefix = provider.toLowerCase();
-
-        for ( let attempt = 0; attempt < 20; attempt++ ) {
-            const randomLength = attempt < 10 ? 4 : 8;
-            const username = `${prefix}${this.generateRandomAlphaNumeric( randomLength )}`;
-            const existing = await this.prisma.user.findFirst( {
-                where: { username, deletedAt: null },
-                select: { userId: true },
-            } );
-
-            if ( !existing ) return username;
-        }
-
-        throw new ConflictException( '중복되지 않는 아이디를 생성하지 못했습니다. 다시 시도해주세요.' );
-    }
-
-    private generateRandomAlphaNumeric( length: number ): string {
-        const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
-        return Array.from( { length }, () => chars[ crypto.randomInt( 0, chars.length ) ] ).join( '' );
+        const suffix = crypto.randomUUID().replace( /-/g, '' ).slice( 0, 8 );
+        return `${prefix}_${suffix}`;
     }
 
     private generateTempPassword(): string {
