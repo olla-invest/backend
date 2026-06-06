@@ -182,6 +182,7 @@ function UsersView({ api }: { api: ReturnType<typeof createApi> }) {
               <th>가입</th>
               <th>플랜</th>
               <th>상태</th>
+              <th>생성일</th>
               <th></th>
             </tr>
           </thead>
@@ -195,6 +196,7 @@ function UsersView({ api }: { api: ReturnType<typeof createApi> }) {
                 <td>{user.provider}</td>
                 <td>{user.planType}</td>
                 <td><span className={`badge ${user.status.toLowerCase()}`}>{user.status}</span></td>
+                <td>{formatDateTime(user.createdAt)}</td>
                 <td className="actions">
                   <button title="수정" onClick={() => setEditing(user)}><Edit3 size={16} /></button>
                   {user.deletedAt ? (
@@ -205,7 +207,7 @@ function UsersView({ api }: { api: ReturnType<typeof createApi> }) {
                 </td>
               </tr>
             ))}
-            {!loading && rows.length === 0 && <tr><td colSpan={8} className="empty">데이터가 없습니다.</td></tr>}
+            {!loading && rows.length === 0 && <tr><td colSpan={9} className="empty">데이터가 없습니다.</td></tr>}
           </tbody>
         </table>
       </div>
@@ -636,6 +638,19 @@ function formatRate(value: number | null) {
 function formatRsRaw(value: number | null | undefined) {
   if (value === null || value === undefined || Number.isNaN(value)) return '-';
   return value.toFixed(4);
+}
+
+function formatDateTime(value: string | null | undefined) {
+  if (!value) return '-';
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return '-';
+  return new Intl.DateTimeFormat('ko-KR', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+  }).format(date);
 }
 
 function formatUptrend(value: boolean | null) {

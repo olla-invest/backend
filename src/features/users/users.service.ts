@@ -111,6 +111,10 @@ export class UsersService {
             throw new NotFoundException( 'User not found' );
         }
 
+        if ( input.delete ) {
+            return this.adminHardDeleteUser( userId );
+        }
+
         if ( input.username && input.username !== user.username ) {
             const existing = await this.prisma.user.findFirst( {
                 where: { username: input.username, deletedAt: null, NOT: { userId } },
@@ -140,7 +144,6 @@ export class UsersService {
                     isTempPassword: false,
                 }),
                 ...(input.restore && { deletedAt: null }),
-                ...(input.delete && { deletedAt: new Date() }),
             },
             select: this.adminUserSelect(),
         } );
@@ -278,6 +281,44 @@ export class UsersService {
             ...user,
             snsLinkedYn: this.isSocialProfileCompleted( user ),
             status: user.deletedAt ? 'DELETED' : 'ACTIVE',
+        };
+    }
+
+    private async adminHardDeleteUser( userId: string ) {
+        const deleted = await this.prisma.$transaction( async ( tx ) => {
+            const watchlistTags = await tx.watchlistTag.deleteMany( { where: { userId } } );
+            const watchlist = await tx.userWatchlist.deleteMany( { where: { userId } } );
+            const watchlistThemes = await tx.userWatchlistTheme.deleteMany( { where: { userId } } );
+            const rsFilterPeriods = await tx.rsFilterPeriod.deleteMany( {
+                where: { preset: { userId } },
+            } );
+            const rsFilterPresets = await tx.rsFilterPreset.deleteMany( { where: { userId } } );
+            const searchFilterPresets = await tx.searchFilterPreset.deleteMany( { where: { userId } } );
+            const apiCallLogs = await tx.kiwoomApiCallLog.deleteMany( { where: { userId } } );
+            const payments = await tx.payment.deleteMany( { where: { userId } } );
+            const subscription = await tx.userSubscription.deleteMany( { where: { userId } } );
+            const paymentCards = await tx.paymentCard.deleteMany( { where: { userId } } );
+
+            await tx.user.delete( { where: { userId } } );
+
+            return {
+                watchlistTags: watchlistTags.count,
+                watchlist: watchlist.count,
+                watchlistThemes: watchlistThemes.count,
+                rsFilterPeriods: rsFilterPeriods.count,
+                rsFilterPresets: rsFilterPresets.count,
+                searchFilterPresets: searchFilterPresets.count,
+                apiCallLogs: apiCallLogs.count,
+                payments: payments.count,
+                subscription: subscription.count,
+                paymentCards: paymentCards.count,
+            };
+        } );
+
+        return {
+            userId,
+            deleted: true,
+            deletedCounts: deleted,
         };
     }
 

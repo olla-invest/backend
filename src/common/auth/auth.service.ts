@@ -300,7 +300,7 @@ export class AuthService {
         return {
             userId: user.userId,
             username: user.username,
-            email: user.email,
+            email: this.toMeResponseEmail( user ),
             name: user.name,
             provider: user.provider,
             phone: user.phone,
@@ -391,6 +391,14 @@ export class AuthService {
 
     private isFallbackSocialEmail( email: string ): boolean {
         return email.endsWith( '@naver.social' ) || email.endsWith( '@kakao.social' );
+    }
+
+    private toMeResponseEmail( user: { provider: AuthProvider; email: string } ): string | null {
+        if ( user.provider === AuthProvider.KAKAO ) {
+            return null;
+        }
+
+        return user.email;
     }
 
     private isLegacySocialUsername( user: { provider: AuthProvider; socialId?: string | null; username: string } ): boolean {
