@@ -3148,7 +3148,7 @@ export class RealTimeChartService implements OnModuleInit {
 
       return {
         ...filter,
-        period: tradingDayCount > 0 ? tradingDayCount : periods[index],
+        period: tradingDayCount > 1 ? tradingDayCount - 1 : periods[index],
       };
     });
     const tradingPeriods = filtersWithPeriods.map((filter) => filter.period);
