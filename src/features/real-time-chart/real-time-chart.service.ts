@@ -797,7 +797,9 @@ export class RealTimeChartService implements OnModuleInit {
     }
 
     const currentPrice = this.parsePrice(latest.cur_prc);
-    const prevDayCompare = this.parsePrice(latest.pred_pre);
+    const prevDayCompareAbs = this.parsePrice(latest.pred_pre);
+    const sig = latest.pred_pre_sig;
+    const prevDayCompare = (sig === '4' || sig === '5') ? -prevDayCompareAbs : prevDayCompareAbs;
     const changeRate = currentPrice !== 0
       ? ((prevDayCompare / (currentPrice - prevDayCompare)) * 100).toFixed(2)
       : '0.00';
