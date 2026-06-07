@@ -960,28 +960,6 @@ export class StockMetricsService {
     const calculations: StockCalc[] = [];
     const filterStats = { total: 0, sf1Fail: 0, sf2Fail: 0, sf3Fail: 0, sf4Fail: 0, sf5Fail: 0, passed: 0 };
 
-    // 연봉 고가 비교를 위한 year 캔들 일괄 조회 (올해 + 작년)
-    const targetYear = targetDate.getUTCFullYear();
-    const prevYear = targetYear - 1;
-    const yearCandleRows = await this.prisma.stockCandle.findMany({
-      where: {
-        candleType: 'year',
-        stockCode: { in: allStockCodes },
-        candleTime: { gte: new Date(`${prevYear}-01-01T00:00:00.000Z`) },
-      },
-      select: { stockCode: true, candleTime: true, highPrice: true, adjHighPrice: true },
-    });
-    const yearHighMap = new Map<string, { thisYear: number; prevYear: number }>();
-    for (const c of yearCandleRows) {
-      const yr = c.candleTime.getUTCFullYear();
-      if (yr !== targetYear && yr !== prevYear) continue;
-      if (!yearHighMap.has(c.stockCode)) yearHighMap.set(c.stockCode, { thisYear: 0, prevYear: 0 });
-      const entry = yearHighMap.get(c.stockCode)!;
-      const high = (c.adjHighPrice ?? c.highPrice).toNumber();
-      if (yr === targetYear) entry.thisYear = high;
-      else entry.prevYear = high;
-    }
-
     for (let batchStart = 0; batchStart < allStockCodes.length; batchStart += CALC_BATCH_SIZE) {
       const batchCodes = allStockCodes.slice(batchStart, batchStart + CALC_BATCH_SIZE);
 
@@ -1176,9 +1154,8 @@ export class StockMetricsService {
       if (!sf5) filterStats.sf5Fail++;
       if (passedStaticFilters) filterStats.passed++;
 
-      // 신고가: 해당 연도 연봉 고가 > 이전 연도 연봉 고가
-      const yearHighs = yearHighMap.get(stockCode);
-      const isNewHigh = yearHighs != null && yearHighs.prevYear > 0 && yearHighs.thisYear > yearHighs.prevYear;
+      // [Patch 1] 신고가 판정도 수정주가(adjHigh) 기준
+      const isNewHigh = adjH(latest) >= high52w;
 
       // === 투자 중요 지표 계산 (최근 10거래일 필요) ===
       // [Patch 3] TR / 가격압축 / 강도지속 모두 거래정지 캔들 제외 + 수정주가 기준
