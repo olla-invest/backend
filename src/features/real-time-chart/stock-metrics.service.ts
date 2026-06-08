@@ -1051,6 +1051,15 @@ export class StockMetricsService {
       const adjL = (c: PlainCandle) => c.adjLow ?? c.low;
       const closePrice = adjP(latest);
       const openPrice = adjO(latest);
+      let latestTradeIndex = -1;
+      for (let i = tradeCandles.length - 1; i >= 0; i--) {
+        if (tradeCandles[i].candleTime.getTime() === latest.candleTime.getTime()) {
+          latestTradeIndex = i;
+          break;
+        }
+      }
+      const previousTradeCandle = latestTradeIndex > 0 ? tradeCandles[latestTradeIndex - 1] : null;
+      const previousClosePrice = previousTradeCandle ? adjP(previousTradeCandle) : null;
 
       // [Patch 1] 52주 고/저가 (수정주가 기준 + 거래정지 캔들 제외)
       //   - 분할/병합 직후 원주가 high/low 가 그대로 max/min 에 잡혀 DF1/DF2 가 왜곡되는 문제 해결.
@@ -1215,8 +1224,10 @@ export class StockMetricsService {
         high52w,
         low52w,
         isNewHigh,
-        priceChange1d: closePrice - openPrice,
-        priceChangeRate1d: openPrice > 0 ? ((closePrice - openPrice) / openPrice) * 100 : 0,
+        priceChange1d: previousClosePrice != null ? closePrice - previousClosePrice : closePrice - openPrice,
+        priceChangeRate1d: previousClosePrice != null && previousClosePrice > 0
+          ? ((closePrice - previousClosePrice) / previousClosePrice) * 100
+          : openPrice > 0 ? ((closePrice - openPrice) / openPrice) * 100 : 0,
         volume: latest.volume,
         tradingValue: BigInt(Math.floor(tradingValue)),
         rsRaw,

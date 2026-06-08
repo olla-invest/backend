@@ -1522,9 +1522,8 @@ export class RealTimeChartService implements OnModuleInit {
 
   private formatPriceChangeRateText(realtimePrice: any, metrics: any): string {
     if (realtimePrice) {
-      const rate = realtimePrice.openPrice > 0
-        ? ((realtimePrice.currentPrice - realtimePrice.openPrice) / realtimePrice.openPrice) * 100
-        : realtimePrice.changeRate;
+      const rate = Number(realtimePrice.changeRate);
+      if (!Number.isFinite(rate)) return '-';
       return `${rate > 0 ? '+' : ''}${rate.toFixed(2)}%`;
     }
     if (metrics?.priceChangeRate1d != null) {
