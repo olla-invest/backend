@@ -786,25 +786,19 @@ export class RealTimeChartService implements OnModuleInit {
    * 醫낅ぉ ?곸꽭 ?붿빟 (?꾩옱媛, ?꾩씪?鍮? 嫄곕옒?? 嫄곕옒?湲? 1??怨좎?, 52二?怨좎?)
    */
   async getStockSummary(stockCode: string) {
-    const today = new Date().toISOString().split('T')[0].replace(/-/g, '');
+    const today = this.formatDateToYYYYMMDD(this.todayKstDateOnly());
+    const realtimePrice = this.getUsableRealtimePrice(this.realtimeCache.getPrice(stockCode));
 
-    // 1. ?ㅼ? ?쇰큺 API ???ㅻ뒛 ?꾩옱媛/嫄곕옒??怨좎?/?꾩씪?鍮?
-    const kiwoomData = await this.kiwoomRest.getDayCandles(stockCode, today);
-    const latest = kiwoomData.stk_dt_pole_chart_qry[0];
-
-    if (!latest) {
-      throw new Error(`No candle data for ${stockCode}`);
-    }
-
-    const currentPrice = this.parsePrice(latest.cur_prc);
-    const prevDayCompareAbs = this.parsePrice(latest.pred_pre);
-    const sig = latest.pred_pre_sig;
-    const prevDayCompare = (sig === '4' || sig === '5') ? -prevDayCompareAbs : prevDayCompareAbs;
-    const changeRate = currentPrice !== 0
-      ? ((prevDayCompare / (currentPrice - prevDayCompare)) * 100).toFixed(2)
-      : '0.00';
-
-    const [company, basicInfo] = await Promise.all([
+    const [kiwoomData, dbCandles, company, basicInfo] = await Promise.all([
+      this.kiwoomRest.getDayCandles(stockCode, today).catch((error) => {
+        this.logger.warn(`Kiwoom day summary unavailable for ${stockCode}: ${error.message}`);
+        return null;
+      }),
+      this.prisma.stockCandle.findMany({
+        where: { stockCode, candleType: 'day' },
+        orderBy: { candleTime: 'desc' },
+        take: 2,
+      }),
       this.prisma.company.findFirst({
         where: { stockCode, deletedAt: null },
         select: { listedShares: true },
@@ -814,6 +808,39 @@ export class RealTimeChartService implements OnModuleInit {
         return null;
       }),
     ]);
+
+    const latest = kiwoomData?.stk_dt_pole_chart_qry?.[0] ?? null;
+    const latestDbCandle = dbCandles[0] ?? null;
+    const previousDbCandle = dbCandles[1] ?? null;
+    const realtimeCurrentPrice = Number(realtimePrice?.currentPrice ?? 0);
+    const dbCurrentPrice = latestDbCandle ? Number(latestDbCandle.closePrice) : 0;
+    const kiwoomCurrentPrice = latest ? this.parsePrice(latest.cur_prc) : 0;
+    const currentPrice =
+      realtimeCurrentPrice > 0 ? realtimeCurrentPrice :
+      dbCurrentPrice > 0 ? dbCurrentPrice :
+      kiwoomCurrentPrice;
+
+    if (!Number.isFinite(currentPrice) || currentPrice <= 0) {
+      throw new Error(`No candle data for ${stockCode}`);
+    }
+
+    const previousDbClose = previousDbCandle ? Number(previousDbCandle.closePrice) : null;
+    const kiwoomPrevDayCompareAbs = latest ? this.parsePrice(latest.pred_pre) : 0;
+    const kiwoomSig = latest?.pred_pre_sig;
+    const kiwoomPrevDayCompare = (kiwoomSig === '4' || kiwoomSig === '5') ? -kiwoomPrevDayCompareAbs : kiwoomPrevDayCompareAbs;
+    const prevDayCompare =
+      realtimePrice ? Number(realtimePrice.changeAmount) :
+      previousDbClose != null && previousDbClose > 0 ? currentPrice - previousDbClose :
+      kiwoomPrevDayCompare;
+    const changeRate =
+      realtimePrice ? Number(realtimePrice.changeRate).toFixed(2) :
+      previousDbClose != null && previousDbClose > 0 ? (((currentPrice - previousDbClose) / previousDbClose) * 100).toFixed(2) :
+      currentPrice - kiwoomPrevDayCompare !== 0 ? ((kiwoomPrevDayCompare / (currentPrice - kiwoomPrevDayCompare)) * 100).toFixed(2) :
+      '0.00';
+    const prevDayCompareSign =
+      latest?.pred_pre_sig ??
+      (prevDayCompare > 0 ? '2' : prevDayCompare < 0 ? '5' : '3');
+
     const listedShares = company?.listedShares ?? null;
     const kiwoomMarketCap = this.extractKiwoomMarketCap(basicInfo);
     const marketCap = kiwoomMarketCap;
@@ -837,15 +864,17 @@ export class RealTimeChartService implements OnModuleInit {
       stockCode,
       currentPrice,
       prevDayCompare,
-      prevDayCompareSign: latest.pred_pre_sig,
+      prevDayCompareSign,
       changeRate,
-      volume: latest.trde_qty,
-      tradingValue: latest.trde_prica,
+      volume: realtimePrice?.accVolume ?? latestDbCandle?.volume?.toString() ?? latest?.trde_qty ?? null,
+      tradingValue: realtimePrice
+        ? this.normalizeTradingValueToWon(realtimePrice.accAmount).toString()
+        : latestDbCandle?.tradingValue?.toString() ?? latest?.trde_prica ?? null,
       listedShares: listedShares ? Number(listedShares) : null,
       marketCap,
       marketCapSource: marketCap != null ? 'kiwoom' : null,
-      dayHigh: this.parsePrice(latest.high_pric),
-      dayLow: this.parsePrice(latest.low_pric),
+      dayHigh: realtimePrice?.highPrice ?? (latestDbCandle ? Number(latestDbCandle.highPrice) : latest ? this.parsePrice(latest.high_pric) : currentPrice),
+      dayLow: realtimePrice?.lowPrice ?? (latestDbCandle ? Number(latestDbCandle.lowPrice) : latest ? this.parsePrice(latest.low_pric) : currentPrice),
       week52High,
       week52Low,
     };
