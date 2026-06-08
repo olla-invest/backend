@@ -2685,7 +2685,7 @@ export class RealTimeChartService implements OnModuleInit {
     const shouldMaskUnfixedPrices =
       options?.maskUnfixedPrices === true &&
       ['day', 'week', 'month', 'year'].includes(candleType) &&
-      this.isKrxMarketSessionNow();
+      this.shouldMaskCurrentUnfixedPeriodNow();
     const today = shouldMaskUnfixedPrices ? this.todayKstDateOnly() : null;
 
     const calculationCandles = previousCandle ? [...responseCandles, previousCandle] : responseCandles;
@@ -2737,6 +2737,12 @@ export class RealTimeChartService implements OnModuleInit {
     const nowKst = new Date(now.getTime() + 9 * 60 * 60 * 1000);
     const minutes = nowKst.getUTCHours() * 60 + nowKst.getUTCMinutes();
     return minutes >= 9 * 60 && minutes <= 16 * 60;
+  }
+
+  private shouldMaskCurrentUnfixedPeriodNow(): boolean {
+    const now = new Date();
+    if (!isKrxTradingDay(now)) return true;
+    return this.isKrxMarketSessionNow();
   }
 
   private async buildCurrentPeriodAggregateCandle(
