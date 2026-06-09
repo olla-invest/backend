@@ -1057,7 +1057,7 @@ export class RealTimeChartService implements OnModuleInit {
           companyName: s.name,
           stockCode: s.code,
           currentPrice: realtimePrice?.currentPrice || dbPrice,
-          exchange: this.isKospiStock(s) ? 'KOSPI' : this.isKosdaqStock(s) ? 'KOSDAQ' : s.marketName,
+          exchange: this.isKospiStock(s) ? '코스피' : this.isKosdaqStock(s) ? '코스닥' : '-',
           relativeStrengthScore: Number((metrics?.relativeStrengthScore || 0).toFixed(4)),
           isHighPrice: metrics?.isNewHigh || false,
           priceChangeRateText,
@@ -1280,7 +1280,7 @@ export class RealTimeChartService implements OnModuleInit {
           companyName: s.name,
           stockCode: s.code,
           currentPrice: realtimePrice?.currentPrice || dbPrice,
-          exchange: this.isKospiStock(s) ? 'KOSPI' : this.isKosdaqStock(s) ? 'KOSDAQ' : s.marketName,
+          exchange: this.isKospiStock(s) ? '코스피' : this.isKosdaqStock(s) ? '코스닥' : '-',
           relativeStrengthScore: Number(item.rsScore.toFixed(4)),
           isHighPrice: metrics?.isNewHigh || false,
           priceChangeRateText,
@@ -1465,7 +1465,7 @@ export class RealTimeChartService implements OnModuleInit {
           companyName: s.name,
           stockCode: s.code,
           currentPrice: realtimePrice?.currentPrice || dbPrice,
-          exchange: this.isKospiStock(s) ? 'KOSPI' : this.isKosdaqStock(s) ? 'KOSDAQ' : s.marketName,
+          exchange: this.isKospiStock(s) ? '코스피' : this.isKosdaqStock(s) ? '코스닥' : '-',
           relativeStrengthScore: Number(item.rsScore.toFixed(4)),
           isHighPrice: metrics?.isNewHigh || false,
           priceChangeRateText,
@@ -1544,10 +1544,10 @@ export class RealTimeChartService implements OnModuleInit {
     if (!metrics) return indicators;
 
     if (metrics.isVolatilityContraction) {
-      indicators.push({ type: 'VOLATILITY_CONTRACTION', label: '蹂?숈꽦 異뺤냼' });
+      indicators.push({ type: 'VOLATILITY_CONTRACTION', label: '변동성 축소' });
     }
     if (metrics.isPriceCompression) {
-      indicators.push({ type: 'PRICE_COMPRESSION', label: '媛寃??뺤텞' });
+      indicators.push({ type: 'PRICE_COMPRESSION', label: '가격 압축' });
     }
     if (metrics.strengthContinuationDays != null && metrics.strengthContinuationDays > 0) {
       indicators.push({
@@ -1634,15 +1634,18 @@ export class RealTimeChartService implements OnModuleInit {
           this.kiwoomRest.getStockList('0'),
           this.kiwoomRest.getStockList('10'),
         ]);
-        const allList = [...kospiResult.list, ...kosdaqResult.list];
+        const allList = [
+          ...kospiResult.list.map((s: any) => ({ ...s, marketType: '0' })),
+          ...kosdaqResult.list.map((s: any) => ({ ...s, marketType: '10' })),
+        ];
         validStocks = allList.filter(
           (s: any) => s.code.match(/^\d{6}$/) && !s.code.endsWith('5') && !this.isHaltedState(s.state),
         );
       } else {
         const result = await this.kiwoomRest.getStockList(marketType);
-        validStocks = result.list.filter(
-          (s: any) => s.code.match(/^\d{6}$/) && !s.code.endsWith('5') && !this.isHaltedState(s.state),
-        );
+        validStocks = result.list
+          .filter((s: any) => s.code.match(/^\d{6}$/) && !s.code.endsWith('5') && !this.isHaltedState(s.state))
+          .map((s: any) => ({ ...s, marketType }));
       }
     } catch (error) {
       this.logger.warn(
