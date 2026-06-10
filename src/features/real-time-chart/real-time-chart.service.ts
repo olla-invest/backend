@@ -43,6 +43,7 @@ export class RealTimeChartService implements OnModuleInit {
   private readonly stockListCache = new Map<string, StockListCache>();
   private readonly CACHE_TTL = 60 * 60 * 1000; // 1?쒓컙 (諛由ъ큹)
   private readonly REALTIME_CANDLE_SAVE_THROTTLE_MS = 30 * 1000;
+  private readonly rsFilterInflight = new Map<string, Promise<any>>();
   private readonly realtimeCandleSavedAt = new Map<string, number>();
   private initializationComplete = false;
   private lastDataUpdate: Date | null = null;
@@ -1345,12 +1346,21 @@ export class RealTimeChartService implements OnModuleInit {
     const tradeDateForLog = latestTradeDate
       ? latestTradeDate.toISOString().split('T')[0].replace(/-/g, '')
       : undefined;
-    const rsFilterResult = await this.metricsService.calculateRsFilterLog(
-      allStockCodes,
-      tradeDateForLog,
-      periods.join(','),
-      weights.join(','),
-    );
+
+    const inflightKey = `${tradeDateForLog}|${periods.join(',')}|${weights.join(',')}`;
+    let rsFilterPromise = this.rsFilterInflight.get(inflightKey);
+    if (!rsFilterPromise) {
+      rsFilterPromise = this.metricsService.calculateRsFilterLog(
+        allStockCodes,
+        tradeDateForLog,
+        periods.join(','),
+        weights.join(','),
+      ).finally(() => this.rsFilterInflight.delete(inflightKey));
+      this.rsFilterInflight.set(inflightKey, rsFilterPromise);
+    } else {
+      this.logger.log(`[getStockListWithRangeRS] reusing in-flight RS calculation (key=${inflightKey})`);
+    }
+    const rsFilterResult = await rsFilterPromise;
 
     this.logger.log(`Converted range filters to periods: ${periods}, weights: ${weights}`);
 
