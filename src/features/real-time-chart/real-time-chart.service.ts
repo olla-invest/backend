@@ -41,9 +41,7 @@ export interface StockDetailSnapshot {
 export class RealTimeChartService implements OnModuleInit {
   private readonly logger = new Logger(RealTimeChartService.name);
   private readonly stockListCache = new Map<string, StockListCache>();
-  private readonly trendTemplateFinancialCache = new Map<string, { value: boolean; expiresAt: number }>();
   private readonly CACHE_TTL = 60 * 60 * 1000; // 1?쒓컙 (諛由ъ큹)
-  private readonly FINANCIAL_CACHE_TTL = 24 * 60 * 60 * 1000;
   private readonly REALTIME_CANDLE_SAVE_THROTTLE_MS = 30 * 1000;
   private readonly realtimeCandleSavedAt = new Map<string, number>();
   private initializationComplete = false;
@@ -1045,7 +1043,7 @@ export class RealTimeChartService implements OnModuleInit {
         const realtimePrice = this.getUsableRealtimePrice(realtimePrices.get(s.code));
         const dbPrice = metrics?.closePrice || closingPrices.get(s.code) || 0;
         const priceChangeRateText = this.formatPriceChangeRateText(realtimePrice, metrics);
-        const investmentIndicators = await this.buildInvestmentIndicators(s.code, metrics);
+        const investmentIndicators = this.buildInvestmentIndicators(metrics);
         const investmentIndicatorsText = this.formatInvestmentIndicators(investmentIndicators);
         const naverThemes = naverThemesMap.get(s.code) ?? [];
         const naverThemeText = naverThemes.map((theme) => theme.themeName).join(', ');
@@ -1268,7 +1266,7 @@ export class RealTimeChartService implements OnModuleInit {
         const realtimePrice = this.getUsableRealtimePrice(realtimePrices.get(s.code));
         const dbPrice = metrics?.closePrice || closingPrices.get(s.code) || 0;
         const priceChangeRateText = this.formatPriceChangeRateText(realtimePrice, metrics);
-        const investmentIndicators = await this.buildInvestmentIndicators(s.code, metrics);
+        const investmentIndicators = this.buildInvestmentIndicators(metrics);
         const investmentIndicatorsText = this.formatInvestmentIndicators(investmentIndicators);
         const naverThemes = naverThemesMap.get(s.code) ?? [];
         const naverThemeText = naverThemes.map((theme) => theme.themeName).join(', ');
@@ -1453,7 +1451,7 @@ export class RealTimeChartService implements OnModuleInit {
         const realtimePrice = this.getUsableRealtimePrice(realtimePrices.get(s.code));
         const dbPrice = metrics?.closePrice || closingPrices.get(s.code) || 0;
         const priceChangeRateText = this.formatPriceChangeRateText(realtimePrice, metrics);
-        const investmentIndicators = await this.buildInvestmentIndicators(s.code, metrics);
+        const investmentIndicators = this.buildInvestmentIndicators(metrics);
         const investmentIndicatorsText = this.formatInvestmentIndicators(investmentIndicators);
         const naverThemes = naverThemesMap.get(s.code) ?? [];
         const naverThemeText = naverThemes.map((theme) => theme.themeName).join(', ');
@@ -1539,7 +1537,7 @@ export class RealTimeChartService implements OnModuleInit {
       .join(', ') || '-';
   }
 
-  private async buildInvestmentIndicators(stockCode: string, metrics: any): Promise<InvestmentIndicator[]> {
+  private buildInvestmentIndicators(metrics: any): InvestmentIndicator[] {
     const indicators: InvestmentIndicator[] = [];
     if (!metrics) return indicators;
 
@@ -1556,42 +1554,13 @@ export class RealTimeChartService implements OnModuleInit {
         value: `${metrics.strengthContinuationDays}/10`,
       });
     }
-    if (metrics.isTrendTemplate && await this.hasTrendTemplateFundamentals(stockCode)) {
+    if (metrics.isTrendTemplate) {
       indicators.push({ type: 'TREND_TEMPLATE', label: '트렌드 템플릿' });
     }
 
     return indicators;
   }
 
-  private async hasTrendTemplateFundamentals(stockCode: string): Promise<boolean> {
-    const cached = this.trendTemplateFinancialCache.get(stockCode);
-    const now = Date.now();
-    if (cached && cached.expiresAt > now) return cached.value;
-
-    let value = false;
-    try {
-      const basicInfo = await this.kiwoomRest.getStockBasicInfo(stockCode);
-      const eps = this.parseNullableNumber(basicInfo.eps);
-      const roe = this.parseNullableNumber(basicInfo.roe);
-
-      // ka10001 provides vendor EPS/ROE snapshots, not historical EPS growth or quarterly YoY.
-      // Use it as the realtime-list financial gate: positive EPS and ROE >= 15%.
-      value = eps != null && eps > 0 && roe != null && roe >= 15;
-    } catch (error) {
-      this.logger.debug(`Trend template fundamentals unavailable for ${stockCode}: ${(error as Error).message}`);
-    }
-
-    this.trendTemplateFinancialCache.set(stockCode, { value, expiresAt: now + this.FINANCIAL_CACHE_TTL });
-    return value;
-  }
-
-  private parseNullableNumber(value: string | number | null | undefined): number | null {
-    if (value == null) return null;
-    const normalized = String(value).replace(/,/g, '').replace(/%/g, '').trim();
-    if (!normalized) return null;
-    const parsed = Number(normalized);
-    return Number.isFinite(parsed) ? parsed : null;
-  }
 
   private extractKiwoomMarketCap(data: any): number | null {
     if (!data) return null;
