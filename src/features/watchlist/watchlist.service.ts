@@ -1,9 +1,13 @@
 import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
 import { PrismaService } from '../../common/prisma/prisma.service';
+import { RealtimePriceCacheService } from '../real-time-chart/realtime-price-cache.service';
 
 @Injectable()
 export class WatchlistService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly realtimePriceCache: RealtimePriceCacheService,
+  ) {}
 
   // ─── 관심종목 ─────────────────────────────────────────────────────
 
@@ -29,7 +33,8 @@ export class WatchlistService {
     });
 
     if (!latestMetric) {
-      return { tradeDate: null, stocks: watchlist.map((w) => this.buildStockItem(w, null, null)) };
+      const realtimePriceMap = this.realtimePriceCache.getPrices(stockCodes);
+      return { tradeDate: null, stocks: watchlist.map((w) => this.buildStockItem(w, null, null, realtimePriceMap.get(w.company.stockCode))) };
     }
 
     const latestDate = latestMetric.tradeDate;
@@ -53,8 +58,15 @@ export class WatchlistService {
     const todayMap = new Map(todayMetrics.map((m) => [m.stockCode, m]));
     const prevMap = new Map(prevMetrics.map((m) => [m.stockCode, m]));
 
+    const realtimePriceMap = this.realtimePriceCache.getPrices(stockCodes);
+
     const stocks = watchlist.map((w) =>
-      this.buildStockItem(w, todayMap.get(w.company.stockCode) ?? null, prevMap.get(w.company.stockCode) ?? null),
+      this.buildStockItem(
+        w,
+        todayMap.get(w.company.stockCode) ?? null,
+        prevMap.get(w.company.stockCode) ?? null,
+        realtimePriceMap.get(w.company.stockCode),
+      ),
     );
     stocks.sort((a, b) => this.compareNullableRank(a.rank, b.rank) || a.companyName.localeCompare(b.companyName, 'ko'));
 
@@ -64,7 +76,7 @@ export class WatchlistService {
     };
   }
 
-  private buildStockItem(watchlistEntry: any, today: any, prev: any) {
+  private buildStockItem(watchlistEntry: any, today: any, prev: any, realtimePrice?: { currentPrice: number } | undefined) {
     const events: string[] = [];
     if (today) {
       if (today.isNewHigh) events.push('NEW_HIGH');
@@ -83,7 +95,7 @@ export class WatchlistService {
       marketType: watchlistEntry.company.marketType,
       addedDate: watchlistEntry.addedDate,
       memo: watchlistEntry.memo ?? null,
-      closePrice: today ? Number(today.closePrice) : null,
+      closePrice: realtimePrice?.currentPrice ?? (today ? Number(today.closePrice) : null),
       priceChange1d: today?.priceChange1d != null ? Number(today.priceChange1d) : null,
       priceChangeRate1d: today?.priceChangeRate1d != null ? Number(today.priceChangeRate1d) : null,
       rank: today?.rank ?? null,
@@ -348,6 +360,7 @@ export class WatchlistService {
       });
       topStocks = metrics.map((m) => {
         const w = watchlistStocks.find((ws) => ws.company.stockCode === m.stockCode)!;
+        const realtimePrice = this.realtimePriceCache.getPrice(m.stockCode);
         return {
           type: 'STOCK',
           companyId: w.company.companyId,
@@ -355,7 +368,7 @@ export class WatchlistService {
           companyName: w.company.companyName,
           marketType: w.company.marketType,
           rank: m.rank,
-          closePrice: Number(m.closePrice),
+          closePrice: realtimePrice?.currentPrice ?? Number(m.closePrice),
           priceChangeRate1d: m.priceChangeRate1d != null ? Number(m.priceChangeRate1d) : null,
           relativeStrengthScore: Number(m.relativeStrengthScore),
         };
@@ -518,6 +531,8 @@ export class WatchlistService {
       else if (metric.rank > prevRank) events.push('RANK_DOWN');
     }
 
+    const realtimePrice = this.realtimePriceCache.getPrice(metric.stockCode);
+
     return {
       reason,
       type: 'STOCK',
@@ -533,7 +548,7 @@ export class WatchlistService {
         today: metric.rank,
         oneDayAgo: prevRank,
       },
-      closePrice: Number(metric.closePrice),
+      closePrice: realtimePrice?.currentPrice ?? Number(metric.closePrice),
       priceChangeRate1d: metric.priceChangeRate1d != null ? Number(metric.priceChangeRate1d) : null,
       relativeStrengthScore: Number(metric.relativeStrengthScore),
       events,
@@ -725,6 +740,7 @@ export class WatchlistService {
 
     for (const w of watchlistStocks) {
       const m = stockMetricMap.get(w.company.stockCode);
+      const realtimePrice = this.realtimePriceCache.getPrice(w.company.stockCode);
       items.push({
         type: 'STOCK',
         companyId: w.company.companyId,
@@ -735,7 +751,7 @@ export class WatchlistService {
         rank: m?.rank ?? null,
         prevRank: null,
         rankChange: null,
-        closePrice: m ? Number(m.closePrice) : null,
+        closePrice: realtimePrice?.currentPrice ?? (m ? Number(m.closePrice) : null),
         priceChangeRate1d: m?.priceChangeRate1d != null ? Number(m.priceChangeRate1d) : null,
         relativeStrengthScore: m ? Number(m.relativeStrengthScore) : null,
       });
