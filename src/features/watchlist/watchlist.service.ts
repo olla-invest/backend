@@ -2,6 +2,13 @@ import { Injectable, NotFoundException, ConflictException } from '@nestjs/common
 import { PrismaService } from '../../common/prisma/prisma.service';
 import { RealtimePriceCacheService } from '../real-time-chart/realtime-price-cache.service';
 
+type StockCurrentRankContext = {
+  tradeDate: Date | null;
+  snapshotTime: Date | null;
+  currentRankMap: Map<string, number | null>;
+  previousRankMap: Map<string, number | null>;
+};
+
 @Injectable()
 export class WatchlistService {
   constructor(
@@ -58,7 +65,10 @@ export class WatchlistService {
     const todayMap = new Map(todayMetrics.map((m) => [m.stockCode, m]));
     const prevMap = new Map(prevMetrics.map((m) => [m.stockCode, m]));
 
-    const realtimePriceMap = this.realtimePriceCache.getPrices(stockCodes);
+    const [realtimePriceMap, currentRankContext] = await Promise.all([
+      Promise.resolve(this.realtimePriceCache.getPrices(stockCodes)),
+      this.getStockCurrentRankContext(stockCodes, latestDate),
+    ]);
 
     const stocks = watchlist.map((w) =>
       this.buildStockItem(
@@ -66,31 +76,49 @@ export class WatchlistService {
         todayMap.get(w.company.stockCode) ?? null,
         prevMap.get(w.company.stockCode) ?? null,
         realtimePriceMap.get(w.company.stockCode),
+        currentRankContext,
       ),
     );
     stocks.sort((a, b) => this.compareNullableRank(a.rank, b.rank) || a.companyName.localeCompare(b.companyName, 'ko'));
 
     return {
-      tradeDate: latestDate,
+      tradeDate: currentRankContext.tradeDate ?? latestDate,
+      currentRankSnapshotTime: currentRankContext.snapshotTime,
       stocks,
     };
   }
 
-  private buildStockItem(watchlistEntry: any, today: any, prev: any, realtimePrice?: { currentPrice: number } | undefined) {
+  private buildStockItem(
+    watchlistEntry: any,
+    today: any,
+    prev: any,
+    realtimePrice?: { currentPrice: number } | undefined,
+    currentRankContext?: StockCurrentRankContext,
+  ) {
+    const stockCode = watchlistEntry.company.stockCode;
+    const hasSnapshotRank = currentRankContext?.currentRankMap.has(stockCode) ?? false;
+    const hasPreviousCurrentRank = currentRankContext?.previousRankMap.has(stockCode) ?? false;
+    const rank = hasSnapshotRank
+      ? currentRankContext!.currentRankMap.get(stockCode) ?? null
+      : today?.currentRank ?? today?.rank ?? null;
+    const prevRank = hasPreviousCurrentRank
+      ? currentRankContext!.previousRankMap.get(stockCode) ?? null
+      : prev?.currentRank ?? prev?.rank ?? null;
+    const rankChange = rank != null && prevRank != null ? prevRank - rank : null;
     const events: string[] = [];
     if (today) {
       if (today.isNewHigh) events.push('NEW_HIGH');
       if (today.isVolatilityContraction) events.push('VOLATILITY_CONTRACTION');
       if (today.isPriceCompression) events.push('PRICE_COMPRESSION');
       if (today.isTrendTemplate) events.push('TREND_TEMPLATE');
-      if (prev) {
-        if (today.rank < prev.rank) events.push('RANK_UP');
-        else if (today.rank > prev.rank) events.push('RANK_DOWN');
+      if (rank != null && prevRank != null) {
+        if (rank < prevRank) events.push('RANK_UP');
+        else if (rank > prevRank) events.push('RANK_DOWN');
       }
     }
     return {
       companyId: watchlistEntry.companyId,
-      stockCode: watchlistEntry.company.stockCode,
+      stockCode,
       companyName: watchlistEntry.company.companyName,
       marketType: watchlistEntry.company.marketType,
       addedDate: watchlistEntry.addedDate,
@@ -98,8 +126,11 @@ export class WatchlistService {
       closePrice: realtimePrice?.currentPrice ?? (today ? Number(today.closePrice) : null),
       priceChange1d: today?.priceChange1d != null ? Number(today.priceChange1d) : null,
       priceChangeRate1d: today?.priceChangeRate1d != null ? Number(today.priceChangeRate1d) : null,
-      rank: today?.rank ?? null,
-      prevRank: prev?.rank ?? null,
+      rank,
+      prevRank,
+      rankChange,
+      storedRank: today?.rank ?? null,
+      currentRankSnapshotTime: currentRankContext?.snapshotTime ?? null,
       relativeStrengthScore: today ? Number(today.relativeStrengthScore) : null,
       isNewHigh: today?.isNewHigh ?? false,
       events,
@@ -674,11 +705,21 @@ export class WatchlistService {
       : null;
 
     let stockMetricMap = new Map<string, any>();
+    let stockCurrentRankContext: StockCurrentRankContext = {
+      tradeDate: null,
+      snapshotTime: null,
+      currentRankMap: new Map(),
+      previousRankMap: new Map(),
+    };
     if (latestStockMetric) {
-      const metrics = await this.prisma.stockDailyMetrics.findMany({
-        where: { stockCode: { in: stockCodes }, tradeDate: latestStockMetric.tradeDate },
-      });
+      const [metrics, currentRankContext] = await Promise.all([
+        this.prisma.stockDailyMetrics.findMany({
+          where: { stockCode: { in: stockCodes }, tradeDate: latestStockMetric.tradeDate },
+        }),
+        this.getStockCurrentRankContext(stockCodes, latestStockMetric.tradeDate),
+      ]);
       stockMetricMap = new Map(metrics.map((m) => [m.stockCode, m]));
+      stockCurrentRankContext = currentRankContext;
     }
 
     // 테마 스냅샷
@@ -741,16 +782,28 @@ export class WatchlistService {
     for (const w of watchlistStocks) {
       const m = stockMetricMap.get(w.company.stockCode);
       const realtimePrice = this.realtimePriceCache.getPrice(w.company.stockCode);
+      const stockCode = w.company.stockCode;
+      const hasSnapshotRank = stockCurrentRankContext.currentRankMap.has(stockCode);
+      const hasPreviousCurrentRank = stockCurrentRankContext.previousRankMap.has(stockCode);
+      const rank = hasSnapshotRank
+        ? stockCurrentRankContext.currentRankMap.get(stockCode) ?? null
+        : m?.currentRank ?? m?.rank ?? null;
+      const prevRank = hasPreviousCurrentRank
+        ? stockCurrentRankContext.previousRankMap.get(stockCode) ?? null
+        : null;
+      const rankChange = rank != null && prevRank != null ? prevRank - rank : null;
       items.push({
         type: 'STOCK',
         companyId: w.company.companyId,
-        stockCode: w.company.stockCode,
+        stockCode,
         companyName: w.company.companyName,
         marketType: w.company.marketType,
         addedDate: w.addedDate,
-        rank: m?.rank ?? null,
-        prevRank: null,
-        rankChange: null,
+        rank,
+        prevRank,
+        rankChange,
+        storedRank: m?.rank ?? null,
+        currentRankSnapshotTime: stockCurrentRankContext.snapshotTime,
         closePrice: realtimePrice?.currentPrice ?? (m ? Number(m.closePrice) : null),
         priceChangeRate1d: m?.priceChangeRate1d != null ? Number(m.priceChangeRate1d) : null,
         relativeStrengthScore: m ? Number(m.relativeStrengthScore) : null,
@@ -768,5 +821,69 @@ export class WatchlistService {
     if (a == null) return 1;
     if (b == null) return -1;
     return a - b;
+  }
+
+  private async getStockCurrentRankContext(
+    stockCodes: string[],
+    fallbackTradeDate?: Date,
+  ): Promise<StockCurrentRankContext> {
+    if (stockCodes.length === 0) {
+      return { tradeDate: null, snapshotTime: null, currentRankMap: new Map(), previousRankMap: new Map() };
+    }
+
+    const snapshot = await this.prisma.stockCurrentRankSnapshot.findFirst({
+      orderBy: [{ tradeDate: 'desc' }, { snapshotTime: 'desc' }],
+      select: { tradeDate: true, snapshotTime: true },
+    });
+    if (snapshot) {
+      const currentRows = await this.prisma.stockCurrentRankSnapshot.findMany({
+        where: {
+          tradeDate: snapshot.tradeDate,
+          snapshotTime: snapshot.snapshotTime,
+          stockCode: { in: stockCodes },
+        },
+        select: { stockCode: true, currentRank: true },
+      });
+      const previousRankMap = await this.getPreviousDailyCurrentRankMap(stockCodes, snapshot.tradeDate);
+
+      return {
+        tradeDate: snapshot.tradeDate,
+        snapshotTime: snapshot.snapshotTime,
+        currentRankMap: new Map(currentRows.map((row) => [row.stockCode, row.currentRank])),
+        previousRankMap,
+      };
+    }
+
+    if (!fallbackTradeDate) {
+      return { tradeDate: null, snapshotTime: null, currentRankMap: new Map(), previousRankMap: new Map() };
+    }
+
+    const currentRows = await this.prisma.stockDailyMetrics.findMany({
+      where: { stockCode: { in: stockCodes }, tradeDate: fallbackTradeDate },
+      select: { stockCode: true, currentRank: true },
+    });
+
+    return {
+      tradeDate: fallbackTradeDate,
+      snapshotTime: null,
+      currentRankMap: new Map(currentRows.map((row) => [row.stockCode, row.currentRank])),
+      previousRankMap: await this.getPreviousDailyCurrentRankMap(stockCodes, fallbackTradeDate),
+    };
+  }
+
+  private async getPreviousDailyCurrentRankMap(stockCodes: string[], tradeDate: Date): Promise<Map<string, number | null>> {
+    const prevDateRecord = await this.prisma.stockDailyMetrics.findFirst({
+      where: { tradeDate: { lt: tradeDate } },
+      orderBy: { tradeDate: 'desc' },
+      select: { tradeDate: true },
+    });
+    if (!prevDateRecord) return new Map();
+
+    const rows = await this.prisma.stockDailyMetrics.findMany({
+      where: { stockCode: { in: stockCodes }, tradeDate: prevDateRecord.tradeDate },
+      select: { stockCode: true, currentRank: true },
+    });
+
+    return new Map(rows.map((row) => [row.stockCode, row.currentRank]));
   }
 }

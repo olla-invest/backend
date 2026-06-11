@@ -100,6 +100,7 @@ export class StockMetricsService {
       metricsMap.set(metric.stockCode, {
         relativeStrengthScore: Number(metric.relativeStrengthScore),
         rank: metric.rank,
+        currentRank: metric.currentRank,
         isNewHigh: metric.isNewHigh,
         closePrice: Number(metric.closePrice),
         priceChange1d: metric.priceChange1d ? Number(metric.priceChange1d) : null,

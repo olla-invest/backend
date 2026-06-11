@@ -360,9 +360,32 @@ export class RealTimeChartService implements OnModuleInit {
         close > Number(row.ma50)
       );
     };
+    const currentRankSnapshotMap = mode === 'aggregated'
+      ? await this.getLatestCurrentRankSnapshotMap(latest)
+      : new Map<string, {
+          currentRank: number | null;
+          passedDynamicFilters: boolean;
+          currentPrice: number;
+          snapshotTime: Date;
+          priceSource: string;
+        }>();
+    const passesCurrentDynamicFilters = (row: typeof allRows[number]) => {
+      const snapshot = currentRankSnapshotMap.get(row.stockCode);
+      if (snapshot) return snapshot.passedDynamicFilters;
+      return passesDynamicFilters(row);
+    };
+    const effectiveCurrentRank = (row: typeof allRows[number]) => {
+      const snapshotRank = currentRankSnapshotMap.get(row.stockCode)?.currentRank;
+      return snapshotRank ?? row.currentRank ?? row.rank;
+    };
     const filteredRows = allRows
       .filter((row) => marketMatches(row))
-      .filter((row) => passesDynamicFilters(row));
+      .filter((row) => passesCurrentDynamicFilters(row));
+    if (mode === 'aggregated') {
+      filteredRows.sort(
+        (a, b) => effectiveCurrentRank(a) - effectiveCurrentRank(b) || a.stockCode.localeCompare(b.stockCode),
+      );
+    }
     const totalCount = filteredRows.length;
     const rows = filteredRows.slice((page - 1) * pageSize, page * pageSize);
     const movingAverageMap = await this.getAdminMovingAverageMap(
@@ -387,8 +410,13 @@ export class RealTimeChartService implements OnModuleInit {
           stockCode: row.stockCode,
           companyName: company?.companyName || '-',
           marketType: company?.marketType || row.marketType,
-          rank: mode === 'aggregated' ? (page - 1) * pageSize + index + 1 : row.rank,
+          rank: mode === 'aggregated' ? effectiveCurrentRank(row) : row.rank,
           storedRank: row.rank,
+          currentRank: row.currentRank,
+          snapshotCurrentRank: currentRankSnapshotMap.get(row.stockCode)?.currentRank ?? null,
+          currentRankSnapshotTime: currentRankSnapshotMap.get(row.stockCode)?.snapshotTime ?? null,
+          currentPrice: currentRankSnapshotMap.get(row.stockCode)?.currentPrice ?? null,
+          currentPriceSource: currentRankSnapshotMap.get(row.stockCode)?.priceSource ?? null,
           closePrice: Number(row.closePrice),
           relativeStrengthScore: Number(row.relativeStrengthScore),
           rsRaw: rsRawMap.get(row.stockCode) ?? null,
@@ -489,6 +517,55 @@ export class RealTimeChartService implements OnModuleInit {
     }
 
     return result;
+  }
+
+  private async getLatestCurrentRankSnapshotMap(tradeDate: Date): Promise<Map<string, {
+    currentRank: number | null;
+    passedDynamicFilters: boolean;
+    currentPrice: number;
+    snapshotTime: Date;
+    priceSource: string;
+  }>> {
+    const rows = await this.prisma.$queryRawUnsafe<Array<{
+      stock_code: string;
+      current_rank: number | null;
+      passed_dynamic_filters: boolean;
+      current_price: string;
+      snapshot_time: Date;
+      price_source: string;
+    }>>(
+      `
+        WITH latest AS (
+          SELECT snapshot_time
+          FROM stock_current_rank_snapshots
+          WHERE trade_date = $1::date
+          ORDER BY snapshot_time DESC
+          LIMIT 1
+        )
+        SELECT
+          s.stock_code,
+          s.current_rank,
+          s.passed_dynamic_filters,
+          s.current_price::text,
+          s.snapshot_time,
+          s.price_source
+        FROM stock_current_rank_snapshots s
+        JOIN latest ON latest.snapshot_time = s.snapshot_time
+        WHERE s.trade_date = $1::date
+      `,
+      tradeDate.toISOString().slice(0, 10),
+    );
+
+    return new Map(rows.map((row) => [
+      row.stock_code,
+      {
+        currentRank: row.current_rank,
+        passedDynamicFilters: row.passed_dynamic_filters,
+        currentPrice: Number(row.current_price),
+        snapshotTime: row.snapshot_time,
+        priceSource: row.price_source,
+      },
+    ]));
   }
 
   private async getAdminMovingAverageMap(stockCodes: string[], tradeDate: Date): Promise<Map<string, {
