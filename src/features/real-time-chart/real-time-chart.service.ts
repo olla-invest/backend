@@ -41,7 +41,7 @@ export interface StockDetailSnapshot {
 export class RealTimeChartService implements OnModuleInit {
   private readonly logger = new Logger(RealTimeChartService.name);
   private readonly stockListCache = new Map<string, StockListCache>();
-  private readonly CACHE_TTL = 60 * 60 * 1000; // 1?쒓컙 (諛由ъ큹)
+  private readonly CACHE_TTL = 60 * 60 * 1000; // 1시간 (캐시TTL)
   private readonly REALTIME_CANDLE_SAVE_THROTTLE_MS = 30 * 1000;
   private readonly rsFilterInflight = new Map<string, Promise<any>>();
   private readonly realtimeCandleSavedAt = new Map<string, number>();
@@ -59,14 +59,14 @@ export class RealTimeChartService implements OnModuleInit {
   ) {}
 
   /**
-   * ?쒕쾭 ?쒖옉 ???곗씠??珥덇린??
-   * - ?곗씠???놁쓬: 52二?365??移??섏쭛 (?좉퀬媛 ?먮떒??
-   * - ?곗씠???덉쓬: 留덉?留??곗씠??~ ?ㅻ뒛源뚯? 怨듬갚留??섏쭛
+   * - openPrice/closePrice 필드 : 비수정가 (upd_stkpc_tp='0')
+   * - 데이터 없음: 52주(365일)씩 수집 (최초 기동 시)
+   * - 데이터 있음: 마지막 데이터~최신 거래일까지 수집
    */
   async onModuleInit() {
     this.logger.log('Starting data initialization on server startup...');
 
-    // 諛깃렇?쇱슫?쒖뿉??鍮꾨룞湲곕줈 珥덇린???ㅽ뻾 (?쒕쾭 ?쒖옉??釉붾줈?뱁븯吏 ?딆쓬)
+    // 비동기적으로 백그라운드에서 초기화 실행 (서버 시작을 블로킹하지 않음)
     this.initializeData().catch((error) => {
       this.logger.error(`Data initialization failed: ${error.message}`, error.stack);
     });
@@ -167,23 +167,23 @@ export class RealTimeChartService implements OnModuleInit {
   }
 
   /**
-   * ?곗씠??珥덇린??(?쇰큺 ?섏쭛 + 吏??怨꾩궛)
-   * - DB???곗씠?곌? ?놁쑝硫? 52二?365??移??섏쭛
-   * - DB???곗씠?곌? ?덉쑝硫? 留덉?留??곗씠???좎쭨 ~ ?ㅻ뒛源뚯? 怨듬갚 湲곌컙留??섏쭛
+   * 데이터 초기화 (캔들 수집 + 지표 계산)
+   * - DB에 데이터가 없으면 52주(365일)씩 수집
+   * - DB에 데이터가 있으면 마지막 데이터 날짜~최신 거래일 기간만 수집
    */
   async initializeData(marketTypes: ('0' | '10')[] = ['0', '10']) {
     const startTime = Date.now();
     this.logger.log('=== Data Initialization Started ===');
 
     try {
-      // ?꾩옱 ?쒓컙 泥댄겕 (?쒓뎅 ?쒓컙 湲곗?)
+      // 현재 시간 체크 (한국 시간 기준)
       const now = new Date();
       const currentHour = now.getHours();
       const currentMinute = now.getMinutes();
       const dayOfWeek = now.getDay();
-      const isWeekday = dayOfWeek >= 1 && dayOfWeek <= 5; // ??湲?
+      const isWeekday = dayOfWeek >= 1 && dayOfWeek <= 5; // 평일
 
-      // DB?먯꽌 留덉?留??쇰큺 ?곗씠???좎쭨 議고쉶
+      // DB에서 마지막 캔들 데이터 날짜 조회
       const lastCandleDate = await this.chartStorage.getLatestDayCandleDate();
       const today = new Date();
       today.setUTCHours(0, 0, 0, 0);
@@ -191,7 +191,7 @@ export class RealTimeChartService implements OnModuleInit {
       let daysToFetch: number;
       let shouldSkipCollection = false;
 
-      // ??嫄곕옒??怨꾩궛 (二쇰쭚 ??갑?μ쑝濡?嫄대꼫?)
+      // 이전 거래일 계산 (가장 최근 거래일로 거슬러)
       const getPrevTradingDay = (): Date => {
         const d = new Date(today);
         d.setDate(d.getDate() - 1);
@@ -201,18 +201,18 @@ export class RealTimeChartService implements OnModuleInit {
         return d;
       };
 
-      // ?섏쭛 湲곗???寃곗젙:
-      // - ??留덇컧 ???됱씪 15:30 珥덇낵): ?ㅻ뒛源뚯? ?섏쭛 媛??(?뱀씪 ?쇰큺 ?꾩꽦)
-      // - 洹?????以? 媛쒖옣 ?? 二쇰쭚): ??嫄곕옒?쇨퉴吏留??섏쭛 (?뱀씪 誘몄셿???쇰큺 ?쒖쇅)
+      // 수집 기준일 결정:
+      // - 장마감 후 (평일 15:30 이후): 최신 거래일 수집 포함 (오늘 캔들 가능)
+      // - 그 외 (장중 혹은 주말): 이전 캔들까지 수집 (오늘 미확정 캔들 제외)
       const isAfterMarketClose = isWeekday && (currentHour > 15 || (currentHour === 15 && currentMinute > 30));
       const collectionTargetDate = isAfterMarketClose ? today : getPrevTradingDay();
 
       this.logger.log(
-        `Collection mode: ${isAfterMarketClose ? '??留덇컧 ??(?뱀씪 ?ы븿)' : '??以???(?꾩씪源뚯?)'}, target: ${collectionTargetDate.toISOString().split('T')[0]}`,
+        `Collection mode: ${isAfterMarketClose ? '장마감 후 (오늘 포함)' : '장중 이전 (어제 기준)'}, target: ${collectionTargetDate.toISOString().split('T')[0]}`,
       );
 
       if (!lastCandleDate) {
-        // ?곗씠?곌? ?놁쑝硫?52二쇱튂 ?섏쭛 (?좉퀬媛 ?먮떒 ?꾩슂)
+        // 데이터가 없으면 52주치 수집 (최초 기동)
         daysToFetch = 365;
         this.logger.log('No existing data found. Fetching 52 weeks (365 days)...');
       } else {
@@ -222,13 +222,13 @@ export class RealTimeChartService implements OnModuleInit {
         const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
 
         if (diffDays <= 0) {
-          // ?대? 湲곗????곗씠?곌퉴吏 蹂댁쑀 以?
+          // 이미 최신 데이터까지 갱신 완료
           shouldSkipCollection = true;
           this.logger.log(
             `Data is up to date (last: ${lastDate.toISOString().split('T')[0]}, target: ${collectionTargetDate.toISOString().split('T')[0]}). Skipping collection.`,
           );
         } else {
-          // 怨듬갚 ?쇱닔留뚰겮 ?섏쭛 (API媛 嫄곕옒?쇰쭔 諛섑솚?섎?濡?二쇰쭚/怨듯쑕???먮룞 ?쒖쇅)
+          // 누락 일수만큼 수집 (API가 일봉을 역순으로 반환하므로 주말/공휴일은 자동 제외)
           daysToFetch = diffDays;
           this.logger.log(
             `Last data: ${lastDate.toISOString().split('T')[0]}, target: ${collectionTargetDate.toISOString().split('T')[0]}, gap: ${diffDays} days. Fetching...`,
@@ -236,13 +236,13 @@ export class RealTimeChartService implements OnModuleInit {
         }
       }
 
-      // ?곗씠???섏쭛 (?ㅽ궢?섏? ?딅뒗 寃쎌슦留?
+      // 데이터 수집 (스킵하지 않는 경우만)
       if (!shouldSkipCollection) {
-        // 0. ?쒖옣 吏???쇰큺 ?섏쭛 (KOSPI + KOSDAQ) - RS 怨꾩궛???꾩슂
+        // 0. 시장 지수 캔들 수집 (KOSPI + KOSDAQ) - RS 계산에 필요
         this.logger.log('Collecting market index day candles (KOSPI + KOSDAQ)...');
         await this.collectSectorDayCandles('001', 'INDEX_KOSPI');
         await this.collectSectorDayCandles('101', 'INDEX_KOSDAQ');
-        // ka20006? ?뱀씪 罹붾뱾 誘명룷??????留덇컧 ?꾩뿉??ka20001濡??ㅻ뒛 醫낃? 蹂꾨룄 ?섏쭛
+        // ka20006은 오늘 날짜 데이터 미포함 — 장마감 이후에는 ka20001로 최신 지수 별도 수집
         if (isAfterMarketClose) {
           await this.collectTodayIndexClose();
         }
@@ -252,26 +252,26 @@ export class RealTimeChartService implements OnModuleInit {
           const marketName = marketType === '0' ? 'KOSPI' : 'KOSDAQ';
           this.logger.log(`[${marketName}] Collecting day candles (${daysToFetch} days)...`);
 
-          // 1. ?쇰큺 ?곗씠???섏쭛
+          // 1. 캔들 데이터 수집
           const collectResult = await this.collectAllDayCandles(marketType, daysToFetch);
           this.logger.log(`[${marketName}] Day candles collected: ${collectResult.success}/${collectResult.total}`);
         }
       } else {
         this.logger.log('Data collection skipped (already up to date). Recalculating metrics only...');
-        // ?쇰큺 ?섏쭛? ?ㅽ궢?대룄 ?ㅻ뒛 吏??醫낃?????긽 媛깆떊 (ka20006 ?뱀씪 誘명룷??
+        // 캔들 수집을 스킵해도 최신 지수 현재가는 항상 갱신 (ka20006 오늘 날짜 미포함)
         if (isAfterMarketClose) {
           await this.collectTodayIndexClose();
         }
       }
 
-      // metrics 怨꾩궛? ?먯젙 00:05 cron?먯꽌留??ㅽ뻾 (initializeData?먯꽌???쇰큺 ?섏쭛留?
+      // metrics 계산은 별도 00:05 cron에서만 실행 (initializeData에서는 캔들 수집만)
       this.initializationComplete = true;
       this.lastDataUpdate = new Date();
 
       const duration = ((Date.now() - startTime) / 1000).toFixed(1);
       this.logger.log(`=== Data Initialization Completed in ${duration}s ===`);
 
-      // ?꾪꽣 ?듦낵 醫낅ぉ ?꾩껜 WebSocket 援щ룆 (諛깃렇?쇱슫??
+      // 필터 통과 종목 전체 WebSocket 구독 (비동기)
       this.subscribeFilteredStocks().catch((error) => {
         this.logger.warn(`Bulk subscription failed: ${(error as Error).message}`);
       });
@@ -288,7 +288,7 @@ export class RealTimeChartService implements OnModuleInit {
   }
 
   /**
-   * 珥덇린???곹깭 議고쉶
+   * 초기화 상태 조회
    */
   getInitializationStatus() {
     return {
@@ -555,7 +555,7 @@ export class RealTimeChartService implements OnModuleInit {
   }
 
   /**
-   * ?ㅼ떆媛?WebSocket ?곌껐 ?곹깭 議고쉶
+   * 실시간 WebSocket 연결 상태 조회
    */
   getRealtimeStatus() {
     const isConnected = this.realtimeSource.isConnected();
@@ -569,7 +569,7 @@ export class RealTimeChartService implements OnModuleInit {
       },
       subscriptions: {
         total: subscribedStocks.length,
-        stockCodes: subscribedStocks.slice(0, 20), // 理쒕? 20媛쒕쭔 ?쒖떆
+        stockCodes: subscribedStocks.slice(0, 20), // 최대 20개까지 표시
       },
       cache: cacheStats,
       checkedAt: new Date().toISOString(),
@@ -577,8 +577,8 @@ export class RealTimeChartService implements OnModuleInit {
   }
 
   /**
-   * ?ㅼ떆媛??곗씠???뚯뒪 ?곌껐 蹂댁옣
-   * (?μ떆???쒓컙??WebSocket ?곌껐 ?뺤씤 諛??ъ뿰寃?
+   * 실시간 데이터 스트림 연결 확인
+   * (필요 시간에 WebSocket 연결 확인 및 재연결)
    */
   async ensureRealtimeConnection(): Promise<void> {
     try {
@@ -595,7 +595,7 @@ export class RealTimeChartService implements OnModuleInit {
   }
 
   /**
-   * 遺꾨큺 李⑦듃 ?곗씠??議고쉶 (怨쇨굅 ?곗씠??
+   * 분봉 차트 데이터 조회 (실시간 데이터)
    */
   async getMinuteCandles(stockCode: string, interval: '1' | '3' | '5' | '10' | '15' | '30' | '45' | '60') {
     this.logger.log(`Getting ${interval}min candles for ${stockCode}`);
@@ -619,7 +619,7 @@ export class RealTimeChartService implements OnModuleInit {
   }
 
   /**
-   * ??李⑦듃 ?곗씠??議고쉶
+   * 틱봉 차트 데이터 조회
    */
   async getTickCandles(stockCode: string, interval: '1' | '3' | '5' | '10' | '30') {
     this.logger.log(`Getting ${interval}tick candles for ${stockCode}`);
@@ -643,15 +643,14 @@ export class RealTimeChartService implements OnModuleInit {
   }
 
   /**
-   * ?쇰큺 李⑦듃 ?곗씠??議고쉶 諛????
+   * 일봉 차트 데이터 조회 및 저장
    */
   async getDayCandles(stockCode: string, baseDate: string, saveToDb = false, days = 7) {
     // this.logger.log(`Getting day candles for ${stockCode} from ${baseDate}`);
 
     const kiwoomData = await this.kiwoomRest.getDayCandles(stockCode, baseDate);
 
-    // 理쒓렐 N?쇰쭔 ?꾪꽣留?
-    const recentCandles = kiwoomData.stk_dt_pole_chart_qry.slice(0, days);
+    const recentCandles = kiwoomData.stk_dt_pole_chart_qry.slice(0, days); // 최근 N개만
 
     const candles = recentCandles.map((item) => ({
       date: item.dt,
@@ -663,7 +662,7 @@ export class RealTimeChartService implements OnModuleInit {
       tradingValue: item.trde_prica,
     }));
 
-    // DB?????
+    // DB에 저장
     if (saveToDb) {
       const candlesToSave = recentCandles.map((item) => ({
         stockCode,
@@ -675,7 +674,7 @@ export class RealTimeChartService implements OnModuleInit {
         closePrice: this.parsePrice(item.cur_prc),
         volume: BigInt(item.trde_qty),
         tradingValue: item.trde_prica ? BigInt(item.trde_prica) * 1_000_000n : null,
-        // kiwoom getDayCandles??upd_stkpc_tp='1'(?섏젙二쇨?)濡??붿껌?섎?濡?adj 而щ읆?먮룄 ?숈씪媛????
+        // kiwoom getDayCandles는 upd_stkpc_tp='1'(수정주가)로 요청하므로 adj 필드도 동일값 사용
         adjOpenPrice: this.parsePrice(item.open_pric),
         adjHighPrice: this.parsePrice(item.high_pric),
         adjLowPrice: this.parsePrice(item.low_pric),
@@ -782,7 +781,7 @@ export class RealTimeChartService implements OnModuleInit {
   }
 
   /**
-   * 醫낅ぉ ?곸꽭 ?붿빟 (?꾩옱媛, ?꾩씪?鍮? 嫄곕옒?? 嫄곕옒?湲? 1??怨좎?, 52二?怨좎?)
+   * 종목 요약 정보 (현재가, 전일대비, 캔들, 캔들용 1주 고가, 52주 고가)
    */
   async getStockSummary(stockCode: string) {
     const today = this.formatDateToYYYYMMDD(this.todayKstDateOnly());
@@ -844,7 +843,7 @@ export class RealTimeChartService implements OnModuleInit {
     const kiwoomMarketCap = this.extractKiwoomMarketCap(basicInfo);
     const marketCap = kiwoomMarketCap;
 
-    // 2. DB ????쇰큺 ??52二?怨좎? 怨꾩궛
+    // 2. DB 기반 일봉 및 52주 고가 계산
     const now = new Date();
     const yearAgo = new Date(now);
     yearAgo.setFullYear(now.getFullYear() - 1);
@@ -880,10 +879,10 @@ export class RealTimeChartService implements OnModuleInit {
   }
 
   /**
-   * 醫낅ぉ 由ъ뒪??議고쉶 (?꾨줎?몄뿏???명꽣?섏씠?ㅼ뿉 留욎떠?? ?섏씠吏?ㅼ씠??吏?? 罹먯떛, ?꾪꽣留?
+   * 종목 리스트 조회 (필터링된 페이지네이션 + 지표 정보)
    *
-   * @param rsPeriods - RS 怨꾩궛 湲곌컙 (?? "63,126,252"), ?놁쑝硫??뷀뤃??RS(63?? ?ъ슜
-   * @param rsWeights - RS 媛以묒튂 (?? "50,30,20"), rsPeriods? ?④퍡 ?ъ슜
+   * @param rsPeriods - RS 계산 기간 (예: "63,126,252"), 없으면 기본 RS(63일) 사용
+   * @param rsWeights - RS 가중치 (예: "50,30,20"), rsPeriods와 쌍으로 사용
    */
   async getStockList(
     marketType: '0' | '10' | 'all' = 'all',
@@ -902,14 +901,14 @@ export class RealTimeChartService implements OnModuleInit {
       `Getting stock list for market type: ${marketType}, page: ${page}, pageSize: ${pageSize}, filters: ${JSON.stringify(filters)}, rsPeriods: ${rsPeriods}, rsWeights: ${rsWeights}, rsDates: ${rsDates}`,
     );
 
-    // rsDates媛 ?덉쑝硫??좎쭨瑜??쇱닔濡?蹂??
+    // rsDates가 있으면 날짜를 기간수로 변환
     let calculatedPeriods = rsPeriods;
     if (rsDates && rsWeights) {
       calculatedPeriods = this.convertDatesToPeriods(rsDates);
       this.logger.log(`Converted dates ${rsDates} to periods: ${calculatedPeriods}`);
     }
 
-    // 而ㅼ뒪? RS ?붿껌??寃쎌슦 ?고???怨꾩궛
+    // 커스텀 RS 요청인 경우 동적 계산
     if (calculatedPeriods && rsWeights) {
       return this.getStockListWithCustomRS(
         marketType,
@@ -921,19 +920,19 @@ export class RealTimeChartService implements OnModuleInit {
       );
     }
 
-    // ?뷀뤃??RS(63?? - 湲곗〈 濡쒖쭅
+    // 기본값 RS(63일) - 기존 플로우
 
     const validStocks = await this.fetchStockList(marketType);
     const allStockCodes = validStocks.map((s) => s.code);
     const themeFilteredStockCodes = await this.getThemeFilteredStockCodes(filters?.theme);
 
-    // 理쒖떊 吏???곗씠??議고쉶 (紐⑤뱺 醫낅ぉ)
+    // 최신 지표 데이터 조회 (전체 종목)
     const metricsMap = await this.metricsService.getLatestMetrics(allStockCodes);
 
-    // ?ㅼ떆媛?罹먯떆?먯꽌 ?꾩껜 醫낅ぉ ?꾩옱媛 議고쉶 (?몃찓紐⑤━, 鍮좊쫫)
+    // 실시간 캐시에서 전체 종목 현재가 조회 (페이지네이션, 속도)
     const allRealtimePrices = this.realtimeCache.getPrices(allStockCodes);
 
-    // 醫낅ぉ 由ъ뒪?몄? 吏??蹂묓빀 諛??꾪꽣留?
+    // 종목 리스트에 지표 필터링 및 종가
     const stocksWithMetrics = validStocks
       .map((s) => {
         const metrics = metricsMap.get(s.code);
@@ -944,10 +943,10 @@ export class RealTimeChartService implements OnModuleInit {
         };
       })
       .filter((item) => {
-        // ?뺤쟻 ?꾪꽣 ?듦낵 ?щ? (?λ쭏媛???怨꾩궛, DB ???
+        // 정적 필터 통과 여부 (지수값은 계산, DB 저장)
         if (!item.metrics?.passedStaticFilters) return false;
 
-        // ?숈쟻 ?꾪꽣: ?꾩옱媛 湲곗? ?ㅼ떆媛??곸슜 (?ㅼ떆媛?媛寃??곗꽑, ?놁쑝硫?醫낃?)
+        // 동적 필터: 현재가 기준 실시간 적용 (실시간 가격 우선, 없으면 지수)
         const realtimePrice = this.getUsableRealtimePrice(allRealtimePrices.get(item.stock.code));
         const currentPrice = realtimePrice?.currentPrice || item.metrics?.closePrice || 0;
 
@@ -955,25 +954,25 @@ export class RealTimeChartService implements OnModuleInit {
         const high52w = item.metrics.highPrice52w;
         const ma50 = item.metrics.ma50;
 
-        // DF1: ?꾩옱媛 >= 52二쇱? 횞 1.3
+        // DF1: 현재가 >= 52주저가 × 1.3
         if (low52w != null && currentPrice < low52w * 1.3) return false;
-        // DF2: ?꾩옱媛 >= 52二쇨퀬 횞 0.75
+        // DF2: 현재가 >= 52주고가 × 0.75
         if (high52w != null && currentPrice < high52w * 0.75) return false;
-        // DF3: ?꾩옱媛 > MA50
+        // DF3: 현재가 > MA50
         if (ma50 != null && currentPrice <= ma50) return false;
 
-        // ?좉퀬媛 ?꾪꽣
+        // 신고가 필터
         if (filters?.isHighPrice !== undefined) {
           if (item.metrics?.isNewHigh !== filters.isHighPrice) return false;
         }
 
-        // 理쒖냼 嫄곕옒?湲??꾪꽣
+        // 최소 거래대금 필터
         if (filters?.minTradingValue !== undefined) {
           const tradingValue = item.metrics?.tradingValue || 0;
           if (tradingValue < filters.minTradingValue) return false;
         }
 
-        // ?뚮쭏 ?꾪꽣
+        // 테마 필터
         if (filters?.theme) {
           const stockTheme = item.stock.upName || '';
           if (!this.matchesTheme(item.stock.code, stockTheme, filters.theme, themeFilteredStockCodes)) return false;
@@ -982,42 +981,42 @@ export class RealTimeChartService implements OnModuleInit {
         return true;
       })
       .sort((a, b) => {
-        // 1李? rank ?ㅻ쫫李⑥닚 (??? ?쒖쐞媛 癒쇱?)
+        // 1차 rank 오름차순 (낮을수록 상위가 우선)
         const rankDiff = (a.metrics?.rank || 999999) - (b.metrics?.rank || 999999);
         if (rankDiff !== 0) return rankDiff;
-        // 2李? rsScore ?대┝李⑥닚 (?숈씪 ?쒖쐞???먯닔 ?믪?寃?癒쇱?)
+        // 2차 rsScore 내림차순 (동일 순위일 때 점수 높은게 우선)
         return b.rsScore - a.rsScore;
       });
 
-    // ?뺣젹 ???섏씠吏?ㅼ씠??
+    // 페이지 처리 (페이지네이션)
     const totalCount = stocksWithMetrics.length;
     const totalPages = Math.ceil(totalCount / pageSize);
     const startIndex = (page - 1) * pageSize;
     const endIndex = startIndex + pageSize;
     const paginatedData = stocksWithMetrics.slice(startIndex, endIndex);
 
-    // ?섏씠吏?ㅼ씠?섎맂 醫낅ぉ?ㅼ쓽 醫낃? 諛??쒖쐞 蹂??議고쉶
+    // 페이지네이션된 종목들의 지수 및 순위 변화 조회
     const pageStockCodes = paginatedData.map((d) => d.stock.code);
     const closingPrices = await this.chartStorage.getLatestClosingPrices(pageStockCodes);
     const naverThemesMap = await this.getNaverThemesByStockCodes(pageStockCodes);
 
-    // ?먮룞 ?ㅼ떆媛?援щ룆 (諛깃렇?쇱슫?쒖뿉??鍮꾨룞湲??ㅽ뻾)
+    // 자동 실시간 구독 (비동기적으로 백그라운드 실행)
     this.autoSubscribeStocks(pageStockCodes).catch((error) => {
       this.logger.warn(`Auto-subscribe failed: ${error.message}`);
     });
 
-    // ?ㅼ떆媛??꾩옱媛 (?대? allRealtimePrices???덉쓬)
+    // 실시간 현재가 (이미 allRealtimePrices로 있음)
     const realtimePrices = allRealtimePrices;
 
     const rankingHistories = await Promise.all(
       pageStockCodes.map(async (code) => ({
         code,
-        history: await this.metricsService.getRankingHistory(code, 4), // ?ㅻ뒛 + D-1 + D-2 + D-3
+        history: await this.metricsService.getRankingHistory(code, 4), // 최신 + D-1 + D-2 + D-3
       })),
     );
     const rankingMap = new Map(rankingHistories.map((r) => [r.code, r.history]));
 
-    // 理쒖떊 嫄곕옒??議고쉶 (硫뷀??곗씠?곗슜)
+    // 최신 거래일 조회 (메타 데이터용)
     const latestTradeDate = await this.metricsService.getLatestTradeDate();
     const themeList = await this.getNaverThemeList();
     return {
@@ -1027,11 +1026,11 @@ export class RealTimeChartService implements OnModuleInit {
       totalCount,
       totalPages,
       count: paginatedData.length,
-      // 硫뷀??곗씠?? ?곗씠??湲곗???諛?媛깆떊 ?뺣낫
+      // 메타 데이터: 데이터 기준일과 갱신 정보
       meta: {
-        dataDate: latestTradeDate?.toISOString().split('T')[0] || null, // ?곗씠??湲곗? 嫄곕옒??
-        lastUpdatedAt: this.lastDataUpdate?.toISOString() || null, // 留덉?留??곗씠??媛깆떊 ?쒓컙
-        isInitialized: this.initializationComplete, // 珥덇린???꾨즺 ?щ?
+        dataDate: latestTradeDate?.toISOString().split('T')[0] || null, // 데이터 기준 거래일
+        lastUpdatedAt: this.lastDataUpdate?.toISOString() || null, // 마지막 데이터 갱신 시간
+        isInitialized: this.initializationComplete, // 초기화 완료 여부
         queryStartDate: latestTradeDate ? getKrxTradingDateByOffset(latestTradeDate.toISOString().slice(0, 10), 63) : null,
         queryEndDate: latestTradeDate?.toISOString().split('T')[0] || null,
       },
@@ -1083,7 +1082,7 @@ export class RealTimeChartService implements OnModuleInit {
   }
 
   /**
-   * 而ㅼ뒪? RS ?ㅼ젙?쇰줈 醫낅ぉ 由ъ뒪??議고쉶 (?고???怨꾩궛)
+   * 커스텀 RS 설정으로 종목 리스트 조회 (동적 계산)
    */
   async getStockListWithCustomRS(
     marketType: '0' | '10' | 'all' = 'all',
@@ -1099,7 +1098,7 @@ export class RealTimeChartService implements OnModuleInit {
   ) {
     this.logger.log(`Getting stock list with custom RS: periods=${rsPeriods}, weights=${rsWeights}`);
 
-    // RS ?뚮씪誘명꽣 ?뚯떛
+    // RS 파라미터 파싱
     const periods = rsPeriods?.split(',').map((p) => parseInt(p.trim())) || [63];
     const weights = rsWeights?.split(',').map((w) => parseFloat(w.trim())) || [100];
 
@@ -1107,16 +1106,16 @@ export class RealTimeChartService implements OnModuleInit {
       throw new Error('RS periods and weights must have the same length');
     }
 
-    // 醫낅ぉ 由ъ뒪??媛?몄삤湲?(罹먯떆 or API)
+    // 종목 리스트 가져오기 (캐시 or API)
     const validStocks = await this.fetchStockList(marketType);
     const allStockCodes = validStocks.map((s) => s.code);
     const themeFilteredStockCodes = await this.getThemeFilteredStockCodes(filters?.theme);
 
-    // ?고???RS 怨꾩궛 (理쒓렐 4媛?嫄곕옒?? ?뱀씪, D-1, D-2, D-3)
+    // 동적 RS 계산 (최근 4개 거래일: 오늘, D-1, D-2, D-3)
     let rsHistoryMap: Map<string, Array<{ tradeDate: Date; rank: number; rsScore: number }>>;
 
     if (marketType === 'all') {
-      // ?꾩껜 議고쉶: KOSPI/KOSDAQ 媛곴컖 ?대떦 吏?섎줈 RS 怨꾩궛 ???⑹튂湲?
+      // 전체 조회: KOSPI/KOSDAQ 각각 다른 지수로 RS 계산 후 합치기
       const kospiStocks = validStocks.filter((s) => this.isKospiStock(s)).map((s) => s.code);
       const kosdaqStocks = validStocks.filter((s) => this.isKosdaqStock(s)).map((s) => s.code);
 
@@ -1131,10 +1130,10 @@ export class RealTimeChartService implements OnModuleInit {
           : new Map(),
       ]);
 
-      // ??寃곌낵 ?⑹튂湲?
+      // 두 결과 합치기
       rsHistoryMap = new Map([...kospiRS, ...kosdaqRS]);
     } else {
-      // ?⑥씪 ?쒖옣 議고쉶
+      // 단일 시장 조회
       const indexCode = marketType === '0' ? 'INDEX_KOSPI' : 'INDEX_KOSDAQ';
       rsHistoryMap = await this.metricsService.calculateRuntimeRS(
         allStockCodes,
@@ -1145,19 +1144,19 @@ export class RealTimeChartService implements OnModuleInit {
       );
     }
 
-    // 湲곕낯 吏???곗씠??議고쉶 (ma50, 52w 怨좎?, isNewHigh, tradingValue ??
+    // 기본 지표 데이터 조회 (ma50, 52w 고가, isNewHigh, tradingValue 등)
     const metricsMap = await this.metricsService.getLatestMetrics(allStockCodes);
 
-    // ?ㅼ떆媛?罹먯떆?먯꽌 ?꾩껜 醫낅ぉ ?꾩옱媛 議고쉶 (?몃찓紐⑤━, 鍮좊쫫)
+    // 실시간 캐시에서 전체 종목 현재가 조회 (코스피, 코스닥)
     const allRealtimePrices = this.realtimeCache.getPrices(allStockCodes);
 
-    // 醫낅ぉ 由ъ뒪?몄? RS 蹂묓빀 諛??꾪꽣留?
+    // 종목 리스트에 RS 필터링 및 종가
     const stocksWithRS = validStocks
       .map((s) => {
         const rsHistory = rsHistoryMap.get(s.code);
         const metrics = metricsMap.get(s.code);
 
-        // ?뱀씪 (泥?踰덉㎏) RS? ??겕
+        // 오늘 (첫번째) RS를 점수로
         const todayRS = rsHistory && rsHistory.length > 0 ? rsHistory[0] : null;
 
         return {
@@ -1169,10 +1168,10 @@ export class RealTimeChartService implements OnModuleInit {
         };
       })
       .filter((item) => {
-        // 湲곕낯 ?꾪꽣: ?뺤쟻 ?꾪꽣 ?듦낵 醫낅ぉ (calculateRuntimeRS?먯꽌 ?대? SF1~SF5 ?곸슜)
+        // 기본 필터: 정적 필터 통과 종목 (calculateRuntimeRS에서 이미 SF1~SF5 적용)
         if (item.rsScore <= 0) return false;
 
-        // ?숈쟻 ?꾪꽣: ?꾩옱媛 湲곗? ?ㅼ떆媛??곸슜
+        // 동적 필터: 현재가 기준 실시간 적용
         const realtimePrice = this.getUsableRealtimePrice(allRealtimePrices.get(item.stock.code));
         const currentPrice = realtimePrice?.currentPrice || item.metrics?.closePrice || 0;
 
@@ -1184,18 +1183,18 @@ export class RealTimeChartService implements OnModuleInit {
         if (high52w != null && currentPrice < high52w * 0.75) return false;
         if (ma50 != null && currentPrice <= ma50) return false;
 
-        // ?좉퀬媛 ?꾪꽣
+        // 신고가 필터
         if (filters?.isHighPrice !== undefined) {
           if (item.metrics?.isNewHigh !== filters.isHighPrice) return false;
         }
 
-        // 理쒖냼 嫄곕옒?湲??꾪꽣
+        // 최소 거래대금 필터
         if (filters?.minTradingValue !== undefined) {
           const tradingValue = item.metrics?.tradingValue || 0;
           if (tradingValue < filters.minTradingValue) return false;
         }
 
-        // ?뚮쭏 ?꾪꽣
+        // 테마 필터
         if (filters?.theme) {
           const stockTheme = item.stock.upName || '';
           if (!this.matchesTheme(item.stock.code, stockTheme, filters.theme, themeFilteredStockCodes)) return false;
@@ -1203,29 +1202,29 @@ export class RealTimeChartService implements OnModuleInit {
 
         return true;
       })
-      .sort((a, b) => a.rank - b.rank); // ??겕 ?ㅻ쫫李⑥닚 (?대? 怨꾩궛??
+      .sort((a, b) => a.rank - b.rank); // 점수 오름차순 (이미 계산됨)
 
-    // ?섏씠吏?ㅼ씠??
+    // 페이지네이션
     const totalCount = stocksWithRS.length;
     const totalPages = Math.ceil(totalCount / pageSize);
     const startIndex = (page - 1) * pageSize;
     const endIndex = startIndex + pageSize;
     const paginatedData = stocksWithRS.slice(startIndex, endIndex);
 
-    // ?섏씠吏?ㅼ씠?섎맂 醫낅ぉ?ㅼ쓽 醫낃? 議고쉶
+    // 페이지네이션된 종목들의 지수 조회
     const pageStockCodes = paginatedData.map((d) => d.stock.code);
     const closingPrices = await this.chartStorage.getLatestClosingPrices(pageStockCodes);
     const naverThemesMap = await this.getNaverThemesByStockCodes(pageStockCodes);
 
-    // ?먮룞 ?ㅼ떆媛?援щ룆
+    // 자동 실시간 구독
     this.autoSubscribeStocks(pageStockCodes).catch((error) => {
       this.logger.warn(`Auto-subscribe failed: ${error.message}`);
     });
 
-    // ?ㅼ떆媛??꾩옱媛 (?대? allRealtimePrices???덉쓬)
+    // 실시간 현재가 (이미 allRealtimePrices로 있음)
     const realtimePrices = allRealtimePrices;
 
-    // 理쒖떊 嫄곕옒??議고쉶
+    // 최신 거래일 조회
     const latestTradeDate = await this.metricsService.getLatestTradeDate();
     const shouldWriteCustomRsLog =
       !(periods.length === 1 && periods[0] === 63 && weights.length === 1 && weights[0] === 100);
@@ -1306,8 +1305,8 @@ export class RealTimeChartService implements OnModuleInit {
   }
 
   /**
-   * 醫낅ぉ 由ъ뒪??議고쉶 (湲곌컙 湲곕컲 RS ?꾪꽣)
-   * rsFilters 諛곗뿴??諛쏆븘??媛?湲곌컙??RS瑜?怨꾩궛?섍퀬 媛以묒튂瑜??곸슜
+   * 종목 리스트 조회 (기간 기반 RS 필터)
+   * rsFilters 배열에 담긴 각 기간의 RS를 계산하고 가중치를 적용
    */
   async getStockListWithRangeRS(
     marketType: '0' | '10' | 'all' = 'all',
@@ -1330,12 +1329,12 @@ export class RealTimeChartService implements OnModuleInit {
       `heap=${Math.round(_mem0.heapUsed/1024/1024)}MB/${Math.round(_mem0.heapTotal/1024/1024)}MB rss=${Math.round(_mem0.rss/1024/1024)}MB`,
     );
 
-    // rsFilters媛 ?놁쑝硫?湲곕낯 濡쒖쭅 ?ъ슜
+    // rsFilters가 없으면 기본 플로우 사용
     if (!rsFilters || rsFilters.length === 0) {
       return this.getStockList(marketType, page, pageSize, filters);
     }
 
-    // 醫낅ぉ 由ъ뒪??媛?몄삤湲?
+    // 종목 리스트 가져오기
     const validStocks = await this.fetchStockList(marketType);
     const allStockCodes = validStocks.map((s) => s.code);
     const themeFilteredStockCodes = await this.getThemeFilteredStockCodes(filters?.theme);
@@ -1373,13 +1372,13 @@ export class RealTimeChartService implements OnModuleInit {
       }]);
     }
 
-    // 湲곕낯 吏???곗씠??議고쉶 (ma50, 52w 怨좎?, isNewHigh, tradingValue ??
+    // 기본 지표 데이터 조회 (ma50, 52w 고가, isNewHigh, tradingValue 등)
     const metricsMap = await this.metricsService.getLatestMetrics(allStockCodes);
 
-    // ?ㅼ떆媛?罹먯떆?먯꽌 ?꾩껜 醫낅ぉ ?꾩옱媛 議고쉶 (?몃찓紐⑤━, 鍮좊쫫)
+    // 실시간 캐시에서 전체 종목 현재가 조회 (코스피, 코스닥)
     const allRealtimePrices = this.realtimeCache.getPrices(allStockCodes);
 
-    // 醫낅ぉ 由ъ뒪?몄? RS 蹂묓빀 諛??꾪꽣留?
+    // 종목 리스트에 RS 필터링 및 종가
     const stocksWithRS = validStocks
       .map((s) => {
         const rsHistory = rsHistoryMap.get(s.code);
@@ -1396,7 +1395,7 @@ export class RealTimeChartService implements OnModuleInit {
         };
       })
       .filter((item) => {
-        // 湲곕낯 ?꾪꽣: ?뺤쟻 ?꾪꽣 ?듦낵 醫낅ぉ (calculateRangeRS?먯꽌 ?대? SF1~SF5 ?곸슜)
+        // 기본 필터: 정적 필터 통과 종목 (calculateRangeRS에서 이미 SF1~SF5 적용)
         if (item.rsScore <= 0) return false;
 
         if (filters?.isHighPrice !== undefined) {
@@ -1408,7 +1407,7 @@ export class RealTimeChartService implements OnModuleInit {
           if (tradingValue < filters.minTradingValue) return false;
         }
 
-        // ?뚮쭏 ?꾪꽣
+        // 테마 필터
         if (filters?.theme) {
           const stockTheme = item.stock.upName || '';
           if (!this.matchesTheme(item.stock.code, stockTheme, filters.theme, themeFilteredStockCodes)) return false;
@@ -1418,14 +1417,14 @@ export class RealTimeChartService implements OnModuleInit {
       })
       .sort((a, b) => a.rank - b.rank);
 
-    // ?섏씠吏?ㅼ씠??
+    // 페이지네이션
     const totalCount = stocksWithRS.length;
     const totalPages = Math.ceil(totalCount / pageSize);
     const startIndex = (page - 1) * pageSize;
     const endIndex = startIndex + pageSize;
     const paginatedData = stocksWithRS.slice(startIndex, endIndex);
 
-    // 醫낃? 諛??ㅼ떆媛?媛寃?議고쉶
+    // 지수 및 실시간 가격 조회
     const pageStockCodes = paginatedData.map((d) => d.stock.code);
     const closingPrices = await this.chartStorage.getLatestClosingPrices(pageStockCodes);
     const naverThemesMap = await this.getNaverThemesByStockCodes(pageStockCodes);
@@ -1500,13 +1499,13 @@ export class RealTimeChartService implements OnModuleInit {
   }
 
   /**
-   * 醫낅ぉ 由ъ뒪??媛?몄삤湲?(罹먯떆 ?ъ슜)
-   * 'all'??寃쎌슦 KOSPI + KOSDAQ 紐⑤몢 媛?몄???蹂묓빀
+   * 종목 리스트 가져오기 (캐시 사용)
+   * 'all'인 경우 KOSPI + KOSDAQ 전체 가져와서 필터링
    *
-   * marketType ?뺤쓽:
-   *   '0'   = KOSPI (?ㅼ? API 洹몃?濡?
-   *   '10'  = KOSDAQ (?ㅼ? API 洹몃?濡?
-   *   'all' = ?꾩껜 (KOSPI + KOSDAQ 蹂묓빀)
+   * marketType 정의:
+   *   '0'   = KOSPI (키움 API 그대로)
+   *   '10'  = KOSDAQ (키움 API 그대로)
+   *   'all' = 전체 (KOSPI + KOSDAQ 합산)
    */
   private getUsableRealtimePrice(realtimePrice: any): any | undefined {
     if (!realtimePrice) return undefined;
@@ -1663,7 +1662,7 @@ export class RealTimeChartService implements OnModuleInit {
       where: {
         stockCode: { in: stockCodes },
         deletedAt: null,
-        NOT: { tradingState: { contains: '?뺤?' } },
+        NOT: { tradingState: { contains: '정지' } },
       },
       select: {
         stockCode: true,
@@ -1692,7 +1691,7 @@ export class RealTimeChartService implements OnModuleInit {
 
   private isHaltedState(state?: string): boolean {
     if (!state) return false;
-    return state.includes('?뺤?');
+    return state.includes('정지');
   }
 
   private normalizeTradingState(state?: string | null): string | null {
@@ -1702,7 +1701,7 @@ export class RealTimeChartService implements OnModuleInit {
     if (!normalized) return null;
 
     if (this.isHaltedState(normalized)) {
-      return '嫄곕옒?뺤?';
+      return '거래정지';
     }
 
     return normalized.slice(0, 20);
@@ -1720,7 +1719,7 @@ export class RealTimeChartService implements OnModuleInit {
     const haltedStocks = stocks.filter((s) => this.isHaltedState(s.state));
     if (haltedStocks.length > 0) {
       this.logger.log(
-        `[syncTradingStates] 嫄곕옒?뺤? 醫낅ぉ ${haltedStocks.length}媛? ${haltedStocks.map((s) => `${s.code}(${s.state})`).join(', ')}`,
+        `[syncTradingStates] 거래정지 종목 ${haltedStocks.length}개: ${haltedStocks.map((s) => `${s.code}(${s.state})`).join(', ')}`,
       );
     }
 
@@ -1735,7 +1734,7 @@ export class RealTimeChartService implements OnModuleInit {
     );
 
     this.clearStockListCache();
-    this.logger.log(`[syncTradingStates] ${uniqueStocks.length}媛?醫낅ぉ tradingState ?낅뜲?댄듃 ?꾨즺`);
+    this.logger.log(`[syncTradingStates] ${uniqueStocks.length}개 종목 tradingState 업데이트 완료`);
   }
 
   private normalizeDbMarketType(marketType?: string): 'KOSPI' | 'KOSDAQ' | string {
@@ -1753,7 +1752,7 @@ export class RealTimeChartService implements OnModuleInit {
   }
 
   /**
-   * 醫낅ぉ 由ъ뒪??罹먯떆 臾댄슚??
+   * 종목 리스트 캐시 초기화
    */
   clearStockListCache(marketType?: '0' | '10' | 'all') {
     if (marketType) {
@@ -1766,9 +1765,9 @@ export class RealTimeChartService implements OnModuleInit {
   }
 
   /**
-   * ?좎쭨 臾몄옄?댁쓣 ?ㅻ뒛濡쒕???硫곗튌 ?꾩씤吏 怨꾩궛?섏뿬 ?쇱닔濡?蹂??
-   * @param rsDates ?쇳몴濡?援щ텇???좎쭨 臾몄옄??(?? "2026-02-09,2026-01-15" ?먮뒗 "20260209,20260115")
-   * @returns ?쇳몴濡?援щ텇???쇱닔 臾몄옄??(?? "1,26")
+   * 날짜 문자열들을 최신으로부터 며칠 이전인지 계산하여 기간수로 변환
+   * @param rsDates 쉼표로 구분된 날짜 문자열 (예: "2026-02-09,2026-01-15" 또는 "20260209,20260115")
+   * @returns 쉼표로 구분된 기간수 문자열 (예: "1,26")
    */
   private convertDatesToPeriods(rsDates: string): string {
     const today = new Date();
@@ -1803,21 +1802,21 @@ export class RealTimeChartService implements OnModuleInit {
   }
 
   /**
-   * ?⑥씪 ?좎쭨 臾몄옄?댁쓣 ?ㅻ뒛濡쒕???硫곗튌 ?꾩씤吏 怨꾩궛
-   * @param dateStr ?좎쭨 臾몄옄??(?? "2026-02-09" ?먮뒗 "20260209")
-   * @returns ?ㅻ뒛濡쒕???硫곗튌 ?꾩씤吏 (?? 1)
+   * 단일 날짜 문자열을 최신으로부터 며칠 이전인지 계산
+   * @param dateStr 날짜 문자열 (예: "2026-02-09" 또는 "20260209")
+   * @returns 최신으로부터 며칠 이전인지 (예: 1)
    */
   private convertSingleDateToDays(dateStr: string): number {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    // ?좎쭨 ?뺤떇 ?뚯떛: "2026-02-09" ?먮뒗 "20260209"
+    // 날짜 형식 파싱: "2026-02-09" 또는 "20260209"
     let date: Date;
     if (dateStr.includes('-')) {
-      // "2026-02-09" ?뺤떇
+      // "2026-02-09" 형식
       date = new Date(dateStr);
     } else if (dateStr.length === 8) {
-      // "20260209" ?뺤떇
+      // "20260209" 형식
       const year = dateStr.substring(0, 4);
       const month = dateStr.substring(4, 6);
       const day = dateStr.substring(6, 8);
@@ -1827,7 +1826,7 @@ export class RealTimeChartService implements OnModuleInit {
       return 63;
     }
 
-    // ?좎쭨 ?좏슚??寃??
+    // 날짜 유효성 검사
     if (isNaN(date.getTime())) {
       this.logger.warn(`Invalid date: ${dateStr}, using 63 as default`);
       return 63;
@@ -1835,18 +1834,18 @@ export class RealTimeChartService implements OnModuleInit {
 
     date.setHours(0, 0, 0, 0);
 
-    // ?ㅻ뒛濡쒕???硫곗튌 ?꾩씤吏 怨꾩궛
+    // 최신으로부터 며칠 이전인지 계산
     const diffMs = today.getTime() - date.getTime();
     const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
 
     this.logger.log(`Date ${dateStr} is ${diffDays} days ago from today`);
 
-    // ?뚯닔?닿굅??0?대㈃ 湲곕낯媛??ъ슜
+    // 양수가 아니거나 0이면 기본값 사용
     return diffDays > 0 ? diffDays : 1;
   }
 
   /**
-   * ?붾쾭洹? 醫낅ぉ 由ъ뒪??Raw 議고쉶 (?꾪꽣 ?놁쓬)
+   * 디버그용 종목 리스트 Raw 조회 (필터 없음)
    */
   async debugGetStockList(marketType: '0' | '10' | 'all' = 'all') {
     const validStocks = await this.fetchStockList(marketType);
@@ -1863,13 +1862,13 @@ export class RealTimeChartService implements OnModuleInit {
   }
 
   /**
-   * ?뚮쭏 留ㅼ묶 ?⑥닔
-   * @param stockUpName 醫낅ぉ???낆쥌紐?(?ㅼ? API upName)
-   * @param themeFilters ?꾪꽣留곹븷 ?뚮쭏 肄붾뱶 諛곗뿴 (?レ옄 諛곗뿴, ?? [101, 102, 302] = ?쒖빟, 湲덉냽, 諛섎룄泥?
-   * @returns 留ㅼ묶 ?щ?
+   * 테마 매핑 함수
+   * @param stockUpName 종목의 업종명 (키움 API upName)
+   * @param themeFilters 필터할 테마 코드 배열 (숫자 배열, 예: [101, 102, 302] = 제약, 바이오, 반도체)
+   * @returns 매핑 여부
    */
   private async getThemeFilteredStockCodes(themeFilters?: number[]): Promise<Set<string> | null> {
-    // 0(?꾩껜) ?뚮쭏媛 ?ы븿?섏뼱 ?덉쑝硫?紐⑤뱺 醫낅ぉ ?덉슜
+    // 0(전체) 테마가 포함되어 있으면 모든 종목 적용
     if (!themeFilters?.length || themeFilters.includes(0)) {
       return null;
     }
@@ -1957,17 +1956,17 @@ export class RealTimeChartService implements OnModuleInit {
       return false;
     }
 
-    // upName???뚮쭏 肄붾뱶濡?蹂??
+    // upName을 테마 코드로 변환
     const stockThemeCode = mapUpNameToThemeCode(stockUpName);
 
-    // 蹂?섎맂 ?뚮쭏 肄붾뱶媛 ?꾪꽣 諛곗뿴???ы븿?섏뼱 ?덈뒗吏 ?뺤씤
+    // 변환된 테마 코드가 필터 배열에 포함되어 있는지 확인
     return stockThemeCode !== null && themeFilters.includes(stockThemeCode);
   }
 
   /**
-   * ?쒖옣 吏???쇰큺 ?섏쭛 (KOSPI/KOSDAQ)
-   * @param sectorCode ?낆쥌肄붾뱶 (001: KOSPI, 101: KOSDAQ)
-   * @param indexStockCode DB ??μ슜 肄붾뱶 (INDEX_KOSPI, INDEX_KOSDAQ)
+   * 시장 지수 캔들 수집 (KOSPI/KOSDAQ)
+   * @param sectorCode 업종코드 (001: KOSPI, 101: KOSDAQ)
+   * @param indexStockCode DB 사용 코드 (INDEX_KOSPI, INDEX_KOSDAQ)
    */
   async collectSectorDayCandles(sectorCode: string, indexStockCode: string) {
     const today = new Date().toISOString().slice(0, 10).replace(/-/g, '');
@@ -1985,9 +1984,9 @@ export class RealTimeChartService implements OnModuleInit {
 
       this.logger.log(`Fetched ${candles.length} sector day candles for ${sectorCode}`);
 
-      // DB?????(吏?섍컪? 횞100 ?뺤닔濡?????洹몃?濡???? 怨꾩궛 ??/100)
-      // parsePrice濡?遺???쒓굅 (Kiwoom API媛 '+'/'-' 遺?몃? 遺숈뿬??諛섑솚?섎뒗 寃쎌슦 ???
-      // ka20006 dt = ?ㅼ젣 嫄곕옒??(ka10081怨??щ━ ?ㅼ쓬?좎씠 ?꾨떂) ??parseIndexDate ?ъ슜
+      // DB에 저장 (지수단위 ×100 그대로 저장, 조회 시 ÷100)
+      // parsePrice로 부호 제거 (Kiwoom API가 '+'/'-' 부호를 포함해 반환하는 경우 있음)
+      // ka20006 dt = 실제 거래일 (ka10081과 달리 역일자가 아님) → parseIndexDate 사용
       for (const candle of candles) {
         await this.chartStorage.saveCandle({
           stockCode: indexStockCode,
@@ -2009,9 +2008,9 @@ export class RealTimeChartService implements OnModuleInit {
   }
 
   /**
-   * ?꾩껜 醫낅ぉ ?쇰큺 ?섏쭛 (諛곗튂 蹂묐젹 泥섎━)
-   * - BATCH_SIZE媛쒖뵫 ?숈떆 ?붿껌, 諛곗튂 媛?BATCH_DELAY_MS ?湲?
-   * - 429 諛쒖깮 ??諛깆삤?????ъ떆??
+   * 전체 종목 캔들 수집 (배치 처리)
+   * - BATCH_SIZE만큼 동시 처리, 배치 간격 BATCH_DELAY_MS 대기
+   * - 429 발생 시 지수 백오프 재시도
    */
   async collectIndexCandles() {
     this.logger.log('Collecting market index day candles (KOSPI + KOSDAQ)...');
@@ -2024,12 +2023,12 @@ export class RealTimeChartService implements OnModuleInit {
   }
 
   /**
-   * ?ㅻ뒛 吏??醫낃? ?섏쭛 (ka20001 ?낆쥌?꾩옱媛)
-   * ka20006 ?쇰큺 API???뱀씪 罹붾뱾???ы븿?섏? ?딆쑝誘濡? ??留덇컧 ??蹂꾨룄濡??몄텧
+   * 최신 지수 종가 수집 (ka20001 업종현재가)
+   * ka20006 일봉 API에 오늘 날짜가 미포함이므로 장마감 후 별도 호출
    */
   async collectTodayIndexClose() {
     const now = new Date();
-    // KST ?좎쭨 湲곗??쇰줈 ?ㅻ뒛 ?먯젙 怨꾩궛 (?쒕쾭 ??꾩〈 臾닿?)
+    // KST 날짜 기준으로 최신 마감 계산 (서버 시간대 무관)
     const { kstNow, kstHours, kstMinutes } = this.getKstParts(now);
     const todayDate = this.todayKstDateOnly(now);
     const isAfterClose = kstHours > 15 || (kstHours === 15 && kstMinutes >= 40);
@@ -2055,8 +2054,8 @@ export class RealTimeChartService implements OnModuleInit {
       this.kiwoomRest.getSectorCurrentPrice('1', '101'),
     ]);
 
-    // ka20001? ?ㅼ젣 吏?섍컪(횞1)??諛섑솚?섍퀬, ka20006? 횞100 ?뺤닔瑜?諛섑솚?섎?濡?
-    // DB ?쇨????좎?瑜??꾪빐 횞100 怨깊븯?????(parsePrice濡?遺?몃룄 ?쒓굅)
+    // ka20001은 실제 지수값(×1)을 반환하고, ka20006은 ×100 단위를 반환하므로
+    // DB 저장을 위해 스케일을 맞춰 ×100 곱하기 (parsePrice로 부호도 제거)
     await Promise.all([
       this.chartStorage.saveCandle({
         stockCode: 'INDEX_KOSPI',
@@ -2090,18 +2089,18 @@ export class RealTimeChartService implements OnModuleInit {
   }
 
   async collectAllDayCandles(marketType: '0' | '10' = '0', days = 10) {
-    const BATCH_SIZE = 5; // ?숈떆 ?붿껌 ??
-    const BATCH_DELAY_MS = 600; // 諛곗튂 媛??湲?(ms)
+    const BATCH_SIZE = 5; // 동시 처리 수
+    const BATCH_DELAY_MS = 600; // 배치 간격 지연(ms)
 
     this.logger.log(`Starting bulk day candle collection for market: ${marketType}, days: ${days}, batchSize: ${BATCH_SIZE}`);
 
     const stockList = await this.kiwoomRest.getStockList(marketType);
     const today = new Date().toISOString().slice(0, 10).replace(/-/g, '');
 
-    // ?대떦 ?쒖옣 醫낅ぉ ?꾪꽣 (ETF/ETN ?쒖쇅)
-    // - ETF: marketCode='8'?대씪 ?대? ?쒖쇅??
-    // - ETN: 肄붾뱶媛 5/6/7濡??쒖옉 (marketCode='0'?댁?留?ETN)
-    // - ?뚰뙆踰??ы븿 肄붾뱶: ETF/ETN 蹂??
+    // 해당 시장 종목 필터 (ETF/ETN 제외)
+    // - ETF: marketCode='8'이지만 이미 제외됨
+    // - ETN: 코드가 5/6/7로 시작 (marketCode='0'이어도 ETN)
+    // - 특수코드 포함 종목: ETF/ETN 변환
     const stocks = stockList.list.filter(
       (s) => s.marketCode === marketType && /^\d+$/.test(s.code) && !/^[567]/.test(s.code),
     );
@@ -2113,19 +2112,19 @@ export class RealTimeChartService implements OnModuleInit {
     let currentDelay = BATCH_DELAY_MS;
     const errors: { code: string; error: string }[] = [];
 
-    // 諛곗튂 ?⑥쐞濡?遺꾪븷
+    // 배치 단위로 반복
     for (let i = 0; i < stocks.length; i += BATCH_SIZE) {
       const batch = stocks.slice(i, i + BATCH_SIZE);
 
-      // 諛곗튂 ??醫낅ぉ?ㅼ쓣 蹂묐젹濡?泥섎━
-      // ?먯＜媛/?섏젙二쇨?瑜??④퍡 ?섏쭛??stockCandle 而щ읆 ?섎?瑜?backfillDayCandles? ?쇨??섍쾶 ?좎?.
-      // - openPrice/closePrice : ?먯＜媛 (upd_stkpc_tp='0')
-      // - adjOpenPrice/adjClosePrice : ?섏젙二쇨? (upd_stkpc_tp='1')
+      // 배치 내 종목들을 병렬로 처리
+      // 비수정가/수정주가를 함께 수집해 stockCandle 두 필드를 백필하도록 collectStockDayCandlesWithAdjusted를 사용.
+      // - openPrice/closePrice : 비수정가 (upd_stkpc_tp='0')
+      // - adjOpenPrice/adjClosePrice : 수정주가 (upd_stkpc_tp='1')
       const results = await Promise.allSettled(
         batch.map((stock) => this.collectStockDayCandlesWithAdjusted(stock.code, today, days)),
       );
 
-      // 寃곌낵 泥섎━
+      // 결과 처리
       let batchHas429 = false;
       const retryStocks: typeof batch = [];
 
@@ -2146,7 +2145,7 @@ export class RealTimeChartService implements OnModuleInit {
         }
       }
 
-      // 429 諛쒖깮 ??諛깆삤?????ъ떆??(?쒖감)
+      // 429 발생 시 지수 백오프 재시도 (증가)
       if (batchHas429) {
         currentDelay = Math.min(currentDelay * 2, 10000);
         this.logger.warn(`Rate limited (429) on ${retryStocks.length} stocks. Backing off ${currentDelay}ms...`);
@@ -2163,18 +2162,18 @@ export class RealTimeChartService implements OnModuleInit {
           }
         }
       } else {
-        // ?깃났 ???쒕젅???먯쭊??蹂듦뎄
+        // 성공 시 지연을 점진적으로 감소
         currentDelay = Math.max(BATCH_DELAY_MS, currentDelay - 200);
       }
 
-      // 吏꾪뻾 ?곹솴 濡쒓퉭
+      // 진행 상황 로그
       const processed = Math.min(i + BATCH_SIZE, stocks.length);
       if (processed % 50 === 0 || processed === stocks.length) {
         const elapsed = ((processed / stocks.length) * 100).toFixed(1);
         this.logger.log(`Progress: ${processed}/${stocks.length} (${elapsed}%) - success: ${success}, failed: ${failed}`);
       }
 
-      // 諛곗튂 媛??쒕젅??
+      // 배치 간격 대기
       await new Promise((resolve) => setTimeout(resolve, currentDelay));
     }
 
@@ -2191,12 +2190,12 @@ export class RealTimeChartService implements OnModuleInit {
   }
 
   /**
-   * ?⑥씪 醫낅ぉ???쇰큺???먯＜媛/?섏젙二쇨? ?묒そ 紐⑤몢 媛?몄? stockCandle ?????
+   * 단일 종목의 캔들에 비수정가/수정주가를 동시에 조회해 stockCandle에 저장.
    *
-   * - openPrice/closePrice 而щ읆 : ?먯＜媛 (upd_stkpc_tp='0')
-   * - adjOpenPrice/adjClosePrice : ?섏젙二쇨? (upd_stkpc_tp='1')
+   * - openPrice/closePrice 컬럼 : 비수정가 (upd_stkpc_tp='0')
+   * - adjOpenPrice/adjClosePrice : 수정주가 (upd_stkpc_tp='1')
    *
-   * collectAllDayCandles, backfillDayCandles ?묒そ 紐⑤몢?먯꽌 ?ъ슜??而щ읆 ?섎?瑜??쇨??섍쾶 ?좎??쒕떎.
+   * collectAllDayCandles, backfillDayCandles 양쪽 모두에서 사용하는 컬럼 채우기 방식을 통일.
    */
   async backfillAdjAnomalyStocks(threshold = 0.3, days = 400) {
     const rows = await this.prisma.$queryRaw<{ stock_code: string }[]>`
@@ -2248,7 +2247,7 @@ export class RealTimeChartService implements OnModuleInit {
     baseDate: string,
     days: number,
   ): Promise<number> {
-    // getDayCandlesWithHistory??maxCandles留뚰겮 ?섏씠吏?ㅼ씠?? 5~10???섏??대㈃ 1?섏씠吏濡?異⑸텇.
+    // getDayCandlesWithHistory는 maxCandles만큼 페이지네이션, 5~10배 크면 1페이지로 분리.
     const rawData = await this.kiwoomRest.getDayCandlesWithHistory(stockCode, baseDate, days, '0');
     const adjData = await this.kiwoomRest.getDayCandlesWithHistory(stockCode, baseDate, days, '1');
 
@@ -2278,7 +2277,7 @@ export class RealTimeChartService implements OnModuleInit {
   }
 
   /**
-   * ?꾩껜 醫낅ぉ ?쇰큺 + 嫄곕옒?湲?諛깊븘 (getDayCandlesWithHistory ?ъ슜, ?섏씠吏?ㅼ씠??吏??
+   * 전체 종목 캔들 + 거래대금 채우기 (getDayCandlesWithHistory 사용, 페이지네이션 지원)
    */
   async backfillDayCandles(marketType: '0' | '10' = '0', days = 330) {
     const BATCH_SIZE = 3;
@@ -2303,7 +2302,7 @@ export class RealTimeChartService implements OnModuleInit {
 
       const results = await Promise.allSettled(
         batch.map(async (stock) => {
-          // ?먯＜媛('0')? ?섏젙二쇨?('1') ?쒖감 ?붿껌 (rate limit 怨좊젮)
+          // 비수정가('0')와 수정주가('1') 순차 처리 (rate limit 고려)
           const rawData = await this.kiwoomRest.getDayCandlesWithHistory(stock.code, today, days, '0');
           const adjData = await this.kiwoomRest.getDayCandlesWithHistory(stock.code, today, days, '1');
 
@@ -2356,7 +2355,7 @@ export class RealTimeChartService implements OnModuleInit {
   }
 
   /**
-   * tradingValue媛 null???쇰큺??李얠븘 ?ㅼ? ?곗씠?곕줈 梨꾩썙?ｊ린
+   * tradingValue가 null인 캔들에 거래대금 데이터 재수집해 채우기
    */
   private async saveHigherTimeframeCandles(
     stockCode: string,
@@ -2563,7 +2562,7 @@ export class RealTimeChartService implements OnModuleInit {
     const BATCH_SIZE = 3;
     const BATCH_DELAY_MS = 1000;
 
-    // tradingValue媛 null??醫낅ぉ 肄붾뱶 紐⑸줉 議고쉶
+    // tradingValue가 null인 종목 코드 목록 조회
     const nullCandleStocks = await this.prisma.stockCandle.findMany({
       where: { candleType: 'day', tradingValue: null },
       select: { stockCode: true },
@@ -2571,7 +2570,7 @@ export class RealTimeChartService implements OnModuleInit {
     });
 
     const stockCodes = nullCandleStocks.map((r) => r.stockCode);
-    this.logger.log(`fillMissingTradingValue: ${stockCodes.length}媛?醫낅ぉ??tradingValue ?꾨씫 ?쇰큺 議댁옱`);
+    this.logger.log(`fillMissingTradingValue: ${stockCodes.length}개 종목의 tradingValue 누락 캔들 의심`);
 
     if (stockCodes.length === 0) return { total: 0, success: 0, failed: 0, updated: 0, errors: [] };
 
@@ -2586,14 +2585,14 @@ export class RealTimeChartService implements OnModuleInit {
 
       const results = await Promise.allSettled(
         batch.map(async (stockCode) => {
-          // ?대떦 醫낅ぉ?먯꽌 tradingValue媛 null???쇱옄 紐⑸줉
+          // 해당 종목에서 tradingValue가 null인 날짜 목록
           const nullDates = await this.prisma.stockCandle.findMany({
             where: { stockCode, candleType: 'day', tradingValue: null },
             select: { candleTime: true },
           });
           const nullDateSet = new Set(nullDates.map((r) => r.candleTime.toISOString()));
 
-          // ?ㅼ??먯꽌 ?대떦 醫낅ぉ ?쇰큺 ?곗씠??議고쉶 (理쒕? 750??
+          // 키움에서 해당 종목 캔들 데이터 조회 (최대 750개)
           const kiwoomData = await this.kiwoomRest.getDayCandlesWithHistory(stockCode, today, 750);
 
           let updatedCount = 0;
@@ -2627,18 +2626,18 @@ export class RealTimeChartService implements OnModuleInit {
 
       const processed = Math.min(i + BATCH_SIZE, stockCodes.length);
       if (processed % 50 === 0 || processed === stockCodes.length) {
-        this.logger.log(`吏꾪뻾: ${processed}/${stockCodes.length} - ?낅뜲?댄듃: ${totalUpdated}嫄? ?ㅽ뙣: ${failed}`);
+        this.logger.log(`진행: ${processed}/${stockCodes.length} - 업데이트: ${totalUpdated}개, 실패: ${failed}`);
       }
 
       await new Promise((resolve) => setTimeout(resolve, BATCH_DELAY_MS));
     }
 
-    this.logger.log(`fillMissingTradingValue ?꾨즺: ${success}醫낅ぉ 泥섎━, ${totalUpdated}嫄??낅뜲?댄듃, ${failed}醫낅ぉ ?ㅽ뙣`);
+    this.logger.log(`fillMissingTradingValue 완료: ${success}종목 처리, ${totalUpdated}개 업데이트, ${failed}종목 실패`);
     return { total: stockCodes.length, success, failed, updated: totalUpdated, errors: errors.slice(0, 20) };
   }
 
   /**
-   * DB?먯꽌 ??λ맂 罹붾뱾 ?곗씠??議고쉶
+   * DB에서 저장된 캔들 데이터 조회
    */
   async getStoredCandles(
     stockCode: string,
@@ -3053,7 +3052,7 @@ export class RealTimeChartService implements OnModuleInit {
   }
 
   /**
-   * YYYYMMDD 臾몄옄????Date 蹂??
+   * YYYYMMDD 문자열을 Date로 변환
    */
   private normalizeYYYYMMDD(dateStr: string): string {
     return dateStr.includes('-') ? dateStr.replace(/-/g, '') : dateStr;
@@ -3077,8 +3076,8 @@ export class RealTimeChartService implements OnModuleInit {
   }
 
   /**
-   * ?⑥씪 醫낅ぉ RS 異붿씠 怨꾩궛 (洹몃옒?꾩슜)
-   * rsFilters ??POST /stocks? ?숈씪???뺤떇, ?좎쭨??YYYYMMDD
+   * 단일 종목 RS 이력 계산 (그래프용)
+   * rsFilters가 POST /stocks와 동일한 형식, 날짜는 YYYYMMDD
    */
   async getRsHistory(
     stockCode: string,
@@ -3086,7 +3085,7 @@ export class RealTimeChartService implements OnModuleInit {
     endDate: string,
     rsFilters?: Array<{ rsStartDate: string; rsEndDate: string; strength: number }>,
   ) {
-    // rsFilters ??湲곌컙(?щ젰????怨?媛以묒튂濡?蹂??
+    // rsFilters → 기간(일수)과 합산 가중치로 변환
     let periods: number[];
     let weights: number[];
     const normalizedRsFilters = rsFilters?.map((f) => ({
@@ -3097,8 +3096,8 @@ export class RealTimeChartService implements OnModuleInit {
 
     if (normalizedRsFilters && normalizedRsFilters.length > 0) {
       periods = normalizedRsFilters.map((f) => {
-        const from = this.parseYYYYMMDD(f.rsStartDate); // ?댁쟾 ?좎쭨 (earlier)
-        const to = this.parseYYYYMMDD(f.rsEndDate);     // ?댄썑 ?좎쭨 (later)
+        const from = this.parseYYYYMMDD(f.rsStartDate); // 이전 날짜 (earlier)
+        const to = this.parseYYYYMMDD(f.rsEndDate);     // 이후 날짜 (later)
         const diffDays = Math.floor((to.getTime() - from.getTime()) / (1000 * 60 * 60 * 24));
         return diffDays > 0 ? diffDays : 63;
       });
@@ -3108,13 +3107,13 @@ export class RealTimeChartService implements OnModuleInit {
       weights = [100];
     }
 
-    // 醫낅ぉ ?쒖옣 議고쉶 ??吏??肄붾뱶 寃곗젙
+    // 종목 시장 조회 및 지수 코드 결정
     const company = await this.prisma.company.findFirst({
       where: { stockCode, deletedAt: null },
     });
     const indexCode = company?.marketType === 'KOSDAQ' ? 'INDEX_KOSDAQ' : 'INDEX_KOSPI';
 
-    // 猷⑸갚 踰꾪띁 (?곸뾽?????щ젰?? 理쒕? 湲곌컙 횞 1.5)
+    // 여유 버퍼 (RS 계산을 위해 최대 기간 × 1.5)
     const maxPeriod = Math.max(...periods);
     const bufferDays = Math.ceil(maxPeriod * 1.5);
     const fetchStart = this.parseYYYYMMDD(startDate);
@@ -3139,7 +3138,7 @@ export class RealTimeChartService implements OnModuleInit {
     const queryStartDate = this.formatYYYYMMDD(longestFilter.rsStartDate);
     const queryEndDate = this.formatYYYYMMDD(longestFilter.rsEndDate);
 
-    // 醫낅ぉ + 吏???쇰큺 議고쉶
+    // 종목 + 지수 캔들 조회
     const [stockCandles, indexCandles] = await Promise.all([
       this.prisma.stockCandle.findMany({
         where: { stockCode, candleType: 'day', candleTime: { gte: fetchStart, lte: fetchEnd } },
@@ -3151,7 +3150,7 @@ export class RealTimeChartService implements OnModuleInit {
       }),
     ]);
 
-    // startDate ?댄썑 嫄곕옒?쇰쭔 寃곌낵濡?諛섑솚 (踰꾪띁 湲곌컙 ?쒖쇅)
+    // startDate 이후 거래일만 결과로 반환 (버퍼 기간 제외)
     const filtersWithPeriods = appliedRsFilters.map((filter, index) => {
       if (!normalizedRsFilters || normalizedRsFilters.length === 0) {
         return { ...filter, period: periods[index] ?? 63 };
@@ -3185,7 +3184,7 @@ export class RealTimeChartService implements OnModuleInit {
 
       const lastStock = stockUpTo[stockUpTo.length - 1];
       const lastIndex = indexUpTo[indexUpTo.length - 1];
-      // 醫낅ぉ? ?섏젙二쇨? ?곗꽑, 吏?섎뒗 ?섏젙二쇨? ?놁쓬
+      // 종목은 수정주가 우선, 지수는 수정주가 없음
       const closeNow = (lastStock.adjClosePrice ?? lastStock.closePrice).toNumber();
       const indexNow = lastIndex.closePrice.toNumber();
 
@@ -3206,7 +3205,7 @@ export class RealTimeChartService implements OnModuleInit {
         }
       }
 
-      // 媛以??됯퇏
+      // 가중 평균
       let weightedRS = 0;
       let totalWeight = 0;
       for (let i = 0; i < rsValues.length; i++) {
@@ -3236,35 +3235,35 @@ export class RealTimeChartService implements OnModuleInit {
   }
 
   /**
-   * ?ㅼ떆媛?援щ룆 ?쒖옉
+   * 실시간 구독 시작
    */
   async startRealtime(stockCode: string) {
 
-    // 罹먯떆??援щ룆 異붽?
+    // 캐시에 구독 추가
     this.realtimeCache.addSubscription(stockCode);
 
-    // ?ㅼ떆媛??뚯뒪 援щ룆 ?쒖옉 (0B: 泥닿껐, 0D: ?멸?)
+    // 실시간 스트림 구독 시작 (0B: 체결, 0D: 호가)
     await this.realtimeSource.subscribe(stockCode, ['0B', '0D']);
 
     return { success: true, stockCode };
   }
 
   /**
-   * ?ㅼ떆媛?援щ룆 以묒?
+   * 실시간 구독 중지
    */
   async stopRealtime(stockCode: string) {
 
-    // ?ㅼ떆媛??뚯뒪 援щ룆 ?댁젣
+    // 실시간 스트림 구독 제거
     await this.realtimeSource.unsubscribe(stockCode);
 
-    // 罹먯떆?먯꽌 ?쒓굅
+    // 캐시에서 삭제
     this.realtimeCache.removeSubscription(stockCode);
 
     return { success: true, stockCode };
   }
 
   /**
-   * ?ㅼ떆媛?援щ룆 ?쒖옉 (?щ윭 醫낅ぉ)
+   * 실시간 구독 시작 (여러 종목)
    */
   async startRealtimeBatch(stockCodes: string[]) {
     this.logger.log(`Starting realtime subscription for ${stockCodes.length} stocks`);
@@ -3285,7 +3284,7 @@ export class RealTimeChartService implements OnModuleInit {
   }
 
   /**
-   * ?ㅼ떆媛?援щ룆 以묒? (?щ윭 醫낅ぉ)
+   * 실시간 구독 중지 (여러 종목)
    */
   async stopRealtimeBatch(stockCodes: string[]) {
     this.logger.log(`Stopping realtime subscription for ${stockCodes.length} stocks`);
@@ -3306,7 +3305,7 @@ export class RealTimeChartService implements OnModuleInit {
   }
 
   /**
-   * ?ㅼ떆媛?罹먯떆 ?곹깭 議고쉶
+   * 실시간 캐시 상태 조회
    */
   async getRealtimeCacheStats() {
     const stats = this.realtimeCache.getCacheStats();
@@ -3314,13 +3313,13 @@ export class RealTimeChartService implements OnModuleInit {
 
     return {
       ...stats,
-      subscribedStockCodes: subscribedStocks.slice(0, 10), // 泥섏쓬 10媛쒕쭔
+      subscribedStockCodes: subscribedStocks.slice(0, 10), // 처음 10개만
       totalSubscribed: subscribedStocks.length,
     };
   }
 
   /**
-   * 醫낅ぉ ?먮룞 援щ룆 (?꾩쭅 援щ룆?섏? ?딆? 醫낅ぉ留? ?섏씠吏 議고쉶 ???ъ슜)
+   * 종목 자동 구독 (아직 구독하지 않은 종목만 페이지 조회 시 사용)
    */
   private async autoSubscribeStocks(stockCodes: string[]) {
     const subscribedStocks = new Set(this.realtimeCache.getSubscribedStocks());
@@ -3342,9 +3341,9 @@ export class RealTimeChartService implements OnModuleInit {
   }
 
   /**
-   * ?꾪꽣 ?듦낵 醫낅ぉ ?꾩껜 ?쇨큵 援щ룆 (?쒕쾭 ?쒖옉 ??/ ?ш퀎???꾨즺 ??
-   * - DB StockDailyMetrics?먯꽌 rank > 0??醫낅ぉ ?꾩껜瑜?援щ룆
-   * - ?대? 援щ룆??醫낅ぉ? ?ㅽ궢
+   * 필터 통과 종목 전체 일괄 구독 (서버 시작 후 / 메트릭 완료 후)
+   * - DB StockDailyMetrics에서 rank > 0인 종목 전체를 구독
+   * - 이미 구독된 종목은 스킵
    */
   async subscribeFilteredStocks(): Promise<void> {
     if (!this.realtimeSource.isConnected()) {
@@ -3352,7 +3351,7 @@ export class RealTimeChartService implements OnModuleInit {
       return;
     }
 
-    // 理쒖떊 嫄곕옒?쇱쓽 ?꾪꽣 ?듦낵 醫낅ぉ 議고쉶 (rank > 0)
+    // 최신 거래일의 필터 통과 종목 조회 (rank > 0)
     const filteredCodes = await this.metricsService.getFilteredStockCodes();
 
     if (filteredCodes.length === 0) {
@@ -3370,17 +3369,17 @@ export class RealTimeChartService implements OnModuleInit {
 
     this.logger.log(`Bulk subscribing ${newCodes.length} filtered stocks via batch REG (total filtered: ${filteredCodes.length})`);
 
-    // subscribeBatch: 100醫낅ぉ???⑥씪 REG ?붿껌?쇰줈 ?꾩넚 (媛쒕퀎 ?붿껌 嫄댁닔 珥덇낵 諛⑹?)
+    // subscribeBatch: 100종목씩 단일 REG 요청으로 효율 (개별 요청 횟수 최소화 및 속도)
     await this.realtimeSource.subscribeBatch(newCodes, ['0B', '0D']);
 
-    // 罹먯떆?먮룄 援щ룆 ?깅줉 (status API 議고쉶 ???뺥솗??諛섏쁺?섎룄濡?
+    // 캐시에도 구독 기록 (status API 조회 시 정확하게 반영되도록)
     newCodes.forEach((code) => this.realtimeCache.addSubscription(code));
 
     this.logger.log(`Bulk subscription completed: ${newCodes.length} stocks submitted`);
   }
 
   /**
-   * 罹붾뱾 ?쒓컙 ?뚯떛 (YYYYMMDDHHmmss)
+   * 캔들 시간 파싱 (YYYYMMDDHHmmss)
    */
   private parseCandleTime(timeStr: string): Date {
     const year = parseInt(timeStr.substring(0, 4));
@@ -3394,15 +3393,15 @@ export class RealTimeChartService implements OnModuleInit {
   }
 
   /**
-   * 媛寃??뚯떛 (遺???쒓굅)
+   * 가격 파싱 (부호 제거)
    */
   private parsePrice(priceStr: string): number {
     return parseFloat(priceStr.replace(/[+\-]/g, ''));
   }
 
   /**
-   * ?좎쭨 ?뚯떛 (YYYYMMDD ??Date)
-   * ka10081/ka20006 紐⑤몢 dt = ?ㅼ젣 嫄곕옒?쇱쓣 諛섑솚?섎?濡?洹몃?濡??ъ슜
+   * 날짜 파싱 (YYYYMMDD → Date)
+   * ka10081/ka20006 모두 dt = 실제 거래일을 반환하므로 그대로 사용
    */
   private parseDateOnly(dateStr: string): Date {
     const year = parseInt(dateStr.substring(0, 4));
@@ -3430,7 +3429,7 @@ export class RealTimeChartService implements OnModuleInit {
   }
 
   /**
-   * ?쇰퀎 吏??怨꾩궛 (諛곗튂 ?묒뾽)
+   * 종합 지표 계산 (배치 처리)
    */
   async calculateDailyMetrics(marketType: '0' | '10' | 'all' = 'all', tradeDate?: string, writeLogFile: boolean = false) {
     this.logger.log(`Starting daily metrics calculation for market type: ${marketType}, date: ${tradeDate || 'today'}`);
@@ -3439,10 +3438,10 @@ export class RealTimeChartService implements OnModuleInit {
         ? `${tradeDate.slice(0, 4)}-${tradeDate.slice(4, 6)}-${tradeDate.slice(6, 8)}`
         : tradeDate
       : undefined;
-    // 罹붾뱾? UTC 15:00????λ릺誘濡??좎쭨 臾몄옄?댁쓣 T15:00:00Z濡??뚯떛?댁빞 ?뱀씪 罹붾뱾 ?ы븿
+    // 캔들은 UTC 15:00 마감이므로 날짜 문자열을 T15:00:00Z로 파싱해야 오늘 캔들 포함
     const date = parsedTradeDate ? new Date(`${parsedTradeDate}T15:00:00.000Z`) : undefined;
 
-    // ??긽 KOSPI + KOSDAQ ?듯빀 ??궧 (?쒖쐞???꾩껜 ??먯꽌 留ㅺ린怨? ?쒖옣蹂?議고쉶 ???꾪꽣留?
+    // 항상 KOSPI + KOSDAQ 함께 처리 (순위는 전체 기준으로 계산하므로 시장별 조회 후 필터)
     const [kospiStocks, kosdaqStocks] = await Promise.all([
       this.fetchStockList('0'),
       this.fetchStockList('10'),
@@ -3458,11 +3457,11 @@ export class RealTimeChartService implements OnModuleInit {
 
     const result = await this.metricsService.calculateAndSaveDailyMetrics('all', date, 'INDEX_KOSPI', allCodes, stockIndexMap, stockNameMap, writeLogFile);
 
-    // ?섎룞 ?ш퀎????珥덇린???곹깭 媛깆떊
+    // 정상 완료 후 초기화 상태 갱신
     this.initializationComplete = true;
     this.lastDataUpdate = new Date();
 
-    // ?ш퀎?????덈줈 ?꾪꽣 ?듦낵??醫낅ぉ 援щ룆 媛깆떊 (諛깃렇?쇱슫??
+    // 완료 후 새롭게 필터 통과한 종목 구독 갱신 (비동기)
     this.subscribeFilteredStocks().catch((error) => {
       this.logger.warn(`Post-metrics bulk subscription failed: ${(error as Error).message}`);
     });
