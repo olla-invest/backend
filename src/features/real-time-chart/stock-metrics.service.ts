@@ -218,6 +218,57 @@ export class StockMetricsService {
   }
 
   /**
+   * 최근 N개 거래일의 확정 currentRank 이력 조회.
+   * 장중/장전 화면의 D-1/D-2/D-3는 전일 daily metric에 확정 저장된 current_rank를 사용한다.
+   */
+  async getCurrentRankHistory(
+    stockCodes: string[],
+    days: number = 3,
+    beforeTradeDate?: Date | null,
+  ): Promise<Map<string, Array<number | null>>> {
+    if (stockCodes.length === 0) return new Map();
+
+    const recentDates = await this.prisma.stockDailyMetrics.findMany({
+      where: beforeTradeDate ? { tradeDate: { lt: beforeTradeDate } } : undefined,
+      orderBy: { tradeDate: 'desc' },
+      take: days,
+      distinct: ['tradeDate'],
+      select: { tradeDate: true },
+    });
+    const tradeDates = recentDates.map((d) => d.tradeDate);
+    const dateKeys = tradeDates.map((date) => date.toISOString().slice(0, 10));
+
+    if (tradeDates.length === 0) return new Map();
+
+    const rows = await this.prisma.stockDailyMetrics.findMany({
+      where: {
+        stockCode: { in: stockCodes },
+        tradeDate: { in: tradeDates },
+      },
+      select: {
+        stockCode: true,
+        tradeDate: true,
+        currentRank: true,
+      },
+    });
+
+    const rankByStockDate = new Map<string, number | null>();
+    for (const row of rows) {
+      rankByStockDate.set(`${row.stockCode}:${row.tradeDate.toISOString().slice(0, 10)}`, row.currentRank);
+    }
+
+    const historyMap = new Map<string, Array<number | null>>();
+    for (const stockCode of stockCodes) {
+      historyMap.set(
+        stockCode,
+        dateKeys.map((dateKey) => rankByStockDate.get(`${stockCode}:${dateKey}`) ?? null),
+      );
+    }
+
+    return historyMap;
+  }
+
+  /**
    * 여러 종목의 최근 N개 거래일 지표 이력 조회
    * 반환: Map<stockCode, Array<{tradeDate, rank, rsScore}>>
    */
