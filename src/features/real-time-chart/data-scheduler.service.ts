@@ -76,8 +76,17 @@ export class DataSchedulerService implements OnApplicationBootstrap {
   /**
    * 장중 현재가 기준 DF 통과 순위 스냅샷. 월~금 거래일 09:00~15:30, 10분마다.
    */
-  @Cron('*/10 9-15 * * 1-5', { timeZone: 'Asia/Seoul' })
+  @Cron('*/10 9-14 * * 1-5', { timeZone: 'Asia/Seoul' })
   async snapshotCurrentRanksDuringMarket() {
+    await this.runCurrentRankSnapshotDuringMarket();
+  }
+
+  @Cron('0,10,20,30 15 * * 1-5', { timeZone: 'Asia/Seoul' })
+  async snapshotCurrentRanksDuringMarketCloseWindow() {
+    await this.runCurrentRankSnapshotDuringMarket();
+  }
+
+  private async runCurrentRankSnapshotDuringMarket() {
     if (!isKrxTradingDay(new Date())) return;
     const { kstHours, kstMinutes } = this.getKstParts();
     if (kstHours === 15 && kstMinutes > 30) return;
@@ -144,8 +153,8 @@ export class DataSchedulerService implements OnApplicationBootstrap {
       const lockKey = 'cron:lock:metrics-after-close';
       const result = await this.redisLock.withLock(lockKey, DataSchedulerService.LOCK_TTL_MS, async () => {
         await this.runCatchUp();
-        await this.runMetricsFor(tradeDate);
         await this.currentRankService.createCurrentRankSnapshot(new Date(), tradeDate);
+        await this.runMetricsFor(tradeDate);
         await this.currentRankService.finalizeDailyCurrentRank(tradeDate);
       });
 

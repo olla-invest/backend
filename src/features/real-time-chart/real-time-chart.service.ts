@@ -1085,16 +1085,9 @@ export class RealTimeChartService implements OnModuleInit {
     // 실시간 현재가 (이미 allRealtimePrices로 있음)
     const realtimePrices = allRealtimePrices;
 
-    const rankingHistories = await Promise.all(
-      pageStockCodes.map(async (code) => ({
-        code,
-        history: await this.metricsService.getRankingHistory(code, 4), // 최신 + D-1 + D-2 + D-3
-      })),
-    );
-    const rankingMap = new Map(rankingHistories.map((r) => [r.code, r.history]));
-
     // 최신 거래일 조회 (메타 데이터용)
     const latestTradeDate = await this.metricsService.getLatestTradeDate();
+    const currentRankHistoryMap = await this.metricsService.getCurrentRankHistory(pageStockCodes, 3, latestTradeDate);
     const themeList = await this.getNaverThemeList();
     return {
       marketType,
@@ -1115,7 +1108,7 @@ export class RealTimeChartService implements OnModuleInit {
       stocks: await Promise.all(paginatedData.map(async (item, index) => {
         const s = item.stock;
         const metrics = item.metrics;
-        const rankHistory = rankingMap.get(s.code) || [];
+        const currentRankHistory = currentRankHistoryMap.get(s.code) || [];
 
         const realtimePrice = this.getUsableRealtimePrice(realtimePrices.get(s.code));
         const dbPrice = metrics?.closePrice || closingPrices.get(s.code) || 0;
@@ -1144,10 +1137,10 @@ export class RealTimeChartService implements OnModuleInit {
           themeFull: naverThemeText || s.upName || '-',
           themes: naverThemes,
           rankHistory: {
-            today: rankHistory[0] || null,
-            oneDayAgo: rankHistory[1] || null,
-            twoDaysAgo: rankHistory[2] || null,
-            threeDaysAgo: rankHistory[3] || null,
+            today: startIndex + index + 1,
+            oneDayAgo: currentRankHistory[0] ?? null,
+            twoDaysAgo: currentRankHistory[1] ?? null,
+            threeDaysAgo: currentRankHistory[2] ?? null,
           },
           isVolatilityContraction: metrics?.isVolatilityContraction ?? false,
           isPriceCompression: metrics?.isPriceCompression ?? false,
@@ -1303,6 +1296,7 @@ export class RealTimeChartService implements OnModuleInit {
 
     // 최신 거래일 조회
     const latestTradeDate = await this.metricsService.getLatestTradeDate();
+    const currentRankHistoryMap = await this.metricsService.getCurrentRankHistory(pageStockCodes, 3, latestTradeDate);
     const shouldWriteCustomRsLog =
       !(periods.length === 1 && periods[0] === 63 && weights.length === 1 && weights[0] === 100);
     if (shouldWriteCustomRsLog) {
@@ -1338,7 +1332,7 @@ export class RealTimeChartService implements OnModuleInit {
       stocks: await Promise.all(paginatedData.map(async (item, index) => {
         const s = item.stock;
         const metrics = item.metrics;
-        const rankHistory = item.rankHistory;
+        const currentRankHistory = currentRankHistoryMap.get(s.code) || [];
 
         const realtimePrice = this.getUsableRealtimePrice(realtimePrices.get(s.code));
         const dbPrice = metrics?.closePrice || closingPrices.get(s.code) || 0;
@@ -1367,10 +1361,10 @@ export class RealTimeChartService implements OnModuleInit {
           themeFull: naverThemeText || s.upName || '-',
           themes: naverThemes,
           rankHistory: {
-            today: rankHistory[0]?.rank || null,
-            oneDayAgo: rankHistory[1]?.rank || null,
-            twoDaysAgo: rankHistory[2]?.rank || null,
-            threeDaysAgo: rankHistory[3]?.rank || null,
+            today: startIndex + index + 1,
+            oneDayAgo: currentRankHistory[0] ?? null,
+            twoDaysAgo: currentRankHistory[1] ?? null,
+            threeDaysAgo: currentRankHistory[2] ?? null,
           },
           isVolatilityContraction: metrics?.isVolatilityContraction ?? false,
           isPriceCompression: metrics?.isPriceCompression ?? false,
@@ -1512,6 +1506,7 @@ export class RealTimeChartService implements OnModuleInit {
 
     const realtimePrices = allRealtimePrices;
     const themeList = await this.getNaverThemeList();
+    const currentRankHistoryMap = await this.metricsService.getCurrentRankHistory(pageStockCodes, 3, latestTradeDate);
 
     return {
       marketType,
@@ -1532,7 +1527,7 @@ export class RealTimeChartService implements OnModuleInit {
       stocks: await Promise.all(paginatedData.map(async (item, index) => {
         const s = item.stock;
         const metrics = item.metrics;
-        const rankHistory = item.rankHistory;
+        const currentRankHistory = currentRankHistoryMap.get(s.code) || [];
 
         const realtimePrice = this.getUsableRealtimePrice(realtimePrices.get(s.code));
         const dbPrice = metrics?.closePrice || closingPrices.get(s.code) || 0;
@@ -1561,10 +1556,10 @@ export class RealTimeChartService implements OnModuleInit {
           themeFull: naverThemeText || s.upName || '-',
           themes: naverThemes,
           rankHistory: {
-            today: rankHistory[0]?.rank || null,
-            oneDayAgo: rankHistory[1]?.rank || null,
-            twoDaysAgo: rankHistory[2]?.rank || null,
-            threeDaysAgo: rankHistory[3]?.rank || null,
+            today: startIndex + index + 1,
+            oneDayAgo: currentRankHistory[0] ?? null,
+            twoDaysAgo: currentRankHistory[1] ?? null,
+            threeDaysAgo: currentRankHistory[2] ?? null,
           },
           isVolatilityContraction: metrics?.isVolatilityContraction ?? false,
           isPriceCompression: metrics?.isPriceCompression ?? false,
