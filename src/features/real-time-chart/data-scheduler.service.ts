@@ -6,6 +6,7 @@ import { RedisLockService } from '../../common/redis/redis-lock.service';
 import { CronRunLogService } from '../../common/cron/cron-run-log.service';
 import { isKrxTradingDay, previousTradingDay } from '../../common/utils/market-calendar.util';
 import { PrismaService } from '../../common/prisma/prisma.service';
+import { CurrentRankService } from './current-rank.service';
 
 /**
  * 스케줄 잡 정리
@@ -29,6 +30,7 @@ export class DataSchedulerService implements OnApplicationBootstrap {
   private readonly logger = new Logger(DataSchedulerService.name);
 
   private static readonly LOCK_TTL_MS = 30 * 60 * 1000; // 30분 — 메트릭스 잡 최대 실행 추정치
+  private static readonly CURRENT_RANK_LOCK_TTL_MS = 2 * 60 * 1000;
 
   constructor(
     private readonly realTimeChartService: RealTimeChartService,
@@ -36,6 +38,7 @@ export class DataSchedulerService implements OnApplicationBootstrap {
     private readonly redisLock: RedisLockService,
     private readonly cronRunLog: CronRunLogService,
     private readonly prisma: PrismaService,
+    private readonly currentRankService: CurrentRankService,
   ) {}
 
   // ─────────────────────────────────────────────────────────────
@@ -68,6 +71,25 @@ export class DataSchedulerService implements OnApplicationBootstrap {
 
     const status = this.realTimeChartService.getRealtimeStatus();
     this.logger.log(`[heartbeat] realtime=${status.websocket.status} subscriptions=${status.subscriptions.total}`);
+  }
+
+  /**
+   * 장중 현재가 기준 DF 통과 순위 스냅샷. 월~금 거래일 09:00~15:30, 10분마다.
+   */
+  @Cron('*/10 9-15 * * 1-5', { timeZone: 'Asia/Seoul' })
+  async snapshotCurrentRanksDuringMarket() {
+    if (!isKrxTradingDay(new Date())) return;
+    const { kstHours, kstMinutes } = this.getKstParts();
+    if (kstHours === 15 && kstMinutes > 30) return;
+
+    const lockKey = 'cron:lock:current-rank-snapshot';
+    const result = await this.redisLock.withLock(lockKey, DataSchedulerService.CURRENT_RANK_LOCK_TTL_MS, async () => {
+      return this.currentRankService.createCurrentRankSnapshot(new Date(), this.todayKstDateOnly());
+    });
+
+    if (result === null) {
+      this.logger.warn('[current-rank] snapshot skipped - another instance holds the lock.');
+    }
   }
 
   // ─────────────────────────────────────────────────────────────
@@ -123,6 +145,8 @@ export class DataSchedulerService implements OnApplicationBootstrap {
       const result = await this.redisLock.withLock(lockKey, DataSchedulerService.LOCK_TTL_MS, async () => {
         await this.runCatchUp();
         await this.runMetricsFor(tradeDate);
+        await this.currentRankService.createCurrentRankSnapshot(new Date(), tradeDate);
+        await this.currentRankService.finalizeDailyCurrentRank(tradeDate);
       });
 
       if (result === null) {
@@ -221,6 +245,10 @@ export class DataSchedulerService implements OnApplicationBootstrap {
       const filled = await this.chartStorage.backfillSuspendedDayCandles();
       if (filled > 0) {
         this.logger.warn(`[유지보수] Backfilled ${filled} suspended-day candles with prior close`);
+      }
+      const pruned = await this.currentRankService.pruneSnapshots(90);
+      if (pruned.deleted > 0) {
+        this.logger.warn(`[유지보수] Pruned ${pruned.deleted} current-rank snapshots before ${pruned.cutoff}`);
       }
       this.logger.log('=== Daily Maintenance Completed ===');
     } catch (error) {

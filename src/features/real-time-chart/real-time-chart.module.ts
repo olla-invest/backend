@@ -8,6 +8,7 @@ import { InitialSetupService } from './initial-setup.service';
 import { ChartGateway } from './chart.gateway';
 import { RealtimePriceCacheService } from './realtime-price-cache.service';
 import { DataSchedulerService } from './data-scheduler.service';
+import { CurrentRankService } from './current-rank.service';
 import { DetailController } from './detail.controller';
 import { KiwoomModule } from '../../integrations/kiwoom/kiwoom.module';
 import { PrismaModule } from '../../common/prisma/prisma.module';
@@ -33,6 +34,7 @@ import { AdminApiKeyGuard } from '../../common/auth/guards/admin-api-key.guard';
     InitialSetupService,
     ChartGateway,
     RealtimePriceCacheService,
+    CurrentRankService,
     DataSchedulerService,
     AdminApiKeyGuard,
   ],

@@ -344,6 +344,7 @@ exports.Prisma.StockDailyMetricsScalarFieldEnum = {
   closePrice: 'closePrice',
   relativeStrengthScore: 'relativeStrengthScore',
   rank: 'rank',
+  currentRank: 'currentRank',
   marketType: 'marketType',
   isNewHigh: 'isNewHigh',
   highPrice52w: 'highPrice52w',
@@ -360,6 +361,23 @@ exports.Prisma.StockDailyMetricsScalarFieldEnum = {
   strengthContinuationDays: 'strengthContinuationDays',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
+};
+
+exports.Prisma.StockCurrentRankSnapshotScalarFieldEnum = {
+  snapshotId: 'snapshotId',
+  stockCode: 'stockCode',
+  tradeDate: 'tradeDate',
+  snapshotTime: 'snapshotTime',
+  currentRank: 'currentRank',
+  relativeStrengthScore: 'relativeStrengthScore',
+  currentPrice: 'currentPrice',
+  closePrice: 'closePrice',
+  highPrice52w: 'highPrice52w',
+  lowPrice52w: 'lowPrice52w',
+  ma50: 'ma50',
+  passedDynamicFilters: 'passedDynamicFilters',
+  priceSource: 'priceSource',
+  createdAt: 'createdAt'
 };
 
 exports.Prisma.CronRunLogScalarFieldEnum = {
@@ -532,6 +550,7 @@ exports.Prisma.ModelName = {
   ThemeDailySnapshot: 'ThemeDailySnapshot',
   StockTradingValueSnapshot: 'StockTradingValueSnapshot',
   StockDailyMetrics: 'StockDailyMetrics',
+  StockCurrentRankSnapshot: 'StockCurrentRankSnapshot',
   CronRunLog: 'CronRunLog',
   UserSubscription: 'UserSubscription',
   PaymentCard: 'PaymentCard',
