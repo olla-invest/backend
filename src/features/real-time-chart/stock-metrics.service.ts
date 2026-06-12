@@ -1742,14 +1742,6 @@ export class StockMetricsService {
       ? new Date(`${tradeDate.substring(0, 4)}-${tradeDate.substring(4, 6)}-${tradeDate.substring(6, 8)}T15:00:00.000Z`)
       : (() => { const d = new Date(); d.setUTCHours(15, 0, 0, 0); return d; })();
 
-    // stockCodes 미입력 시 DB에서 KOSPI/KOSDAQ 보통주만 조회 (끝자리 5 우선주 제외)
-    const stockCodes: string[] = stockCodesInput && stockCodesInput.length > 0
-      ? stockCodesInput
-      : (await this.prisma.company.findMany({
-          where: { marketType: { in: ['KOSPI', 'KOSDAQ'] } },
-          select: { stockCode: true },
-        })).map((c) => c.stockCode).filter((code) => !code.endsWith('5'));
-
     // rsDates → 캘린더일수 변환 (targetDate 기준)
     let parsedPeriods: number[];
     let parsedWeights: number[];
@@ -1774,13 +1766,77 @@ export class StockMetricsService {
     }
 
     const maxPeriod = Math.max(...parsedPeriods);
-    const historicalCutoff = new Date(targetDate);
-    // 거래일 period → 달력일 변환 (거래일 1일 ≈ 달력일 1.5일): 충분한 여유를 주어 거래정지 종목도 커버
     const calendarDaysNeeded = Math.ceil(maxPeriod * 1.6) + 100;
+    const historicalCutoff = new Date(targetDate);
     historicalCutoff.setUTCDate(historicalCutoff.getUTCDate() - Math.max(StockMetricsService.CANDLE_LOOKBACK_DAYS, calendarDaysNeeded));
 
+    // === Pre-filter: stock_daily_metrics.passedStaticFilters=true 종목으로 후보 축소 ===
+    // sf1(MA50>MA150) + sf2(MA150>MA200) + sf3(MA200 연속상승) + sf5(거래대금) 이미 계산됨
+    type MetricsEntry = {
+      closePrice: number;
+      ma50: number | null;
+      high52w: number | null;
+      low52w: number | null;
+      tradingValue: number | null;
+      isNewHigh: boolean;
+    };
+    const metricsMap = new Map<string, MetricsEntry>();
+
+    const latestMetricsEntry = await this.prisma.stockDailyMetrics.findFirst({
+      where: { tradeDate: { lte: targetDate } },
+      orderBy: { tradeDate: 'desc' },
+      select: { tradeDate: true },
+    });
+
+    if (latestMetricsEntry) {
+      const rows = await this.prisma.stockDailyMetrics.findMany({
+        where: {
+          tradeDate: latestMetricsEntry.tradeDate,
+          passedStaticFilters: true,
+          ...(stockCodesInput?.length ? { stockCode: { in: stockCodesInput } } : {}),
+        },
+        select: {
+          stockCode: true,
+          closePrice: true,
+          ma50: true,
+          highPrice52w: true,
+          lowPrice52w: true,
+          tradingValue: true,
+          isNewHigh: true,
+        },
+      });
+      for (const m of rows) {
+        metricsMap.set(m.stockCode, {
+          closePrice: m.closePrice.toNumber(),
+          ma50: m.ma50?.toNumber() ?? null,
+          high52w: m.highPrice52w?.toNumber() ?? null,
+          low52w: m.lowPrice52w?.toNumber() ?? null,
+          tradingValue: m.tradingValue ? Number(m.tradingValue) : null,
+          isNewHigh: m.isNewHigh,
+        });
+      }
+    }
+
+    const useMetrics = metricsMap.size > 0;
+
+    // 후보 종목 결정: pre-filter 적용 시 passedStaticFilters=true 종목만, 아니면 전체
+    let candidateStockCodes: string[];
+    if (useMetrics) {
+      candidateStockCodes = [...metricsMap.keys()];
+      this.logger.log(`[calculateRsFilterLog] metrics pre-filter: ${candidateStockCodes.length} / ${stockCodesInput?.length ?? '?'} stocks`);
+    } else {
+      candidateStockCodes = stockCodesInput?.length
+        ? stockCodesInput
+        : (await this.prisma.company.findMany({
+            where: { marketType: { in: ['KOSPI', 'KOSDAQ'] } },
+            select: { stockCode: true },
+          })).map((c) => c.stockCode).filter((code) => !code.endsWith('5'));
+    }
+
+    const originalTotalCount = stockCodesInput?.length ?? candidateStockCodes.length;
+
     const stockInfos = await this.prisma.company.findMany({
-      where: { stockCode: { in: stockCodes } },
+      where: { stockCode: { in: candidateStockCodes } },
       select: { stockCode: true, companyName: true, marketType: true },
     });
     const stockNameMap = new Map(stockInfos.map((s) => [s.stockCode, s.companyName]));
@@ -1790,7 +1846,7 @@ export class StockMetricsService {
         .filter((stock) => this.isExcludedInstrumentName(stock.companyName))
         .map((stock) => stock.stockCode),
     );
-    const effectiveStockCodes = stockCodes.filter((code) => !excludedInstrumentCodes.has(code));
+    const effectiveStockCodes = candidateStockCodes.filter((code) => !excludedInstrumentCodes.has(code));
 
     const stockIndexMap = new Map<string, string>();
     for (const code of effectiveStockCodes) {
@@ -1881,6 +1937,7 @@ export class StockMetricsService {
       const mkt = stockMarketMap.get(stockCode) ?? '';
       const idxCode = stockIndexMap.get(stockCode) ?? 'INDEX_KOSPI';
       const idxCandles = indexCandlesMap.get(idxCode) ?? [];
+      const metrics = metricsMap.get(stockCode);
 
       if (rawCandles.length === 0) continue;
 
@@ -1893,12 +1950,12 @@ export class StockMetricsService {
       const adjP = (c: typeof latest) => (c.adjClosePrice ?? c.closePrice).toNumber();
       const adjH = (c: typeof latest) => (c.adjHighPrice ?? c.highPrice).toNumber();
       const adjL = (c: typeof latest) => (c.adjLowPrice ?? c.lowPrice).toNumber();
-      const closePrice = adjP(latest);
+      const closePrice = metrics?.closePrice ?? adjP(latest);
       const idxCloseNow = idxCandles.length > 0 ? idxCandles[idxCandles.length - 1].closePrice.toNumber() : 0;
 
+      // RS 계산 (커스텀 기간 — 항상 캔들에서 계산)
       const rsValues: { period: number; rsRaw: number; stockAgo: number | null; idxAgo: number | null }[] = [];
       for (const period of parsedPeriods) {
-        // RS 계산은 거래정지일이 채워진 candles 사용 (인덱스와 동일한 기준)
         if (candles.length <= period || idxCandles.length <= period) {
           rsValues.push({ period, rsRaw: 0, stockAgo: null, idxAgo: null });
           continue;
@@ -1922,15 +1979,65 @@ export class StockMetricsService {
       }
       if (totalWeight > 0) weightedRS /= totalWeight;
 
-      let high52w = -Infinity, low52w = Infinity;
-      for (const c of tradeCandles) {
-        const h = adjH(c), l = adjL(c);
-        if (h > high52w) high52w = h;
-        if (l < low52w) low52w = l;
+      // 52주 고/저: metrics 있으면 재사용, 없으면 캔들에서 계산
+      let high52w: number;
+      let low52w: number;
+      if (metrics?.high52w != null && metrics?.low52w != null) {
+        high52w = metrics.high52w;
+        low52w = metrics.low52w;
+      } else {
+        high52w = -Infinity;
+        low52w = Infinity;
+        for (const c of tradeCandles) {
+          const h = adjH(c), l = adjL(c);
+          if (h > high52w) high52w = h;
+          if (l < low52w) low52w = l;
+        }
       }
 
-      const ma50Slice = tradeCandles.slice(-50);
-      const ma50 = ma50Slice.length >= 50 ? ma50Slice.reduce((s, c) => s + adjP(c), 0) / 50 : null;
+      // MA50: metrics 있으면 재사용, 없으면 캔들에서 계산
+      const ma50 = metrics?.ma50 ?? (() => {
+        const s = tradeCandles.slice(-50);
+        return s.length >= 50 ? s.reduce((sum, c) => sum + adjP(c), 0) / 50 : null;
+      })();
+
+      if (useMetrics) {
+        // sf1/sf2/sf3/sf5는 passedStaticFilters로 이미 보장 — sf4 + df1/df2/df3만 체크
+        if (weightedRS <= 0) continue;
+        const df1 = closePrice >= low52w * 1.3;
+        const df2 = closePrice >= high52w * 0.75;
+        const df3 = ma50 !== null && closePrice > ma50;
+        if (!(df1 && df2 && df3)) continue;
+      } else {
+        // fallback: 전체 필터 직접 계산
+        const ma150Slice = tradeCandles.slice(-150);
+        const ma150fallback = ma150Slice.length >= 150 ? ma150Slice.reduce((s, c) => s + adjP(c), 0) / 150 : null;
+        const ma200Slice = tradeCandles.slice(-200);
+        const ma200fallback = ma200Slice.length >= 200 ? ma200Slice.reduce((s, c) => s + adjP(c), 0) / 200 : null;
+
+        const sf1 = ma50 !== null && ma150fallback !== null && ma50 > ma150fallback;
+        const sf2 = ma150fallback !== null && ma200fallback !== null && ma150fallback > ma200fallback;
+        const sf3 = (() => {
+          if (tradeCandles.length < 220) return false;
+          let prev = -Infinity;
+          for (let i = 20; i >= 0; i--) {
+            const s = tradeCandles.slice(-200 - i, i === 0 ? undefined : -i);
+            const ma = s.reduce((sum, c) => sum + adjP(c), 0) / 200;
+            if (ma <= prev) return false;
+            prev = ma;
+          }
+          return true;
+        })();
+        const tradingValueFallback = latest.tradingValue ? Number(latest.tradingValue) : closePrice * Number(latest.volume);
+        const sf4 = weightedRS > 0;
+        const sf5 = tradingValueFallback >= MIN_TRADING_VALUE;
+        const df1 = closePrice >= low52w * 1.3;
+        const df2 = closePrice >= high52w * 0.75;
+        const df3 = ma50 !== null && closePrice > ma50;
+        if (!(sf1 && sf2 && sf3 && sf4 && sf5 && df1 && df2 && df3)) continue;
+      }
+
+      // MA150/MA200/MA200_20d: 로그 출력용 (종목 수 적어서 빠름)
       const ma150Slice = tradeCandles.slice(-150);
       const ma150 = ma150Slice.length >= 150 ? ma150Slice.reduce((s, c) => s + adjP(c), 0) / 150 : null;
       const ma200Slice = tradeCandles.slice(-200);
@@ -1938,27 +2045,8 @@ export class StockMetricsService {
       const ma200_20dSlice = tradeCandles.length >= 220 ? tradeCandles.slice(-220, -20) : [];
       const ma200_20d = ma200_20dSlice.length >= 200 ? ma200_20dSlice.reduce((s, c) => s + adjP(c), 0) / 200 : null;
 
-      const tradingValue = latest.tradingValue ? Number(latest.tradingValue) : closePrice * Number(latest.volume);
-
-      const sf1 = ma50 !== null && ma150 !== null && ma50 > ma150;
-      const sf2 = ma150 !== null && ma200 !== null && ma150 > ma200;
-      const sf3 = (() => {
-        if (tradeCandles.length < 220) return false;
-        let prev = -Infinity;
-        for (let i = 20; i >= 0; i--) {
-          const s = tradeCandles.slice(-200 - i, i === 0 ? undefined : -i);
-          const ma = s.reduce((sum, c) => sum + adjP(c), 0) / 200;
-          if (ma <= prev) return false;
-          prev = ma;
-        }
-        return true;
-      })();
-      const sf4 = weightedRS > 0;
-      const sf5 = tradingValue >= MIN_TRADING_VALUE;
-      const df1 = closePrice >= low52w * 1.3;
-      const df2 = closePrice >= high52w * 0.75;
-      const df3 = ma50 !== null && closePrice > ma50;
-      if (!(sf1 && sf2 && sf3 && sf4 && sf5 && df1 && df2 && df3)) continue;
+      const tradingValue = metrics?.tradingValue
+        ?? (latest.tradingValue ? Number(latest.tradingValue) : closePrice * Number(latest.volume));
 
       passed.push({
         stockCode,
@@ -1975,7 +2063,7 @@ export class StockMetricsService {
         high52w,
         low52w,
         tradingValueEok: (tradingValue / 1e8).toFixed(1),
-        isNewHigh: closePrice >= high52w,
+        isNewHigh: metrics?.isNewHigh ?? (closePrice >= high52w),
         df1Val: `${closePrice}>=${(low52w * 1.3).toFixed(0)}`,
         df2Val: `${closePrice}>=${(high52w * 0.75).toFixed(0)}`,
         df3Val: ma50 !== null ? `${closePrice}>${ma50.toFixed(0)}` : 'N/A',
@@ -2052,7 +2140,7 @@ export class StockMetricsService {
     return {
       success: true,
       logFile: this.getCustomLogRef(logFile),
-      total: stockCodes.length,
+      total: originalTotalCount,
       found: rawCandlesByStock.size,
       passed: total,
       periodsUsed: parsedPeriods,
