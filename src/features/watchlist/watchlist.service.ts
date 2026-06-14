@@ -823,12 +823,36 @@ export class WatchlistService {
     return a - b;
   }
 
+  private isAfterAggregation(): boolean {
+    const kst = new Date(Date.now() + 9 * 60 * 60 * 1000);
+    const hours = kst.getUTCHours();
+    const minutes = kst.getUTCMinutes();
+    return hours > 15 || (hours === 15 && minutes >= 40);
+  }
+
   private async getStockCurrentRankContext(
     stockCodes: string[],
     fallbackTradeDate?: Date,
   ): Promise<StockCurrentRankContext> {
     if (stockCodes.length === 0) {
       return { tradeDate: null, snapshotTime: null, currentRankMap: new Map(), previousRankMap: new Map() };
+    }
+
+    // 집계 후(15:40~)에는 오늘 배치의 currentRank를 사용
+    if (this.isAfterAggregation()) {
+      if (!fallbackTradeDate) {
+        return { tradeDate: null, snapshotTime: null, currentRankMap: new Map(), previousRankMap: new Map() };
+      }
+      const currentRows = await this.prisma.stockDailyMetrics.findMany({
+        where: { stockCode: { in: stockCodes }, tradeDate: fallbackTradeDate },
+        select: { stockCode: true, currentRank: true },
+      });
+      return {
+        tradeDate: fallbackTradeDate,
+        snapshotTime: null,
+        currentRankMap: new Map(currentRows.map((row) => [row.stockCode, row.currentRank])),
+        previousRankMap: await this.getPreviousDailyCurrentRankMap(stockCodes, fallbackTradeDate),
+      };
     }
 
     const snapshot = await this.prisma.stockCurrentRankSnapshot.findFirst({
