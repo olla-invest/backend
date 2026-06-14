@@ -1007,6 +1007,7 @@ export class StockMetricsService {
       candleTime: Date;
       rsScore?: number;
       rank?: number;
+      currentRank?: number | null;
       isVolatilityContraction: boolean;
       isPriceCompression: boolean;
       strengthContinuationDays: number | null;
@@ -1329,6 +1330,20 @@ export class StockMetricsService {
       }
     }
 
+    // DF(동적 필터) 통과 종목 순위 → currentRank로 저장
+    // filtered는 이미 RS 내림차순 정렬된 상태; DF 통과 순서가 곧 currentRank
+    const dynamicFilteredForRank = filtered.filter((calc) => {
+      const df1 = calc.closePrice >= calc.low52w * 1.3;
+      const df2 = calc.closePrice >= calc.high52w * 0.75;
+      const df3 = calc.ma50 !== null && calc.closePrice > calc.ma50;
+      return df1 && df2 && df3;
+    });
+    const currentRankMap = new Map<string, number>();
+    dynamicFilteredForRank.forEach((calc, i) => currentRankMap.set(calc.stockCode, i + 1));
+    for (const calc of calculations) {
+      calc.currentRank = currentRankMap.get(calc.stockCode) ?? null;
+    }
+
     // 4. DB에 저장 — 단일 INSERT ... ON CONFLICT DO UPDATE chunk로 묶어서 라운드트립 최소화.
     //    기존 Promise.all(upsert) × 50 동시 실행은 connection pool 고갈 / lock contention 위험이 컸음.
     this.logger.log(`Saving metrics for ${calculations.length} stocks (bulk upsert)...`);
@@ -1342,8 +1357,8 @@ export class StockMetricsService {
       const chunk = calculations.slice(i, i + SAVE_BATCH);
       if (chunk.length === 0) continue;
 
-      // PostgreSQL parameterized VALUES list 생성. 컬럼 20개 × chunk.length.
-      const COLUMNS_PER_ROW = 20;
+      // PostgreSQL parameterized VALUES list 생성. 컬럼 21개 × chunk.length.
+      const COLUMNS_PER_ROW = 21;
       const valuePlaceholders: string[] = [];
       const params: unknown[] = [];
       let p = 1;
@@ -1384,6 +1399,8 @@ export class StockMetricsService {
         slots.push(`$${p++}::boolean`); params.push(calc.isPriceCompression);
         // strength_continuation_days
         slots.push(`$${p++}::int`); params.push(calc.strengthContinuationDays);
+        // current_rank (DF 통과 순위, 미통과 시 NULL)
+        slots.push(`$${p++}::int`); params.push(calc.currentRank ?? null);
         if (slots.length !== COLUMNS_PER_ROW) {
           throw new Error(`Internal placeholder mismatch: expected ${COLUMNS_PER_ROW}, got ${slots.length}`);
         }
@@ -1397,6 +1414,7 @@ export class StockMetricsService {
           price_change_1d, price_change_rate_1d, volume_1d, trading_value,
           ma_50, passed_static_filters, is_trend_template,
           is_volatility_contraction, is_price_compression, strength_continuation_days,
+          current_rank,
           updated_at
         )
         SELECT v.*, NOW() FROM ( VALUES ${valuePlaceholders.join(', ')} ) AS v
@@ -1418,6 +1436,7 @@ export class StockMetricsService {
           is_volatility_contraction = EXCLUDED.is_volatility_contraction,
           is_price_compression     = EXCLUDED.is_price_compression,
           strength_continuation_days = EXCLUDED.strength_continuation_days,
+          current_rank             = EXCLUDED.current_rank,
           updated_at               = NOW()
       `;
 
@@ -1436,12 +1455,7 @@ export class StockMetricsService {
 
     if (writeLogFile) {
       // 정적 + 동적 필터 모두 통과한 종목만 로그 (종가를 현재가로 사용)
-      const dynamicFiltered = filtered.filter((calc) => {
-        const df1 = calc.closePrice >= calc.low52w * 1.3;
-        const df2 = calc.closePrice >= calc.high52w * 0.75;
-        const df3 = calc.ma50 !== null && calc.closePrice > calc.ma50;
-        return df1 && df2 && df3;
-      });
+      const dynamicFiltered = dynamicFilteredForRank;
 
       const now = new Date();
       const kstNow = new Date(now.getTime() + 9 * 60 * 60 * 1000);
