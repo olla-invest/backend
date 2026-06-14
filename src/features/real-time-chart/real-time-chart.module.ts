@@ -7,6 +7,7 @@ import { StockMetricsService } from './stock-metrics.service';
 import { InitialSetupService } from './initial-setup.service';
 import { ChartGateway } from './chart.gateway';
 import { RealtimePriceCacheService } from './realtime-price-cache.service';
+import { StockListCacheService } from './stock-list-cache.service';
 import { DataSchedulerService } from './data-scheduler.service';
 import { CurrentRankService } from './current-rank.service';
 import { DetailController } from './detail.controller';
@@ -34,6 +35,7 @@ import { AdminApiKeyGuard } from '../../common/auth/guards/admin-api-key.guard';
     InitialSetupService,
     ChartGateway,
     RealtimePriceCacheService,
+    StockListCacheService,
     CurrentRankService,
     DataSchedulerService,
     AdminApiKeyGuard,

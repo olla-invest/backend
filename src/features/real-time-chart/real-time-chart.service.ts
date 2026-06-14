@@ -5,14 +5,10 @@ import { IRealtimeSource, REALTIME_SOURCE_TOKEN } from '../../integrations/kiwoo
 import { ChartStorageService } from './chart-storage.service';
 import { StockMetricsService } from './stock-metrics.service';
 import { RealtimePriceCacheService } from './realtime-price-cache.service';
+import { StockListCacheService, RangeRsRankingCache } from './stock-list-cache.service';
 import { PrismaService } from '../../common/prisma/prisma.service';
 import { mapUpNameToThemeCode } from '../../common/constants/theme-codes';
 import { getKrxTradingDateByOffset, isKrxTradingDay } from '../../common/utils/market-calendar.util';
-
-interface StockListCache {
-  data: any[];
-  timestamp: number;
-}
 
 type HigherTimeframeCandleType = 'week' | 'month' | 'year';
 export type InvestmentIndicatorType =
@@ -40,10 +36,7 @@ export interface StockDetailSnapshot {
 @Injectable()
 export class RealTimeChartService implements OnModuleInit {
   private readonly logger = new Logger(RealTimeChartService.name);
-  private readonly stockListCache = new Map<string, StockListCache>();
-  private readonly CACHE_TTL = 60 * 60 * 1000; // 1시간 (캐시TTL)
   private readonly REALTIME_CANDLE_SAVE_THROTTLE_MS = 30 * 1000;
-  private readonly rsFilterInflight = new Map<string, Promise<any>>();
   private readonly realtimeCandleSavedAt = new Map<string, number>();
   private initializationComplete = false;
   private lastDataUpdate: Date | null = null;
@@ -55,6 +48,7 @@ export class RealTimeChartService implements OnModuleInit {
     private readonly chartStorage: ChartStorageService,
     private readonly metricsService: StockMetricsService,
     private readonly realtimeCache: RealtimePriceCacheService,
+    private readonly stockListCache: StockListCacheService,
     private readonly prisma: PrismaService,
   ) {}
 
@@ -1087,7 +1081,7 @@ export class RealTimeChartService implements OnModuleInit {
 
     // 최신 거래일 조회 (메타 데이터용)
     const latestTradeDate = await this.metricsService.getLatestTradeDate();
-    const currentRankHistoryMap = await this.metricsService.getCurrentRankHistory(pageStockCodes, 3, latestTradeDate);
+    const currentRankHistoryMap = await this.metricsService.getCurrentRankHistory(pageStockCodes, 3, latestTradeDate, this.isAfterAggregation());
     const themeList = await this.getNaverThemeList();
     return {
       marketType,
@@ -1296,7 +1290,7 @@ export class RealTimeChartService implements OnModuleInit {
 
     // 최신 거래일 조회
     const latestTradeDate = await this.metricsService.getLatestTradeDate();
-    const currentRankHistoryMap = await this.metricsService.getCurrentRankHistory(pageStockCodes, 3, latestTradeDate);
+    const currentRankHistoryMap = await this.metricsService.getCurrentRankHistory(pageStockCodes, 3, latestTradeDate, this.isAfterAggregation());
     const shouldWriteCustomRsLog =
       !(periods.length === 1 && periods[0] === 63 && weights.length === 1 && weights[0] === 100);
     if (shouldWriteCustomRsLog) {
@@ -1416,26 +1410,56 @@ export class RealTimeChartService implements OnModuleInit {
     const tradeDateForLog = latestTradeDate
       ? latestTradeDate.toISOString().split('T')[0].replace(/-/g, '')
       : undefined;
+    const dataDate = latestTradeDate?.toISOString().split('T')[0] ?? null;
+    const cacheKey = this.stockListCache.buildRangeRsCacheKey({
+      dataDate,
+      marketType,
+      periods,
+      weights,
+      rsFilters,
+    });
 
-    const inflightKey = `${tradeDateForLog}|${periods.join(',')}|${weights.join(',')}`;
-    let rsFilterPromise = this.rsFilterInflight.get(inflightKey);
-    if (!rsFilterPromise) {
-      rsFilterPromise = this.metricsService.calculateRsFilterLog(
-        allStockCodes,
-        tradeDateForLog,
-        periods.join(','),
-        weights.join(','),
-      ).finally(() => this.rsFilterInflight.delete(inflightKey));
-      this.rsFilterInflight.set(inflightKey, rsFilterPromise);
+    let rsRankingCache = await this.stockListCache.getRangeRsRankingCache(cacheKey);
+    if (rsRankingCache) {
+      this.logger.log(
+        `[getStockListWithRangeRS] cache hit key=${cacheKey} rows=${rsRankingCache.rows.length}`,
+      );
     } else {
-      this.logger.log(`[getStockListWithRangeRS] reusing in-flight RS calculation (key=${inflightKey})`);
+      let rsFilterPromise = this.stockListCache.getInflight(cacheKey);
+      if (!rsFilterPromise) {
+        rsFilterPromise = this.metricsService.calculateRsFilterLog(
+          allStockCodes,
+          tradeDateForLog,
+          periods.join(','),
+          weights.join(','),
+        )
+          .then((result) => ({
+            dataDate,
+            marketType,
+            periods,
+            weights,
+            logFile: result.logFile,
+            rows: result.rows.map((row) => ({
+              stockCode: row.stockCode,
+              rank: row.rank,
+              rsScore: row.rsScore,
+            })),
+            createdAt: new Date().toISOString(),
+          } satisfies RangeRsRankingCache))
+          .finally(() => this.stockListCache.deleteInflight(cacheKey));
+        this.stockListCache.setInflight(cacheKey, rsFilterPromise);
+      } else {
+        this.logger.log(`[getStockListWithRangeRS] reusing in-flight RS calculation (key=${cacheKey})`);
+      }
+
+      rsRankingCache = await rsFilterPromise;
+      await this.stockListCache.setRangeRsRankingCache(cacheKey, rsRankingCache);
     }
-    const rsFilterResult = await rsFilterPromise;
 
     this.logger.log(`Converted range filters to periods: ${periods}, weights: ${weights}`);
 
     const rsHistoryMap = new Map<string, Array<{ tradeDate: Date; rank: number; rsScore: number }>>();
-    for (const row of rsFilterResult.rows) {
+    for (const row of rsRankingCache.rows) {
       rsHistoryMap.set(row.stockCode, [{
         tradeDate: latestTradeDate ?? new Date(),
         rank: row.rank,
@@ -1506,7 +1530,7 @@ export class RealTimeChartService implements OnModuleInit {
 
     const realtimePrices = allRealtimePrices;
     const themeList = await this.getNaverThemeList();
-    const currentRankHistoryMap = await this.metricsService.getCurrentRankHistory(pageStockCodes, 3, latestTradeDate);
+    const currentRankHistoryMap = await this.metricsService.getCurrentRankHistory(pageStockCodes, 3, latestTradeDate, this.isAfterAggregation());
 
     return {
       marketType,
@@ -1521,7 +1545,7 @@ export class RealTimeChartService implements OnModuleInit {
         isInitialized: this.initializationComplete,
         queryStartDate: (() => { const toMs = (s: string) => new Date(`${s.slice(0,4)}-${s.slice(4,6)}-${s.slice(6,8)}`).getTime(); const longest = rsFilters.reduce((max, f) => (toMs(f.rsEndDate) - toMs(f.rsStartDate)) > (toMs(max.rsEndDate) - toMs(max.rsStartDate)) ? f : max); return `${longest.rsStartDate.slice(0,4)}-${longest.rsStartDate.slice(4,6)}-${longest.rsStartDate.slice(6,8)}`; })(),
         queryEndDate: (() => { const toMs = (s: string) => new Date(`${s.slice(0,4)}-${s.slice(4,6)}-${s.slice(6,8)}`).getTime(); const longest = rsFilters.reduce((max, f) => (toMs(f.rsEndDate) - toMs(f.rsStartDate)) > (toMs(max.rsEndDate) - toMs(max.rsStartDate)) ? f : max); return `${longest.rsEndDate.slice(0,4)}-${longest.rsEndDate.slice(4,6)}-${longest.rsEndDate.slice(6,8)}`; })(),
-        rangeRS: { filters: rsFilters, periods, weights, logFile: rsFilterResult.logFile },
+        rangeRS: { filters: rsFilters, periods, weights, logFile: rsRankingCache.logFile },
       },
       themeList,
       stocks: await Promise.all(paginatedData.map(async (item, index) => {
@@ -1579,6 +1603,7 @@ export class RealTimeChartService implements OnModuleInit {
    *   '10'  = KOSDAQ (키움 API 그대로)
    *   'all' = 전체 (KOSPI + KOSDAQ 합산)
    */
+
   private getUsableRealtimePrice(realtimePrice: any): any | undefined {
     if (!realtimePrice) return undefined;
 
@@ -1669,12 +1694,8 @@ export class RealTimeChartService implements OnModuleInit {
   }
 
   private async fetchStockList(marketType: '0' | '10' | 'all'): Promise<any[]> {
-    const cached = this.stockListCache.get(marketType);
-    const now = Date.now();
-
-    if (cached && (now - cached.timestamp) < this.CACHE_TTL) {
-      return cached.data;
-    }
+    const cached = await this.stockListCache.getStockList(marketType);
+    if (cached) return cached;
 
     let validStocks: any[];
 
@@ -1704,7 +1725,7 @@ export class RealTimeChartService implements OnModuleInit {
       validStocks = await this.fetchStockListFromDatabase(marketType);
     }
 
-    this.stockListCache.set(marketType, { data: validStocks, timestamp: now });
+    await this.stockListCache.setStockList(marketType, validStocks);
     return validStocks;
   }
 
@@ -1761,6 +1782,13 @@ export class RealTimeChartService implements OnModuleInit {
       });
   }
 
+  private isAfterAggregation(): boolean {
+    const kst = new Date(Date.now() + 9 * 60 * 60 * 1000);
+    const hours = kst.getUTCHours();
+    const minutes = kst.getUTCMinutes();
+    return hours > 15 || (hours === 15 && minutes >= 40);
+  }
+
   private isHaltedState(state?: string): boolean {
     if (!state) return false;
     return state.includes('정지');
@@ -1805,7 +1833,7 @@ export class RealTimeChartService implements OnModuleInit {
       ),
     );
 
-    this.clearStockListCache();
+    await this.clearStockListCache();
     this.logger.log(`[syncTradingStates] ${uniqueStocks.length}개 종목 tradingState 업데이트 완료`);
   }
 
@@ -1826,14 +1854,8 @@ export class RealTimeChartService implements OnModuleInit {
   /**
    * 종목 리스트 캐시 초기화
    */
-  clearStockListCache(marketType?: '0' | '10' | 'all') {
-    if (marketType) {
-      this.stockListCache.delete(marketType);
-      this.logger.log(`Cleared cache for market type: ${marketType}`);
-    } else {
-      this.stockListCache.clear();
-      this.logger.log('Cleared all stock list cache');
-    }
+  async clearStockListCache(marketType?: '0' | '10' | 'all'): Promise<void> {
+    await this.stockListCache.clearStockList(marketType);
   }
 
   /**
