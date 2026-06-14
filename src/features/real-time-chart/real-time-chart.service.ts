@@ -1081,7 +1081,7 @@ export class RealTimeChartService implements OnModuleInit {
 
     // 최신 거래일 조회 (메타 데이터용)
     const latestTradeDate = await this.metricsService.getLatestTradeDate();
-    const currentRankHistoryMap = await this.metricsService.getCurrentRankHistory(pageStockCodes, 3, latestTradeDate);
+    const currentRankHistoryMap = await this.metricsService.getCurrentRankHistory(pageStockCodes, 3, latestTradeDate, this.isAfterAggregation());
     const themeList = await this.getNaverThemeList();
     return {
       marketType,
@@ -1290,7 +1290,7 @@ export class RealTimeChartService implements OnModuleInit {
 
     // 최신 거래일 조회
     const latestTradeDate = await this.metricsService.getLatestTradeDate();
-    const currentRankHistoryMap = await this.metricsService.getCurrentRankHistory(pageStockCodes, 3, latestTradeDate);
+    const currentRankHistoryMap = await this.metricsService.getCurrentRankHistory(pageStockCodes, 3, latestTradeDate, this.isAfterAggregation());
     const shouldWriteCustomRsLog =
       !(periods.length === 1 && periods[0] === 63 && weights.length === 1 && weights[0] === 100);
     if (shouldWriteCustomRsLog) {
@@ -1530,7 +1530,7 @@ export class RealTimeChartService implements OnModuleInit {
 
     const realtimePrices = allRealtimePrices;
     const themeList = await this.getNaverThemeList();
-    const currentRankHistoryMap = await this.metricsService.getCurrentRankHistory(pageStockCodes, 3, latestTradeDate);
+    const currentRankHistoryMap = await this.metricsService.getCurrentRankHistory(pageStockCodes, 3, latestTradeDate, this.isAfterAggregation());
 
     return {
       marketType,
@@ -1780,6 +1780,13 @@ export class RealTimeChartService implements OnModuleInit {
           upName: company?.theme?.themeName ?? '',
         };
       });
+  }
+
+  private isAfterAggregation(): boolean {
+    const kst = new Date(Date.now() + 9 * 60 * 60 * 1000);
+    const hours = kst.getUTCHours();
+    const minutes = kst.getUTCMinutes();
+    return hours > 15 || (hours === 15 && minutes >= 40);
   }
 
   private isHaltedState(state?: string): boolean {

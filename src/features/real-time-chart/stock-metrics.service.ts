@@ -225,11 +225,14 @@ export class StockMetricsService {
     stockCodes: string[],
     days: number = 3,
     beforeTradeDate?: Date | null,
+    inclusive = false,
   ): Promise<Map<string, Array<number | null>>> {
     if (stockCodes.length === 0) return new Map();
 
     const recentDates = await this.prisma.stockDailyMetrics.findMany({
-      where: beforeTradeDate ? { tradeDate: { lt: beforeTradeDate } } : undefined,
+      where: beforeTradeDate
+        ? { tradeDate: inclusive ? { lte: beforeTradeDate } : { lt: beforeTradeDate } }
+        : undefined,
       orderBy: { tradeDate: 'desc' },
       take: days,
       distinct: ['tradeDate'],
