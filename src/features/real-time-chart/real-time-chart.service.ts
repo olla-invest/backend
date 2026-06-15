@@ -1052,8 +1052,10 @@ export class RealTimeChartService implements OnModuleInit {
         return true;
       })
       .sort((a, b) => {
-        // 1차 rank 오름차순 (낮을수록 상위가 우선)
-        const rankDiff = (a.metrics?.rank || 999999) - (b.metrics?.rank || 999999);
+        // 1차 현재 순위 오름차순 (낮을수록 상위가 우선)
+        const aRank = a.metrics?.currentRank ?? a.metrics?.rank ?? 999999;
+        const bRank = b.metrics?.currentRank ?? b.metrics?.rank ?? 999999;
+        const rankDiff = aRank - bRank;
         if (rankDiff !== 0) return rankDiff;
         // 2차 rsScore 내림차순 (동일 순위일 때 점수 높은게 우선)
         return b.rsScore - a.rsScore;
