@@ -1606,6 +1606,58 @@ export class RealTimeChartService implements OnModuleInit {
    *   'all' = 전체 (KOSPI + KOSDAQ 합산)
    */
 
+  async getDefaultStockDisplayRankMap(
+    targetStockCodes: string[],
+    marketType: '0' | '10' | 'all' = 'all',
+  ): Promise<Map<string, number>> {
+    if (targetStockCodes.length === 0) return new Map();
+
+    const targetSet = new Set(targetStockCodes);
+    const validStocks = await this.fetchStockList(marketType);
+    const allStockCodes = validStocks.map((s) => s.code);
+    const metricsMap = await this.metricsService.getLatestMetrics(allStockCodes);
+    const allRealtimePrices = this.realtimeCache.getPrices(allStockCodes);
+
+    const rankedStocks = validStocks
+      .map((stock) => {
+        const metrics = metricsMap.get(stock.code);
+        return {
+          stock,
+          metrics,
+          rsScore: metrics?.relativeStrengthScore || 0,
+        };
+      })
+      .filter((item) => {
+        if (!item.metrics?.passedStaticFilters) return false;
+
+        const realtimePrice = this.getUsableRealtimePrice(allRealtimePrices.get(item.stock.code));
+        const currentPrice = realtimePrice?.currentPrice || item.metrics?.closePrice || 0;
+        const low52w = item.metrics.lowPrice52w;
+        const high52w = item.metrics.highPrice52w;
+        const ma50 = item.metrics.ma50;
+
+        if (low52w != null && currentPrice < low52w * 1.3) return false;
+        if (high52w != null && currentPrice < high52w * 0.75) return false;
+        if (ma50 != null && currentPrice <= ma50) return false;
+        return true;
+      })
+      .sort((a, b) => {
+        const aRank = a.metrics?.currentRank ?? a.metrics?.rank ?? 999999;
+        const bRank = b.metrics?.currentRank ?? b.metrics?.rank ?? 999999;
+        const rankDiff = aRank - bRank;
+        if (rankDiff !== 0) return rankDiff;
+        return b.rsScore - a.rsScore;
+      });
+
+    const displayRankMap = new Map<string, number>();
+    rankedStocks.forEach((item, index) => {
+      if (targetSet.has(item.stock.code)) {
+        displayRankMap.set(item.stock.code, index + 1);
+      }
+    });
+    return displayRankMap;
+  }
+
   private getUsableRealtimePrice(realtimePrice: any): any | undefined {
     if (!realtimePrice) return undefined;
 

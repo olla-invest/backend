@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
 import { PrismaService } from '../../common/prisma/prisma.service';
 import { RealtimePriceCacheService, RealtimePrice } from '../real-time-chart/realtime-price-cache.service';
+import { RealTimeChartService } from '../real-time-chart/real-time-chart.service';
 
 type StockCurrentRankContext = {
   tradeDate: Date | null;
@@ -14,6 +15,7 @@ export class WatchlistService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly realtimePriceCache: RealtimePriceCacheService,
+    private readonly realTimeChartService: RealTimeChartService,
   ) {}
 
   // ─── 관심종목 ─────────────────────────────────────────────────────
@@ -65,9 +67,10 @@ export class WatchlistService {
     const todayMap = new Map(todayMetrics.map((m) => [m.stockCode, m]));
     const prevMap = new Map(prevMetrics.map((m) => [m.stockCode, m]));
 
-    const [realtimePriceMap, currentRankContext] = await Promise.all([
+    const [realtimePriceMap, currentRankContext, displayRankMap] = await Promise.all([
       Promise.resolve(this.realtimePriceCache.getPrices(stockCodes)),
       this.getStockCurrentRankContext(stockCodes, latestDate),
+      this.realTimeChartService.getDefaultStockDisplayRankMap(stockCodes),
     ]);
 
     const stocks = watchlist.map((w) =>
@@ -77,6 +80,7 @@ export class WatchlistService {
         prevMap.get(w.company.stockCode) ?? null,
         realtimePriceMap.get(w.company.stockCode),
         currentRankContext,
+        displayRankMap,
       ),
     );
     stocks.sort((a, b) => this.compareNullableRank(a.rank, b.rank) || a.companyName.localeCompare(b.companyName, 'ko'));
@@ -94,13 +98,14 @@ export class WatchlistService {
     prev: any,
     realtimePrice?: RealtimePrice,
     currentRankContext?: StockCurrentRankContext,
+    displayRankMap?: Map<string, number>,
   ) {
     const stockCode = watchlistEntry.company.stockCode;
     const hasSnapshotRank = currentRankContext?.currentRankMap.has(stockCode) ?? false;
     const hasPreviousCurrentRank = currentRankContext?.previousRankMap.has(stockCode) ?? false;
-    const rank = hasSnapshotRank
+    const rank = displayRankMap?.get(stockCode) ?? (hasSnapshotRank
       ? currentRankContext!.currentRankMap.get(stockCode) ?? null
-      : today?.currentRank ?? today?.rank ?? null;
+      : today?.currentRank ?? today?.rank ?? null);
     const prevRank = hasPreviousCurrentRank
       ? currentRankContext!.previousRankMap.get(stockCode) ?? null
       : prev?.currentRank ?? prev?.rank ?? null;
@@ -383,18 +388,19 @@ export class WatchlistService {
 
     let topStocks: any[] = [];
     if (latestStockMetric) {
-      const [metrics, currentRankContext] = await Promise.all([
+      const [metrics, currentRankContext, displayRankMap] = await Promise.all([
         this.prisma.stockDailyMetrics.findMany({
           where: { stockCode: { in: stockCodes }, tradeDate: latestStockMetric.tradeDate },
         }),
         this.getStockCurrentRankContext(stockCodes, latestStockMetric.tradeDate),
+        this.realTimeChartService.getDefaultStockDisplayRankMap(stockCodes),
       ]);
       topStocks = metrics
         .map((m) => ({
           metric: m,
-          rank: currentRankContext.currentRankMap.has(m.stockCode)
+          rank: displayRankMap.get(m.stockCode) ?? (currentRankContext.currentRankMap.has(m.stockCode)
             ? currentRankContext.currentRankMap.get(m.stockCode) ?? null
-            : m.currentRank ?? m.rank ?? null,
+            : m.currentRank ?? m.rank ?? null),
         }))
         .sort((a, b) => this.compareNullableRank(a.rank, b.rank) || a.metric.stockCode.localeCompare(b.metric.stockCode))
         .slice(0, 3)
@@ -722,15 +728,18 @@ export class WatchlistService {
       currentRankMap: new Map(),
       previousRankMap: new Map(),
     };
+    let stockDisplayRankMap = new Map<string, number>();
     if (latestStockMetric) {
-      const [metrics, currentRankContext] = await Promise.all([
+      const [metrics, currentRankContext, displayRankMap] = await Promise.all([
         this.prisma.stockDailyMetrics.findMany({
           where: { stockCode: { in: stockCodes }, tradeDate: latestStockMetric.tradeDate },
         }),
         this.getStockCurrentRankContext(stockCodes, latestStockMetric.tradeDate),
+        this.realTimeChartService.getDefaultStockDisplayRankMap(stockCodes),
       ]);
       stockMetricMap = new Map(metrics.map((m) => [m.stockCode, m]));
       stockCurrentRankContext = currentRankContext;
+      stockDisplayRankMap = displayRankMap;
     }
 
     // 테마 스냅샷
@@ -796,9 +805,9 @@ export class WatchlistService {
       const stockCode = w.company.stockCode;
       const hasSnapshotRank = stockCurrentRankContext.currentRankMap.has(stockCode);
       const hasPreviousCurrentRank = stockCurrentRankContext.previousRankMap.has(stockCode);
-      const rank = hasSnapshotRank
+      const rank = stockDisplayRankMap.get(stockCode) ?? (hasSnapshotRank
         ? stockCurrentRankContext.currentRankMap.get(stockCode) ?? null
-        : m?.currentRank ?? m?.rank ?? null;
+        : m?.currentRank ?? m?.rank ?? null);
       const prevRank = hasPreviousCurrentRank
         ? stockCurrentRankContext.previousRankMap.get(stockCode) ?? null
         : null;
