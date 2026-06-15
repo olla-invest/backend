@@ -2,6 +2,7 @@ import { Injectable, NotFoundException, ConflictException } from '@nestjs/common
 import { PrismaService } from '../../common/prisma/prisma.service';
 import { RealtimePriceCacheService, RealtimePrice } from '../real-time-chart/realtime-price-cache.service';
 import { RealTimeChartService } from '../real-time-chart/real-time-chart.service';
+import { IssueThemeService } from '../issue-theme/issue-theme.service';
 
 type StockCurrentRankContext = {
   tradeDate: Date | null;
@@ -16,6 +17,7 @@ export class WatchlistService {
     private readonly prisma: PrismaService,
     private readonly realtimePriceCache: RealtimePriceCacheService,
     private readonly realTimeChartService: RealTimeChartService,
+    private readonly issueThemeService: IssueThemeService,
   ) {}
 
   // ─── 관심종목 ─────────────────────────────────────────────────────
@@ -235,10 +237,12 @@ export class WatchlistService {
       prevMap = new Map(prevSnapshots.map((s) => [s.themeCode, s]));
     }
 
+    const currentThemeMap = await this.issueThemeService.getCurrentThemeRankMap(themeCodes);
+
     const themes = watchlistThemes.map((w) => {
       const today = todayMap.get(w.themeCode) ?? null;
       const prev = prevMap.get(w.themeCode) ?? null;
-      return this.buildThemeItem(w, today, prev);
+      return this.buildThemeItem(w, currentThemeMap.get(w.themeCode) ?? today, prev);
     });
 
     themes.sort((a, b) => this.compareNullableRank(a.rank, b.rank) || a.themeName.localeCompare(b.themeName, 'ko'));
@@ -335,35 +339,27 @@ export class WatchlistService {
       }),
     ]);
 
-    // 테마 Top2 - 최신 스냅샷 순위 기준
+    // 테마 Top2 - 이슈테마 화면의 현재 순위 기준
     const themeCodes = watchlistThemes.map((w) => w.themeCode);
-    const latestThemeSnapshot = themeCodes.length > 0
-      ? await this.prisma.themeDailySnapshot.findFirst({
-          where: { themeCode: { in: themeCodes } },
-          orderBy: { snapshotDate: 'desc' },
-          select: { snapshotDate: true },
-        })
-      : null;
+    const currentThemeMap = await this.issueThemeService.getCurrentThemeRankMap(themeCodes);
 
     let topThemes: any[] = [];
-    if (latestThemeSnapshot) {
-      const snapshots = await this.prisma.themeDailySnapshot.findMany({
-        where: { themeCode: { in: themeCodes }, snapshotDate: latestThemeSnapshot.snapshotDate },
-        orderBy: { rank: 'asc' },
-        take: 2,
-      });
-      topThemes = snapshots.map((s) => {
-        const w = watchlistThemes.find((wt) => wt.themeCode === s.themeCode)!;
-        return {
-          type: 'THEME',
-          themeCode: s.themeCode,
-          themeName: w.theme.themeName,
-          imageUrl: w.theme.imageUrl ?? null,
-          rank: s.rank,
-          risingCount: s.risingCount,
-          totalCount: s.totalCount,
-        };
-      });
+    if (currentThemeMap.size > 0) {
+      topThemes = Array.from(currentThemeMap.values())
+        .sort((a: any, b: any) => this.compareNullableRank(a.rank, b.rank) || a.themeName.localeCompare(b.themeName, 'ko'))
+        .slice(0, 2)
+        .map((s: any) => {
+          const w = watchlistThemes.find((wt) => wt.themeCode === s.themeCode)!;
+          return {
+            type: 'THEME',
+            themeCode: s.themeCode,
+            themeName: w.theme.themeName,
+            imageUrl: w.theme.imageUrl ?? null,
+            rank: s.rank,
+            risingCount: s.risingCount,
+            totalCount: s.totalCount,
+          };
+        });
     } else {
       topThemes = watchlistThemes.slice(0, 2).map((w) => ({
         type: 'THEME',
@@ -744,6 +740,7 @@ export class WatchlistService {
 
     // 테마 스냅샷
     const themeCodes = watchlistThemes.map((w) => w.themeCode);
+    const currentThemeMap = await this.issueThemeService.getCurrentThemeRankMap(themeCodes);
     const latestThemeSnapshot = themeCodes.length > 0
       ? await this.prisma.themeDailySnapshot.findFirst({
           where: { themeCode: { in: themeCodes } },
@@ -778,7 +775,7 @@ export class WatchlistService {
     const items: any[] = [];
 
     for (const w of watchlistThemes) {
-      const snapshot = themeSnapshotMap.get(w.themeCode);
+      const snapshot = currentThemeMap.get(w.themeCode) ?? themeSnapshotMap.get(w.themeCode);
       const prevSnapshot = prevThemeSnapshotMap.get(w.themeCode);
       const rankChange =
         snapshot && prevSnapshot ? prevSnapshot.rank - snapshot.rank : null;
