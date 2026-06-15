@@ -8,6 +8,7 @@ type MetricRow = {
   trade_date: Date;
   close_price: string;
   relative_strength_score: string;
+  rank: number;
   high_price_52w: string | null;
   low_price_52w: string | null;
   ma_50: string | null;
@@ -45,7 +46,10 @@ export class CurrentRankService {
       return { success: false, count: 0, rankedCount: 0, tradeDate: null, snapshotTime: null };
     }
 
-    const snapshotTradeDate = tradeDate ? this.dateOnly(tradeDate) : this.todayKstDateOnly(now);
+    // snapshotTradeDate를 오늘 KST 날짜가 아닌 메트릭 기준 날짜로 맞춰야 한다.
+    // 실시간 차트는 getLatestCurrentRankSnapshotMap(metricTradeDate)로 조회하므로
+    // trade_date가 다르면 스냅샷을 찾지 못하고 배치 currentRank로 fallback된다.
+    const snapshotTradeDate = tradeDate ? this.dateOnly(tradeDate) : this.dateOnly(metricTradeDate);
     const metrics = await this.getStaticFilteredMetrics(metricTradeDate);
     if (metrics.length === 0) {
       this.logger.warn(`[current-rank] no SF-passed metrics for ${this.toDateOnly(metricTradeDate)}`);
@@ -177,6 +181,7 @@ export class CurrentRankService {
           trade_date,
           close_price::text,
           relative_strength_score::text,
+          rank,
           high_price_52w::text,
           low_price_52w::text,
           ma_50::text
@@ -239,9 +244,11 @@ export class CurrentRankService {
       };
     });
 
+    // relativeStrengthScore(퍼센타일 1-99)로 정렬하면 동점이 많아 stockCode 순으로 밀림.
+    // 배치 rank(rsRaw 기반 연속값 정렬)를 그대로 사용하는 것이 실시간 차트 순위와 일치함.
+    // getStaticFilteredMetrics가 rank ASC로 조회하므로 sort 없이 순서를 유지한다.
     rows
       .filter((row) => row.passedDynamicFilters)
-      .sort((a, b) => b.relativeStrengthScore - a.relativeStrengthScore || a.stockCode.localeCompare(b.stockCode))
       .forEach((row, index) => {
         row.currentRank = index + 1;
       });
