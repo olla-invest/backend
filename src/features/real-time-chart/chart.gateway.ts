@@ -12,6 +12,7 @@ import { Logger, Inject } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
 import { Server, Socket } from 'socket.io';
 import { IRealtimeSource, REALTIME_SOURCE_TOKEN } from '../../integrations/kiwoom/websocket/realtime-source.interface';
+import { RealtimePriceCacheService } from './realtime-price-cache.service';
 
 @WebSocketGateway({
   cors: {
@@ -31,6 +32,7 @@ export class ChartGateway
   constructor(
     @Inject(REALTIME_SOURCE_TOKEN)
     private readonly realtimeSource: IRealtimeSource,
+    private readonly realtimeCache: RealtimePriceCacheService,
   ) {}
 
   afterInit(server: Server) {
@@ -74,15 +76,29 @@ export class ChartGateway
   ): Promise<void> {
     const { stockCode } = data;
 
-
     // 클라이언트 구독 목록에 추가
     const stockCodes = this.clientSubscriptions.get(client.id)!;
     stockCodes.add(stockCode);
 
-    // 실시간 소스 구독 (실시간 체결 + 호가)
+    // 실시간 소스 구독 (실시간 체결 + 호가) + room 자동 join
     await this.realtimeSource.subscribe(stockCode, ['0B', '0D']);
+    client.join(`stock:${stockCode}`);
 
-    // 클라이언트에게 구독 성공 응답
+    // 캐시에 현재가가 있으면 즉시 snapshot 전송 (프론트 초기 렌더링용)
+    const cached = this.realtimeCache.getPrice(stockCode);
+    if (cached) {
+      client.emit('snapshot', {
+        stockCode,
+        price: cached.currentPrice,
+        changeRate: cached.changeRate,
+        prevDayCompare: cached.changeAmount,
+        open: cached.openPrice,
+        high: cached.highPrice,
+        low: cached.lowPrice,
+        accVolume: cached.accVolume,
+      });
+    }
+
     client.emit('subscribed', { stockCode });
   }
 
@@ -113,7 +129,7 @@ export class ChartGateway
       await this.realtimeSource.unsubscribe(stockCode);
     }
 
-    // 클라이언트에게 구독 해제 응답
+    client.leave(`stock:${stockCode}`);
     client.emit('unsubscribed', { stockCode });
   }
 
@@ -131,17 +147,17 @@ export class ChartGateway
     // 구독 중인 클라이언트에게만 전송
     const tickData = {
       stockCode,
-      time: values['20'], // 체결시간
-      price: values['10'], // 현재가
-      volume: values['15'], // 거래량
-      prevDayCompare: values['11'], // 전일대비
-      changeRate: values['12'], // 등락율
-      askPrice: values['27'], // 매도호가
-      bidPrice: values['28'], // 매수호가
-      accVolume: values['13'], // 누적거래량
-      open: values['16'], // 시가
-      high: values['17'], // 고가
-      low: values['18'], // 저가
+      time: values['20'],                              // 체결시간
+      price: String(Math.abs(Number(values['10']))),   // 현재가 (부호 제거)
+      volume: values['15'],                            // 거래량
+      prevDayCompare: String(Math.abs(Number(values['11']))), // 전일대비 (부호 제거)
+      changeRate: values['12'],                        // 등락율
+      askPrice: values['27'],                          // 매도호가
+      bidPrice: values['28'],                          // 매수호가
+      accVolume: values['13'],                         // 누적거래량
+      open: String(Math.abs(Number(values['16']))),    // 시가 (부호 제거)
+      high: String(Math.abs(Number(values['17']))),    // 고가 (부호 제거)
+      low: String(Math.abs(Number(values['18']))),     // 저가 (부호 제거)
     };
 
     this.server.to(`stock:${stockCode}`).emit('tick', tickData);
