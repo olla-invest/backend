@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
 import { PrismaService } from '../../common/prisma/prisma.service';
-import { RealtimePriceCacheService } from '../real-time-chart/realtime-price-cache.service';
+import { RealtimePriceCacheService, RealtimePrice } from '../real-time-chart/realtime-price-cache.service';
 
 type StockCurrentRankContext = {
   tradeDate: Date | null;
@@ -92,7 +92,7 @@ export class WatchlistService {
     watchlistEntry: any,
     today: any,
     prev: any,
-    realtimePrice?: { currentPrice: number } | undefined,
+    realtimePrice?: RealtimePrice,
     currentRankContext?: StockCurrentRankContext,
   ) {
     const stockCode = watchlistEntry.company.stockCode;
