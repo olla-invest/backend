@@ -10,5 +10,6 @@ import { AdminApiKeyGuard } from '../../common/auth/guards/admin-api-key.guard';
   imports: [PrismaModule, RealTimeChartModule, KiwoomModule],
   controllers: [IssueThemeController],
   providers: [IssueThemeService, AdminApiKeyGuard],
+  exports: [IssueThemeService],
 })
 export class IssueThemeModule {}

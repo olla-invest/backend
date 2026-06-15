@@ -469,6 +469,18 @@ export class IssueThemeService {
     return { updatedAt: new Date().toISOString(), total, page, display, themes: paged };
   }
 
+  async getCurrentThemeRankMap(themeCodes: number[]): Promise<Map<number, any>> {
+    if (themeCodes.length === 0) return new Map();
+
+    const themeCodeSet = new Set(themeCodes);
+    const result = await this.getThemeList(10000, 1);
+    return new Map(
+      result.themes
+        .filter((theme: any) => themeCodeSet.has(theme.themeCode))
+        .map((theme: any) => [theme.themeCode, theme]),
+    );
+  }
+
   async adminListThemes(params: {
     page?: number;
     pageSize?: number;
