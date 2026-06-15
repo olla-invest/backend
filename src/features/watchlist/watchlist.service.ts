@@ -251,6 +251,7 @@ export class WatchlistService {
   }
 
   private buildThemeItem(watchlistEntry: any, today: any, prev: any) {
+    const counts = this.normalizeThemeCounts(today);
     let event = '-';
     if (today && prev) {
       const diff = prev.rank - today.rank;
@@ -267,12 +268,40 @@ export class WatchlistService {
       addedDate: watchlistEntry.addedDate,
       rank: today?.rank ?? null,
       prevRank: prev?.rank ?? null,
-      risingCount: today?.risingCount ?? null,
-      totalCount: today?.totalCount ?? null,
-      upCount: today?.upCount ?? null,
-      flatCount: today?.flatCount ?? null,
-      downCount: today?.downCount ?? null,
+      risingCount: counts.risingCount,
+      totalCount: counts.totalCount,
+      upCount: counts.upCount,
+      flatCount: counts.flatCount,
+      downCount: counts.downCount,
       event,
+    };
+  }
+
+  private normalizeThemeCounts(snapshot: any): {
+    risingCount: number | null;
+    totalCount: number | null;
+    upCount: number | null;
+    flatCount: number | null;
+    downCount: number | null;
+  } {
+    if (!snapshot) {
+      return { risingCount: null, totalCount: null, upCount: null, flatCount: null, downCount: null };
+    }
+
+    const upCount = snapshot.upCount ?? null;
+    const flatCount = snapshot.flatCount ?? null;
+    const downCount = snapshot.downCount ?? null;
+    const bucketTotal =
+      upCount != null && flatCount != null && downCount != null
+        ? upCount + flatCount + downCount
+        : null;
+
+    return {
+      risingCount: snapshot.risingCount ?? null,
+      totalCount: bucketTotal ?? snapshot.totalCount ?? null,
+      upCount,
+      flatCount,
+      downCount,
     };
   }
 
@@ -465,6 +494,7 @@ export class WatchlistService {
 
   private buildThemeRecommendResult(reason: string, theme: any, snapshot: any, prevRank: number | null) {
     const rankChange = prevRank != null ? prevRank - snapshot.rank : null;
+    const counts = this.normalizeThemeCounts(snapshot);
 
     return {
       reason,
@@ -480,11 +510,11 @@ export class WatchlistService {
         today: snapshot.rank,
         oneDayAgo: prevRank,
       },
-      risingCount: snapshot.risingCount,
-      totalCount: snapshot.totalCount,
-      upCount: snapshot.upCount,
-      flatCount: snapshot.flatCount,
-      downCount: snapshot.downCount,
+      risingCount: counts.risingCount,
+      totalCount: counts.totalCount,
+      upCount: counts.upCount,
+      flatCount: counts.flatCount,
+      downCount: counts.downCount,
     };
   }
 
@@ -515,22 +545,18 @@ export class WatchlistService {
           orderBy: { rank: 'asc' },
         });
         if (best) {
-          const [theme, prevSnapshot] = await Promise.all([
+          const [theme, prevRank] = await Promise.all([
             this.prisma.theme.findFirst({ where: { themeCode: best.themeCode, deletedAt: null } }),
-            this.prisma.themeDailySnapshot.findFirst({
-              where: { themeCode: best.themeCode, snapshotDate: { lt: latestSnapshot.snapshotDate } },
-              orderBy: { snapshotDate: 'desc' },
-              select: { rank: true },
-            }),
+            this.getPreviousThemeRank(best.themeCode),
           ]);
           if (theme) {
-            return this.buildThemeRecommendResult('1순위', theme, best, prevSnapshot?.rank ?? null);
+            return this.buildThemeRecommendResult('1순위', theme, best, prevRank);
           }
         }
       }
     }
 
-    // 2순위: 오늘의 Top10 테마 중 매일 다르게 1개
+    // 2순위: 장마감 후 저장된 Top10 테마 중 매일 다르게 1개
     const latestSnapshot = await this.prisma.themeDailySnapshot.findFirst({
       orderBy: { snapshotDate: 'desc' },
       select: { snapshotDate: true },
@@ -548,17 +574,30 @@ export class WatchlistService {
     if (top10.length === 0) return null;
 
     const picked = top10[dayIndex % top10.length];
-    const [theme, prevSnapshot] = await Promise.all([
+    const [theme, prevRank] = await Promise.all([
       this.prisma.theme.findFirst({ where: { themeCode: picked.themeCode, deletedAt: null } }),
-      this.prisma.themeDailySnapshot.findFirst({
-        where: { themeCode: picked.themeCode, snapshotDate: { lt: latestSnapshot.snapshotDate } },
-        orderBy: { snapshotDate: 'desc' },
-        select: { rank: true },
-      }),
+      this.getPreviousThemeRank(picked.themeCode),
     ]);
     if (!theme) return null;
 
-    return this.buildThemeRecommendResult('2순위', theme, picked, prevSnapshot?.rank ?? null);
+    return this.buildThemeRecommendResult('2순위', theme, picked, prevRank);
+  }
+
+  private async getPreviousThemeRank(themeCode: number): Promise<number | null> {
+    const latestSnapshot = await this.prisma.themeDailySnapshot.findFirst({
+      where: { themeCode },
+      orderBy: { snapshotDate: 'desc' },
+      select: { snapshotDate: true },
+    });
+    if (!latestSnapshot) return null;
+
+    const prevSnapshot = await this.prisma.themeDailySnapshot.findFirst({
+      where: { themeCode, snapshotDate: { lt: latestSnapshot.snapshotDate } },
+      orderBy: { snapshotDate: 'desc' },
+      select: { rank: true },
+    });
+
+    return prevSnapshot?.rank ?? null;
   }
 
   private async buildStockRecommendResult(reason: string, metric: any, company: any, prevMetric: any) {
@@ -788,11 +827,7 @@ export class WatchlistService {
         rank: snapshot?.rank ?? null,
         prevRank: prevSnapshot?.rank ?? null,
         rankChange,
-        risingCount: snapshot?.risingCount ?? null,
-        totalCount: snapshot?.totalCount ?? null,
-        upCount: snapshot?.upCount ?? null,
-        flatCount: snapshot?.flatCount ?? null,
-        downCount: snapshot?.downCount ?? null,
+        ...this.normalizeThemeCounts(snapshot),
       });
     }
 

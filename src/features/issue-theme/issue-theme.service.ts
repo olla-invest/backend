@@ -684,12 +684,11 @@ export class IssueThemeService {
     if (avgChangeRate >= 2) insights.push('평균 등락률 상승');
     if (changeRates.some((r) => r >= 7)) insights.push('상위 종목 급등');
 
-    // 순위/순위변동
-    const currentSnapshot = await this.prisma.themeDailySnapshot.findFirst({
-      where: { themeCode, snapshotDate: tradeDate },
-    });
+    // 현재 순위는 이슈테마 목록의 런타임 계산값을 사용하고, 스냅샷은 이전 순위 비교에만 사용한다.
+    const currentTheme = (await this.getCurrentThemeRankMap([themeCode])).get(themeCode);
+    const currentRank = currentTheme?.rank ?? null;
     const rankChange =
-      currentSnapshot && prevSnapshot ? prevSnapshot.rank - currentSnapshot.rank : null;
+      currentRank != null && prevSnapshot ? prevSnapshot.rank - currentRank : null;
 
     let isFavorite: boolean | null = null;
     if (userId) {
@@ -703,7 +702,7 @@ export class IssueThemeService {
       themeCode,
       themeName: theme.themeName,
       imageUrl: theme.imageUrl ?? null,
-      rank: currentSnapshot?.rank ?? null,
+      rank: currentRank,
       rankChange,
       risingCount,
       totalCount,
@@ -774,17 +773,20 @@ export class IssueThemeService {
     const metricsMap = new Map(metrics.map((m) => [m.stockCode, m]));
 
     const prices = this.realtimeCache.getPrices(stockCodes);
-    const themeGroups = new Map<number, { changeRates: number[]; rsScores: number[] }>();
+    const themeGroups = new Map<number, { stockCodes: Set<string>; changeRates: number[]; rsScores: number[] }>();
 
     for (const row of stockThemeRows) {
       const m = metricsMap.get(row.stockCode);
       if (!m) continue;
       const themeCode = row.themeCode;
-      if (!themeGroups.has(themeCode)) themeGroups.set(themeCode, { changeRates: [], rsScores: [] });
+      if (!themeGroups.has(themeCode)) themeGroups.set(themeCode, { stockCodes: new Set(), changeRates: [], rsScores: [] });
+      const currentGroup = themeGroups.get(themeCode)!;
+      if (currentGroup.stockCodes.has(row.stockCode)) continue;
+      currentGroup.stockCodes.add(row.stockCode);
       const rt = this.getActiveRealtimePrice(prices, row.stockCode);
       const changeRate = this.getOpenToCurrentChangeRate(m, rt);
-      themeGroups.get(themeCode)!.changeRates.push(changeRate);
-      themeGroups.get(themeCode)!.rsScores.push(Number(m.relativeStrengthScore));
+      currentGroup.changeRates.push(changeRate);
+      currentGroup.rsScores.push(Number(m.relativeStrengthScore));
     }
 
     // 순위 산출
@@ -862,10 +864,11 @@ export class IssueThemeService {
         FROM stock_daily_metrics
         ORDER BY trade_date DESC
         LIMIT $1
-      ), filtered AS (
-        SELECT
+      ), filtered_raw AS (
+        SELECT DISTINCT ON (m.trade_date, st.theme_code, m.stock_code)
           m.trade_date,
           st.theme_code,
+          m.stock_code,
           COALESCE(m.price_change_rate_1d, 0)::numeric AS change_rate,
           m.relative_strength_score::numeric AS rs_score
         FROM stock_daily_metrics m
@@ -883,6 +886,14 @@ export class IssueThemeService {
           AND m.close_price >= m.high_price_52w * 0.75
           AND m.ma_50 IS NOT NULL
           AND m.close_price > m.ma_50
+        ORDER BY m.trade_date, st.theme_code, m.stock_code
+      ), filtered AS (
+        SELECT
+          trade_date,
+          theme_code,
+          change_rate,
+          rs_score
+        FROM filtered_raw
       ), grouped AS (
         SELECT
           trade_date,
