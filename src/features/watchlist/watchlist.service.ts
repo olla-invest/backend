@@ -124,8 +124,8 @@ export class WatchlistService {
       addedDate: watchlistEntry.addedDate,
       memo: watchlistEntry.memo ?? null,
       closePrice: realtimePrice?.currentPrice ?? (today ? Number(today.closePrice) : null),
-      priceChange1d: today?.priceChange1d != null ? Number(today.priceChange1d) : null,
-      priceChangeRate1d: today?.priceChangeRate1d != null ? Number(today.priceChangeRate1d) : null,
+      priceChange1d: realtimePrice?.changeAmount ?? (today?.priceChange1d != null ? Number(today.priceChange1d) : null),
+      priceChangeRate1d: realtimePrice?.changeRate ?? (today?.priceChangeRate1d != null ? Number(today.priceChangeRate1d) : null),
       rank,
       prevRank,
       rankChange,
@@ -400,7 +400,7 @@ export class WatchlistService {
           marketType: w.company.marketType,
           rank: m.rank,
           closePrice: realtimePrice?.currentPrice ?? Number(m.closePrice),
-          priceChangeRate1d: m.priceChangeRate1d != null ? Number(m.priceChangeRate1d) : null,
+          priceChangeRate1d: realtimePrice?.changeRate ?? (m.priceChangeRate1d != null ? Number(m.priceChangeRate1d) : null),
           relativeStrengthScore: Number(m.relativeStrengthScore),
         };
       });
@@ -580,7 +580,7 @@ export class WatchlistService {
         oneDayAgo: prevRank,
       },
       closePrice: realtimePrice?.currentPrice ?? Number(metric.closePrice),
-      priceChangeRate1d: metric.priceChangeRate1d != null ? Number(metric.priceChangeRate1d) : null,
+      priceChangeRate1d: realtimePrice?.changeRate ?? (metric.priceChangeRate1d != null ? Number(metric.priceChangeRate1d) : null),
       relativeStrengthScore: Number(metric.relativeStrengthScore),
       events,
     };
@@ -805,7 +805,7 @@ export class WatchlistService {
         storedRank: m?.rank ?? null,
         currentRankSnapshotTime: stockCurrentRankContext.snapshotTime,
         closePrice: realtimePrice?.currentPrice ?? (m ? Number(m.closePrice) : null),
-        priceChangeRate1d: m?.priceChangeRate1d != null ? Number(m.priceChangeRate1d) : null,
+        priceChangeRate1d: realtimePrice?.changeRate ?? (m?.priceChangeRate1d != null ? Number(m.priceChangeRate1d) : null),
         relativeStrengthScore: m ? Number(m.relativeStrengthScore) : null,
       });
     }
@@ -855,7 +855,10 @@ export class WatchlistService {
       };
     }
 
+    // 스냅샷 trade_date는 배치 메트릭 기준일(fallbackTradeDate)과 일치해야 한다.
+    // 미래 날짜 스냅샷이 잔존하면 배치 메트릭과 불일치가 생기므로 lte 필터로 막는다.
     const snapshot = await this.prisma.stockCurrentRankSnapshot.findFirst({
+      where: fallbackTradeDate ? { tradeDate: { lte: fallbackTradeDate } } : undefined,
       orderBy: [{ tradeDate: 'desc' }, { snapshotTime: 'desc' }],
       select: { tradeDate: true, snapshotTime: true },
     });
