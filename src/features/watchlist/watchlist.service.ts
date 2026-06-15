@@ -314,7 +314,7 @@ export class WatchlistService {
 
   /**
    * GET /watchlist/highlights
-   * 관심테마 중 순위 기준 상위 2개 + 관심종목 중 rank 기준 상위 3개
+   * 관심테마 중 순위 기준 상위 2개 + 관심종목 중 현재 순위 기준 상위 3개
    */
   async getHighlights(userId: string) {
     const [watchlistThemes, watchlistStocks] = await Promise.all([
@@ -347,7 +347,6 @@ export class WatchlistService {
         orderBy: { rank: 'asc' },
         take: 2,
       });
-      const snapshotMap = new Map(snapshots.map((s) => [s.themeCode, s]));
       topThemes = snapshots.map((s) => {
         const w = watchlistThemes.find((wt) => wt.themeCode === s.themeCode)!;
         return {
@@ -372,7 +371,7 @@ export class WatchlistService {
       }));
     }
 
-    // 종목 Top3 - 최신 지표 rank 기준
+    // 종목 Top3 - 실시간 차트와 같은 현재 순위 기준
     const stockCodes = watchlistStocks.map((w) => w.company.stockCode);
     const latestStockMetric = stockCodes.length > 0
       ? await this.prisma.stockDailyMetrics.findFirst({
@@ -384,26 +383,38 @@ export class WatchlistService {
 
     let topStocks: any[] = [];
     if (latestStockMetric) {
-      const metrics = await this.prisma.stockDailyMetrics.findMany({
-        where: { stockCode: { in: stockCodes }, tradeDate: latestStockMetric.tradeDate },
-        orderBy: { rank: 'asc' },
-        take: 3,
-      });
-      topStocks = metrics.map((m) => {
-        const w = watchlistStocks.find((ws) => ws.company.stockCode === m.stockCode)!;
-        const realtimePrice = this.realtimePriceCache.getPrice(m.stockCode);
-        return {
-          type: 'STOCK',
-          companyId: w.company.companyId,
-          stockCode: m.stockCode,
-          companyName: w.company.companyName,
-          marketType: w.company.marketType,
-          rank: m.rank,
-          closePrice: realtimePrice?.currentPrice ?? Number(m.closePrice),
-          priceChangeRate1d: realtimePrice?.changeRate ?? (m.priceChangeRate1d != null ? Number(m.priceChangeRate1d) : null),
-          relativeStrengthScore: Number(m.relativeStrengthScore),
-        };
-      });
+      const [metrics, currentRankContext] = await Promise.all([
+        this.prisma.stockDailyMetrics.findMany({
+          where: { stockCode: { in: stockCodes }, tradeDate: latestStockMetric.tradeDate },
+        }),
+        this.getStockCurrentRankContext(stockCodes, latestStockMetric.tradeDate),
+      ]);
+      topStocks = metrics
+        .map((m) => ({
+          metric: m,
+          rank: currentRankContext.currentRankMap.has(m.stockCode)
+            ? currentRankContext.currentRankMap.get(m.stockCode) ?? null
+            : m.currentRank ?? m.rank ?? null,
+        }))
+        .sort((a, b) => this.compareNullableRank(a.rank, b.rank) || a.metric.stockCode.localeCompare(b.metric.stockCode))
+        .slice(0, 3)
+        .map(({ metric: m, rank }) => {
+          const w = watchlistStocks.find((ws) => ws.company.stockCode === m.stockCode)!;
+          const realtimePrice = this.realtimePriceCache.getPrice(m.stockCode);
+          return {
+            type: 'STOCK',
+            companyId: w.company.companyId,
+            stockCode: m.stockCode,
+            companyName: w.company.companyName,
+            marketType: w.company.marketType,
+            rank,
+            storedRank: m.rank,
+            currentRankSnapshotTime: currentRankContext.snapshotTime,
+            closePrice: realtimePrice?.currentPrice ?? Number(m.closePrice),
+            priceChangeRate1d: realtimePrice?.changeRate ?? (m.priceChangeRate1d != null ? Number(m.priceChangeRate1d) : null),
+            relativeStrengthScore: Number(m.relativeStrengthScore),
+          };
+        });
     } else {
       topStocks = watchlistStocks.slice(0, 3).map((w) => ({
         type: 'STOCK',
