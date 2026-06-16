@@ -240,9 +240,9 @@ export class WatchlistService {
     const currentThemeMap = await this.issueThemeService.getCurrentThemeRankMap(themeCodes);
 
     const themes = watchlistThemes.map((w) => {
-      const today = todayMap.get(w.themeCode) ?? null;
+      const today = currentThemeMap.get(w.themeCode) ?? null;
       const prev = prevMap.get(w.themeCode) ?? null;
-      return this.buildThemeItem(w, currentThemeMap.get(w.themeCode) ?? today, prev);
+      return this.buildThemeItem(w, today, prev);
     });
 
     themes.sort((a, b) => this.compareNullableRank(a.rank, b.rank) || a.themeName.localeCompare(b.themeName, 'ko'));
@@ -600,18 +600,26 @@ export class WatchlistService {
     return prevSnapshot?.rank ?? null;
   }
 
-  private async buildStockRecommendResult(reason: string, metric: any, company: any, prevMetric: any) {
+  private async buildStockRecommendResult(
+    reason: string,
+    metric: any,
+    company: any,
+    prevMetric: any,
+    displayRank?: number | null,
+    displayPrevRank?: number | null,
+  ) {
     const events: string[] = [];
-    const prevRank = prevMetric?.rank ?? null;
-    const rankChange = prevRank != null ? prevRank - metric.rank : null;
+    const rank = displayRank ?? metric.currentRank ?? metric.rank ?? null;
+    const prevRank = displayPrevRank ?? prevMetric?.currentRank ?? prevMetric?.rank ?? null;
+    const rankChange = rank != null && prevRank != null ? prevRank - rank : null;
 
     if (metric.isNewHigh) events.push('NEW_HIGH');
     if (metric.isVolatilityContraction) events.push('VOLATILITY_CONTRACTION');
     if (metric.isPriceCompression) events.push('PRICE_COMPRESSION');
     if (metric.isTrendTemplate) events.push('TREND_TEMPLATE');
-    if (prevRank != null) {
-      if (metric.rank < prevRank) events.push('RANK_UP');
-      else if (metric.rank > prevRank) events.push('RANK_DOWN');
+    if (rank != null && prevRank != null) {
+      if (rank < prevRank) events.push('RANK_UP');
+      else if (rank > prevRank) events.push('RANK_DOWN');
     }
 
     const realtimePrice = this.realtimePriceCache.getPrice(metric.stockCode);
@@ -623,12 +631,12 @@ export class WatchlistService {
       stockCode: metric.stockCode,
       companyName: company.companyName,
       marketType: company.marketType,
-      rank: metric.rank,
+      rank,
       prevRank,
       previousRank: prevRank,
       rankChange,
       rankHistory: {
-        today: metric.rank,
+        today: rank,
         oneDayAgo: prevRank,
       },
       closePrice: realtimePrice?.currentPrice ?? Number(metric.closePrice),
@@ -681,9 +689,20 @@ export class WatchlistService {
             const prevMetric = await this.prisma.stockDailyMetrics.findFirst({
               where: { stockCode: picked.stockCode, tradeDate: { lt: latestMetric.tradeDate } },
               orderBy: { tradeDate: 'desc' },
-              select: { rank: true },
+              select: { rank: true, currentRank: true },
             });
-            return this.buildStockRecommendResult('1순위', picked, company, prevMetric);
+            const [displayRankMap, currentRankContext] = await Promise.all([
+              this.realTimeChartService.getDefaultStockDisplayRankMap([picked.stockCode]),
+              this.getStockCurrentRankContext([picked.stockCode], latestMetric.tradeDate),
+            ]);
+            const displayRank = displayRankMap.get(picked.stockCode)
+              ?? (currentRankContext.currentRankMap.has(picked.stockCode)
+                ? currentRankContext.currentRankMap.get(picked.stockCode) ?? null
+                : picked.currentRank ?? picked.rank ?? null);
+            const displayPrevRank = currentRankContext.previousRankMap.has(picked.stockCode)
+              ? currentRankContext.previousRankMap.get(picked.stockCode) ?? null
+              : prevMetric?.currentRank ?? prevMetric?.rank ?? null;
+            return this.buildStockRecommendResult('1순위', picked, company, prevMetric, displayRank, displayPrevRank);
           }
         }
       }
@@ -716,12 +735,24 @@ export class WatchlistService {
       this.prisma.stockDailyMetrics.findFirst({
         where: { stockCode: picked.stockCode, tradeDate: { lt: latestMetric.tradeDate } },
         orderBy: { tradeDate: 'desc' },
-        select: { rank: true },
+        select: { rank: true, currentRank: true },
       }),
     ]);
     if (!company) return null;
 
-    return this.buildStockRecommendResult('2순위', picked, company, prevMetric);
+    const [displayRankMap, currentRankContext] = await Promise.all([
+      this.realTimeChartService.getDefaultStockDisplayRankMap([picked.stockCode]),
+      this.getStockCurrentRankContext([picked.stockCode], latestMetric.tradeDate),
+    ]);
+    const displayRank = displayRankMap.get(picked.stockCode)
+      ?? (currentRankContext.currentRankMap.has(picked.stockCode)
+        ? currentRankContext.currentRankMap.get(picked.stockCode) ?? null
+        : picked.currentRank ?? picked.rank ?? null);
+    const displayPrevRank = currentRankContext.previousRankMap.has(picked.stockCode)
+      ? currentRankContext.previousRankMap.get(picked.stockCode) ?? null
+      : prevMetric?.currentRank ?? prevMetric?.rank ?? null;
+
+    return this.buildStockRecommendResult('2순위', picked, company, prevMetric, displayRank, displayPrevRank);
   }
 
   // ─── 섹션 5: 내 관심 통합 목록 ───────────────────────────────────
@@ -814,7 +845,7 @@ export class WatchlistService {
     const items: any[] = [];
 
     for (const w of watchlistThemes) {
-      const snapshot = currentThemeMap.get(w.themeCode) ?? themeSnapshotMap.get(w.themeCode);
+      const snapshot = currentThemeMap.get(w.themeCode) ?? null;
       const prevSnapshot = prevThemeSnapshotMap.get(w.themeCode);
       const rankChange =
         snapshot && prevSnapshot ? prevSnapshot.rank - snapshot.rank : null;
