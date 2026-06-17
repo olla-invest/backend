@@ -147,7 +147,7 @@ export class ChartGateway
     // 구독 중인 클라이언트에게만 전송
     const tickData = {
       stockCode,
-      time: values['20'],                              // 체결시간
+      time: this.parseKiwoomTime(values['20']),        // 체결시간 → Unix timestamp(초)
       price: String(Math.abs(Number(values['10']))),   // 현재가 (부호 제거)
       volume: values['15'],                            // 거래량
       prevDayCompare: String(Math.abs(Number(values['11']))), // 전일대비 (부호 제거)
@@ -217,6 +217,15 @@ export class ChartGateway
     };
 
     this.server.to(`stock:${stockCode}`).emit('quote', quoteData);
+  }
+
+  private parseKiwoomTime(hhmmss: string): number {
+    const now = new Date();
+    const todayKst = new Date(now.getTime() + 9 * 60 * 60 * 1000).toISOString().split('T')[0];
+    const h = hhmmss.slice(0, 2);
+    const m = hhmmss.slice(2, 4);
+    const s = hhmmss.slice(4, 6);
+    return Math.floor(new Date(`${todayKst}T${h}:${m}:${s}+09:00`).getTime() / 1000);
   }
 
   /**
