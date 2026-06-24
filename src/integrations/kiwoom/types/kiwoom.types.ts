@@ -202,6 +202,11 @@ export interface KiwoomSectorCurrentPriceResponse {
   flu_rt: string; // 등락률
   trde_qty: string; // 거래량
   trde_prica: string; // 거래대금
+  rising: string; // 상승 종목 수
+  stdns: string; // 보합 종목 수
+  fall: string; // 하락 종목 수
+  upl: string; // 상한 종목 수
+  lst: string; // 하한 종목 수
   open_pric: string; // 시가
   high_pric: string; // 고가
   low_pric: string; // 저가
@@ -209,6 +214,45 @@ export interface KiwoomSectorCurrentPriceResponse {
   '52wk_hgst_pric_dt': string; // 52주최고가일
   '52wk_lwst_pric': string; // 52주최저가
   '52wk_lwst_pric_dt': string; // 52주최저가일
+  return_code: number;
+  return_msg: string;
+}
+
+export interface KiwoomMarketInvestorNetBuyData {
+  inds_cd: string;
+  inds_nm: string;
+  cur_prc: string;
+  pre_smbol: string;
+  pred_pre: string;
+  flu_rt: string;
+  trde_qty: string;
+  ind_netprps: string;
+  frgnr_netprps: string;
+  orgn_netprps: string;
+  [key: string]: string;
+}
+
+export interface KiwoomMarketInvestorNetBuyResponse {
+  inds_netprps: KiwoomMarketInvestorNetBuyData[];
+  return_code: number;
+  return_msg: string;
+}
+
+export interface KiwoomNewHighLowData {
+  stk_cd: string;
+  stk_nm: string;
+  cur_prc: string;
+  pred_pre_sig: string;
+  pred_pre: string;
+  flu_rt: string;
+  trde_qty: string;
+  pred_trde_qty_pre_rt: string;
+  high_pric: string;
+  low_pric: string;
+}
+
+export interface KiwoomNewHighLowResponse {
+  ntl_pric: KiwoomNewHighLowData[];
   return_code: number;
   return_msg: string;
 }

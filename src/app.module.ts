@@ -18,6 +18,7 @@ import { StockInfoModule } from './features/stock-info/stock-info.module';
 import { IssueThemeModule } from './features/issue-theme/issue-theme.module';
 import { SubscriptionModule } from './features/subscription/subscription.module';
 import { PaymentModule } from './features/payment/payment.module';
+import { MarketViewModule } from './features/market-view/market-view.module';
 
 @Module( {
     imports: [
@@ -41,6 +42,7 @@ import { PaymentModule } from './features/payment/payment.module';
         IssueThemeModule,
         SubscriptionModule,
         PaymentModule,
+        MarketViewModule,
     ],
     providers: [
         {
