@@ -17,6 +17,7 @@ import { StockInfoModule } from '../stock-info/stock-info.module';
 import { RedisModule } from '../../common/redis/redis.module';
 import { CronModule } from '../../common/cron/cron.module';
 import { AdminApiKeyGuard } from '../../common/auth/guards/admin-api-key.guard';
+import { MarketViewModule } from '../market-view/market-view.module';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { AdminApiKeyGuard } from '../../common/auth/guards/admin-api-key.guard';
     RedisModule,
     CronModule,
     EventEmitterModule.forRoot(),
+    MarketViewModule,
   ],
   controllers: [RealTimeChartController, DetailController],
   providers: [

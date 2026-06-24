@@ -16,6 +16,9 @@ import {
   KiwoomStockListResponse,
   KiwoomSectorDayCandleResponse,
   KiwoomSectorCurrentPriceResponse,
+  KiwoomMarketInvestorNetBuyResponse,
+  KiwoomNewHighLowData,
+  KiwoomNewHighLowResponse,
 } from '../types/kiwoom.types';
 
 @Injectable()
@@ -739,6 +742,124 @@ export class KiwoomRestService {
       });
 
       this.logger.error(`Failed to fetch sector current price for ${sectorCode}`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * 시장별 투자자 순매수 조회 (ka10051)
+   * 금액 기준, 통합거래소 기준으로 종합(KOSPI/KOSDAQ) 행을 사용한다.
+   */
+  async getMarketInvestorNetBuy(
+    marketType: '0' | '1',
+    baseDate: string,
+  ): Promise<KiwoomMarketInvestorNetBuyResponse> {
+    const startTime = Date.now();
+    const requestData = {
+      mrkt_tp: marketType,
+      amt_qty_tp: '0',
+      base_dt: baseDate,
+      stex_tp: '3',
+    };
+
+    try {
+      const token = await this.authService.ensureValidToken();
+      const response = await this.httpClient.post<KiwoomMarketInvestorNetBuyResponse>(
+        '/api/dostk/sect',
+        requestData,
+        {
+          headers: {
+            'api-id': 'ka10051',
+            authorization: `Bearer ${token}`,
+          },
+        },
+      );
+
+      await this.logApiCall({
+        apiName: 'ka10051',
+        stockCode: marketType === '0' ? '001' : '101',
+        requestData,
+        responseStatus: 'SUCCESS',
+        responseMessage: response.data.return_msg,
+        responseTimeMs: Date.now() - startTime,
+      });
+      return response.data;
+    } catch (error) {
+      await this.logApiCall({
+        apiName: 'ka10051',
+        stockCode: marketType === '0' ? '001' : '101',
+        requestData,
+        responseStatus: 'ERROR',
+        responseMessage: (error as Error).message,
+        responseTimeMs: Date.now() - startTime,
+      });
+      throw error;
+    }
+  }
+
+  /**
+   * 시장별 52주 신고가/신저가 종목 조회 (ka10016)
+   * 연속조회가 있으면 모든 페이지를 합쳐 반환한다.
+   */
+  async getNewHighLowStocks(
+    marketType: '001' | '101',
+    type: '1' | '2',
+  ): Promise<KiwoomNewHighLowData[]> {
+    const startTime = Date.now();
+    const requestData = {
+      mrkt_tp: marketType,
+      ntl_tp: type,
+      high_low_close_tp: '1',
+      stk_cnd: '0',
+      trde_qty_tp: '00000',
+      crd_cnd: '0',
+      updown_incls: '1',
+      dt: '250',
+      stex_tp: '3',
+    };
+
+    try {
+      const token = await this.authService.ensureValidToken();
+      const rows: KiwoomNewHighLowData[] = [];
+      let contYn = '';
+      let nextKey = '';
+
+      for (let page = 0; page < 20; page++) {
+        const response = await this.httpClient.post<KiwoomNewHighLowResponse>(
+          '/api/dostk/stkinfo',
+          requestData,
+          {
+            headers: {
+              'api-id': 'ka10016',
+              authorization: `Bearer ${token}`,
+              ...(contYn === 'Y' ? { 'cont-yn': contYn, 'next-key': nextKey } : {}),
+            },
+          },
+        );
+        rows.push(...(response.data.ntl_pric ?? []));
+        contYn = String(response.headers['cont-yn'] ?? '');
+        nextKey = String(response.headers['next-key'] ?? '');
+        if (contYn !== 'Y' || !nextKey) break;
+      }
+
+      await this.logApiCall({
+        apiName: 'ka10016',
+        stockCode: marketType,
+        requestData,
+        responseStatus: 'SUCCESS',
+        responseMessage: `${type === '1' ? 'new-high' : 'new-low'} ${rows.length} rows`,
+        responseTimeMs: Date.now() - startTime,
+      });
+      return rows;
+    } catch (error) {
+      await this.logApiCall({
+        apiName: 'ka10016',
+        stockCode: marketType,
+        requestData,
+        responseStatus: 'ERROR',
+        responseMessage: (error as Error).message,
+        responseTimeMs: Date.now() - startTime,
+      });
       throw error;
     }
   }

@@ -383,6 +383,79 @@ model MarketIndexHistory {
   @@map("market_index_history")
 }
 
+// 마켓뷰 시장별 일별 계산 결과
+model MarketViewDailySnapshot {
+  snapshotId               String    @id @default(uuid()) @map("snapshot_id") @db.Uuid
+  marketType               String    @map("market_type") @db.VarChar(10)
+  tradeDate                DateTime  @map("trade_date") @db.Date
+  indexOpen                Decimal   @map("index_open") @db.Decimal(12, 2)
+  indexHigh                Decimal   @map("index_high") @db.Decimal(12, 2)
+  indexLow                 Decimal   @map("index_low") @db.Decimal(12, 2)
+  indexClose               Decimal   @map("index_close") @db.Decimal(12, 2)
+  indexChange              Decimal   @map("index_change") @db.Decimal(12, 2)
+  indexChangeRate          Decimal   @map("index_change_rate") @db.Decimal(8, 4)
+  volume                   BigInt
+  risingCount              Int       @map("rising_count")
+  flatCount                Int       @map("flat_count")
+  fallingCount             Int       @map("falling_count")
+  upperLimitCount          Int       @default(0) @map("upper_limit_count")
+  lowerLimitCount          Int       @default(0) @map("lower_limit_count")
+  foreignNetBuy            Decimal   @map("foreign_net_buy") @db.Decimal(20, 2)
+  institutionNetBuy        Decimal   @map("institution_net_buy") @db.Decimal(20, 2)
+  individualNetBuy         Decimal   @map("individual_net_buy") @db.Decimal(20, 2)
+  ma20                     Decimal?  @db.Decimal(12, 2)
+  ma50                     Decimal?  @db.Decimal(12, 2)
+  ma200                    Decimal?  @db.Decimal(12, 2)
+  belowMa20Ratio           Decimal   @map("below_ma20_ratio") @db.Decimal(6, 2)
+  belowMa200Ratio          Decimal   @map("below_ma200_ratio") @db.Decimal(6, 2)
+  adr                      Decimal?  @db.Decimal(10, 4)
+  newHighCount             Int       @map("new_high_count")
+  newLowCount              Int       @map("new_low_count")
+  netNewHigh               Int       @map("net_new_high")
+  isDistributionDay        Boolean   @default(false) @map("is_distribution_day")
+  distributionCount        Int       @default(0) @map("distribution_count")
+  distributionAccelerating Boolean   @default(false) @map("distribution_accelerating")
+  rallyDay                 Int?      @map("rally_day")
+  rallyStartDate           DateTime? @map("rally_start_date") @db.Date
+  rallyAttemptLow          Decimal?  @map("rally_attempt_low") @db.Decimal(12, 2)
+  isFollowThroughDay       Boolean   @default(false) @map("is_follow_through_day")
+  followThroughDate        DateTime? @map("follow_through_date") @db.Date
+  shortSignal              String    @map("short_signal") @db.VarChar(10)
+  longSignal               String    @map("long_signal") @db.VarChar(10)
+  marketState              String    @map("market_state") @db.VarChar(30)
+  exposureMin              Int       @map("exposure_min")
+  exposureMax              Int       @map("exposure_max")
+  alertCode                String    @map("alert_code") @db.VarChar(50)
+  alertMessage             String    @map("alert_message") @db.VarChar(500)
+  dataStatus               String    @default("NORMAL") @map("data_status") @db.VarChar(20)
+  delayedMessage           String?   @map("delayed_message") @db.VarChar(500)
+  sourceTradeDate          DateTime  @map("source_trade_date") @db.Date
+  createdAt                DateTime  @default(now()) @map("created_at")
+  updatedAt                DateTime  @default(now()) @updatedAt @map("updated_at")
+
+  @@unique([marketType, tradeDate], map: "uk_market_view_snapshot_market_date")
+  @@index([tradeDate(sort: Desc)], map: "idx_market_view_snapshot_date")
+  @@index([marketType, tradeDate(sort: Desc)], map: "idx_market_view_snapshot_market_date")
+  @@map("market_view_daily_snapshots")
+}
+
+// 마켓뷰 분산일 이력. 최근 25거래일 및 FTD 리셋 상태를 추적한다.
+model MarketViewDistributionDay {
+  distributionId String    @id @default(uuid()) @map("distribution_id") @db.Uuid
+  marketType     String    @map("market_type") @db.VarChar(10)
+  tradeDate      DateTime  @map("trade_date") @db.Date
+  changeRate     Decimal   @map("change_rate") @db.Decimal(8, 4)
+  volume         BigInt
+  isActive       Boolean   @default(true) @map("is_active")
+  removedReason  String?   @map("removed_reason") @db.VarChar(30)
+  removedAt      DateTime? @map("removed_at")
+  createdAt      DateTime  @default(now()) @map("created_at")
+
+  @@unique([marketType, tradeDate], map: "uk_market_view_distribution_market_date")
+  @@index([marketType, isActive, tradeDate(sort: Desc)], map: "idx_market_view_distribution_active")
+  @@map("market_view_distribution_days")
+}
+
 // 11. API 호출 이력 테이블 (Optional)
 model KiwoomApiCallLog {
   logId           String   @id @default(uuid()) @map("log_id") @db.Uuid

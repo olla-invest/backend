@@ -7,6 +7,7 @@ import { CronRunLogService } from '../../common/cron/cron-run-log.service';
 import { isKrxTradingDay, previousTradingDay } from '../../common/utils/market-calendar.util';
 import { PrismaService } from '../../common/prisma/prisma.service';
 import { CurrentRankService } from './current-rank.service';
+import { MarketViewService } from '../market-view/market-view.service';
 
 /**
  * 스케줄 잡 정리
@@ -14,6 +15,7 @@ import { CurrentRankService } from './current-rank.service';
  *  08:50 (월~금, 거래일)             prepareMarketOpenData
  *  09:00~15:30 (3분 / 30초)         실시간 연결 유지 / heartbeat
  *  15:40 (월~금, 거래일)             collectEndOfDayData   (원주가+수정주가 수집 후 메트릭스 계산)
+ *                                      └─ 완료 직후 마켓뷰 일별 집계
  *  23:30 (매일, 거래일)              dailyAdjustedPriceBackfill (★ 메트릭스 계산 전에 실행)
  *  00:10 (매일)                     dailyMaintenance
  *  서버 시작 시                      onApplicationBootstrap → 누락된 메트릭스 catch-up
@@ -39,6 +41,7 @@ export class DataSchedulerService implements OnApplicationBootstrap {
     private readonly cronRunLog: CronRunLogService,
     private readonly prisma: PrismaService,
     private readonly currentRankService: CurrentRankService,
+    private readonly marketViewService: MarketViewService,
   ) {}
 
   // ─────────────────────────────────────────────────────────────
@@ -156,6 +159,7 @@ export class DataSchedulerService implements OnApplicationBootstrap {
         await this.currentRankService.createCurrentRankSnapshot(new Date(), tradeDate);
         await this.runMetricsFor(tradeDate);
         await this.currentRankService.finalizeDailyCurrentRank(tradeDate);
+        await this.runMarketViewFor(tradeDate, true);
       });
 
       if (result === null) {
@@ -212,6 +216,9 @@ export class DataSchedulerService implements OnApplicationBootstrap {
       const iso = targetDate.toISOString().slice(0, 10);
       if (await this.hasMetricsForDate(targetDate)) {
         this.logger.log(`[safety-net] metrics already exist for ${iso}`);
+        if (!(await this.hasMarketViewForDate(targetDate))) {
+          await this.runMarketViewFor(targetDate, this.isTodayKst(targetDate));
+        }
         return;
       }
       if (!(await this.hasRequiredCandlesForDate(targetDate))) {
@@ -219,6 +226,7 @@ export class DataSchedulerService implements OnApplicationBootstrap {
         return;
       }
       await this.runMetricsFor(targetDate, true);
+      await this.runMarketViewFor(targetDate, this.isTodayKst(targetDate));
     });
 
     if (result === null) {
@@ -308,6 +316,7 @@ export class DataSchedulerService implements OnApplicationBootstrap {
       this.logger.warn(`[catch-up] Re-running metrics for ${iso}`);
       try {
         await this.runMetricsFor(d, metricsMissing);
+        await this.runMarketViewFor(d, false);
       } catch (err) {
         this.logger.error(`[catch-up] Failed for ${iso}`, err);
       }
@@ -345,12 +354,27 @@ export class DataSchedulerService implements OnApplicationBootstrap {
     });
   }
 
+  private async runMarketViewFor(tradeDate: Date, useExternalSources: boolean): Promise<void> {
+    await this.cronRunLog.run('calculateMarketViewAfterClose', tradeDate, async () => {
+      const marketView = await this.marketViewService.calculateForDate(tradeDate, useExternalSources);
+      this.logger.log(`[market-view] chained aggregation completed for ${marketView.tradeDate}`);
+      return marketView;
+    });
+  }
+
   private async hasMetricsForDate(tradeDate: Date): Promise<boolean> {
     const rows = await this.prisma.$queryRawUnsafe<{ count: number }[]>(
       `SELECT COUNT(*)::int AS count FROM stock_daily_metrics WHERE trade_date = $1`,
       this.dateOnly(tradeDate),
     );
     return (rows[0]?.count ?? 0) > 0;
+  }
+
+  private async hasMarketViewForDate(tradeDate: Date): Promise<boolean> {
+    const count = await this.prisma.marketViewDailySnapshot.count({
+      where: { tradeDate: this.dateOnly(tradeDate) },
+    });
+    return count >= 2;
   }
 
   private async hasRequiredCandlesForDate(tradeDate: Date): Promise<boolean> {
@@ -383,6 +407,10 @@ export class DataSchedulerService implements OnApplicationBootstrap {
   private getKstParts(now: Date = new Date()): { kstHours: number; kstMinutes: number } {
     const kstNow = new Date(now.getTime() + 9 * 60 * 60 * 1000);
     return { kstHours: kstNow.getUTCHours(), kstMinutes: kstNow.getUTCMinutes() };
+  }
+
+  private isTodayKst(date: Date): boolean {
+    return this.dateOnly(date).getTime() === this.todayKstDateOnly().getTime();
   }
 
   /** 오늘 KST 자정 (UTC 정규화된 DATE) */
