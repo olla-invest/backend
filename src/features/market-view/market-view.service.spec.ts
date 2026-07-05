@@ -67,6 +67,39 @@ describe( 'MarketViewService rules', () => {
         } );
     } );
 
+    describe( 'distribution day volume rules', () => {
+        it( 'keeps sector volume in the same unit as stored index candles', () => {
+            expect( service.getComparableMarketVolume( '554574', 560644n ) ).toBe( 554574n );
+            expect( service.getComparableMarketVolume( undefined, 560644n ) ).toBe( 560644n );
+        } );
+
+        it( 'does not mark a distribution day when volume decreases', () => {
+            expect( service.isDistributionDay( -6.7391, 554574n, 601212n ) ).toBe( false );
+            expect( service.isDistributionDay( -6.7391, 601213n, 601212n ) ).toBe( true );
+        } );
+
+        it( 'deactivates an existing distribution day when recalculation no longer qualifies', async () => {
+            const prisma = {
+                marketViewDistributionDay: {
+                    updateMany: jest.fn().mockResolvedValue( { count: 1 } ),
+                },
+            };
+            const recalculatingService = new MarketViewService( prisma as any, {} as any, {} as any ) as any;
+            const tradeDate = new Date( '2026-07-02T00:00:00.000Z' );
+
+            await recalculatingService.syncDistributionDay( 'KOSDAQ', tradeDate, false, -6.7391, 554574n );
+
+            expect( prisma.marketViewDistributionDay.updateMany ).toHaveBeenCalledWith( {
+                where: { marketType: 'KOSDAQ', tradeDate, isActive: true },
+                data: {
+                    isActive: false,
+                    removedReason: 'RECALCULATED_NOT_DISTRIBUTION',
+                    removedAt: expect.any( Date ),
+                },
+            } );
+        } );
+    } );
+
     it( 'uses the worse KOSPI/KOSDAQ signal for the headline', () => {
         const overall = service.buildOverallSignal( [
             { marketType: 'KOSPI', shortSignal: 'GREEN', longSignal: 'GREEN', alertMessage: '정상' },
@@ -78,14 +111,14 @@ describe( 'MarketViewService rules', () => {
         expect( overall.signalMeta.short ).toMatchObject( {
             actionLabel: '매도',
             signalLabel: '하락신호',
-            colorClass: 'blue-500',
-            inactiveColorClass: 'blue-200',
+            colorClass: 'blue',
+            inactiveColorClass: 'blue',
         } );
         expect( overall.signalMeta.long ).toMatchObject( {
             actionLabel: '중립',
             signalLabel: '중립',
-            colorClass: 'slate-500',
-            inactiveColorClass: 'slate-200',
+            colorClass: 'slate',
+            inactiveColorClass: 'slate',
         } );
         expect( overall.guide ).toBe( '지금은 빠져나올 때예요.' );
     } );
@@ -105,8 +138,8 @@ describe( 'MarketViewService rules', () => {
         expect( service.getAdrStatus( 1.1 ).signalMeta ).toMatchObject( {
             actionLabel: '매수',
             signalLabel: '상승신호',
-            colorClass: 'rose-500',
-            inactiveColorClass: 'rose-200',
+            colorClass: 'rose',
+            inactiveColorClass: 'rose',
         } );
     } );
 } );

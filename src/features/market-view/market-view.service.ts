@@ -9,8 +9,8 @@ type SignalMeta = {
   action: 'BUY' | 'SELL' | 'NEUTRAL';
   actionLabel: '매수' | '매도' | '중립';
   signalLabel: '상승신호' | '하락신호' | '중립';
-  colorClass: 'rose-500' | 'blue-500' | 'slate-500';
-  inactiveColorClass: 'rose-200' | 'blue-200' | 'slate-200';
+  colorClass: 'rose' | 'blue' | 'slate';
+  inactiveColorClass: 'rose' | 'blue' | 'slate';
 };
 
 type StockBreadth = {
@@ -215,7 +215,7 @@ export class MarketViewService {
             fallingCount = this.parseInteger( sectorResult.value.fall, fallingCount );
             upperLimitCount = this.parseInteger( sectorResult.value.upl );
             lowerLimitCount = this.parseInteger( sectorResult.value.lst );
-            currentVolume = BigInt( this.parseInteger( sectorResult.value.trde_qty, Number( currentVolume ) ) ) * 1000n;
+            currentVolume = this.getComparableMarketVolume( sectorResult.value.trde_qty, currentVolume );
         } else if ( useExternalSources ) {
             sourceErrors.push( '시장 지수/등락 종목 데이터' );
             if ( previousSnapshot ) {
@@ -265,23 +265,8 @@ export class MarketViewService {
 
         await this.expireDistributionDays( marketType, indexCandles, tradeDate );
         const previousVolume = previousSnapshot?.volume ?? previousIndex.volume;
-        const isDistributionDay =
-      indexChangeRate <= this.distributionMinDropRate &&
-      currentVolume > previousVolume;
-
-        if ( isDistributionDay ) {
-            await this.prisma.marketViewDistributionDay.upsert( {
-                where: { marketType_tradeDate: { marketType, tradeDate } },
-                create: { marketType, tradeDate, changeRate: indexChangeRate, volume: currentVolume },
-                update: {
-                    changeRate: indexChangeRate,
-                    volume: currentVolume,
-                    isActive: true,
-                    removedReason: null,
-                    removedAt: null,
-                },
-            } );
-        }
+        const isDistributionDay = this.isDistributionDay( indexChangeRate, currentVolume, previousVolume );
+        await this.syncDistributionDay( marketType, tradeDate, isDistributionDay, indexChangeRate, currentVolume );
 
         let activeDistributionDays = await this.prisma.marketViewDistributionDay.findMany( {
             where: { marketType, isActive: true, tradeDate: { lte: tradeDate } },
@@ -591,6 +576,47 @@ export class MarketViewService {
         } );
     }
 
+    private getComparableMarketVolume( sourceVolume: string | undefined, fallbackVolume: bigint ) {
+        if ( sourceVolume == null ) return fallbackVolume;
+        return BigInt( this.parseInteger( sourceVolume, Number( fallbackVolume ) ) );
+    }
+
+    private isDistributionDay( indexChangeRate: number, currentVolume: bigint, previousVolume: bigint ) {
+        return indexChangeRate <= this.distributionMinDropRate && currentVolume > previousVolume;
+    }
+
+    private async syncDistributionDay(
+        marketType: MarketType,
+        tradeDate: Date,
+        isDistributionDay: boolean,
+        changeRate: number,
+        volume: bigint,
+    ) {
+        if ( isDistributionDay ) {
+            await this.prisma.marketViewDistributionDay.upsert( {
+                where: { marketType_tradeDate: { marketType, tradeDate } },
+                create: { marketType, tradeDate, changeRate, volume },
+                update: {
+                    changeRate,
+                    volume,
+                    isActive: true,
+                    removedReason: null,
+                    removedAt: null,
+                },
+            } );
+            return;
+        }
+
+        await this.prisma.marketViewDistributionDay.updateMany( {
+            where: { marketType, tradeDate, isActive: true },
+            data: {
+                isActive: false,
+                removedReason: 'RECALCULATED_NOT_DISTRIBUTION',
+                removedAt: new Date(),
+            },
+        } );
+    }
+
     private getLongSignal( close: number, ma50: number | null, ma200: number | null ): Signal {
         if ( ma50 == null || ma200 == null ) return 'YELLOW';
         if ( close > ma50 && ma50 > ma200 ) return 'GREEN';
@@ -821,22 +847,22 @@ export class MarketViewService {
                 action: 'BUY',
                 actionLabel: '매수',
                 signalLabel: '상승신호',
-                colorClass: 'rose-500',
-                inactiveColorClass: 'rose-200',
+                colorClass: 'rose',
+                inactiveColorClass: 'rose',
             },
             RED: {
                 action: 'SELL',
                 actionLabel: '매도',
                 signalLabel: '하락신호',
-                colorClass: 'blue-500',
-                inactiveColorClass: 'blue-200',
+                colorClass: 'blue',
+                inactiveColorClass: 'blue',
             },
             YELLOW: {
                 action: 'NEUTRAL',
                 actionLabel: '중립',
                 signalLabel: '중립',
-                colorClass: 'slate-500',
-                inactiveColorClass: 'slate-200',
+                colorClass: 'slate',
+                inactiveColorClass: 'slate',
             },
         };
         return meta[signal];
