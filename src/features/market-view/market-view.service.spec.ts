@@ -75,6 +75,18 @@ describe( 'MarketViewService rules', () => {
 
         expect( overall.shortSignal ).toBe( 'RED' );
         expect( overall.longSignal ).toBe( 'YELLOW' );
+        expect( overall.signalMeta.short ).toMatchObject( {
+            actionLabel: '매도',
+            signalLabel: '하락신호',
+            colorClass: 'blue-500',
+            inactiveColorClass: 'blue-200',
+        } );
+        expect( overall.signalMeta.long ).toMatchObject( {
+            actionLabel: '중립',
+            signalLabel: '중립',
+            colorClass: 'slate-500',
+            inactiveColorClass: 'slate-200',
+        } );
         expect( overall.guide ).toBe( '지금은 빠져나올 때예요.' );
     } );
 
@@ -90,5 +102,11 @@ describe( 'MarketViewService rules', () => {
         expect( service.getMaBreakdownStatus( 40 ).signal ).toBe( 'RED' );
         expect( service.getAdrStatus( 1.1 ).signal ).toBe( 'GREEN' );
         expect( service.getSignedStatus( -1 ).signal ).toBe( 'RED' );
+        expect( service.getAdrStatus( 1.1 ).signalMeta ).toMatchObject( {
+            actionLabel: '매수',
+            signalLabel: '상승신호',
+            colorClass: 'rose-500',
+            inactiveColorClass: 'rose-200',
+        } );
     } );
 } );
