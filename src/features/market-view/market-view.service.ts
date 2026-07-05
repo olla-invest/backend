@@ -48,7 +48,7 @@ export class MarketViewService {
     }
 
     async backfill( days = 260 ) {
-        const normalizedDays = Math.min( Math.max( Math.floor( days ) || 260, 2 ), 500 );
+        const normalizedDays = Math.min( Math.max( Math.floor( days ) || 260, 2 ), 1500 );
         const result = await this.redisLock.withLock(
             'cron:lock:market-view-backfill',
             6 * 60 * 60 * 1000,
@@ -69,12 +69,20 @@ export class MarketViewService {
                 const chronologicalDates = dates.map( ( row ) => row.trade_date ).reverse();
                 const latestDate = chronologicalDates[ chronologicalDates.length - 1 ];
 
+                const skipped: string[] = [];
                 for ( let index = 0; index < chronologicalDates.length; index++ ) {
                     const tradeDate = chronologicalDates[index];
-                    await this.calculateForDate(
-                        tradeDate,
-                        latestDate != null && this.isoDate( tradeDate ) === this.isoDate( latestDate ),
-                    );
+                    try {
+                        await this.calculateForDate(
+                            tradeDate,
+                            latestDate != null && this.isoDate( tradeDate ) === this.isoDate( latestDate ),
+                        );
+                    } catch ( error ) {
+                        skipped.push( this.isoDate( tradeDate ) );
+                        this.logger.warn(
+                            `[backfill] ${this.isoDate( tradeDate )} 계산 실패, 건너뜀: ${( error as Error ).message}`,
+                        );
+                    }
                     if ( ( index + 1 ) % 5 === 0 ) await this.yieldToEventLoop();
                 }
 
@@ -82,6 +90,7 @@ export class MarketViewService {
                     days: chronologicalDates.length,
                     from: chronologicalDates[ 0 ] ? this.isoDate( chronologicalDates[ 0 ] ) : null,
                     to: latestDate ? this.isoDate( latestDate ) : null,
+                    skipped,
                 };
             },
         );
@@ -742,6 +751,7 @@ export class MarketViewService {
                 latestDays: latestDistributionDays.map( ( day ) => ( {
                     tradeDate: this.isoDate( day.tradeDate ),
                     changeRate: Number( day.changeRate ),
+                    volume: day.volume.toString(),
                 } ) ),
             },
             rally: {

@@ -2115,12 +2115,13 @@ export class RealTimeChartService implements OnModuleInit {
    * 시장 지수 캔들 수집 (KOSPI/KOSDAQ)
    * @param sectorCode 업종코드 (001: KOSPI, 101: KOSDAQ)
    * @param indexStockCode DB 사용 코드 (INDEX_KOSPI, INDEX_KOSDAQ)
+   * @param maxCandles 최대 수집 캔들 수 (기본 600 = 단일 페이지, 연속조회로 더 확장 가능)
    */
-  async collectSectorDayCandles(sectorCode: string, indexStockCode: string) {
+  async collectSectorDayCandles(sectorCode: string, indexStockCode: string, maxCandles = 600) {
     const today = new Date().toISOString().slice(0, 10).replace(/-/g, '');
 
     try {
-      const data = await this.kiwoomRest.getSectorDayCandles(sectorCode, today);
+      const data = await this.kiwoomRest.getSectorDayCandlesWithHistory(sectorCode, today, maxCandles);
       const candles = data.inds_dt_pole_qry;
 
       if (!candles || !Array.isArray(candles)) {
@@ -2160,10 +2161,10 @@ export class RealTimeChartService implements OnModuleInit {
    * - BATCH_SIZE만큼 동시 처리, 배치 간격 BATCH_DELAY_MS 대기
    * - 429 발생 시 지수 백오프 재시도
    */
-  async collectIndexCandles() {
-    this.logger.log('Collecting market index day candles (KOSPI + KOSDAQ)...');
-    await this.collectSectorDayCandles('001', 'INDEX_KOSPI');
-    await this.collectSectorDayCandles('101', 'INDEX_KOSDAQ');
+  async collectIndexCandles(maxCandles = 600) {
+    this.logger.log(`Collecting market index day candles (KOSPI + KOSDAQ), maxCandles=${maxCandles}...`);
+    await this.collectSectorDayCandles('001', 'INDEX_KOSPI', maxCandles);
+    await this.collectSectorDayCandles('101', 'INDEX_KOSDAQ', maxCandles);
     this.logger.log('Market index day candles collected.');
     // ka20006 doesn't include today's candle ??also fetch today's close via ka20001
     const todayClose = await this.collectTodayIndexClose();
