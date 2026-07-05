@@ -688,6 +688,80 @@ export class KiwoomRestService {
   }
 
   /**
+   * 업종 일봉 차트 연속조회 (ka20006)
+   * @param sectorCode 업종코드 (001: KOSPI, 101: KOSDAQ)
+   * @param baseDate 기준일자 (YYYYMMDD)
+   * @param maxCandles 최대 수집 캔들 수
+   */
+  async getSectorDayCandlesWithHistory(
+    sectorCode: string,
+    baseDate: string,
+    maxCandles = 1500,
+  ): Promise<KiwoomSectorDayCandleResponse> {
+    const startTime = Date.now();
+    const allCandles: KiwoomSectorDayCandleResponse['inds_dt_pole_qry'] = [];
+    let contYn = '';
+    let nextKey = '';
+
+    try {
+      const token = await this.authService.ensureValidToken();
+
+      do {
+        const headers: Record<string, string> = {
+          'api-id': 'ka20006',
+          authorization: `Bearer ${token}`,
+        };
+        if (contYn === 'Y') {
+          headers['cont-yn'] = contYn;
+          headers['next-key'] = nextKey;
+        }
+
+        const response = await this.httpClient.post<KiwoomSectorDayCandleResponse>(
+          '/api/dostk/chart',
+          { inds_cd: sectorCode, base_dt: baseDate },
+          { headers },
+        );
+
+        allCandles.push(...(response.data.inds_dt_pole_qry || []));
+        contYn = response.headers['cont-yn'] || '';
+        nextKey = response.headers['next-key'] || '';
+
+        this.logger.debug(`Sector day candles: ${allCandles.length}/${maxCandles}, cont: ${contYn}`);
+      } while (contYn === 'Y' && allCandles.length < maxCandles);
+
+      await this.logApiCall({
+        apiName: 'ka20006',
+        stockCode: sectorCode,
+        requestData: { inds_cd: sectorCode, base_dt: baseDate },
+        responseStatus: 'SUCCESS',
+        responseMessage: `${allCandles.length} candles`,
+        responseTimeMs: Date.now() - startTime,
+      });
+
+      return {
+        inds_cd: sectorCode,
+        inds_dt_pole_qry: allCandles.slice(0, maxCandles),
+        return_code: 0,
+        return_msg: '정상적으로 처리되었습니다',
+      };
+    } catch (error) {
+      const responseTime = Date.now() - startTime;
+
+      await this.logApiCall({
+        apiName: 'ka20006',
+        stockCode: sectorCode,
+        requestData: { inds_cd: sectorCode, base_dt: baseDate },
+        responseStatus: 'ERROR',
+        responseMessage: error.message,
+        responseTimeMs: responseTime,
+      });
+
+      this.logger.error(`Failed to fetch sector day candles history for ${sectorCode}`, error);
+      throw error;
+    }
+  }
+
+  /**
    * 업종 현재가 조회 (ka20001)
    * @param marketType 시장구분 (0: 코스피, 1: 코스닥)
    * @param sectorCode 업종코드 (001: KOSPI, 101: KOSDAQ)

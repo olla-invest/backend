@@ -43,7 +43,7 @@ export class MarketViewController {
   @ApiOperation( { summary: '[관리자] 최근 N거래일 마켓뷰 백필' } )
   @ApiQuery( { name: 'days', required: false, example: 260 } )
   backfill(
-    @Query( 'days', new IntRangePipe( 'days', 2, 500, true ) ) days = 260,
+    @Query( 'days', new IntRangePipe( 'days', 2, 1500, true ) ) days = 260,
   ) {
       return this.marketViewService.backfill( days );
   }

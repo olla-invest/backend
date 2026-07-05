@@ -423,8 +423,11 @@ export class RealTimeChartController {
   @Post('collect/index')
   @UseGuards(AdminApiKeyGuard)
   @ApiOperation( { summary: '[관리자] 시장 지수 일봉 수집', description: 'KOSPI + KOSDAQ. 장 마감 후 사용.' } )
-  async collectIndexCandles() {
-    return await this.chartService.collectIndexCandles();
+  @ApiQuery( { name: 'maxCandles', required: false, example: 600, description: '최대 수집 캔들 수 (연속조회로 확장)' } )
+  async collectIndexCandles(
+    @Query( 'maxCandles', new IntRangePipe( 'maxCandles', 1, 3000, true ) ) maxCandles = 600,
+  ) {
+    return await this.chartService.collectIndexCandles(maxCandles);
   }
 
   @Post('collect/index-close')
