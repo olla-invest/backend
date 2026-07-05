@@ -5,6 +5,13 @@ import { KiwoomRestService } from '../../integrations/kiwoom/rest/kiwoom-rest.se
 
 type MarketType = 'KOSPI' | 'KOSDAQ';
 type Signal = 'GREEN' | 'YELLOW' | 'RED';
+type SignalMeta = {
+  action: 'BUY' | 'SELL' | 'NEUTRAL';
+  actionLabel: '매수' | '매도' | '중립';
+  signalLabel: '상승신호' | '하락신호' | '중립';
+  colorClass: 'rose-500' | 'blue-500' | 'slate-500';
+  inactiveColorClass: 'rose-200' | 'blue-200' | 'slate-200';
+};
 
 type StockBreadth = {
   total_count: number;
@@ -682,6 +689,10 @@ export class MarketViewService {
         return {
             shortSignal,
             longSignal,
+            signalMeta: {
+                short: this.getSignalMeta( shortSignal ),
+                long: this.getSignalMeta( longSignal ),
+            },
             headline: message.headline,
             guide: message.guide,
             summary: [ kospi, kosdaq ]
@@ -762,6 +773,10 @@ export class MarketViewService {
             },
             shortSignal: row.shortSignal,
             longSignal: row.longSignal,
+            signalMeta: {
+                short: this.getSignalMeta( row.shortSignal ),
+                long: this.getSignalMeta( row.longSignal ),
+            },
             marketState: row.marketState,
             recommendedExposure: { min: row.exposureMin, max: row.exposureMax },
             alertCode: row.alertCode,
@@ -774,22 +789,57 @@ export class MarketViewService {
     }
 
     private getMaBreakdownStatus( ratio: number ) {
-        if ( ratio < 20 ) return { signal: 'GREEN' as const, label: '이탈 종목 적음' };
-        if ( ratio < 40 ) return { signal: 'YELLOW' as const, label: '이탈 종목 보통' };
-        return { signal: 'RED' as const, label: '이탈 종목 많음' };
+        if ( ratio < 20 ) return this.withSignalMeta( 'GREEN', '이탈 종목 적음' );
+        if ( ratio < 40 ) return this.withSignalMeta( 'YELLOW', '이탈 종목 보통' );
+        return this.withSignalMeta( 'RED', '이탈 종목 많음' );
     }
 
     private getAdrStatus( adr: number | null ) {
-        if ( adr == null ) return { signal: 'YELLOW' as const, label: '비교 데이터 없음' };
-        if ( adr > 1 ) return { signal: 'GREEN' as const, label: '상승 종목 우세' };
-        if ( adr < 1 ) return { signal: 'RED' as const, label: '하락 종목 우세' };
-        return { signal: 'YELLOW' as const, label: '상승·하락 동수' };
+        if ( adr == null ) return this.withSignalMeta( 'YELLOW', '비교 데이터 없음' );
+        if ( adr > 1 ) return this.withSignalMeta( 'GREEN', '상승 종목 우세' );
+        if ( adr < 1 ) return this.withSignalMeta( 'RED', '하락 종목 우세' );
+        return this.withSignalMeta( 'YELLOW', '상승·하락 동수' );
     }
 
     private getSignedStatus( value: number ) {
-        if ( value > 0 ) return { signal: 'GREEN' as const, label: '신고가 우세' };
-        if ( value < 0 ) return { signal: 'RED' as const, label: '신저가 우세' };
-        return { signal: 'YELLOW' as const, label: '신고가·신저가 동수' };
+        if ( value > 0 ) return this.withSignalMeta( 'GREEN', '신고가 우세' );
+        if ( value < 0 ) return this.withSignalMeta( 'RED', '신저가 우세' );
+        return this.withSignalMeta( 'YELLOW', '신고가·신저가 동수' );
+    }
+
+    private withSignalMeta<T extends string>( signal: Signal, label: T ) {
+        return {
+            signal,
+            label,
+            signalMeta: this.getSignalMeta( signal ),
+        };
+    }
+
+    private getSignalMeta( signal: Signal ): SignalMeta {
+        const meta: Record<Signal, SignalMeta> = {
+            GREEN: {
+                action: 'BUY',
+                actionLabel: '매수',
+                signalLabel: '상승신호',
+                colorClass: 'rose-500',
+                inactiveColorClass: 'rose-200',
+            },
+            RED: {
+                action: 'SELL',
+                actionLabel: '매도',
+                signalLabel: '하락신호',
+                colorClass: 'blue-500',
+                inactiveColorClass: 'blue-200',
+            },
+            YELLOW: {
+                action: 'NEUTRAL',
+                actionLabel: '중립',
+                signalLabel: '중립',
+                colorClass: 'slate-500',
+                inactiveColorClass: 'slate-200',
+            },
+        };
+        return meta[signal];
     }
 
     private async getLatestCommonIndexDate(): Promise<Date> {
