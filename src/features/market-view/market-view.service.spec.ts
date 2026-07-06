@@ -100,6 +100,87 @@ describe( 'MarketViewService rules', () => {
         } );
     } );
 
+    describe( 'index chart candles', () => {
+        it( 'returns KOSPI/KOSDAQ index day candles for chart rendering', async () => {
+            const prisma = {
+                stockCandle: {
+                    findMany: jest.fn().mockResolvedValue( [
+                        {
+                            candleTime: new Date( '2026-07-02T00:00:00.000Z' ),
+                            openPrice: 90453,
+                            highPrice: 90453,
+                            lowPrice: 86374,
+                            closePrice: 86672,
+                            volume: 560644n,
+                        },
+                        {
+                            candleTime: new Date( '2026-07-01T00:00:00.000Z' ),
+                            openPrice: 92409,
+                            highPrice: 95545,
+                            lowPrice: 90587,
+                            closePrice: 92935,
+                            volume: 601212n,
+                        },
+                    ] ),
+                },
+            };
+            const chartService = new MarketViewService( prisma as any, {} as any, {} as any ) as any;
+
+            const result = await chartService.getIndexCandles( 'KOSDAQ', 2 );
+
+            expect( prisma.stockCandle.findMany ).toHaveBeenCalledWith( {
+                where: { stockCode: 'INDEX_KOSDAQ', candleType: 'day' },
+                orderBy: { candleTime: 'desc' },
+                take: 2,
+            } );
+            expect( result ).toEqual( {
+                marketType: 'KOSDAQ',
+                stockCode: 'INDEX_KOSDAQ',
+                period: 'day',
+                limit: 2,
+                items: [
+                    {
+                        tradeDate: '2026-07-01',
+                        open: 924.09,
+                        high: 955.45,
+                        low: 905.87,
+                        close: 929.35,
+                        change: null,
+                        changeRate: null,
+                        volume: '601212',
+                    },
+                    {
+                        tradeDate: '2026-07-02',
+                        open: 904.53,
+                        high: 904.53,
+                        low: 863.74,
+                        close: 866.72,
+                        change: -62.63,
+                        changeRate: -6.7391,
+                        volume: '560644',
+                    },
+                ],
+            } );
+        } );
+
+        it( 'returns both index chart series for the market view response', async () => {
+            const chartService = new MarketViewService( {} as any, {} as any, {} as any ) as any;
+            chartService.getIndexCandles = jest
+                .fn()
+                .mockResolvedValueOnce( { items: [ { tradeDate: '2026-07-03', close: 8088.34 } ] } )
+                .mockResolvedValueOnce( { items: [ { tradeDate: '2026-07-03', close: 868.41 } ] } );
+
+            const result = await chartService.getIndexChartSeries( 60 );
+
+            expect( chartService.getIndexCandles ).toHaveBeenNthCalledWith( 1, 'KOSPI', 60 );
+            expect( chartService.getIndexCandles ).toHaveBeenNthCalledWith( 2, 'KOSDAQ', 60 );
+            expect( result ).toEqual( {
+                kospi: [ { tradeDate: '2026-07-03', close: 8088.34 } ],
+                kosdaq: [ { tradeDate: '2026-07-03', close: 868.41 } ],
+            } );
+        } );
+    } );
+
     it( 'uses the worse KOSPI/KOSDAQ signal for the headline', () => {
         const overall = service.buildOverallSignal( [
             { marketType: 'KOSPI', shortSignal: 'GREEN', longSignal: 'GREEN', alertMessage: '정상' },
@@ -109,14 +190,16 @@ describe( 'MarketViewService rules', () => {
         expect( overall.shortSignal ).toBe( 'RED' );
         expect( overall.longSignal ).toBe( 'YELLOW' );
         expect( overall.signalMeta.short ).toMatchObject( {
-            actionLabel: '매도',
-            signalLabel: '하락신호',
+            action: 'RED',
+            actionLabel: '위험',
+            signalLabel: '매도 또는 대기',
             colorClass: 'blue',
             inactiveColorClass: 'blue',
         } );
         expect( overall.signalMeta.long ).toMatchObject( {
+            action: 'YELLOW',
             actionLabel: '중립',
-            signalLabel: '중립',
+            signalLabel: '주의',
             colorClass: 'slate',
             inactiveColorClass: 'slate',
         } );
@@ -136,8 +219,9 @@ describe( 'MarketViewService rules', () => {
         expect( service.getAdrStatus( 1.1 ).signal ).toBe( 'GREEN' );
         expect( service.getSignedStatus( -1 ).signal ).toBe( 'RED' );
         expect( service.getAdrStatus( 1.1 ).signalMeta ).toMatchObject( {
-            actionLabel: '매수',
-            signalLabel: '상승신호',
+            action: 'GREEN',
+            actionLabel: '긍정',
+            signalLabel: '진입 가능',
             colorClass: 'rose',
             inactiveColorClass: 'rose',
         } );
