@@ -29,6 +29,18 @@ export class MarketViewController {
       return this.marketViewService.getDistributionDays( marketType, limit );
   }
 
+  @Get( 'markets/:marketType/index-candles' )
+  @Public()
+  @ApiOperation( { summary: '시장별 지수 일봉 그래프 데이터 조회' } )
+  @ApiParam( { name: 'marketType', enum: [ 'KOSPI', 'KOSDAQ' ] } )
+  @ApiQuery( { name: 'limit', required: false, example: 60 } )
+  getIndexCandles(
+    @Param( 'marketType' ) marketType: 'KOSPI' | 'KOSDAQ',
+    @Query( 'limit', new IntRangePipe( 'limit', 2, 1500, true ) ) limit = 60,
+  ) {
+      return this.marketViewService.getIndexCandles( marketType, limit );
+  }
+
   @Post( 'admin/recalculate' )
   @Public()
   @UseGuards( AdminApiKeyGuard )

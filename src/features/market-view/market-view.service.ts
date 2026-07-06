@@ -6,9 +6,9 @@ import { KiwoomRestService } from '../../integrations/kiwoom/rest/kiwoom-rest.se
 type MarketType = 'KOSPI' | 'KOSDAQ';
 type Signal = 'GREEN' | 'YELLOW' | 'RED';
 type SignalMeta = {
-  action: 'BUY' | 'SELL' | 'NEUTRAL';
-  actionLabel: '매수' | '매도' | '중립';
-  signalLabel: '상승신호' | '하락신호' | '중립';
+  action: Signal;
+  actionLabel: '긍정' | '중립' | '위험';
+  signalLabel: '진입 가능' | '주의' | '매도 또는 대기';
   colorClass: 'rose' | 'blue' | 'slate';
   inactiveColorClass: 'rose' | 'blue' | 'slate';
 };
@@ -51,6 +51,7 @@ export class MarketViewService {
             tradeDate: this.isoDate( tradeDate ),
             markets: results,
             overall: this.buildOverallSignal( results ),
+            chart: await this.getIndexChartSeries(),
         };
     }
 
@@ -128,6 +129,7 @@ export class MarketViewService {
             ),
             markets,
             overall: this.buildOverallSignal( markets ),
+            chart: await this.getIndexChartSeries(),
         };
     }
 
@@ -150,6 +152,56 @@ export class MarketViewService {
                 isActive: row.isActive,
                 removedReason: row.removedReason,
             } ) ),
+        };
+    }
+
+    async getIndexCandles( marketType: MarketType, limit = 60 ) {
+        if ( marketType !== 'KOSPI' && marketType !== 'KOSDAQ' ) {
+            throw new BadRequestException( 'marketType은 KOSPI 또는 KOSDAQ이어야 합니다' );
+        }
+        const normalizedLimit = Math.min( Math.max( Math.floor( limit ) || 60, 2 ), 1500 );
+        const stockCode = marketType === 'KOSPI' ? 'INDEX_KOSPI' : 'INDEX_KOSDAQ';
+        const rows = await this.prisma.stockCandle.findMany( {
+            where: { stockCode, candleType: 'day' },
+            orderBy: { candleTime: 'desc' },
+            take: normalizedLimit,
+        } );
+        const items = rows.reverse().map( ( row, index, candles ) => {
+            const close = Number( row.closePrice ) / 100;
+            const previous = candles[index - 1];
+            const previousClose = previous == null ? null : Number( previous.closePrice ) / 100;
+            const change = previousClose == null ? null : close - previousClose;
+            const changeRate = previousClose == null || previousClose === 0 ? null : ( change! / previousClose ) * 100;
+
+            return {
+                tradeDate: this.isoDate( row.candleTime ),
+                open: Number( row.openPrice ) / 100,
+                high: Number( row.highPrice ) / 100,
+                low: Number( row.lowPrice ) / 100,
+                close,
+                change: change == null ? null : this.round( change, 2 ),
+                changeRate: changeRate == null ? null : this.round( changeRate, 4 ),
+                volume: row.volume.toString(),
+            };
+        } );
+
+        return {
+            marketType,
+            stockCode,
+            period: 'day',
+            limit: normalizedLimit,
+            items,
+        };
+    }
+
+    async getIndexChartSeries( limit = 60 ) {
+        const [ kospi, kosdaq ] = await Promise.all( [
+            this.getIndexCandles( 'KOSPI', limit ),
+            this.getIndexCandles( 'KOSDAQ', limit ),
+        ] );
+        return {
+            kospi: kospi.items,
+            kosdaq: kosdaq.items,
         };
     }
 
@@ -844,23 +896,23 @@ export class MarketViewService {
     private getSignalMeta( signal: Signal ): SignalMeta {
         const meta: Record<Signal, SignalMeta> = {
             GREEN: {
-                action: 'BUY',
-                actionLabel: '매수',
-                signalLabel: '상승신호',
+                action: 'GREEN',
+                actionLabel: '긍정',
+                signalLabel: '진입 가능',
                 colorClass: 'rose',
                 inactiveColorClass: 'rose',
             },
             RED: {
-                action: 'SELL',
-                actionLabel: '매도',
-                signalLabel: '하락신호',
+                action: 'RED',
+                actionLabel: '위험',
+                signalLabel: '매도 또는 대기',
                 colorClass: 'blue',
                 inactiveColorClass: 'blue',
             },
             YELLOW: {
-                action: 'NEUTRAL',
+                action: 'YELLOW',
                 actionLabel: '중립',
-                signalLabel: '중립',
+                signalLabel: '주의',
                 colorClass: 'slate',
                 inactiveColorClass: 'slate',
             },
@@ -901,6 +953,11 @@ export class MarketViewService {
         if ( value == null || String( value ).trim() === '' ) return fallback;
         const parsed = Math.trunc( Number( String( value ).replace( /[,+]/g, '' ) ) );
         return Number.isFinite( parsed ) ? parsed : fallback;
+    }
+
+    private round( value: number, digits: number ) {
+        const factor = 10 ** digits;
+        return Math.round( value * factor ) / factor;
     }
 
     private async yieldToEventLoop() {
