@@ -838,7 +838,6 @@ export class MarketViewService {
         const latestDistributionDays = await this.prisma.marketViewDistributionDay.findMany( {
             where: { marketType: row.marketType, isActive: true, tradeDate: { lte: row.tradeDate } },
             orderBy: { tradeDate: 'desc' },
-            take: 3,
         } );
         return {
             marketType: row.marketType,
