@@ -194,6 +194,30 @@ export interface KiwoomSectorDayCandleResponse {
   return_msg: string;
 }
 
+// 업종 분봉 데이터 (ka20004)
+export interface KiwoomSectorMinuteCandleData {
+  cur_prc: string; // 현재가 (지수 × 100)
+  trde_qty: string; // 거래량
+  cntr_tm: string; // 체결시간 (YYYYMMDDHHmmss)
+  open_pric?: string;
+  high_pric?: string;
+  low_pric?: string;
+  pred_pre?: string;
+  pred_pre_sig?: string;
+}
+
+// 업종 분봉 조회 응답 (ka20004)
+export interface KiwoomSectorMinuteCandleResponse {
+  inds_cd: string;
+  inds_tic_chart_qry?: KiwoomSectorMinuteCandleData[];
+  inds_min_pole_qry?: KiwoomSectorMinuteCandleData[];
+  inds_min_pole_chart_qry?: KiwoomSectorMinuteCandleData[];
+  inds_min_chart_qry?: KiwoomSectorMinuteCandleData[];
+  stk_min_pole_chart_qry?: KiwoomSectorMinuteCandleData[];
+  return_code: number;
+  return_msg: string;
+}
+
 // 업종 현재가 응답 (ka20001)
 export interface KiwoomSectorCurrentPriceResponse {
   cur_prc: string; // 현재가

@@ -31,14 +31,17 @@ export class MarketViewController {
 
   @Get( 'markets/:marketType/index-candles' )
   @Public()
-  @ApiOperation( { summary: '시장별 지수 일봉 그래프 데이터 조회' } )
+  @ApiOperation( { summary: '시장별 지수 장중 그래프 데이터 조회' } )
   @ApiParam( { name: 'marketType', enum: [ 'KOSPI', 'KOSDAQ' ] } )
-  @ApiQuery( { name: 'limit', required: false, example: 60 } )
+  @ApiQuery( { name: 'tradeDate', required: false, example: '2026-07-03' } )
   getIndexCandles(
     @Param( 'marketType' ) marketType: 'KOSPI' | 'KOSDAQ',
-    @Query( 'limit', new IntRangePipe( 'limit', 2, 1500, true ) ) limit = 60,
+    @Query( 'tradeDate' ) tradeDate?: string,
   ) {
-      return this.marketViewService.getIndexCandles( marketType, limit );
+      return this.marketViewService.getIndexCandles(
+          marketType,
+          tradeDate ? new Date( `${tradeDate}T00:00:00.000Z` ) : undefined,
+      );
   }
 
   @Post( 'admin/recalculate' )
