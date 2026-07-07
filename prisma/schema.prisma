@@ -456,6 +456,21 @@ model MarketViewDistributionDay {
   @@map("market_view_distribution_days")
 }
 
+// 마켓뷰 지수 장중 차트 포인트. 집계 당일 KOSPI/KOSDAQ 흐름을 저장한다.
+model MarketViewIndexChartPoint {
+  pointId    String   @id @default(uuid()) @map("point_id") @db.Uuid
+  marketType String   @map("market_type") @db.VarChar(10)
+  tradeDate  DateTime @map("trade_date") @db.Date
+  tradeTime  DateTime @map("trade_time")
+  indexPrice Decimal  @map("index_price") @db.Decimal(12, 2)
+  volume     BigInt?
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  @@unique([marketType, tradeDate, tradeTime], map: "uk_market_view_index_chart_market_time")
+  @@index([marketType, tradeDate, tradeTime], map: "idx_market_view_index_chart_query")
+  @@map("market_view_index_chart_points")
+}
+
 // 11. API 호출 이력 테이블 (Optional)
 model KiwoomApiCallLog {
   logId           String   @id @default(uuid()) @map("log_id") @db.Uuid

@@ -1,3 +1,4 @@
+import { randomUUID } from 'crypto';
 import { BadRequestException, ConflictException, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../common/prisma/prisma.service';
 import { RedisLockService } from '../../common/redis/redis-lock.service';
@@ -29,6 +30,7 @@ export class MarketViewService {
     private readonly logger = new Logger( MarketViewService.name );
     private readonly ftdMinChangeRate = 1.7;
     private readonly distributionMinDropRate = -0.2;
+    private readonly indexChartInterval = '3' as const;
 
     constructor(
     private readonly prisma: PrismaService,
@@ -47,11 +49,14 @@ export class MarketViewService {
         for ( const marketType of [ 'KOSPI', 'KOSDAQ' ] as const ) {
             results.push( await this.calculateMarket( marketType, tradeDate, useExternalSources ) );
         }
+        if ( useExternalSources ) {
+            await this.collectIndexIntradayCharts( tradeDate );
+        }
         return {
             tradeDate: this.isoDate( tradeDate ),
             markets: results,
             overall: this.buildOverallSignal( results ),
-            chart: await this.getIndexChartSeries(),
+            chart: await this.getIndexChartSeries( tradeDate ),
         };
     }
 
@@ -129,7 +134,7 @@ export class MarketViewService {
             ),
             markets,
             overall: this.buildOverallSignal( markets ),
-            chart: await this.getIndexChartSeries(),
+            chart: await this.getIndexChartSeries( latest.tradeDate ),
         };
     }
 
@@ -155,54 +160,98 @@ export class MarketViewService {
         };
     }
 
-    async getIndexCandles( marketType: MarketType, limit = 60 ) {
+    async getIndexCandles( marketType: MarketType, tradeDate?: Date ) {
         if ( marketType !== 'KOSPI' && marketType !== 'KOSDAQ' ) {
             throw new BadRequestException( 'marketType은 KOSPI 또는 KOSDAQ이어야 합니다' );
         }
-        const normalizedLimit = Math.min( Math.max( Math.floor( limit ) || 60, 2 ), 1500 );
-        const stockCode = marketType === 'KOSPI' ? 'INDEX_KOSPI' : 'INDEX_KOSDAQ';
-        const rows = await this.prisma.stockCandle.findMany( {
-            where: { stockCode, candleType: 'day' },
-            orderBy: { candleTime: 'desc' },
-            take: normalizedLimit,
-        } );
-        const items = rows.reverse().map( ( row, index, candles ) => {
-            const close = Number( row.closePrice ) / 100;
-            const previous = candles[index - 1];
-            const previousClose = previous == null ? null : Number( previous.closePrice ) / 100;
-            const change = previousClose == null ? null : close - previousClose;
-            const changeRate = previousClose == null || previousClose === 0 ? null : ( change! / previousClose ) * 100;
-
-            return {
-                tradeDate: this.isoDate( row.candleTime ),
-                open: Number( row.openPrice ) / 100,
-                high: Number( row.highPrice ) / 100,
-                low: Number( row.lowPrice ) / 100,
-                close,
-                change: change == null ? null : this.round( change, 2 ),
-                changeRate: changeRate == null ? null : this.round( changeRate, 4 ),
-                volume: row.volume.toString(),
-            };
+        const targetDate = tradeDate ? this.dateOnly( tradeDate ) : await this.getLatestMarketViewDate();
+        const rows = await this.prisma.marketViewIndexChartPoint.findMany( {
+            where: { marketType, tradeDate: targetDate },
+            orderBy: { tradeTime: 'asc' },
         } );
 
         return {
             marketType,
-            stockCode,
-            period: 'day',
-            limit: normalizedLimit,
-            items,
+            tradeDate: this.isoDate( targetDate ),
+            period: 'intraday',
+            items: rows.map( ( row ) => ( {
+                tradeTime: this.formatTradeTime( row.tradeTime ),
+                indexPrice: Number( row.indexPrice ),
+            } ) ),
         };
     }
 
-    async getIndexChartSeries( limit = 60 ) {
+    async getIndexChartSeries( tradeDate: Date ) {
         const [ kospi, kosdaq ] = await Promise.all( [
-            this.getIndexCandles( 'KOSPI', limit ),
-            this.getIndexCandles( 'KOSDAQ', limit ),
+            this.getIndexCandles( 'KOSPI', tradeDate ),
+            this.getIndexCandles( 'KOSDAQ', tradeDate ),
         ] );
         return {
             kospi: kospi.items,
             kosdaq: kosdaq.items,
         };
+    }
+
+    private async collectIndexIntradayCharts( tradeDate: Date ) {
+        await Promise.all(
+            ( [ 'KOSPI', 'KOSDAQ' ] as const ).map( async ( marketType ) => {
+                try {
+                    await this.collectIndexIntradayChart( marketType, tradeDate );
+                } catch ( error ) {
+                    this.logger.warn(
+                        `[market-view] ${marketType} ${this.isoDate( tradeDate )} 장중 지수 차트 수집 실패: ${( error as Error ).message}`,
+                    );
+                }
+            } ),
+        );
+    }
+
+    private async collectIndexIntradayChart( marketType: MarketType, tradeDate: Date ) {
+        const sectorCode = marketType === 'KOSPI' ? '001' : '101';
+        const response = await this.kiwoomRest.getSectorMinuteCandles( sectorCode, this.indexChartInterval );
+        const rows = this.extractSectorMinuteCandles( response )
+            .map( ( row ) => ( {
+                tradeTime: this.parseKiwoomTradeTime( row.cntr_tm ),
+                indexPrice: this.parseIndexPrice( row.cur_prc ),
+                volume: BigInt( Math.max( 0, this.parseInteger( row.trde_qty ) ) ),
+            } ) )
+            .filter( ( row ) =>
+                row.tradeTime != null &&
+                row.indexPrice != null &&
+                this.isoDate( this.dateOnly( row.tradeTime ) ) === this.isoDate( tradeDate ),
+            )
+            .sort( ( a, b ) => a.tradeTime!.getTime() - b.tradeTime!.getTime() );
+
+        if ( rows.length === 0 ) {
+            this.logger.warn( `[market-view] ${marketType} ${this.isoDate( tradeDate )} 장중 지수 차트 데이터가 비어있습니다` );
+            return;
+        }
+
+        await this.prisma.$transaction( [
+            this.prisma.marketViewIndexChartPoint.deleteMany( {
+                where: { marketType, tradeDate },
+            } ),
+            this.prisma.marketViewIndexChartPoint.createMany( {
+                data: rows.map( ( row ) => ( {
+                    pointId: randomUUID(),
+                    marketType,
+                    tradeDate,
+                    tradeTime: row.tradeTime!,
+                    indexPrice: row.indexPrice!,
+                    volume: row.volume,
+                } ) ),
+                skipDuplicates: true,
+            } ),
+        ] );
+    }
+
+    private extractSectorMinuteCandles( response: any ) {
+        return response?.inds_tic_chart_qry
+            ?? response?.inds_min_pole_qry
+            ?? response?.inds_min_pole_chart_qry
+            ?? response?.inds_min_chart_qry
+            ?? response?.stk_min_pole_chart_qry
+            ?? [];
     }
 
     private async calculateMarket( marketType: MarketType, tradeDate: Date, useExternalSources: boolean ) {
@@ -955,6 +1004,30 @@ export class MarketViewService {
         return Number.isFinite( parsed ) ? parsed : fallback;
     }
 
+    private parseIndexPrice( value: string | number | null | undefined ): number | null {
+        if ( value == null || String( value ).trim() === '' ) return null;
+        const parsed = Math.abs( this.parseNumber( value ) );
+        if ( !Number.isFinite( parsed ) || parsed <= 0 ) return null;
+        return this.round( parsed >= 10000 ? parsed / 100 : parsed, 2 );
+    }
+
+    private parseKiwoomTradeTime( value: string | null | undefined ): Date | null {
+        if ( value == null || !/^\d{14}$/.test( value ) ) return null;
+        const year = Number( value.slice( 0, 4 ) );
+        const month = Number( value.slice( 4, 6 ) ) - 1;
+        const day = Number( value.slice( 6, 8 ) );
+        const hour = Number( value.slice( 8, 10 ) );
+        const minute = Number( value.slice( 10, 12 ) );
+        const second = Number( value.slice( 12, 14 ) );
+        return new Date( Date.UTC( year, month, day, hour, minute, second ) );
+    }
+
+    private formatTradeTime( date: Date ): string {
+        const hours = String( date.getUTCHours() ).padStart( 2, '0' );
+        const minutes = String( date.getUTCMinutes() ).padStart( 2, '0' );
+        return `${hours}:${minutes}`;
+    }
+
     private round( value: number, digits: number ) {
         const factor = 10 ** digits;
         return Math.round( value * factor ) / factor;
@@ -974,5 +1047,14 @@ export class MarketViewService {
 
     private compactDate( date: Date ): string {
         return this.isoDate( date ).replace( /-/g, '' );
+    }
+
+    private async getLatestMarketViewDate(): Promise<Date> {
+        const latest = await this.prisma.marketViewDailySnapshot.findFirst( {
+            orderBy: { tradeDate: 'desc' },
+            select: { tradeDate: true },
+        } );
+        if ( !latest ) throw new NotFoundException( '마켓뷰 집계 데이터가 없습니다' );
+        return latest.tradeDate;
     }
 }

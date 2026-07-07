@@ -100,65 +100,38 @@ describe( 'MarketViewService rules', () => {
         } );
     } );
 
-    describe( 'index chart candles', () => {
-        it( 'returns KOSPI/KOSDAQ index day candles for chart rendering', async () => {
+    describe( 'index intraday chart', () => {
+        it( 'returns market-view index chart points for a trade date', async () => {
             const prisma = {
-                stockCandle: {
+                marketViewIndexChartPoint: {
                     findMany: jest.fn().mockResolvedValue( [
                         {
-                            candleTime: new Date( '2026-07-02T00:00:00.000Z' ),
-                            openPrice: 90453,
-                            highPrice: 90453,
-                            lowPrice: 86374,
-                            closePrice: 86672,
-                            volume: 560644n,
+                            tradeTime: new Date( '2026-07-03T09:00:00.000Z' ),
+                            indexPrice: 866.72,
                         },
                         {
-                            candleTime: new Date( '2026-07-01T00:00:00.000Z' ),
-                            openPrice: 92409,
-                            highPrice: 95545,
-                            lowPrice: 90587,
-                            closePrice: 92935,
-                            volume: 601212n,
+                            tradeTime: new Date( '2026-07-03T09:03:00.000Z' ),
+                            indexPrice: 868.41,
                         },
                     ] ),
                 },
             };
             const chartService = new MarketViewService( prisma as any, {} as any, {} as any ) as any;
+            const tradeDate = new Date( '2026-07-03T00:00:00.000Z' );
 
-            const result = await chartService.getIndexCandles( 'KOSDAQ', 2 );
+            const result = await chartService.getIndexCandles( 'KOSDAQ', tradeDate );
 
-            expect( prisma.stockCandle.findMany ).toHaveBeenCalledWith( {
-                where: { stockCode: 'INDEX_KOSDAQ', candleType: 'day' },
-                orderBy: { candleTime: 'desc' },
-                take: 2,
+            expect( prisma.marketViewIndexChartPoint.findMany ).toHaveBeenCalledWith( {
+                where: { marketType: 'KOSDAQ', tradeDate },
+                orderBy: { tradeTime: 'asc' },
             } );
             expect( result ).toEqual( {
                 marketType: 'KOSDAQ',
-                stockCode: 'INDEX_KOSDAQ',
-                period: 'day',
-                limit: 2,
+                tradeDate: '2026-07-03',
+                period: 'intraday',
                 items: [
-                    {
-                        tradeDate: '2026-07-01',
-                        open: 924.09,
-                        high: 955.45,
-                        low: 905.87,
-                        close: 929.35,
-                        change: null,
-                        changeRate: null,
-                        volume: '601212',
-                    },
-                    {
-                        tradeDate: '2026-07-02',
-                        open: 904.53,
-                        high: 904.53,
-                        low: 863.74,
-                        close: 866.72,
-                        change: -62.63,
-                        changeRate: -6.7391,
-                        volume: '560644',
-                    },
+                    { tradeTime: '09:00', indexPrice: 866.72 },
+                    { tradeTime: '09:03', indexPrice: 868.41 },
                 ],
             } );
         } );
@@ -167,16 +140,17 @@ describe( 'MarketViewService rules', () => {
             const chartService = new MarketViewService( {} as any, {} as any, {} as any ) as any;
             chartService.getIndexCandles = jest
                 .fn()
-                .mockResolvedValueOnce( { items: [ { tradeDate: '2026-07-03', close: 8088.34 } ] } )
-                .mockResolvedValueOnce( { items: [ { tradeDate: '2026-07-03', close: 868.41 } ] } );
+                .mockResolvedValueOnce( { items: [ { tradeTime: '09:00', indexPrice: 8088.34 } ] } )
+                .mockResolvedValueOnce( { items: [ { tradeTime: '09:00', indexPrice: 868.41 } ] } );
+            const tradeDate = new Date( '2026-07-03T00:00:00.000Z' );
 
-            const result = await chartService.getIndexChartSeries( 60 );
+            const result = await chartService.getIndexChartSeries( tradeDate );
 
-            expect( chartService.getIndexCandles ).toHaveBeenNthCalledWith( 1, 'KOSPI', 60 );
-            expect( chartService.getIndexCandles ).toHaveBeenNthCalledWith( 2, 'KOSDAQ', 60 );
+            expect( chartService.getIndexCandles ).toHaveBeenNthCalledWith( 1, 'KOSPI', tradeDate );
+            expect( chartService.getIndexCandles ).toHaveBeenNthCalledWith( 2, 'KOSDAQ', tradeDate );
             expect( result ).toEqual( {
-                kospi: [ { tradeDate: '2026-07-03', close: 8088.34 } ],
-                kosdaq: [ { tradeDate: '2026-07-03', close: 868.41 } ],
+                kospi: [ { tradeTime: '09:00', indexPrice: 8088.34 } ],
+                kosdaq: [ { tradeTime: '09:00', indexPrice: 868.41 } ],
             } );
         } );
     } );

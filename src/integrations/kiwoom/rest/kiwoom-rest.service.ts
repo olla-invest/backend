@@ -15,6 +15,7 @@ import {
   KiwoomStockBasicInfoResponse,
   KiwoomStockListResponse,
   KiwoomSectorDayCandleResponse,
+  KiwoomSectorMinuteCandleResponse,
   KiwoomSectorCurrentPriceResponse,
   KiwoomMarketInvestorNetBuyResponse,
   KiwoomNewHighLowData,
@@ -757,6 +758,62 @@ export class KiwoomRestService {
       });
 
       this.logger.error(`Failed to fetch sector day candles history for ${sectorCode}`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * 업종 분봉 차트 조회 (ka20004)
+   * @param sectorCode 업종코드 (001: KOSPI, 101: KOSDAQ)
+   * @param interval 분봉 간격
+   */
+  async getSectorMinuteCandles(
+    sectorCode: string,
+    interval: '1' | '3' | '5' | '10' | '15' | '30' | '45' | '60' = '3',
+  ): Promise<KiwoomSectorMinuteCandleResponse> {
+    const startTime = Date.now();
+    const requestData = {
+      inds_cd: sectorCode,
+      tic_scope: interval,
+    };
+
+    try {
+      const token = await this.authService.ensureValidToken();
+
+      this.logger.debug(`Fetching ${interval}min sector candles for ${sectorCode}`);
+
+      const response = await this.httpClient.post<KiwoomSectorMinuteCandleResponse>(
+        '/api/dostk/chart',
+        requestData,
+        {
+          headers: {
+            'api-id': 'ka20004',
+            authorization: `Bearer ${token}`,
+          },
+        },
+      );
+
+      await this.logApiCall({
+        apiName: 'ka20004',
+        stockCode: sectorCode,
+        requestData,
+        responseStatus: 'SUCCESS',
+        responseMessage: response.data.return_msg,
+        responseTimeMs: Date.now() - startTime,
+      });
+
+      return response.data;
+    } catch (error) {
+      await this.logApiCall({
+        apiName: 'ka20004',
+        stockCode: sectorCode,
+        requestData,
+        responseStatus: 'ERROR',
+        responseMessage: error.message,
+        responseTimeMs: Date.now() - startTime,
+      });
+
+      this.logger.error(`Failed to fetch sector minute candles for ${sectorCode}`, error);
       throw error;
     }
   }

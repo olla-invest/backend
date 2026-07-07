@@ -321,6 +321,16 @@ exports.Prisma.MarketViewDistributionDayScalarFieldEnum = {
   createdAt: 'createdAt'
 };
 
+exports.Prisma.MarketViewIndexChartPointScalarFieldEnum = {
+  pointId: 'pointId',
+  marketType: 'marketType',
+  tradeDate: 'tradeDate',
+  tradeTime: 'tradeTime',
+  indexPrice: 'indexPrice',
+  volume: 'volume',
+  createdAt: 'createdAt'
+};
+
 exports.Prisma.KiwoomApiCallLogScalarFieldEnum = {
   logId: 'logId',
   userId: 'userId',
@@ -607,6 +617,7 @@ exports.Prisma.ModelName = {
   MarketIndexHistory: 'MarketIndexHistory',
   MarketViewDailySnapshot: 'MarketViewDailySnapshot',
   MarketViewDistributionDay: 'MarketViewDistributionDay',
+  MarketViewIndexChartPoint: 'MarketViewIndexChartPoint',
   KiwoomApiCallLog: 'KiwoomApiCallLog',
   BatchJobHistory: 'BatchJobHistory',
   KiwoomToken: 'KiwoomToken',
