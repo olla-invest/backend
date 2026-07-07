@@ -105,12 +105,12 @@ export class WatchlistService {
     const stockCode = watchlistEntry.company.stockCode;
     const hasSnapshotRank = currentRankContext?.currentRankMap.has(stockCode) ?? false;
     const hasPreviousCurrentRank = currentRankContext?.previousRankMap.has(stockCode) ?? false;
-    const rank = displayRankMap?.get(stockCode) ?? (hasSnapshotRank
+    const rank = this.normalizeStockRank(displayRankMap?.get(stockCode) ?? (hasSnapshotRank
       ? currentRankContext!.currentRankMap.get(stockCode) ?? null
-      : today?.currentRank ?? today?.rank ?? null);
-    const prevRank = hasPreviousCurrentRank
+      : today?.currentRank ?? today?.rank ?? null));
+    const prevRank = this.normalizeStockRank(hasPreviousCurrentRank
       ? currentRankContext!.previousRankMap.get(stockCode) ?? null
-      : prev?.currentRank ?? prev?.rank ?? null;
+      : prev?.currentRank ?? prev?.rank ?? null);
     const rankChange = rank != null && prevRank != null ? prevRank - rank : null;
     const events: string[] = [];
     if (today) {
@@ -133,8 +133,8 @@ export class WatchlistService {
       closePrice: realtimePrice?.currentPrice ?? (today ? Number(today.closePrice) : null),
       priceChange1d: realtimePrice?.changeAmount ?? (today?.priceChange1d != null ? Number(today.priceChange1d) : null),
       priceChangeRate1d: realtimePrice?.changeRate ?? (today?.priceChangeRate1d != null ? Number(today.priceChangeRate1d) : null),
-      rank,
-      prevRank,
+      rank: this.toDisplayRank(rank),
+      prevRank: this.toDisplayRank(prevRank),
       rankChange,
       storedRank: today?.rank ?? null,
       currentRankSnapshotTime: currentRankContext?.snapshotTime ?? null,
@@ -423,9 +423,9 @@ export class WatchlistService {
       topStocks = metrics
         .map((m) => ({
           metric: m,
-          rank: displayRankMap.get(m.stockCode) ?? (currentRankContext.currentRankMap.has(m.stockCode)
+          rank: this.normalizeStockRank(displayRankMap.get(m.stockCode) ?? (currentRankContext.currentRankMap.has(m.stockCode)
             ? currentRankContext.currentRankMap.get(m.stockCode) ?? null
-            : m.currentRank ?? m.rank ?? null),
+            : m.currentRank ?? m.rank ?? null)),
         }))
         .sort((a, b) => this.compareNullableRank(a.rank, b.rank) || a.metric.stockCode.localeCompare(b.metric.stockCode))
         .slice(0, 3)
@@ -438,7 +438,7 @@ export class WatchlistService {
             stockCode: m.stockCode,
             companyName: w.company.companyName,
             marketType: w.company.marketType,
-            rank,
+            rank: this.toDisplayRank(rank),
             storedRank: m.rank,
             currentRankSnapshotTime: currentRankContext.snapshotTime,
             closePrice: realtimePrice?.currentPrice ?? Number(m.closePrice),
@@ -609,8 +609,8 @@ export class WatchlistService {
     displayPrevRank?: number | null,
   ) {
     const events: string[] = [];
-    const rank = displayRank ?? metric.currentRank ?? metric.rank ?? null;
-    const prevRank = displayPrevRank ?? prevMetric?.currentRank ?? prevMetric?.rank ?? null;
+    const rank = this.normalizeStockRank(displayRank ?? metric.currentRank ?? metric.rank ?? null);
+    const prevRank = this.normalizeStockRank(displayPrevRank ?? prevMetric?.currentRank ?? prevMetric?.rank ?? null);
     const rankChange = rank != null && prevRank != null ? prevRank - rank : null;
 
     if (metric.isNewHigh) events.push('NEW_HIGH');
@@ -631,13 +631,13 @@ export class WatchlistService {
       stockCode: metric.stockCode,
       companyName: company.companyName,
       marketType: company.marketType,
-      rank,
-      prevRank,
-      previousRank: prevRank,
+      rank: this.toDisplayRank(rank),
+      prevRank: this.toDisplayRank(prevRank),
+      previousRank: this.toDisplayRank(prevRank),
       rankChange,
       rankHistory: {
-        today: rank,
-        oneDayAgo: prevRank,
+        today: this.toDisplayRank(rank),
+        oneDayAgo: this.toDisplayRank(prevRank),
       },
       closePrice: realtimePrice?.currentPrice ?? Number(metric.closePrice),
       priceChangeRate1d: realtimePrice?.changeRate ?? (metric.priceChangeRate1d != null ? Number(metric.priceChangeRate1d) : null),
@@ -868,12 +868,12 @@ export class WatchlistService {
       const stockCode = w.company.stockCode;
       const hasSnapshotRank = stockCurrentRankContext.currentRankMap.has(stockCode);
       const hasPreviousCurrentRank = stockCurrentRankContext.previousRankMap.has(stockCode);
-      const rank = stockDisplayRankMap.get(stockCode) ?? (hasSnapshotRank
+      const rank = this.normalizeStockRank(stockDisplayRankMap.get(stockCode) ?? (hasSnapshotRank
         ? stockCurrentRankContext.currentRankMap.get(stockCode) ?? null
-        : m?.currentRank ?? m?.rank ?? null);
-      const prevRank = hasPreviousCurrentRank
+        : m?.currentRank ?? m?.rank ?? null));
+      const prevRank = this.normalizeStockRank(hasPreviousCurrentRank
         ? stockCurrentRankContext.previousRankMap.get(stockCode) ?? null
-        : null;
+        : null);
       const rankChange = rank != null && prevRank != null ? prevRank - rank : null;
       items.push({
         type: 'STOCK',
@@ -882,8 +882,8 @@ export class WatchlistService {
         companyName: w.company.companyName,
         marketType: w.company.marketType,
         addedDate: w.addedDate,
-        rank,
-        prevRank,
+        rank: this.toDisplayRank(rank),
+        prevRank: this.toDisplayRank(prevRank),
         rankChange,
         storedRank: m?.rank ?? null,
         currentRankSnapshotTime: stockCurrentRankContext.snapshotTime,
@@ -899,11 +899,23 @@ export class WatchlistService {
     return { items };
   }
 
-  private compareNullableRank(a?: number | null, b?: number | null) {
-    if (a == null && b == null) return 0;
-    if (a == null) return 1;
-    if (b == null) return -1;
-    return a - b;
+  private compareNullableRank(a?: number | string | null, b?: number | string | null) {
+    const rankA = this.normalizeStockRank(a);
+    const rankB = this.normalizeStockRank(b);
+    if (rankA == null && rankB == null) return 0;
+    if (rankA == null) return 1;
+    if (rankB == null) return -1;
+    return rankA - rankB;
+  }
+
+  // rank 0(정적 필터 탈락)과 null(집계 제외)은 모두 RS 순위권 이탈로 간주
+  private normalizeStockRank(rank?: number | string | null): number | null {
+    return typeof rank === 'number' && rank > 0 ? rank : null;
+  }
+
+  // 순위권 이탈 종목은 순위 대신 '-' 노출
+  private toDisplayRank(rank?: number | null): number | '-' {
+    return rank ?? '-';
   }
 
   private isAfterAggregation(): boolean {
