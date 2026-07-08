@@ -349,7 +349,7 @@ export class MarketViewService {
         const eligibleCodes = await this.getEligibleStockCodes( marketType );
         if ( highResult.status === 'fulfilled' && highResult.value ) {
             newHighCount = new Set(
-                highResult.value.map( ( row ) => row.stk_cd.replace( /^[A-Z]/, '' ) ).filter( ( code ) => eligibleCodes.has( code ) ),
+                highResult.value.map( ( row ) => this.normalizeKiwoomStockCode( row.stk_cd ) ).filter( ( code ) => eligibleCodes.has( code ) ),
             ).size;
         } else if ( useExternalSources ) {
             sourceErrors.push( '52주 신고가 데이터' );
@@ -357,7 +357,7 @@ export class MarketViewService {
         }
         if ( lowResult.status === 'fulfilled' && lowResult.value ) {
             newLowCount = new Set(
-                lowResult.value.map( ( row ) => row.stk_cd.replace( /^[A-Z]/, '' ) ).filter( ( code ) => eligibleCodes.has( code ) ),
+                lowResult.value.map( ( row ) => this.normalizeKiwoomStockCode( row.stk_cd ) ).filter( ( code ) => eligibleCodes.has( code ) ),
             ).size;
         } else if ( useExternalSources ) {
             sourceErrors.push( '52주 신저가 데이터' );
@@ -643,6 +643,11 @@ export class MarketViewService {
             new_high_count: row?.new_high_count ?? 0,
             new_low_count: row?.new_low_count ?? 0,
         };
+    }
+
+    // 키움 응답 종목코드 정규화: NXT 통합시세 접미사(012160_AL)와 선행 시장 문자(A005930) 제거
+    private normalizeKiwoomStockCode( rawCode: string ) {
+        return rawCode.split( '_' )[0].replace( /^[A-Z]/, '' );
     }
 
     private async getEligibleStockCodes( marketType: MarketType ): Promise<Set<string>> {
