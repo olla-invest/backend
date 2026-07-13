@@ -22,7 +22,7 @@ export interface KiwoomRealtimeRequest {
 
 // WebSocket 실시간 응답
 export interface KiwoomRealtimeResponse {
-  trnm: 'REG' | 'REMOVE' | 'REAL' | 'SYSTEM';
+  trnm: 'LOGIN' | 'REG' | 'REMOVE' | 'REAL' | 'SYSTEM' | 'PING';
   return_code?: number;
   return_msg?: string;
   data?: {
