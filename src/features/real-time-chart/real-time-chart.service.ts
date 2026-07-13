@@ -5,12 +5,36 @@ import { IRealtimeSource, REALTIME_SOURCE_TOKEN } from '../../integrations/kiwoo
 import { ChartStorageService } from './chart-storage.service';
 import { StockMetricsService } from './stock-metrics.service';
 import { RealtimePriceCacheService } from './realtime-price-cache.service';
-import { StockListCacheService, RangeRsRankingCache } from './stock-list-cache.service';
+import { StockListCacheService, RangeRsRankingCache, CustomRsHistoryCache } from './stock-list-cache.service';
 import { PrismaService } from '../../common/prisma/prisma.service';
 import { mapUpNameToThemeCode } from '../../common/constants/theme-codes';
 import { getKrxTradingDateByOffset, isKrxTradingDay } from '../../common/utils/market-calendar.util';
+import { buildRankChangePoints, computeCumulativeRankChange, sortWithNullsLast } from './rank-change.util';
 
 type HigherTimeframeCandleType = 'week' | 'month' | 'year';
+
+export type StockListSortBy = 'rs' | 'changeRate' | 'tradingValue' | 'rankChange';
+
+export interface StockListOptions {
+  /** 종목명 부분일치 검색어 */
+  search?: string;
+  /** 정렬 기준 (기본 rs = 시장대비강도 점수 높은 순) */
+  sortBy?: StockListSortBy;
+  /** 정렬 방향 (rs는 항상 desc) */
+  sortOrder?: 'asc' | 'desc';
+  /** true면 자동완성용 경량 응답 */
+  suggest?: boolean;
+}
+
+/** 리스트 플로우 공통 항목 형태 (필터 통과 후) */
+interface SortableStockItem {
+  stock: { code: string; name: string };
+  metrics?: any;
+  /** RS 점수 (플로우별 계산값) */
+  rsScore?: number;
+  /** RS 기준 정렬상의 위치 (1-base). 검색/정렬과 무관한 랭킹 순위 */
+  baseRank?: number;
+}
 export type InvestmentIndicatorType =
   | 'VOLATILITY_CONTRACTION'
   | 'PRICE_COMPRESSION'
@@ -967,9 +991,10 @@ export class RealTimeChartService implements OnModuleInit {
     rsPeriods?: string,
     rsWeights?: string,
     rsDates?: string,
+    options?: StockListOptions,
   ) {
     this.logger.log(
-      `Getting stock list for market type: ${marketType}, page: ${page}, pageSize: ${pageSize}, filters: ${JSON.stringify(filters)}, rsPeriods: ${rsPeriods}, rsWeights: ${rsWeights}, rsDates: ${rsDates}`,
+      `Getting stock list for market type: ${marketType}, page: ${page}, pageSize: ${pageSize}, filters: ${JSON.stringify(filters)}, rsPeriods: ${rsPeriods}, rsWeights: ${rsWeights}, rsDates: ${rsDates}, options: ${JSON.stringify(options)}`,
     );
 
     // rsDates가 있으면 날짜를 기간수로 변환
@@ -988,6 +1013,7 @@ export class RealTimeChartService implements OnModuleInit {
         filters,
         calculatedPeriods,
         rsWeights,
+        options,
       );
     }
 
@@ -1061,12 +1087,38 @@ export class RealTimeChartService implements OnModuleInit {
         return b.rsScore - a.rsScore;
       });
 
+    // RS 기준 위치 부여 (검색/정렬과 무관한 랭킹 순위) + 순위변동 계산용 전체 종목수
+    const rankedStocks = stocksWithMetrics.map((item, index) => ({ ...item, baseRank: index + 1 }));
+    const baseTotal = rankedStocks.length;
+
+    // 최신 거래일 조회 (메타 데이터 및 순위 이력용)
+    const latestTradeDate = await this.metricsService.getLatestTradeDate();
+    const rankTotals = await this.metricsService.getCurrentRankTotals(3, latestTradeDate, this.isAfterAggregation());
+
+    // 종목명 검색 (현재 랭킹 결과 내 부분일치)
+    const searchedStocks = this.applyStockNameSearch(rankedStocks, options?.search);
+
+    // 정렬기준 적용 (순위변동 정렬 시 대상 전체의 누적값 선계산)
+    let rankChangeMap: Map<string, number | null> | undefined;
+    if (options?.sortBy === 'rankChange') {
+      rankChangeMap = await this.computeRankChangeMap(searchedStocks, baseTotal, latestTradeDate, rankTotals);
+    }
+    const sortedStocks = this.sortStockItems(searchedStocks, options, {
+      realtimePrices: allRealtimePrices,
+      rankChangeMap,
+    });
+
+    // 자동완성용 경량 응답
+    if (options?.suggest) {
+      return await this.buildSuggestResponse(sortedStocks, options);
+    }
+
     // 페이지 처리 (페이지네이션)
-    const totalCount = stocksWithMetrics.length;
+    const totalCount = sortedStocks.length;
     const totalPages = Math.ceil(totalCount / pageSize);
     const startIndex = (page - 1) * pageSize;
     const endIndex = startIndex + pageSize;
-    const paginatedData = stocksWithMetrics.slice(startIndex, endIndex);
+    const paginatedData = sortedStocks.slice(startIndex, endIndex);
 
     // 페이지네이션된 종목들의 지수 및 순위 변화 조회
     const pageStockCodes = paginatedData.map((d) => d.stock.code);
@@ -1081,8 +1133,6 @@ export class RealTimeChartService implements OnModuleInit {
     // 실시간 현재가 (이미 allRealtimePrices로 있음)
     const realtimePrices = allRealtimePrices;
 
-    // 최신 거래일 조회 (메타 데이터용)
-    const latestTradeDate = await this.metricsService.getLatestTradeDate();
     const currentRankHistoryMap = await this.metricsService.getCurrentRankHistory(pageStockCodes, 3, latestTradeDate, this.isAfterAggregation());
     const themeList = await this.getNaverThemeList();
     return {
@@ -1138,6 +1188,9 @@ export class RealTimeChartService implements OnModuleInit {
             twoDaysAgo: currentRankHistory[1] ?? null,
             threeDaysAgo: currentRankHistory[2] ?? null,
           },
+          rankChange3d: rankChangeMap
+            ? rankChangeMap.get(s.code) ?? null
+            : this.buildRankChangeValue(currentRankHistory, rankTotals, item.baseRank ?? null, baseTotal),
           isVolatilityContraction: metrics?.isVolatilityContraction ?? false,
           isPriceCompression: metrics?.isPriceCompression ?? false,
           strengthContinuationDays: metrics?.strengthContinuationDays ?? null,
@@ -1161,6 +1214,7 @@ export class RealTimeChartService implements OnModuleInit {
     },
     rsPeriods?: string,
     rsWeights?: string,
+    options?: StockListOptions,
   ) {
     this.logger.log(`Getting stock list with custom RS: periods=${rsPeriods}, weights=${rsWeights}`);
 
@@ -1177,38 +1231,18 @@ export class RealTimeChartService implements OnModuleInit {
     const allStockCodes = validStocks.map((s) => s.code);
     const themeFilteredStockCodes = await this.getThemeFilteredStockCodes(filters?.theme);
 
-    // 동적 RS 계산 (최근 4개 거래일: 오늘, D-1, D-2, D-3)
-    let rsHistoryMap: Map<string, Array<{ tradeDate: Date; rank: number; rsScore: number }>>;
+    // 최신 거래일 조회 (캐시 키·메타 데이터·순위 이력용)
+    const latestTradeDate = await this.metricsService.getLatestTradeDate();
 
-    if (marketType === 'all') {
-      // 전체 조회: KOSPI/KOSDAQ 각각 다른 지수로 RS 계산 후 합치기
-      const kospiStocks = validStocks.filter((s) => this.isKospiStock(s)).map((s) => s.code);
-      const kosdaqStocks = validStocks.filter((s) => this.isKosdaqStock(s)).map((s) => s.code);
-
-      this.logger.log(`Split stocks for custom RS: KOSPI=${kospiStocks.length}, KOSDAQ=${kosdaqStocks.length}`);
-
-      const [kospiRS, kosdaqRS] = await Promise.all([
-        kospiStocks.length > 0
-          ? this.metricsService.calculateRuntimeRS(kospiStocks, periods, weights, 'INDEX_KOSPI', 4)
-          : new Map(),
-        kosdaqStocks.length > 0
-          ? this.metricsService.calculateRuntimeRS(kosdaqStocks, periods, weights, 'INDEX_KOSDAQ', 4)
-          : new Map(),
-      ]);
-
-      // 두 결과 합치기
-      rsHistoryMap = new Map([...kospiRS, ...kosdaqRS]);
-    } else {
-      // 단일 시장 조회
-      const indexCode = marketType === '0' ? 'INDEX_KOSPI' : 'INDEX_KOSDAQ';
-      rsHistoryMap = await this.metricsService.calculateRuntimeRS(
-        allStockCodes,
-        periods,
-        weights,
-        indexCode,
-        4,
-      );
-    }
+    // 동적 RS 계산 (최근 4개 거래일: 오늘, D-1, D-2, D-3) — dataDate 기준 캐시 + in-flight dedupe
+    const rsHistoryMap = await this.getOrComputeCustomRsHistory(
+      validStocks,
+      allStockCodes,
+      periods,
+      weights,
+      marketType,
+      latestTradeDate,
+    );
 
     // 기본 지표 데이터 조회 (ma50, 52w 고가, isNewHigh, tradingValue 등)
     const metricsMap = await this.metricsService.getLatestMetrics(allStockCodes);
@@ -1270,12 +1304,34 @@ export class RealTimeChartService implements OnModuleInit {
       })
       .sort((a, b) => a.rank - b.rank); // 점수 오름차순 (이미 계산됨)
 
+    // RS 기준 위치 부여 (검색/정렬과 무관한 랭킹 순위)
+    const rankedStocks = stocksWithRS.map((item, index) => ({ ...item, baseRank: index + 1 }));
+    const baseTotal = rankedStocks.length;
+
+    const rankTotals = await this.metricsService.getCurrentRankTotals(3, latestTradeDate, this.isAfterAggregation());
+
+    // 종목명 검색 → 정렬기준 적용
+    const searchedStocks = this.applyStockNameSearch(rankedStocks, options?.search);
+    let rankChangeMap: Map<string, number | null> | undefined;
+    if (options?.sortBy === 'rankChange') {
+      rankChangeMap = await this.computeRankChangeMap(searchedStocks, baseTotal, latestTradeDate, rankTotals);
+    }
+    const sortedStocks = this.sortStockItems(searchedStocks, options, {
+      realtimePrices: allRealtimePrices,
+      rankChangeMap,
+    });
+
+    // 자동완성용 경량 응답
+    if (options?.suggest) {
+      return await this.buildSuggestResponse(sortedStocks, options);
+    }
+
     // 페이지네이션
-    const totalCount = stocksWithRS.length;
+    const totalCount = sortedStocks.length;
     const totalPages = Math.ceil(totalCount / pageSize);
     const startIndex = (page - 1) * pageSize;
     const endIndex = startIndex + pageSize;
-    const paginatedData = stocksWithRS.slice(startIndex, endIndex);
+    const paginatedData = sortedStocks.slice(startIndex, endIndex);
 
     // 페이지네이션된 종목들의 지수 조회
     const pageStockCodes = paginatedData.map((d) => d.stock.code);
@@ -1290,8 +1346,6 @@ export class RealTimeChartService implements OnModuleInit {
     // 실시간 현재가 (이미 allRealtimePrices로 있음)
     const realtimePrices = allRealtimePrices;
 
-    // 최신 거래일 조회
-    const latestTradeDate = await this.metricsService.getLatestTradeDate();
     const currentRankHistoryMap = await this.metricsService.getCurrentRankHistory(pageStockCodes, 3, latestTradeDate, this.isAfterAggregation());
     const shouldWriteCustomRsLog =
       !(periods.length === 1 && periods[0] === 63 && weights.length === 1 && weights[0] === 100);
@@ -1362,6 +1416,9 @@ export class RealTimeChartService implements OnModuleInit {
             twoDaysAgo: currentRankHistory[1] ?? null,
             threeDaysAgo: currentRankHistory[2] ?? null,
           },
+          rankChange3d: rankChangeMap
+            ? rankChangeMap.get(s.code) ?? null
+            : this.buildRankChangeValue(currentRankHistory, rankTotals, item.baseRank ?? null, baseTotal),
           isVolatilityContraction: metrics?.isVolatilityContraction ?? false,
           isPriceCompression: metrics?.isPriceCompression ?? false,
           strengthContinuationDays: metrics?.strengthContinuationDays ?? null,
@@ -1389,6 +1446,7 @@ export class RealTimeChartService implements OnModuleInit {
       rsEndDate: string;
       strength: number;
     }>,
+    options?: StockListOptions,
   ) {
     const _mem0 = process.memoryUsage();
     this.logger.log(
@@ -1398,7 +1456,7 @@ export class RealTimeChartService implements OnModuleInit {
 
     // rsFilters가 없으면 기본 플로우 사용
     if (!rsFilters || rsFilters.length === 0) {
-      return this.getStockList(marketType, page, pageSize, filters);
+      return this.getStockList(marketType, page, pageSize, filters, undefined, undefined, undefined, options);
     }
 
     // 종목 리스트 가져오기
@@ -1514,12 +1572,34 @@ export class RealTimeChartService implements OnModuleInit {
       })
       .sort((a, b) => a.rank - b.rank);
 
+    // RS 기준 위치 부여 (검색/정렬과 무관한 랭킹 순위)
+    const rankedStocks = stocksWithRS.map((item, index) => ({ ...item, baseRank: index + 1 }));
+    const baseTotal = rankedStocks.length;
+
+    const rankTotals = await this.metricsService.getCurrentRankTotals(3, latestTradeDate, this.isAfterAggregation());
+
+    // 종목명 검색 → 정렬기준 적용
+    const searchedStocks = this.applyStockNameSearch(rankedStocks, options?.search);
+    let rankChangeMap: Map<string, number | null> | undefined;
+    if (options?.sortBy === 'rankChange') {
+      rankChangeMap = await this.computeRankChangeMap(searchedStocks, baseTotal, latestTradeDate, rankTotals);
+    }
+    const sortedStocks = this.sortStockItems(searchedStocks, options, {
+      realtimePrices: allRealtimePrices,
+      rankChangeMap,
+    });
+
+    // 자동완성용 경량 응답
+    if (options?.suggest) {
+      return await this.buildSuggestResponse(sortedStocks, options);
+    }
+
     // 페이지네이션
-    const totalCount = stocksWithRS.length;
+    const totalCount = sortedStocks.length;
     const totalPages = Math.ceil(totalCount / pageSize);
     const startIndex = (page - 1) * pageSize;
     const endIndex = startIndex + pageSize;
-    const paginatedData = stocksWithRS.slice(startIndex, endIndex);
+    const paginatedData = sortedStocks.slice(startIndex, endIndex);
 
     // 지수 및 실시간 가격 조회
     const pageStockCodes = paginatedData.map((d) => d.stock.code);
@@ -1587,6 +1667,9 @@ export class RealTimeChartService implements OnModuleInit {
             twoDaysAgo: currentRankHistory[1] ?? null,
             threeDaysAgo: currentRankHistory[2] ?? null,
           },
+          rankChange3d: rankChangeMap
+            ? rankChangeMap.get(s.code) ?? null
+            : this.buildRankChangeValue(currentRankHistory, rankTotals, item.baseRank ?? null, baseTotal),
           isVolatilityContraction: metrics?.isVolatilityContraction ?? false,
           isPriceCompression: metrics?.isPriceCompression ?? false,
           strengthContinuationDays: metrics?.strengthContinuationDays ?? null,
@@ -1656,6 +1739,317 @@ export class RealTimeChartService implements OnModuleInit {
       }
     });
     return displayRankMap;
+  }
+
+  /** RS 프리셋 조합 (1주/1개월/3개월/6개월/12개월, 비중 100%) — 워밍 대상 */
+  private static readonly RS_PRESET_PERIODS = [5, 21, 63, 126, 252];
+
+  /**
+   * 커스텀 RS(rsPeriods/rsWeights) 계산 결과 캐시 조회/계산.
+   * 키 = dataDate + marketType + periods/weights 해시. 동일 키 동시 요청은 in-flight dedupe.
+   * - forceRefresh: 캐시를 무시하고 재계산 (배치 직후 워밍용 — 배치 전 값이 남아있을 수 있음)
+   * - ttlMs: 미지정 시 5분. 장 마감 후 데이터가 고정된 구간에는 긴 TTL 지정 가능
+   */
+  private async getOrComputeCustomRsHistory(
+    validStocks: any[],
+    allStockCodes: string[],
+    periods: number[],
+    weights: number[],
+    marketType: '0' | '10' | 'all',
+    latestTradeDate: Date | null,
+    cacheOptions?: { ttlMs?: number; forceRefresh?: boolean },
+  ): Promise<Map<string, Array<{ tradeDate: Date; rank: number; rsScore: number }>>> {
+    const dataDate = latestTradeDate?.toISOString().split('T')[0] ?? null;
+    const cacheKey = this.stockListCache.buildCustomRsCacheKey({ dataDate, marketType, periods, weights });
+
+    let cache = cacheOptions?.forceRefresh
+      ? null
+      : await this.stockListCache.getCustomRsHistoryCache(cacheKey);
+
+    if (cache) {
+      this.logger.log(`[customRS] cache hit key=${cacheKey} rows=${cache.rows.length}`);
+    } else {
+      let inflight = this.stockListCache.getCustomRsInflight(cacheKey);
+      if (!inflight) {
+        inflight = this.computeCustomRsHistoryMap(validStocks, allStockCodes, periods, weights, marketType)
+          .then((historyMap) => ({
+            dataDate,
+            marketType,
+            periods,
+            weights,
+            rows: Array.from(historyMap.entries()).map(([stockCode, history]) => ({
+              stockCode,
+              history: history.map((h) => ({
+                tradeDate: h.tradeDate.toISOString(),
+                rank: h.rank,
+                rsScore: h.rsScore,
+              })),
+            })),
+            createdAt: new Date().toISOString(),
+          } satisfies CustomRsHistoryCache))
+          .finally(() => this.stockListCache.deleteCustomRsInflight(cacheKey));
+        this.stockListCache.setCustomRsInflight(cacheKey, inflight);
+      } else {
+        this.logger.log(`[customRS] reusing in-flight calculation (key=${cacheKey})`);
+      }
+      cache = await inflight;
+      await this.stockListCache.setCustomRsHistoryCache(cacheKey, cache, cacheOptions?.ttlMs);
+    }
+
+    return new Map(
+      cache.rows.map((row) => [
+        row.stockCode,
+        row.history.map((h) => ({ tradeDate: new Date(h.tradeDate), rank: h.rank, rsScore: h.rsScore })),
+      ]),
+    );
+  }
+
+  /**
+   * 동적 RS 계산 (최근 4개 거래일: 오늘, D-1, D-2, D-3)
+   * 'all'은 KOSPI/KOSDAQ 각각 해당 시장 지수로 계산 후 병합
+   */
+  private async computeCustomRsHistoryMap(
+    validStocks: any[],
+    allStockCodes: string[],
+    periods: number[],
+    weights: number[],
+    marketType: '0' | '10' | 'all',
+  ): Promise<Map<string, Array<{ tradeDate: Date; rank: number; rsScore: number }>>> {
+    if (marketType === 'all') {
+      const kospiStocks = validStocks.filter((s) => this.isKospiStock(s)).map((s) => s.code);
+      const kosdaqStocks = validStocks.filter((s) => this.isKosdaqStock(s)).map((s) => s.code);
+
+      this.logger.log(`Split stocks for custom RS: KOSPI=${kospiStocks.length}, KOSDAQ=${kosdaqStocks.length}`);
+
+      const [kospiRS, kosdaqRS] = await Promise.all([
+        kospiStocks.length > 0
+          ? this.metricsService.calculateRuntimeRS(kospiStocks, periods, weights, 'INDEX_KOSPI', 4)
+          : new Map(),
+        kosdaqStocks.length > 0
+          ? this.metricsService.calculateRuntimeRS(kosdaqStocks, periods, weights, 'INDEX_KOSDAQ', 4)
+          : new Map(),
+      ]);
+
+      return new Map([...kospiRS, ...kosdaqRS]);
+    }
+
+    const indexCode = marketType === '0' ? 'INDEX_KOSPI' : 'INDEX_KOSDAQ';
+    return await this.metricsService.calculateRuntimeRS(allStockCodes, periods, weights, indexCode, 4);
+  }
+
+  /**
+   * 다음 KRX 개장(09:00 KST)까지 남은 ms.
+   * 장 마감 후 확정 데이터는 다음 개장 전까지 변하지 않으므로 워밍 캐시 TTL로 사용.
+   */
+  private msUntilNextKrxMarketOpen(): number {
+    const HOUR_MS = 60 * 60 * 1000;
+    const DAY_MS = 24 * HOUR_MS;
+    const now = new Date();
+
+    for (let dayOffset = 0; dayOffset <= 14; dayOffset++) {
+      const candidate = new Date(now.getTime() + dayOffset * DAY_MS);
+      const kstDateStr = new Date(candidate.getTime() + 9 * HOUR_MS).toISOString().slice(0, 10);
+      const openAt = new Date(`${kstDateStr}T09:00:00+09:00`);
+      if (openAt > now && isKrxTradingDay(openAt)) {
+        return openAt.getTime() - now.getTime();
+      }
+    }
+    // 달력 데이터 없음 등 비정상 상황 폴백: 12시간
+    return 12 * HOUR_MS;
+  }
+
+  /**
+   * 프리셋 RS 캐시 워밍 (일 배치 지표 확정 후 호출).
+   * 배치 전에 캐시된 값이 남아있을 수 있어 forceRefresh로 재계산하고,
+   * 다음 개장까지 TTL을 늘려 저장한다. 개장 후에는 만료되어 기본 5분 TTL 흐름으로 복귀.
+   */
+  async warmCustomRsPresetCache(
+    marketType: '0' | '10' | 'all' = 'all',
+  ): Promise<{ warmed: number[]; failed: number[]; ttlMs: number }> {
+    const validStocks = await this.fetchStockList(marketType);
+    const allStockCodes = validStocks.map((s) => s.code);
+    const latestTradeDate = await this.metricsService.getLatestTradeDate();
+    const ttlMs = this.msUntilNextKrxMarketOpen();
+
+    const warmed: number[] = [];
+    const failed: number[] = [];
+    for (const period of RealTimeChartService.RS_PRESET_PERIODS) {
+      try {
+        await this.getOrComputeCustomRsHistory(
+          validStocks,
+          allStockCodes,
+          [period],
+          [100],
+          marketType,
+          latestTradeDate,
+          { ttlMs, forceRefresh: true },
+        );
+        warmed.push(period);
+      } catch (error) {
+        failed.push(period);
+        this.logger.warn(`[warmCustomRsPresetCache] period=${period} failed: ${(error as Error).message}`);
+      }
+    }
+
+    this.logger.log(
+      `[warmCustomRsPresetCache] marketType=${marketType} warmed=[${warmed.join(',')}] failed=[${failed.join(',')}] ttlMs=${ttlMs}`,
+    );
+    return { warmed, failed, ttlMs };
+  }
+
+  /**
+   * 종목명 부분일치 검색 (현재 필터 적용된 랭킹 결과 내, 대소문자 무시)
+   */
+  private applyStockNameSearch<T extends SortableStockItem>(items: T[], search?: string): T[] {
+    const term = search?.trim().toLowerCase();
+    if (!term) return items;
+    return items.filter((item) => item.stock.name?.toLowerCase().includes(term));
+  }
+
+  /**
+   * 정렬용 등락률 값: 실시간가 우선, 없으면 일별 지표 (formatPriceChangeRateText와 동일 소스)
+   */
+  private getChangeRateValue(item: SortableStockItem, realtimePrices: Map<string, any>): number | null {
+    const realtimePrice = this.getUsableRealtimePrice(realtimePrices.get(item.stock.code));
+    if (realtimePrice) {
+      const rate = Number(realtimePrice.changeRate);
+      if (Number.isFinite(rate)) return rate;
+    }
+    if (item.metrics?.priceChangeRate1d != null) {
+      const rate = Number(item.metrics.priceChangeRate1d);
+      if (Number.isFinite(rate)) return rate;
+    }
+    return null;
+  }
+
+  /**
+   * 정렬기준 적용. rs(기본)는 이미 정렬된 순서 유지, 나머지는 null을 뒤로 보내고
+   * 동률은 RS 기준 위치(baseRank)로 tie-break.
+   */
+  private sortStockItems<T extends SortableStockItem>(
+    items: T[],
+    options: StockListOptions | undefined,
+    ctx: { realtimePrices: Map<string, any>; rankChangeMap?: Map<string, number | null> },
+  ): T[] {
+    const sortBy = options?.sortBy ?? 'rs';
+    if (sortBy === 'rs') return items;
+
+    const sortOrder = options?.sortOrder ?? 'desc';
+    const tieBreak = (item: T) => item.baseRank ?? Number.MAX_SAFE_INTEGER;
+
+    switch (sortBy) {
+      case 'changeRate':
+        return sortWithNullsLast(items, (item) => this.getChangeRateValue(item, ctx.realtimePrices), sortOrder, tieBreak);
+      case 'tradingValue':
+        return sortWithNullsLast(
+          items,
+          (item) => (item.metrics?.tradingValue != null ? Number(item.metrics.tradingValue) : null),
+          sortOrder,
+          tieBreak,
+        );
+      case 'rankChange':
+        return sortWithNullsLast(items, (item) => ctx.rankChangeMap?.get(item.stock.code) ?? null, sortOrder, tieBreak);
+      default:
+        return items;
+    }
+  }
+
+  /**
+   * 순위변동(3일 누적 상승폭) 값. 오늘 순위는 정렬/검색과 무관한 RS 기준 위치(baseRank),
+   * 오늘 N은 필터 통과 전체 종목수. D-1~D-3의 N은 해당 시점 전체 선별 종목수로 동적 산출.
+   */
+  private buildRankChangeValue(
+    history: Array<number | null>,
+    totals: Array<number | null>,
+    todayRank: number | null,
+    todayTotal: number,
+  ): number | null {
+    return computeCumulativeRankChange(buildRankChangePoints(history, totals, todayRank, todayTotal));
+  }
+
+  /**
+   * 순위변동 정렬용: 대상 종목 전체의 3일 누적 상승폭 맵 계산
+   */
+  private async computeRankChangeMap(
+    items: SortableStockItem[],
+    todayTotal: number,
+    latestTradeDate: Date | null,
+    totals: Array<number | null>,
+  ): Promise<Map<string, number | null>> {
+    const stockCodes = items.map((item) => item.stock.code);
+    const historyMap = await this.metricsService.getCurrentRankHistory(
+      stockCodes,
+      3,
+      latestTradeDate,
+      this.isAfterAggregation(),
+    );
+
+    const rankChangeMap = new Map<string, number | null>();
+    for (const item of items) {
+      const history = historyMap.get(item.stock.code) || [];
+      rankChangeMap.set(
+        item.stock.code,
+        this.buildRankChangeValue(history, totals, item.baseRank ?? null, todayTotal),
+      );
+    }
+    return rankChangeMap;
+  }
+
+  /**
+   * suggest=true 자동완성용 경량 응답 (enrichment 생략, 상위 limit건)
+   * - 조건 내 종목: RS 점수 + 순위 포함, 순위순 정렬
+   * - 조건 밖 종목: 전체 상장 종목 중 종목명 매칭분을 inRanking=false로 뒤에 표시 (FE 선택 불가 처리용)
+   */
+  private async buildSuggestResponse<T extends SortableStockItem>(
+    items: T[],
+    options: StockListOptions | undefined,
+    limit = 20,
+  ) {
+    const term = options?.search?.trim().toLowerCase();
+
+    const inRankingItems = [...items].sort((a, b) => (a.baseRank ?? 0) - (b.baseRank ?? 0));
+    const inRankingCodes = new Set(inRankingItems.map((item) => item.stock.code));
+
+    // 현재 조건 밖 종목 (검색어가 있을 때만)
+    // ETN(코드 5/6/7 시작)·ETF(marketCode '8')는 랭킹 대상이 아니므로 후보에서 제외
+    let outOfRankingStocks: Array<{ code: string; name: string }> = [];
+    if (term) {
+      const allStocks = await this.fetchStockList('all');
+      outOfRankingStocks = allStocks
+        .filter(
+          (s) =>
+            !inRankingCodes.has(s.code) &&
+            !/^[567]/.test(s.code) &&
+            (s.marketCode == null || s.marketCode === '0' || s.marketCode === '10') &&
+            s.name?.toLowerCase().includes(term),
+        )
+        .sort((a, b) => a.name.localeCompare(b.name, 'ko'));
+    }
+
+    const suggestions = [
+      ...inRankingItems.map((item) => ({
+        stockCode: item.stock.code,
+        companyName: item.stock.name,
+        rank: item.baseRank ?? null,
+        relativeStrengthScore: item.rsScore != null ? Number(Number(item.rsScore).toFixed(2)) : null,
+        inRanking: true,
+      })),
+      ...outOfRankingStocks.map((s) => ({
+        stockCode: s.code,
+        companyName: s.name,
+        rank: null,
+        relativeStrengthScore: null,
+        inRanking: false,
+      })),
+    ].slice(0, limit);
+
+    return {
+      search: options?.search?.trim() || null,
+      totalCount: inRankingItems.length + outOfRankingStocks.length,
+      inRankingCount: inRankingItems.length,
+      count: suggestions.length,
+      suggestions,
+    };
   }
 
   private getUsableRealtimePrice(realtimePrice: any): any | undefined {
@@ -2238,8 +2632,10 @@ export class RealTimeChartService implements OnModuleInit {
   }
 
   async collectAllDayCandles(marketType: '0' | '10' = '0', days = 10) {
-    const BATCH_SIZE = 5; // 동시 처리 수
-    const BATCH_DELAY_MS = 600; // 배치 간격 지연(ms)
+    // 동시 처리 수. 실제 전송 속도는 KiwoomRestService의 전역 정속 페이싱(KIWOOM_REST_RPS)이
+    // 제어하므로 여기서는 파이프라인을 채울 정도의 동시성만 유지한다.
+    const BATCH_SIZE = 5;
+    const RETRY_BACKOFF_MS = 5000; // 429 안전망 재시도 전 대기
 
     this.logger.log(`Starting bulk day candle collection for market: ${marketType}, days: ${days}, batchSize: ${BATCH_SIZE}`);
 
@@ -2258,7 +2654,6 @@ export class RealTimeChartService implements OnModuleInit {
 
     let success = 0;
     let failed = 0;
-    let currentDelay = BATCH_DELAY_MS;
     const errors: { code: string; error: string }[] = [];
 
     // 배치 단위로 반복
@@ -2273,8 +2668,7 @@ export class RealTimeChartService implements OnModuleInit {
         batch.map((stock) => this.collectStockDayCandlesWithAdjusted(stock.code, today, days)),
       );
 
-      // 결과 처리
-      let batchHas429 = false;
+      // 결과 처리 (정속 페이싱으로 429는 원칙적으로 발생하지 않아야 하며, 아래 재시도는 안전망)
       const retryStocks: typeof batch = [];
 
       for (let j = 0; j < results.length; j++) {
@@ -2284,7 +2678,6 @@ export class RealTimeChartService implements OnModuleInit {
         } else {
           const axiosError = result.reason as any;
           if (axiosError?.status === 429 || axiosError?.response?.status === 429) {
-            batchHas429 = true;
             retryStocks.push(batch[j]);
           } else {
             failed++;
@@ -2294,25 +2687,20 @@ export class RealTimeChartService implements OnModuleInit {
         }
       }
 
-      // 429 발생 시 지수 백오프 재시도 (증가)
-      if (batchHas429) {
-        currentDelay = Math.min(currentDelay * 2, 10000);
-        this.logger.warn(`Rate limited (429) on ${retryStocks.length} stocks. Backing off ${currentDelay}ms...`);
-        await new Promise((resolve) => setTimeout(resolve, currentDelay));
+      if (retryStocks.length > 0) {
+        this.logger.warn(`Rate limited (429) on ${retryStocks.length} stocks. Retrying after ${RETRY_BACKOFF_MS}ms...`);
+        await new Promise((resolve) => setTimeout(resolve, RETRY_BACKOFF_MS));
 
         for (const stock of retryStocks) {
           try {
             await this.collectStockDayCandlesWithAdjusted(stock.code, today, days);
             success++;
-            await new Promise((resolve) => setTimeout(resolve, 500));
           } catch (retryError) {
             failed++;
             errors.push({ code: stock.code, error: (retryError as Error).message });
+            this.logger.warn(`Retry failed: ${stock.code} - ${(retryError as Error).message}`);
           }
         }
-      } else {
-        // 성공 시 지연을 점진적으로 감소
-        currentDelay = Math.max(BATCH_DELAY_MS, currentDelay - 200);
       }
 
       // 진행 상황 로그
@@ -2321,9 +2709,6 @@ export class RealTimeChartService implements OnModuleInit {
         const elapsed = ((processed / stocks.length) * 100).toFixed(1);
         this.logger.log(`Progress: ${processed}/${stocks.length} (${elapsed}%) - success: ${success}, failed: ${failed}`);
       }
-
-      // 배치 간격 대기
-      await new Promise((resolve) => setTimeout(resolve, currentDelay));
     }
 
     this.logger.log(`Bulk collection completed: ${success} success, ${failed} failed out of ${stocks.length}`);

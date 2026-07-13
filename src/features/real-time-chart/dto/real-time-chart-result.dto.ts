@@ -101,6 +101,13 @@ export class RealTimeChartResultItem {
   @ApiProperty({ type: RankHistoryDto, description: '최근 순위 이력' })
   rankHistory: RankHistoryDto;
 
+  @ApiProperty({
+    example: 27,
+    nullable: true,
+    description: '순위변동(최근 3일) 누적 상승폭. 순위권 밖 진입 구간은 해당 시점 전체 선별 종목수(N)+1을 직전 순위로 간주',
+  })
+  rankChange3d: number | null;
+
   @ApiProperty({ example: true, description: '변동성 축소 여부' })
   isVolatilityContraction: boolean;
 
@@ -145,6 +152,40 @@ export class RealTimeChartMetaDto {
     description: '기간 기반 RS 조회 시 적용된 필터/기간/가중치',
   })
   rangeRS?: Record<string, unknown>;
+}
+
+export class StockSuggestItemDto {
+  @ApiProperty({ example: '005930', description: '종목코드' })
+  stockCode: string;
+
+  @ApiProperty({ example: '삼성전자', description: '종목명' })
+  companyName: string;
+
+  @ApiProperty({ example: 1, nullable: true, description: '현재 필터 결과 내 RS 기준 순위 (조건 밖이면 null)' })
+  rank: number | null;
+
+  @ApiProperty({ example: 99, nullable: true, description: '시장대비강도 점수 (조건 밖이면 null)' })
+  relativeStrengthScore: number | null;
+
+  @ApiProperty({ example: true, description: 'false면 현재 필터 조건 밖 종목 (선택 불가 처리 필요)' })
+  inRanking: boolean;
+}
+
+export class StockSuggestResultDto {
+  @ApiProperty({ example: '삼성', nullable: true, description: '적용된 검색어' })
+  search: string | null;
+
+  @ApiProperty({ example: 3, description: '검색어에 매칭된 전체 종목 수 (조건 내 + 조건 밖)' })
+  totalCount: number;
+
+  @ApiProperty({ example: 2, description: '현재 필터 조건 내 매칭 종목 수' })
+  inRankingCount: number;
+
+  @ApiProperty({ example: 3, description: '반환된 자동완성 후보 수 (최대 20)' })
+  count: number;
+
+  @ApiProperty({ type: [StockSuggestItemDto], description: '자동완성 후보 (조건 내 순위순 → 조건 밖 이름순)' })
+  suggestions: StockSuggestItemDto[];
 }
 
 export class RealTimeChartResultDto {

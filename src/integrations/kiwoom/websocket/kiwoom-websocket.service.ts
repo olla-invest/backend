@@ -116,6 +116,13 @@ export class KiwoomWebSocketService implements IRealtimeSource, OnModuleInit, On
 
       this.logger.debug(`Received message: trnm=${message.trnm}, return_code=${message.return_code}, readyState=${this.ws?.readyState}`);
 
+      // 진단용: 처리 분기가 없는 메시지 타입(PING 등 keepalive 의심)을 운영 로그에서 확인
+      // (원인 확정 후 대응 로직 추가 예정 — 현재는 로그만 남기고 동작 변경 없음)
+      const knownTrnms = ['LOGIN', 'REAL', 'REG', 'REMOVE', 'SYSTEM'];
+      if (!knownTrnms.includes(message.trnm as string)) {
+        this.logger.log(`Unhandled message type: trnm=${message.trnm}, raw=${data.toString().slice(0, 300)}`);
+      }
+
       // 로그인 완료 체크 - 실제 성공 메시지인지 검증
       if (!this.isLoggedIn) {
         // SYSTEM 메시지는 로그인 확인이 아님 (시스템 알림, 종료 메시지 등)

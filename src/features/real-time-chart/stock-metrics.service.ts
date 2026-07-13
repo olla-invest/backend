@@ -272,6 +272,48 @@ export class StockMetricsService {
   }
 
   /**
+   * 최근 N개 거래일별 전체 선별 종목수(current_rank 보유 종목수) 조회.
+   * 반환 배열은 getCurrentRankHistory와 동일하게 최근일이 인덱스 0 (D-1, D-2, ...).
+   */
+  async getCurrentRankTotals(
+    days: number = 3,
+    beforeTradeDate?: Date | null,
+    inclusive = false,
+  ): Promise<Array<number | null>> {
+    const recentDates = await this.prisma.stockDailyMetrics.findMany({
+      where: beforeTradeDate
+        ? { tradeDate: inclusive ? { lte: beforeTradeDate } : { lt: beforeTradeDate } }
+        : undefined,
+      orderBy: { tradeDate: 'desc' },
+      take: days,
+      distinct: ['tradeDate'],
+      select: { tradeDate: true },
+    });
+    const tradeDates = recentDates.map((d) => d.tradeDate);
+    if (tradeDates.length === 0) return Array(days).fill(null);
+
+    const counts = await this.prisma.stockDailyMetrics.groupBy({
+      by: ['tradeDate'],
+      where: {
+        tradeDate: { in: tradeDates },
+        currentRank: { not: null },
+      },
+      _count: { _all: true },
+    });
+
+    const countByDate = new Map<string, number>();
+    for (const row of counts) {
+      countByDate.set(row.tradeDate.toISOString().slice(0, 10), row._count._all);
+    }
+
+    return Array.from({ length: days }, (_, i) => {
+      const tradeDate = tradeDates[i];
+      if (!tradeDate) return null;
+      return countByDate.get(tradeDate.toISOString().slice(0, 10)) ?? null;
+    });
+  }
+
+  /**
    * 여러 종목의 최근 N개 거래일 지표 이력 조회
    * 반환: Map<stockCode, Array<{tradeDate, rank, rsScore}>>
    */
