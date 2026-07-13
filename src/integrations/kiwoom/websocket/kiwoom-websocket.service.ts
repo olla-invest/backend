@@ -116,9 +116,15 @@ export class KiwoomWebSocketService implements IRealtimeSource, OnModuleInit, On
 
       this.logger.debug(`Received message: trnm=${message.trnm}, return_code=${message.return_code}, readyState=${this.ws?.readyState}`);
 
-      // 진단용: 처리 분기가 없는 메시지 타입(PING 등 keepalive 의심)을 운영 로그에서 확인
-      // (원인 확정 후 대응 로직 추가 예정 — 현재는 로그만 남기고 동작 변경 없음)
-      const knownTrnms = ['LOGIN', 'REAL', 'REG', 'REMOVE', 'SYSTEM'];
+      // 키움 keepalive: 서버가 보낸 PING 패킷을 그대로 되돌려줘야 세션이 유지된다.
+      // (미응답 시 서버가 ~50초 후 code 1000 "Bye"로 연결을 끊음 — 2026-07-13 운영 로그로 확인)
+      if (message.trnm === 'PING') {
+        this.ws?.send(data.toString());
+        return;
+      }
+
+      // 진단용: 처리 분기가 없는 메시지 타입을 운영 로그에서 확인
+      const knownTrnms = ['LOGIN', 'REAL', 'REG', 'REMOVE', 'SYSTEM', 'PING'];
       if (!knownTrnms.includes(message.trnm as string)) {
         this.logger.log(`Unhandled message type: trnm=${message.trnm}, raw=${data.toString().slice(0, 300)}`);
       }
