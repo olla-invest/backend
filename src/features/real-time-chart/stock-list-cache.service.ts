@@ -17,14 +17,32 @@ export interface RangeRsRankingCache {
   createdAt: string;
 }
 
+export interface CustomRsHistoryCache {
+  dataDate: string | null;
+  marketType: '0' | '10' | 'all';
+  periods: number[];
+  weights: number[];
+  rows: Array<{
+    stockCode: string;
+    history: Array<{
+      tradeDate: string;
+      rank: number;
+      rsScore: number;
+    }>;
+  }>;
+  createdAt: string;
+}
+
 @Injectable()
 export class StockListCacheService {
   private readonly logger = new Logger(StockListCacheService.name);
   private readonly STOCK_LIST_TTL = 60 * 60 * 1000; // 1시간
   private readonly RANGE_RS_TTL = 5 * 60 * 1000; // 5분
+  private readonly CUSTOM_RS_TTL = 5 * 60 * 1000; // 5분 (장중 캔들 갱신 반영 주기)
 
   // Promise는 직렬화 불가 — 인메모리 유지
   private readonly rsFilterInflight = new Map<string, Promise<RangeRsRankingCache>>();
+  private readonly customRsInflight = new Map<string, Promise<CustomRsHistoryCache>>();
 
   constructor(
     @Inject(CACHE_MANAGER)
@@ -121,5 +139,56 @@ export class StockListCacheService {
 
   deleteInflight(cacheKey: string): void {
     this.rsFilterInflight.delete(cacheKey);
+  }
+
+  buildCustomRsCacheKey(params: {
+    dataDate: string | null;
+    marketType: '0' | '10' | 'all';
+    periods: number[];
+    weights: number[];
+  }): string {
+    const payload = {
+      version: 1,
+      dataDate: params.dataDate,
+      marketType: params.marketType,
+      periods: params.periods,
+      weights: params.weights,
+    };
+    const hash = createHash('sha1').update(JSON.stringify(payload)).digest('hex');
+    return `real-time-chart:custom-rs:${params.dataDate ?? 'unknown'}:${params.marketType}:${hash}`;
+  }
+
+  async getCustomRsHistoryCache(cacheKey: string): Promise<CustomRsHistoryCache | null> {
+    try {
+      return (await this.cacheManager.get<CustomRsHistoryCache>(cacheKey)) ?? null;
+    } catch (error) {
+      this.logger.warn(`[customRS] cache get failed key=${cacheKey}: ${(error as Error).message}`);
+      return null;
+    }
+  }
+
+  /**
+   * ttlMs 미지정 시 기본 5분. 프리셋 워밍 등 데이터가 고정된 구간에는 긴 TTL을 지정할 수 있다.
+   */
+  async setCustomRsHistoryCache(cacheKey: string, value: CustomRsHistoryCache, ttlMs?: number): Promise<void> {
+    const ttl = ttlMs ?? this.CUSTOM_RS_TTL;
+    try {
+      await this.cacheManager.set(cacheKey, value, ttl);
+      this.logger.log(`[customRS] cache set key=${cacheKey} rows=${value.rows.length} ttlMs=${ttl}`);
+    } catch (error) {
+      this.logger.warn(`[customRS] cache set failed key=${cacheKey}: ${(error as Error).message}`);
+    }
+  }
+
+  getCustomRsInflight(cacheKey: string): Promise<CustomRsHistoryCache> | undefined {
+    return this.customRsInflight.get(cacheKey);
+  }
+
+  setCustomRsInflight(cacheKey: string, promise: Promise<CustomRsHistoryCache>): void {
+    this.customRsInflight.set(cacheKey, promise);
+  }
+
+  deleteCustomRsInflight(cacheKey: string): void {
+    this.customRsInflight.delete(cacheKey);
   }
 }

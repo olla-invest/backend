@@ -6,7 +6,7 @@ import { ChartStorageService } from './chart-storage.service';
 import { StockMetricsService } from './stock-metrics.service';
 import { InitialSetupService } from './initial-setup.service';
 import { ChartGateway } from './chart.gateway';
-import { RealtimePriceCacheService } from './realtime-price-cache.service';
+import { RealtimePriceCacheModule } from './realtime-price-cache.module';
 import { StockListCacheService } from './stock-list-cache.service';
 import { DataSchedulerService } from './data-scheduler.service';
 import { CurrentRankService } from './current-rank.service';
@@ -28,6 +28,7 @@ import { MarketViewModule } from '../market-view/market-view.module';
     CronModule,
     EventEmitterModule.forRoot(),
     MarketViewModule,
+    RealtimePriceCacheModule,
   ],
   controllers: [RealTimeChartController, DetailController],
   providers: [
@@ -36,12 +37,11 @@ import { MarketViewModule } from '../market-view/market-view.module';
     StockMetricsService,
     InitialSetupService,
     ChartGateway,
-    RealtimePriceCacheService,
     StockListCacheService,
     CurrentRankService,
     DataSchedulerService,
     AdminApiKeyGuard,
   ],
-  exports: [RealTimeChartService, RealtimePriceCacheService],
+  exports: [RealTimeChartService, RealtimePriceCacheModule],
 })
 export class RealTimeChartModule {}

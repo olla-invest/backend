@@ -345,6 +345,10 @@ export class DataSchedulerService implements OnApplicationBootstrap {
           throw new Error(`metrics calculation returned empty/failed result: ${JSON.stringify(result)}`);
         }
         this.logger.log(`=== [메트릭스] Calculation Completed for ${iso} ===`);
+        // 프리셋 RS 캐시 워밍 (fire-and-forget — 실패해도 배치 결과에 영향 없음)
+        this.realTimeChartService.warmCustomRsPresetCache().catch((err) =>
+          this.logger.warn(`[메트릭스] preset RS cache warm failed: ${(err as Error).message}`),
+        );
         return result;
       },
       { metadata: { tradeDate: iso } },
@@ -377,18 +381,47 @@ export class DataSchedulerService implements OnApplicationBootstrap {
     return count >= 2;
   }
 
+  /** 당일 캔들이 직전 거래일 대비 이 비율 이상 수집되어야 메트릭스 계산을 허용 */
+  private static readonly REQUIRED_CANDLE_COVERAGE = 0.95;
+
   private async hasRequiredCandlesForDate(tradeDate: Date): Promise<boolean> {
-    const rows = await this.prisma.$queryRawUnsafe<{ stock_count: number; index_count: number }[]>(
+    // 수집이 진행 중인 상태(일부 종목만 캔들 존재)에서 세이프넷 크론이 메트릭스를
+    // 확정해버리는 것을 막기 위해, 직전 거래일 캔들 수를 분모로 커버리지를 검증한다.
+    // (직전 거래일 실적을 분모로 쓰면 ETF/ETN 제외 등 수집 대상 정의와 자동으로 일치)
+    const rows = await this.prisma.$queryRawUnsafe<
+      { stock_count: number; index_count: number; prev_count: number }[]
+    >(
       `SELECT
-         COUNT(*) FILTER (WHERE stock_code NOT LIKE 'INDEX_%')::int AS stock_count,
-         COUNT(*) FILTER (WHERE stock_code IN ('INDEX_KOSPI', 'INDEX_KOSDAQ'))::int AS index_count
+         COUNT(*) FILTER (WHERE stock_code NOT LIKE 'INDEX_%' AND candle_time::date = $1)::int AS stock_count,
+         COUNT(*) FILTER (WHERE stock_code IN ('INDEX_KOSPI', 'INDEX_KOSDAQ') AND candle_time::date = $1)::int AS index_count,
+         COUNT(*) FILTER (WHERE stock_code NOT LIKE 'INDEX_%' AND candle_time::date = (
+           SELECT MAX(candle_time::date) FROM stock_candles
+            WHERE candle_type = 'day' AND stock_code NOT LIKE 'INDEX_%'
+              AND candle_time >= $1::timestamp - INTERVAL '21 days' AND candle_time::date < $1
+         ))::int AS prev_count
        FROM stock_candles
        WHERE candle_type = 'day'
-         AND candle_time::date = $1`,
+         AND candle_time >= $1::timestamp - INTERVAL '21 days'
+         AND candle_time < $1::timestamp + INTERVAL '1 day'`,
       this.dateOnly(tradeDate),
     );
     const row = rows[0];
-    return (row?.stock_count ?? 0) > 0 && (row?.index_count ?? 0) >= 2;
+    const stockCount = row?.stock_count ?? 0;
+    const indexCount = row?.index_count ?? 0;
+    const prevCount = row?.prev_count ?? 0;
+
+    if (indexCount < 2) return false;
+    // 이전 거래일 데이터가 없는 초기 상태에서는 기존 기준(1개 이상)으로 폴백
+    if (prevCount === 0) return stockCount > 0;
+
+    const required = Math.floor(prevCount * DataSchedulerService.REQUIRED_CANDLE_COVERAGE);
+    const ok = stockCount >= required;
+    if (!ok) {
+      this.logger.log(
+        `[safenet] candle coverage insufficient for ${this.dateOnly(tradeDate).toISOString().slice(0, 10)}: ${stockCount}/${prevCount} (required ${required})`,
+      );
+    }
+    return ok;
   }
 
   private async resetMetricsRunLog(tradeDate: Date): Promise<void> {

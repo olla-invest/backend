@@ -27,6 +27,9 @@ export class KiwoomRestService {
   private readonly logger = new Logger(KiwoomRestService.name);
   private readonly httpClient: AxiosInstance;
   private readonly apiUrl: string;
+  /** 다음 요청이 전송 가능한 시각 (전역 정속 페이싱용) */
+  private nextRequestAt = 0;
+  private readonly minRequestIntervalMs: number;
 
   constructor(
     private readonly configService: ConfigService,
@@ -45,6 +48,22 @@ export class KiwoomRestService {
         'Content-Type': 'application/json;charset=UTF-8',
       },
       timeout: 30000,
+    });
+
+    // 키움 REST는 계정 단위 TPS 한도가 있어 burst 시 429가 발생한다.
+    // 모든 요청이 이 인스턴스를 거치므로, 인터셉터에서 요청마다 전송 슬롯을
+    // 순서대로 예약해 초당 KIWOOM_REST_RPS 건 이하의 정속으로 흘려보낸다.
+    const rps = Number(this.configService.get('KIWOOM_REST_RPS')) || 4;
+    this.minRequestIntervalMs = Math.ceil(1000 / rps);
+
+    this.httpClient.interceptors.request.use(async (config) => {
+      const now = Date.now();
+      const scheduledAt = Math.max(now, this.nextRequestAt);
+      this.nextRequestAt = scheduledAt + this.minRequestIntervalMs;
+      if (scheduledAt > now) {
+        await new Promise((resolve) => setTimeout(resolve, scheduledAt - now));
+      }
+      return config;
     });
   }
 

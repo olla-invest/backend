@@ -48,7 +48,27 @@
       "PowerShell(Start-Sleep -Seconds 8; try { \\(Invoke-WebRequest -Uri \"http://localhost:3000/real-time-chart/status\" -UseBasicParsing -TimeoutSec 10\\).Content } catch { \"아직 기동중...\" })",
       "Bash(Get-Content C:\\\\tmp\\\\server_out.log -Tail 50)",
       "Bash(nohup node --enable-source-maps dist/main)",
-      "Bash(echo \"Server PID: $!\")"
+      "Bash(echo \"Server PID: $!\")",
+      "Bash(git -C /Users/seokjelee/secret/olla-back checkout develop)",
+      "Bash(python3)",
+      "Bash(python3 -c ' *)",
+      "Bash(git commit -m ' *)",
+      "Bash(git push *)",
+      "Bash(git fetch *)",
+      "Bash(git merge *)",
+      "Bash(xxd)",
+      "Bash(git -C /Users/seokjelee/secret/olla-back log --oneline --all)",
+      "Bash(git -C /Users/seokjelee/secret/olla-back show f299b53 -- src/features/real-time-chart/real-time-chart.service.ts)",
+      "Read(//tmp/**)",
+      "Bash(git -C /Users/seokjelee/secret/olla-back log --oneline f299b53..HEAD -- src/features/real-time-chart/real-time-chart.service.ts)",
+      "Bash(git -C /Users/seokjelee/secret/olla-back show f299b53:src/features/real-time-chart/real-time-chart.service.ts)",
+      "Bash(git -C /Users/seokjelee/secret/olla-back diff f299b53 HEAD -- src/features/real-time-chart/real-time-chart.service.ts)",
+      "Bash(git -C /Users/seokjelee/secret/olla-back show b6ad40a -- src/features/real-time-chart/real-time-chart.service.ts)",
+      "Bash(sed -n '60,65p' /Users/seokjelee/secret/olla-back/src/features/real-time-chart/real-time-chart.service.ts)",
+      "Bash(sed -n '209,213p' /Users/seokjelee/secret/olla-back/src/features/real-time-chart/real-time-chart.service.ts)",
+      "Bash(sed -n '651,655p' /Users/seokjelee/secret/olla-back/src/features/real-time-chart/real-time-chart.service.ts)",
+      "Bash(sed -n '928,932p' /Users/seokjelee/secret/olla-back/src/features/real-time-chart/real-time-chart.service.ts)",
+      "Bash(sed -n '2197,2201p' /Users/seokjelee/secret/olla-back/src/features/real-time-chart/real-time-chart.service.ts)"
     ],
     "additionalDirectories": [
       "c:\\Users\\user\\Documents\\front\\frontend\\src\\pages\\home\\components"

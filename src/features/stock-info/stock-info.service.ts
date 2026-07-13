@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../../common/prisma/prisma.service';
 import { DartRestService } from '../../integrations/dart/dart-rest.service';
 import { KiwoomRestService } from '../../integrations/kiwoom/rest/kiwoom-rest.service';
+import { RealtimePriceCacheService } from '../real-time-chart/realtime-price-cache.service';
 import axios from 'axios';
 import AdmZip = require('adm-zip');
 import * as cheerio from 'cheerio';
@@ -111,6 +112,7 @@ export class StockInfoService {
     private readonly dart: DartRestService,
     private readonly config: ConfigService,
     private readonly kiwoomRest: KiwoomRestService,
+    private readonly realtimePriceCache: RealtimePriceCacheService,
   ) {}
 
   /**
@@ -188,7 +190,10 @@ export class StockInfoService {
     if (dartData.status !== '000') throw new Error(`DART 기업개황 오류: ${dartData.message}`);
 
     const listedShares = company?.listedShares ?? null;
-    const closePrice = latestCandle ? Number(latestCandle.closePrice) : null;
+    // 장중에는 실시간 현재가 우선, 없으면 DB 일봉 종가 (watchlist와 동일 패턴)
+    const realtimePrice = this.realtimePriceCache.getPrice(stockCode);
+    const closePrice =
+      realtimePrice?.currentPrice ?? (latestCandle ? Number(latestCandle.closePrice) : null);
     const calculatedMarketCap = listedShares && closePrice
       ? Number(listedShares) * closePrice
       : null;

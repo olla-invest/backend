@@ -1,11 +1,11 @@
 import { Controller, Get, Post, Query, Param, Body, UseGuards } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiParam, ApiQuery, ApiBody, ApiOkResponse } from '@nestjs/swagger';
-import { RealTimeChartService } from './real-time-chart.service';
+import { ApiTags, ApiOperation, ApiParam, ApiQuery, ApiBody, ApiOkResponse, ApiExtraModels } from '@nestjs/swagger';
+import { RealTimeChartService, StockListSortBy } from './real-time-chart.service';
 import { InitialSetupService } from './initial-setup.service';
 import { StockMetricsService } from './stock-metrics.service';
 import { Public } from '../../common/auth/decorators/public.decorator';
 import { AdminApiKeyGuard } from '../../common/auth/guards/admin-api-key.guard';
-import { RealTimeChartResultDto } from './dto/real-time-chart-result.dto';
+import { RealTimeChartResultDto, StockSuggestResultDto } from './dto/real-time-chart-result.dto';
 import {
   CsvDatePipe,
   CsvIntPipe,
@@ -22,6 +22,7 @@ import {
 } from '../../common/pipes/input-validation.pipes';
 
 @ApiTags( '실시간 차트 (Real-time Chart)' )
+@ApiExtraModels( StockSuggestResultDto )
 @Controller('real-time-chart')
 @Public()
 export class RealTimeChartController {
@@ -243,7 +244,7 @@ export class RealTimeChartController {
   }
 
   @Get('stocks')
-  @ApiOperation( { summary: '종목 리스트 조회 (GET)', description: '페이지네이션 + 필터 + 커스텀 RS. 파라미터 없으면 디폴트 RS(63일) 사용.' } )
+  @ApiOperation( { summary: '종목 리스트 조회 (GET)', description: '페이지네이션 + 필터 + 커스텀 RS + 검색/정렬. 파라미터 없으면 디폴트 RS(63일) 사용. suggest=true면 자동완성용 경량 응답(StockSuggestResultDto).' } )
   @ApiQuery( { name: 'marketType', required: false, enum: ['0','10','all'], description: '0: KOSPI, 10: KOSDAQ, all: 전체' } )
   @ApiQuery( { name: 'page', required: false, example: '1' } )
   @ApiQuery( { name: 'pageSize', required: false, example: '50' } )
@@ -253,6 +254,10 @@ export class RealTimeChartController {
   @ApiQuery( { name: 'rsPeriods', required: false, example: '63,126,252', description: 'RS 계산 기간' } )
   @ApiQuery( { name: 'rsWeights', required: false, example: '50,30,20', description: 'RS 가중치' } )
   @ApiQuery( { name: 'rsDates', required: false, example: '2026-02-09,2026-01-15,2025-11-10', description: 'RS 계산 날짜' } )
+  @ApiQuery( { name: 'search', required: false, example: '삼성', description: '종목명 부분일치 검색 (현재 필터 결과 내)' } )
+  @ApiQuery( { name: 'sortBy', required: false, enum: ['rs','changeRate','tradingValue','rankChange'], description: '정렬 기준 (기본 rs = 시장대비강도 점수 높은 순)' } )
+  @ApiQuery( { name: 'sortOrder', required: false, enum: ['asc','desc'], description: '정렬 방향 (기본 desc, rs는 항상 desc)' } )
+  @ApiQuery( { name: 'suggest', required: false, enum: ['true','false'], description: 'true면 자동완성용 경량 응답 (상위 20건, 종목코드/종목명/순위만)' } )
   @ApiOkResponse( { type: RealTimeChartResultDto } )
   async getStockList(
     @Query('marketType', new EnumPipe(['0','10','all'] as const, 'marketType', true)) marketType: '0' | '10' | 'all' = 'all',
@@ -264,6 +269,10 @@ export class RealTimeChartController {
     @Query('rsPeriods', new CsvIntPipe('rsPeriods', 1, 1000, true, 10)) rsPeriods?: string,
     @Query('rsWeights', new CsvIntPipe('rsWeights', 0, 100, true, 10)) rsWeights?: string,
     @Query('rsDates', new CsvDatePipe('rsDates', true, 10)) rsDates?: string,
+    @Query('search', new RegexPipe(/^[\s\S]{1,50}$/, 'search', true)) search?: string,
+    @Query('sortBy', new EnumPipe(['rs','changeRate','tradingValue','rankChange'] as const, 'sortBy', true)) sortBy?: StockListSortBy,
+    @Query('sortOrder', new EnumPipe(['asc','desc'] as const, 'sortOrder', true)) sortOrder?: 'asc' | 'desc',
+    @Query('suggest', new EnumPipe(['true','false'] as const, 'suggest', true)) suggest?: string,
   ) {
     return await this.chartService.getStockList(
       marketType,
@@ -277,11 +286,17 @@ export class RealTimeChartController {
       rsPeriods,
       rsWeights,
       rsDates,
+      {
+        search,
+        sortBy,
+        sortOrder,
+        suggest: suggest === 'true',
+      },
     );
   }
 
   @Post('stocks')
-  @ApiOperation( { summary: '종목 리스트 조회 (POST)', description: '기간 기반 RS 필터 적용' } )
+  @ApiOperation( { summary: '종목 리스트 조회 (POST)', description: '기간 기반 RS 필터 적용 + 검색/정렬. suggest=true면 자동완성용 경량 응답(StockSuggestResultDto).' } )
   @ApiBody( {
     schema: {
       example: {
@@ -293,6 +308,10 @@ export class RealTimeChartController {
           { rsStartDate: '2026-02-09', rsEndDate: '2026-01-15', strength: 50 },
           { rsStartDate: '2026-01-15', rsEndDate: '2025-12-01', strength: 50 },
         ],
+        search: '삼성',
+        sortBy: 'rankChange',
+        sortOrder: 'desc',
+        suggest: false,
       },
     },
   } )
@@ -311,6 +330,10 @@ export class RealTimeChartController {
       rsEndDate: string;
       strength: number;
     }>,
+    @Body('search', new RegexPipe(/^[\s\S]{1,50}$/, 'search', true)) search?: string,
+    @Body('sortBy', new EnumPipe(['rs','changeRate','tradingValue','rankChange'] as const, 'sortBy', true)) sortBy?: StockListSortBy,
+    @Body('sortOrder', new EnumPipe(['asc','desc'] as const, 'sortOrder', true)) sortOrder?: 'asc' | 'desc',
+    @Body('suggest') suggest?: boolean | string,
   ) {
     return await this.chartService.getStockListWithRangeRS(
       marketType,
@@ -318,6 +341,12 @@ export class RealTimeChartController {
       pageSize,
       filters,
       rsFilters,
+      {
+        search,
+        sortBy,
+        sortOrder,
+        suggest: suggest === true || suggest === 'true',
+      },
     );
   }
 
@@ -435,6 +464,16 @@ export class RealTimeChartController {
   @ApiOperation( { summary: '[관리자] 오늘 지수 종가만 수집', description: '장 마감 후 가볍게 호출' } )
   async collectTodayIndexClose() {
     return await this.chartService.collectTodayIndexClose();
+  }
+
+  @Post('cache/warm-rs-presets')
+  @UseGuards(AdminApiKeyGuard)
+  @ApiOperation( { summary: '[관리자] RS 프리셋 캐시 워밍', description: '프리셋(5/21/63/126/252일) RS 랭킹을 미리 계산해 다음 개장(09:00 KST)까지 캐시. 일 배치 후 자동 실행되며, 수동 트리거용.' } )
+  @ApiBody( { schema: { example: { marketType: 'all' } }, required: false } )
+  async warmRsPresetCache(
+    @Body('marketType', new EnumPipe(['0','10','all'] as const, 'marketType', true)) marketType: '0' | '10' | 'all' = 'all',
+  ) {
+    return await this.chartService.warmCustomRsPresetCache(marketType);
   }
 
   @Post('metrics/calculate')
