@@ -1095,18 +1095,20 @@ export class RealTimeChartService implements OnModuleInit {
     const latestTradeDate = await this.metricsService.getLatestTradeDate();
     const rankTotals = await this.metricsService.getCurrentRankTotals(3, latestTradeDate, this.isAfterAggregation());
 
-    // 종목명 검색 (현재 랭킹 결과 내 부분일치)
-    const searchedStocks = this.applyStockNameSearch(rankedStocks, options?.search);
-
-    // 정렬기준 적용 (순위변동 정렬 시 대상 전체의 누적값 선계산)
+    // 정렬기준 적용 (순위변동 정렬 시 전체 대상의 누적값 선계산)
     let rankChangeMap: Map<string, number | null> | undefined;
     if (options?.sortBy === 'rankChange') {
-      rankChangeMap = await this.computeRankChangeMap(searchedStocks, baseTotal, latestTradeDate, rankTotals);
+      rankChangeMap = await this.computeRankChangeMap(rankedStocks, baseTotal, latestTradeDate, rankTotals);
     }
-    const sortedStocks = this.sortStockItems(searchedStocks, options, {
+    // 검색은 필터일 뿐이므로, 전체 리스트를 먼저 정렬해 표시 순위(displayRank)를 확정한 뒤
+    // 검색을 적용한다 → 검색 결과에도 검색 전 리스트의 순위가 그대로 보인다.
+    const sortedAll = this.sortStockItems(rankedStocks, options, {
       realtimePrices: allRealtimePrices,
       rankChangeMap,
-    });
+    }).map((item, index) => ({ ...item, displayRank: index + 1 }));
+
+    // 종목명 검색 (현재 랭킹 결과 내 부분일치, 순위 유지)
+    const sortedStocks = this.applyStockNameSearch(sortedAll, options?.search);
 
     // 자동완성용 경량 응답
     if (options?.suggest) {
@@ -1167,7 +1169,7 @@ export class RealTimeChartService implements OnModuleInit {
 
         return {
           id: s.code,
-          rank: startIndex + index + 1,
+          rank: item.displayRank,
           companyName: s.name,
           stockCode: s.code,
           currentPrice: realtimePrice?.currentPrice || dbPrice,
@@ -1183,7 +1185,7 @@ export class RealTimeChartService implements OnModuleInit {
           themeFull: naverThemeText || s.upName || '-',
           themes: naverThemes,
           rankHistory: {
-            today: startIndex + index + 1,
+            today: item.displayRank,
             oneDayAgo: currentRankHistory[0] ?? null,
             twoDaysAgo: currentRankHistory[1] ?? null,
             threeDaysAgo: currentRankHistory[2] ?? null,
@@ -1310,16 +1312,16 @@ export class RealTimeChartService implements OnModuleInit {
 
     const rankTotals = await this.metricsService.getCurrentRankTotals(3, latestTradeDate, this.isAfterAggregation());
 
-    // 종목명 검색 → 정렬기준 적용
-    const searchedStocks = this.applyStockNameSearch(rankedStocks, options?.search);
+    // 정렬기준 적용 (전체 대상) → 표시 순위 확정 → 종목명 검색 (순위 유지)
     let rankChangeMap: Map<string, number | null> | undefined;
     if (options?.sortBy === 'rankChange') {
-      rankChangeMap = await this.computeRankChangeMap(searchedStocks, baseTotal, latestTradeDate, rankTotals);
+      rankChangeMap = await this.computeRankChangeMap(rankedStocks, baseTotal, latestTradeDate, rankTotals);
     }
-    const sortedStocks = this.sortStockItems(searchedStocks, options, {
+    const sortedAll = this.sortStockItems(rankedStocks, options, {
       realtimePrices: allRealtimePrices,
       rankChangeMap,
-    });
+    }).map((item, index) => ({ ...item, displayRank: index + 1 }));
+    const sortedStocks = this.applyStockNameSearch(sortedAll, options?.search);
 
     // 자동완성용 경량 응답
     if (options?.suggest) {
@@ -1395,7 +1397,7 @@ export class RealTimeChartService implements OnModuleInit {
 
         return {
           id: s.code,
-          rank: startIndex + index + 1,
+          rank: item.displayRank,
           companyName: s.name,
           stockCode: s.code,
           currentPrice: realtimePrice?.currentPrice || dbPrice,
@@ -1411,7 +1413,7 @@ export class RealTimeChartService implements OnModuleInit {
           themeFull: naverThemeText || s.upName || '-',
           themes: naverThemes,
           rankHistory: {
-            today: startIndex + index + 1,
+            today: item.displayRank,
             oneDayAgo: currentRankHistory[0] ?? null,
             twoDaysAgo: currentRankHistory[1] ?? null,
             threeDaysAgo: currentRankHistory[2] ?? null,
@@ -1578,16 +1580,16 @@ export class RealTimeChartService implements OnModuleInit {
 
     const rankTotals = await this.metricsService.getCurrentRankTotals(3, latestTradeDate, this.isAfterAggregation());
 
-    // 종목명 검색 → 정렬기준 적용
-    const searchedStocks = this.applyStockNameSearch(rankedStocks, options?.search);
+    // 정렬기준 적용 (전체 대상) → 표시 순위 확정 → 종목명 검색 (순위 유지)
     let rankChangeMap: Map<string, number | null> | undefined;
     if (options?.sortBy === 'rankChange') {
-      rankChangeMap = await this.computeRankChangeMap(searchedStocks, baseTotal, latestTradeDate, rankTotals);
+      rankChangeMap = await this.computeRankChangeMap(rankedStocks, baseTotal, latestTradeDate, rankTotals);
     }
-    const sortedStocks = this.sortStockItems(searchedStocks, options, {
+    const sortedAll = this.sortStockItems(rankedStocks, options, {
       realtimePrices: allRealtimePrices,
       rankChangeMap,
-    });
+    }).map((item, index) => ({ ...item, displayRank: index + 1 }));
+    const sortedStocks = this.applyStockNameSearch(sortedAll, options?.search);
 
     // 자동완성용 경량 응답
     if (options?.suggest) {
@@ -1646,7 +1648,7 @@ export class RealTimeChartService implements OnModuleInit {
 
         return {
           id: s.code,
-          rank: startIndex + index + 1,
+          rank: item.displayRank,
           companyName: s.name,
           stockCode: s.code,
           currentPrice: realtimePrice?.currentPrice || dbPrice,
@@ -1662,7 +1664,7 @@ export class RealTimeChartService implements OnModuleInit {
           themeFull: naverThemeText || s.upName || '-',
           themes: naverThemes,
           rankHistory: {
-            today: startIndex + index + 1,
+            today: item.displayRank,
             oneDayAgo: currentRankHistory[0] ?? null,
             twoDaysAgo: currentRankHistory[1] ?? null,
             threeDaysAgo: currentRankHistory[2] ?? null,
