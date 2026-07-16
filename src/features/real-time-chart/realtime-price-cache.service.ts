@@ -71,6 +71,15 @@ export class RealtimePriceCacheService {
   }
 
   /**
+   * 키움 REG 응답이 실제로 성공한 종목만 "구독됨"으로 기록.
+   * (구독 요청 전송 시점에 낙관적으로 기록하면, 요청이 거부돼도 재시도가 걸리지 않는 문제가 있었음 — 2026-07-16)
+   */
+  @OnEvent('kiwoom.subscription.confirmed')
+  handleSubscriptionConfirmed(payload: { stockCodes: string[] }): void {
+    payload.stockCodes.forEach((code) => this.addSubscription(code));
+  }
+
+  /**
    * 종목 구독 제거
    */
   removeSubscription(stockCode: string): void {
