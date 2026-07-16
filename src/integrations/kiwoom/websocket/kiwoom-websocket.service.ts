@@ -22,6 +22,8 @@ export class KiwoomWebSocketService implements IRealtimeSource, OnModuleInit, On
   private pendingSubscriptions = false;
   private subscriptions = new Map<string, Set<string>>(); // stockCode -> Set<type>
   private subscriptionQueue: Array<{ stockCode: string; types: string[]; action: 'REG' | 'REMOVE' }> = [];
+  // 전송한 REG/REMOVE 요청을 키움 응답과 순서대로 매칭하기 위한 대기열 (키움이 보낸 순서대로 ack하는 동작을 전제로 함)
+  private pendingRegAcks: Array<{ action: 'REG' | 'REMOVE'; stockCodes: string[]; types: string[] }> = [];
 
   constructor(
     private readonly configService: ConfigService,
@@ -161,15 +163,34 @@ export class KiwoomWebSocketService implements IRealtimeSource, OnModuleInit, On
             this.resubscribeAll();
           }
 
-          // 큐에 쌓인 구독 요청 처리
+          // 큐에 쌓인 구독 요청 처리 (action/type 조합별로 묶어 배치 전송 — 종목별 개별 REG는
+          // 로그인 직후 대량으로 쌓였을 때 키움 "허용된 요청 건수 초과" 거부를 유발함, 2026-07-16 확인)
           if (this.subscriptionQueue.length > 0) {
             this.logger.log(`Processing ${this.subscriptionQueue.length} queued subscription requests`);
             const queue = [...this.subscriptionQueue];
             this.subscriptionQueue = [];
 
+            const groups = new Map<string, { action: 'REG' | 'REMOVE'; types: string[]; stockCodes: string[] }>();
             for (const req of queue) {
-              this.sendSubscription(req.stockCode, req.types, req.action);
+              const key = `${req.action}:${[...req.types].sort().join(',')}`;
+              if (!groups.has(key)) groups.set(key, { action: req.action, types: req.types, stockCodes: [] });
+              groups.get(key)!.stockCodes.push(req.stockCode);
             }
+
+            (async () => {
+              for (const { action, types, stockCodes } of groups.values()) {
+                const CHUNK_SIZE = 100;
+                for (let i = 0; i < stockCodes.length; i += CHUNK_SIZE) {
+                  const chunk = stockCodes.slice(i, i + CHUNK_SIZE);
+                  await this.sendBatchSubscription(chunk, types, action);
+                  if (i + CHUNK_SIZE < stockCodes.length) {
+                    await new Promise((resolve) => setTimeout(resolve, 500));
+                  }
+                }
+              }
+            })().catch((error) => {
+              this.logger.error(`Failed to flush queued subscriptions: ${(error as Error).message}`);
+            });
           }
         });
       }
@@ -196,11 +217,22 @@ export class KiwoomWebSocketService implements IRealtimeSource, OnModuleInit, On
           });
         }
       } else if (message.trnm === 'REG' || message.trnm === 'REMOVE') {
-        // 등록/해지 응답
+        // 등록/해지 응답 — 전송 순서대로 pendingRegAcks와 매칭 (키움이 요청 순서대로 ack하는 동작 전제)
+        const pending = this.pendingRegAcks.shift();
         if (message.return_code === 0) {
           this.logger.log(`Subscription ${message.trnm} successful`);
+          if (pending && message.trnm === 'REG') {
+            this.eventEmitter.emit('kiwoom.subscription.confirmed', { stockCodes: pending.stockCodes });
+          }
         } else {
           this.logger.error(`Subscription ${message.trnm} failed: ${message.return_msg}`);
+          if (pending && message.trnm === 'REG') {
+            this.eventEmitter.emit('kiwoom.subscription.failed', {
+              stockCodes: pending.stockCodes,
+              types: pending.types,
+              reason: message.return_msg,
+            });
+          }
         }
       }
     } catch (error) {
@@ -229,6 +261,12 @@ export class KiwoomWebSocketService implements IRealtimeSource, OnModuleInit, On
     if (this.subscriptionQueue.length > 0) {
       this.logger.debug(`Clearing ${this.subscriptionQueue.length} queued subscription requests`);
       this.subscriptionQueue = [];
+    }
+
+    // 응답을 못 받고 끊긴 요청들 — 재연결 후 순서 매칭이 어긋나지 않도록 폐기
+    if (this.pendingRegAcks.length > 0) {
+      this.logger.debug(`Discarding ${this.pendingRegAcks.length} pending REG/REMOVE acks (connection closed)`);
+      this.pendingRegAcks = [];
     }
 
     this.stopPing();
@@ -400,6 +438,7 @@ export class KiwoomWebSocketService implements IRealtimeSource, OnModuleInit, On
     };
 
     this.ws.send(JSON.stringify(request));
+    this.pendingRegAcks.push({ action, stockCodes, types });
   }
 
   /**
@@ -473,6 +512,7 @@ export class KiwoomWebSocketService implements IRealtimeSource, OnModuleInit, On
     this.logger.debug(`Sending subscription ${action} for ${stockCode}: ${types.join(', ')}`);
 
     this.ws.send(JSON.stringify(request));
+    this.pendingRegAcks.push({ action, stockCodes: [stockCode], types });
   }
 
   /**
