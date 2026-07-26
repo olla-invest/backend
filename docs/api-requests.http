@@ -157,3 +157,19 @@ Content-Type: application/json
   "marketType": "0",
   "days": 7
 }
+### Enhanced issue theme list
+GET http://localhost:3000/issue-theme?search=AI&filter=momentum&sort=rs&display=20&page=1
+
+### Issue theme heatmap data
+GET http://localhost:3000/issue-theme?view=heatmap&filter=all&sort=changeRate&display=300&page=1
+
+### Issue theme detail with stock sorting
+GET http://localhost:3000/issue-theme/100001?stockSort=changeRate&stockDisplay=20
+
+### Generate daily theme AI summaries
+POST http://localhost:3000/issue-theme/ai-summary/generate?tradeDate=2026-07-25&limit=20
+x-admin-api-key: {{adminApiKey}}
+
+### Regenerate one theme AI summary
+POST http://localhost:3000/issue-theme/ai-summary/100001/regenerate?tradeDate=2026-07-25
+x-admin-api-key: {{adminApiKey}}
