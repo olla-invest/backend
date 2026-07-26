@@ -397,7 +397,27 @@ exports.Prisma.ThemeDailySnapshotScalarFieldEnum = {
   upCount: 'upCount',
   flatCount: 'flatCount',
   downCount: 'downCount',
+  shortTermRs: 'shortTermRs',
+  momentum: 'momentum',
+  newHighCount: 'newHighCount',
+  streakDirection: 'streakDirection',
+  streakDays: 'streakDays',
   createdAt: 'createdAt'
+};
+
+exports.Prisma.ThemeAiSummaryScalarFieldEnum = {
+  summaryId: 'summaryId',
+  themeCode: 'themeCode',
+  tradeDate: 'tradeDate',
+  summary: 'summary',
+  sourceArticles: 'sourceArticles',
+  model: 'model',
+  promptVersion: 'promptVersion',
+  status: 'status',
+  errorMessage: 'errorMessage',
+  generatedAt: 'generatedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
 };
 
 exports.Prisma.StockTradingValueSnapshotScalarFieldEnum = {
@@ -623,6 +643,7 @@ exports.Prisma.ModelName = {
   KiwoomToken: 'KiwoomToken',
   StockCandle: 'StockCandle',
   ThemeDailySnapshot: 'ThemeDailySnapshot',
+  ThemeAiSummary: 'ThemeAiSummary',
   StockTradingValueSnapshot: 'StockTradingValueSnapshot',
   StockDailyMetrics: 'StockDailyMetrics',
   StockCurrentRankSnapshot: 'StockCurrentRankSnapshot',

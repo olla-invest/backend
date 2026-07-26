@@ -124,6 +124,11 @@ export type StockCandle = $Result.DefaultSelection<Prisma.$StockCandlePayload>
  */
 export type ThemeDailySnapshot = $Result.DefaultSelection<Prisma.$ThemeDailySnapshotPayload>
 /**
+ * Model ThemeAiSummary
+ *
+ */
+export type ThemeAiSummary = $Result.DefaultSelection<Prisma.$ThemeAiSummaryPayload>
+/**
  * Model StockTradingValueSnapshot
  *
  */
@@ -620,6 +625,16 @@ export class PrismaClient<
     * ```
     */
   get themeDailySnapshot(): Prisma.ThemeDailySnapshotDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.themeAiSummary`: Exposes CRUD operations for the **ThemeAiSummary** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more ThemeAiSummaries
+    * const themeAiSummaries = await prisma.themeAiSummary.findMany()
+    * ```
+    */
+  get themeAiSummary(): Prisma.ThemeAiSummaryDelegate<ExtArgs, ClientOptions>;
 
   /**
    * `prisma.stockTradingValueSnapshot`: Exposes CRUD operations for the **StockTradingValueSnapshot** model.
@@ -1146,6 +1161,7 @@ export namespace Prisma {
     KiwoomToken: 'KiwoomToken',
     StockCandle: 'StockCandle',
     ThemeDailySnapshot: 'ThemeDailySnapshot',
+    ThemeAiSummary: 'ThemeAiSummary',
     StockTradingValueSnapshot: 'StockTradingValueSnapshot',
     StockDailyMetrics: 'StockDailyMetrics',
     StockCurrentRankSnapshot: 'StockCurrentRankSnapshot',
@@ -1168,7 +1184,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "theme" | "themeGroupTheme" | "stockTheme" | "user" | "company" | "userWatchlist" | "userWatchlistTheme" | "tag" | "watchlistTag" | "rsFilterPreset" | "rsFilterPeriod" | "searchFilterPreset" | "stockPriceHistory" | "marketIndexHistory" | "marketViewDailySnapshot" | "marketViewDistributionDay" | "marketViewIndexChartPoint" | "kiwoomApiCallLog" | "batchJobHistory" | "kiwoomToken" | "stockCandle" | "themeDailySnapshot" | "stockTradingValueSnapshot" | "stockDailyMetrics" | "stockCurrentRankSnapshot" | "cronRunLog" | "userSubscription" | "paymentCard" | "payment"
+      modelProps: "theme" | "themeGroupTheme" | "stockTheme" | "user" | "company" | "userWatchlist" | "userWatchlistTheme" | "tag" | "watchlistTag" | "rsFilterPreset" | "rsFilterPeriod" | "searchFilterPreset" | "stockPriceHistory" | "marketIndexHistory" | "marketViewDailySnapshot" | "marketViewDistributionDay" | "marketViewIndexChartPoint" | "kiwoomApiCallLog" | "batchJobHistory" | "kiwoomToken" | "stockCandle" | "themeDailySnapshot" | "themeAiSummary" | "stockTradingValueSnapshot" | "stockDailyMetrics" | "stockCurrentRankSnapshot" | "cronRunLog" | "userSubscription" | "paymentCard" | "payment"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -2800,6 +2816,80 @@ export namespace Prisma {
           }
         }
       }
+      ThemeAiSummary: {
+        payload: Prisma.$ThemeAiSummaryPayload<ExtArgs>
+        fields: Prisma.ThemeAiSummaryFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.ThemeAiSummaryFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ThemeAiSummaryPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.ThemeAiSummaryFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ThemeAiSummaryPayload>
+          }
+          findFirst: {
+            args: Prisma.ThemeAiSummaryFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ThemeAiSummaryPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.ThemeAiSummaryFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ThemeAiSummaryPayload>
+          }
+          findMany: {
+            args: Prisma.ThemeAiSummaryFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ThemeAiSummaryPayload>[]
+          }
+          create: {
+            args: Prisma.ThemeAiSummaryCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ThemeAiSummaryPayload>
+          }
+          createMany: {
+            args: Prisma.ThemeAiSummaryCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.ThemeAiSummaryCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ThemeAiSummaryPayload>[]
+          }
+          delete: {
+            args: Prisma.ThemeAiSummaryDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ThemeAiSummaryPayload>
+          }
+          update: {
+            args: Prisma.ThemeAiSummaryUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ThemeAiSummaryPayload>
+          }
+          deleteMany: {
+            args: Prisma.ThemeAiSummaryDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.ThemeAiSummaryUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.ThemeAiSummaryUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ThemeAiSummaryPayload>[]
+          }
+          upsert: {
+            args: Prisma.ThemeAiSummaryUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ThemeAiSummaryPayload>
+          }
+          aggregate: {
+            args: Prisma.ThemeAiSummaryAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateThemeAiSummary>
+          }
+          groupBy: {
+            args: Prisma.ThemeAiSummaryGroupByArgs<ExtArgs>
+            result: $Utils.Optional<ThemeAiSummaryGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.ThemeAiSummaryCountArgs<ExtArgs>
+            result: $Utils.Optional<ThemeAiSummaryCountAggregateOutputType> | number
+          }
+        }
+      }
       StockTradingValueSnapshot: {
         payload: Prisma.$StockTradingValueSnapshotPayload<ExtArgs>
         fields: Prisma.StockTradingValueSnapshotFieldRefs
@@ -3448,6 +3538,7 @@ export namespace Prisma {
     kiwoomToken?: KiwoomTokenOmit
     stockCandle?: StockCandleOmit
     themeDailySnapshot?: ThemeDailySnapshotOmit
+    themeAiSummary?: ThemeAiSummaryOmit
     stockTradingValueSnapshot?: StockTradingValueSnapshotOmit
     stockDailyMetrics?: StockDailyMetricsOmit
     stockCurrentRankSnapshot?: StockCurrentRankSnapshotOmit
@@ -3538,6 +3629,7 @@ export namespace Prisma {
     companies: number
     stockThemes: number
     dailySnapshots: number
+    aiSummaries: number
     watchlistUsers: number
     groupThemeLinks: number
     childThemeLinks: number
@@ -3547,6 +3639,7 @@ export namespace Prisma {
     companies?: boolean | ThemeCountOutputTypeCountCompaniesArgs
     stockThemes?: boolean | ThemeCountOutputTypeCountStockThemesArgs
     dailySnapshots?: boolean | ThemeCountOutputTypeCountDailySnapshotsArgs
+    aiSummaries?: boolean | ThemeCountOutputTypeCountAiSummariesArgs
     watchlistUsers?: boolean | ThemeCountOutputTypeCountWatchlistUsersArgs
     groupThemeLinks?: boolean | ThemeCountOutputTypeCountGroupThemeLinksArgs
     childThemeLinks?: boolean | ThemeCountOutputTypeCountChildThemeLinksArgs
@@ -3582,6 +3675,13 @@ export namespace Prisma {
    */
   export type ThemeCountOutputTypeCountDailySnapshotsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: ThemeDailySnapshotWhereInput
+  }
+
+  /**
+   * ThemeCountOutputType without action
+   */
+  export type ThemeCountOutputTypeCountAiSummariesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: ThemeAiSummaryWhereInput
   }
 
   /**
@@ -4084,6 +4184,7 @@ export namespace Prisma {
     companies?: boolean | Theme$companiesArgs<ExtArgs>
     stockThemes?: boolean | Theme$stockThemesArgs<ExtArgs>
     dailySnapshots?: boolean | Theme$dailySnapshotsArgs<ExtArgs>
+    aiSummaries?: boolean | Theme$aiSummariesArgs<ExtArgs>
     watchlistUsers?: boolean | Theme$watchlistUsersArgs<ExtArgs>
     groupThemeLinks?: boolean | Theme$groupThemeLinksArgs<ExtArgs>
     childThemeLinks?: boolean | Theme$childThemeLinksArgs<ExtArgs>
@@ -4128,6 +4229,7 @@ export namespace Prisma {
     companies?: boolean | Theme$companiesArgs<ExtArgs>
     stockThemes?: boolean | Theme$stockThemesArgs<ExtArgs>
     dailySnapshots?: boolean | Theme$dailySnapshotsArgs<ExtArgs>
+    aiSummaries?: boolean | Theme$aiSummariesArgs<ExtArgs>
     watchlistUsers?: boolean | Theme$watchlistUsersArgs<ExtArgs>
     groupThemeLinks?: boolean | Theme$groupThemeLinksArgs<ExtArgs>
     childThemeLinks?: boolean | Theme$childThemeLinksArgs<ExtArgs>
@@ -4142,6 +4244,7 @@ export namespace Prisma {
       companies: Prisma.$CompanyPayload<ExtArgs>[]
       stockThemes: Prisma.$StockThemePayload<ExtArgs>[]
       dailySnapshots: Prisma.$ThemeDailySnapshotPayload<ExtArgs>[]
+      aiSummaries: Prisma.$ThemeAiSummaryPayload<ExtArgs>[]
       watchlistUsers: Prisma.$UserWatchlistThemePayload<ExtArgs>[]
       groupThemeLinks: Prisma.$ThemeGroupThemePayload<ExtArgs>[]
       childThemeLinks: Prisma.$ThemeGroupThemePayload<ExtArgs>[]
@@ -4552,6 +4655,7 @@ export namespace Prisma {
     companies<T extends Theme$companiesArgs<ExtArgs> = {}>(args?: Subset<T, Theme$companiesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CompanyPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     stockThemes<T extends Theme$stockThemesArgs<ExtArgs> = {}>(args?: Subset<T, Theme$stockThemesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$StockThemePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     dailySnapshots<T extends Theme$dailySnapshotsArgs<ExtArgs> = {}>(args?: Subset<T, Theme$dailySnapshotsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ThemeDailySnapshotPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    aiSummaries<T extends Theme$aiSummariesArgs<ExtArgs> = {}>(args?: Subset<T, Theme$aiSummariesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ThemeAiSummaryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     watchlistUsers<T extends Theme$watchlistUsersArgs<ExtArgs> = {}>(args?: Subset<T, Theme$watchlistUsersArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$UserWatchlistThemePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     groupThemeLinks<T extends Theme$groupThemeLinksArgs<ExtArgs> = {}>(args?: Subset<T, Theme$groupThemeLinksArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ThemeGroupThemePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     childThemeLinks<T extends Theme$childThemeLinksArgs<ExtArgs> = {}>(args?: Subset<T, Theme$childThemeLinksArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ThemeGroupThemePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -5049,6 +5153,30 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: ThemeDailySnapshotScalarFieldEnum | ThemeDailySnapshotScalarFieldEnum[]
+  }
+
+  /**
+   * Theme.aiSummaries
+   */
+  export type Theme$aiSummariesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ThemeAiSummary
+     */
+    select?: ThemeAiSummarySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ThemeAiSummary
+     */
+    omit?: ThemeAiSummaryOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ThemeAiSummaryInclude<ExtArgs> | null
+    where?: ThemeAiSummaryWhereInput
+    orderBy?: ThemeAiSummaryOrderByWithRelationInput | ThemeAiSummaryOrderByWithRelationInput[]
+    cursor?: ThemeAiSummaryWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: ThemeAiSummaryScalarFieldEnum | ThemeAiSummaryScalarFieldEnum[]
   }
 
   /**
@@ -28090,6 +28218,10 @@ export namespace Prisma {
     upCount: number | null
     flatCount: number | null
     downCount: number | null
+    shortTermRs: Decimal | null
+    momentum: Decimal | null
+    newHighCount: number | null
+    streakDays: number | null
   }
 
   export type ThemeDailySnapshotSumAggregateOutputType = {
@@ -28105,6 +28237,10 @@ export namespace Prisma {
     upCount: number | null
     flatCount: number | null
     downCount: number | null
+    shortTermRs: Decimal | null
+    momentum: Decimal | null
+    newHighCount: number | null
+    streakDays: number | null
   }
 
   export type ThemeDailySnapshotMinAggregateOutputType = {
@@ -28122,6 +28258,11 @@ export namespace Prisma {
     upCount: number | null
     flatCount: number | null
     downCount: number | null
+    shortTermRs: Decimal | null
+    momentum: Decimal | null
+    newHighCount: number | null
+    streakDirection: string | null
+    streakDays: number | null
     createdAt: Date | null
   }
 
@@ -28140,6 +28281,11 @@ export namespace Prisma {
     upCount: number | null
     flatCount: number | null
     downCount: number | null
+    shortTermRs: Decimal | null
+    momentum: Decimal | null
+    newHighCount: number | null
+    streakDirection: string | null
+    streakDays: number | null
     createdAt: Date | null
   }
 
@@ -28158,6 +28304,11 @@ export namespace Prisma {
     upCount: number
     flatCount: number
     downCount: number
+    shortTermRs: number
+    momentum: number
+    newHighCount: number
+    streakDirection: number
+    streakDays: number
     createdAt: number
     _all: number
   }
@@ -28176,6 +28327,10 @@ export namespace Prisma {
     upCount?: true
     flatCount?: true
     downCount?: true
+    shortTermRs?: true
+    momentum?: true
+    newHighCount?: true
+    streakDays?: true
   }
 
   export type ThemeDailySnapshotSumAggregateInputType = {
@@ -28191,6 +28346,10 @@ export namespace Prisma {
     upCount?: true
     flatCount?: true
     downCount?: true
+    shortTermRs?: true
+    momentum?: true
+    newHighCount?: true
+    streakDays?: true
   }
 
   export type ThemeDailySnapshotMinAggregateInputType = {
@@ -28208,6 +28367,11 @@ export namespace Prisma {
     upCount?: true
     flatCount?: true
     downCount?: true
+    shortTermRs?: true
+    momentum?: true
+    newHighCount?: true
+    streakDirection?: true
+    streakDays?: true
     createdAt?: true
   }
 
@@ -28226,6 +28390,11 @@ export namespace Prisma {
     upCount?: true
     flatCount?: true
     downCount?: true
+    shortTermRs?: true
+    momentum?: true
+    newHighCount?: true
+    streakDirection?: true
+    streakDays?: true
     createdAt?: true
   }
 
@@ -28244,6 +28413,11 @@ export namespace Prisma {
     upCount?: true
     flatCount?: true
     downCount?: true
+    shortTermRs?: true
+    momentum?: true
+    newHighCount?: true
+    streakDirection?: true
+    streakDays?: true
     createdAt?: true
     _all?: true
   }
@@ -28349,6 +28523,11 @@ export namespace Prisma {
     upCount: number
     flatCount: number
     downCount: number
+    shortTermRs: Decimal | null
+    momentum: Decimal | null
+    newHighCount: number
+    streakDirection: string | null
+    streakDays: number
     createdAt: Date
     _count: ThemeDailySnapshotCountAggregateOutputType | null
     _avg: ThemeDailySnapshotAvgAggregateOutputType | null
@@ -28386,6 +28565,11 @@ export namespace Prisma {
     upCount?: boolean
     flatCount?: boolean
     downCount?: boolean
+    shortTermRs?: boolean
+    momentum?: boolean
+    newHighCount?: boolean
+    streakDirection?: boolean
+    streakDays?: boolean
     createdAt?: boolean
     theme?: boolean | ThemeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["themeDailySnapshot"]>
@@ -28405,6 +28589,11 @@ export namespace Prisma {
     upCount?: boolean
     flatCount?: boolean
     downCount?: boolean
+    shortTermRs?: boolean
+    momentum?: boolean
+    newHighCount?: boolean
+    streakDirection?: boolean
+    streakDays?: boolean
     createdAt?: boolean
     theme?: boolean | ThemeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["themeDailySnapshot"]>
@@ -28424,6 +28613,11 @@ export namespace Prisma {
     upCount?: boolean
     flatCount?: boolean
     downCount?: boolean
+    shortTermRs?: boolean
+    momentum?: boolean
+    newHighCount?: boolean
+    streakDirection?: boolean
+    streakDays?: boolean
     createdAt?: boolean
     theme?: boolean | ThemeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["themeDailySnapshot"]>
@@ -28443,10 +28637,15 @@ export namespace Prisma {
     upCount?: boolean
     flatCount?: boolean
     downCount?: boolean
+    shortTermRs?: boolean
+    momentum?: boolean
+    newHighCount?: boolean
+    streakDirection?: boolean
+    streakDays?: boolean
     createdAt?: boolean
   }
 
-  export type ThemeDailySnapshotOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"snapshotId" | "themeCode" | "snapshotDate" | "rank" | "risingCount" | "totalCount" | "risingRatio" | "avgChangeRate" | "avgRsScore" | "themeScore" | "highVolumeCount" | "upCount" | "flatCount" | "downCount" | "createdAt", ExtArgs["result"]["themeDailySnapshot"]>
+  export type ThemeDailySnapshotOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"snapshotId" | "themeCode" | "snapshotDate" | "rank" | "risingCount" | "totalCount" | "risingRatio" | "avgChangeRate" | "avgRsScore" | "themeScore" | "highVolumeCount" | "upCount" | "flatCount" | "downCount" | "shortTermRs" | "momentum" | "newHighCount" | "streakDirection" | "streakDays" | "createdAt", ExtArgs["result"]["themeDailySnapshot"]>
   export type ThemeDailySnapshotInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     theme?: boolean | ThemeDefaultArgs<ExtArgs>
   }
@@ -28477,6 +28676,11 @@ export namespace Prisma {
       upCount: number
       flatCount: number
       downCount: number
+      shortTermRs: Prisma.Decimal | null
+      momentum: Prisma.Decimal | null
+      newHighCount: number
+      streakDirection: string | null
+      streakDays: number
       createdAt: Date
     }, ExtArgs["result"]["themeDailySnapshot"]>
     composites: {}
@@ -28916,6 +29120,11 @@ export namespace Prisma {
     readonly upCount: FieldRef<"ThemeDailySnapshot", 'Int'>
     readonly flatCount: FieldRef<"ThemeDailySnapshot", 'Int'>
     readonly downCount: FieldRef<"ThemeDailySnapshot", 'Int'>
+    readonly shortTermRs: FieldRef<"ThemeDailySnapshot", 'Decimal'>
+    readonly momentum: FieldRef<"ThemeDailySnapshot", 'Decimal'>
+    readonly newHighCount: FieldRef<"ThemeDailySnapshot", 'Int'>
+    readonly streakDirection: FieldRef<"ThemeDailySnapshot", 'String'>
+    readonly streakDays: FieldRef<"ThemeDailySnapshot", 'Int'>
     readonly createdAt: FieldRef<"ThemeDailySnapshot", 'DateTime'>
   }
 
@@ -29328,6 +29537,1185 @@ export namespace Prisma {
      * Choose, which related nodes to fetch as well
      */
     include?: ThemeDailySnapshotInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model ThemeAiSummary
+   */
+
+  export type AggregateThemeAiSummary = {
+    _count: ThemeAiSummaryCountAggregateOutputType | null
+    _avg: ThemeAiSummaryAvgAggregateOutputType | null
+    _sum: ThemeAiSummarySumAggregateOutputType | null
+    _min: ThemeAiSummaryMinAggregateOutputType | null
+    _max: ThemeAiSummaryMaxAggregateOutputType | null
+  }
+
+  export type ThemeAiSummaryAvgAggregateOutputType = {
+    themeCode: number | null
+  }
+
+  export type ThemeAiSummarySumAggregateOutputType = {
+    themeCode: number | null
+  }
+
+  export type ThemeAiSummaryMinAggregateOutputType = {
+    summaryId: string | null
+    themeCode: number | null
+    tradeDate: Date | null
+    summary: string | null
+    model: string | null
+    promptVersion: string | null
+    status: string | null
+    errorMessage: string | null
+    generatedAt: Date | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type ThemeAiSummaryMaxAggregateOutputType = {
+    summaryId: string | null
+    themeCode: number | null
+    tradeDate: Date | null
+    summary: string | null
+    model: string | null
+    promptVersion: string | null
+    status: string | null
+    errorMessage: string | null
+    generatedAt: Date | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type ThemeAiSummaryCountAggregateOutputType = {
+    summaryId: number
+    themeCode: number
+    tradeDate: number
+    summary: number
+    sourceArticles: number
+    model: number
+    promptVersion: number
+    status: number
+    errorMessage: number
+    generatedAt: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type ThemeAiSummaryAvgAggregateInputType = {
+    themeCode?: true
+  }
+
+  export type ThemeAiSummarySumAggregateInputType = {
+    themeCode?: true
+  }
+
+  export type ThemeAiSummaryMinAggregateInputType = {
+    summaryId?: true
+    themeCode?: true
+    tradeDate?: true
+    summary?: true
+    model?: true
+    promptVersion?: true
+    status?: true
+    errorMessage?: true
+    generatedAt?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type ThemeAiSummaryMaxAggregateInputType = {
+    summaryId?: true
+    themeCode?: true
+    tradeDate?: true
+    summary?: true
+    model?: true
+    promptVersion?: true
+    status?: true
+    errorMessage?: true
+    generatedAt?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type ThemeAiSummaryCountAggregateInputType = {
+    summaryId?: true
+    themeCode?: true
+    tradeDate?: true
+    summary?: true
+    sourceArticles?: true
+    model?: true
+    promptVersion?: true
+    status?: true
+    errorMessage?: true
+    generatedAt?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type ThemeAiSummaryAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which ThemeAiSummary to aggregate.
+     */
+    where?: ThemeAiSummaryWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     *
+     * Determine the order of ThemeAiSummaries to fetch.
+     */
+    orderBy?: ThemeAiSummaryOrderByWithRelationInput | ThemeAiSummaryOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     *
+     * Sets the start position
+     */
+    cursor?: ThemeAiSummaryWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Take `±n` ThemeAiSummaries from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Skip the first `n` ThemeAiSummaries.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     *
+     * Count returned ThemeAiSummaries
+    **/
+    _count?: true | ThemeAiSummaryCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     *
+     * Select which fields to average
+    **/
+    _avg?: ThemeAiSummaryAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     *
+     * Select which fields to sum
+    **/
+    _sum?: ThemeAiSummarySumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     *
+     * Select which fields to find the minimum value
+    **/
+    _min?: ThemeAiSummaryMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     *
+     * Select which fields to find the maximum value
+    **/
+    _max?: ThemeAiSummaryMaxAggregateInputType
+  }
+
+  export type GetThemeAiSummaryAggregateType<T extends ThemeAiSummaryAggregateArgs> = {
+        [P in keyof T & keyof AggregateThemeAiSummary]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateThemeAiSummary[P]>
+      : GetScalarType<T[P], AggregateThemeAiSummary[P]>
+  }
+
+
+
+
+  export type ThemeAiSummaryGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: ThemeAiSummaryWhereInput
+    orderBy?: ThemeAiSummaryOrderByWithAggregationInput | ThemeAiSummaryOrderByWithAggregationInput[]
+    by: ThemeAiSummaryScalarFieldEnum[] | ThemeAiSummaryScalarFieldEnum
+    having?: ThemeAiSummaryScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: ThemeAiSummaryCountAggregateInputType | true
+    _avg?: ThemeAiSummaryAvgAggregateInputType
+    _sum?: ThemeAiSummarySumAggregateInputType
+    _min?: ThemeAiSummaryMinAggregateInputType
+    _max?: ThemeAiSummaryMaxAggregateInputType
+  }
+
+  export type ThemeAiSummaryGroupByOutputType = {
+    summaryId: string
+    themeCode: number
+    tradeDate: Date
+    summary: string | null
+    sourceArticles: JsonValue
+    model: string | null
+    promptVersion: string
+    status: string
+    errorMessage: string | null
+    generatedAt: Date | null
+    createdAt: Date
+    updatedAt: Date
+    _count: ThemeAiSummaryCountAggregateOutputType | null
+    _avg: ThemeAiSummaryAvgAggregateOutputType | null
+    _sum: ThemeAiSummarySumAggregateOutputType | null
+    _min: ThemeAiSummaryMinAggregateOutputType | null
+    _max: ThemeAiSummaryMaxAggregateOutputType | null
+  }
+
+  type GetThemeAiSummaryGroupByPayload<T extends ThemeAiSummaryGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<ThemeAiSummaryGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof ThemeAiSummaryGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], ThemeAiSummaryGroupByOutputType[P]>
+            : GetScalarType<T[P], ThemeAiSummaryGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type ThemeAiSummarySelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    summaryId?: boolean
+    themeCode?: boolean
+    tradeDate?: boolean
+    summary?: boolean
+    sourceArticles?: boolean
+    model?: boolean
+    promptVersion?: boolean
+    status?: boolean
+    errorMessage?: boolean
+    generatedAt?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    theme?: boolean | ThemeDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["themeAiSummary"]>
+
+  export type ThemeAiSummarySelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    summaryId?: boolean
+    themeCode?: boolean
+    tradeDate?: boolean
+    summary?: boolean
+    sourceArticles?: boolean
+    model?: boolean
+    promptVersion?: boolean
+    status?: boolean
+    errorMessage?: boolean
+    generatedAt?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    theme?: boolean | ThemeDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["themeAiSummary"]>
+
+  export type ThemeAiSummarySelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    summaryId?: boolean
+    themeCode?: boolean
+    tradeDate?: boolean
+    summary?: boolean
+    sourceArticles?: boolean
+    model?: boolean
+    promptVersion?: boolean
+    status?: boolean
+    errorMessage?: boolean
+    generatedAt?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    theme?: boolean | ThemeDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["themeAiSummary"]>
+
+  export type ThemeAiSummarySelectScalar = {
+    summaryId?: boolean
+    themeCode?: boolean
+    tradeDate?: boolean
+    summary?: boolean
+    sourceArticles?: boolean
+    model?: boolean
+    promptVersion?: boolean
+    status?: boolean
+    errorMessage?: boolean
+    generatedAt?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type ThemeAiSummaryOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"summaryId" | "themeCode" | "tradeDate" | "summary" | "sourceArticles" | "model" | "promptVersion" | "status" | "errorMessage" | "generatedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["themeAiSummary"]>
+  export type ThemeAiSummaryInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    theme?: boolean | ThemeDefaultArgs<ExtArgs>
+  }
+  export type ThemeAiSummaryIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    theme?: boolean | ThemeDefaultArgs<ExtArgs>
+  }
+  export type ThemeAiSummaryIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    theme?: boolean | ThemeDefaultArgs<ExtArgs>
+  }
+
+  export type $ThemeAiSummaryPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "ThemeAiSummary"
+    objects: {
+      theme: Prisma.$ThemePayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      summaryId: string
+      themeCode: number
+      tradeDate: Date
+      summary: string | null
+      sourceArticles: Prisma.JsonValue
+      model: string | null
+      promptVersion: string
+      status: string
+      errorMessage: string | null
+      generatedAt: Date | null
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["themeAiSummary"]>
+    composites: {}
+  }
+
+  type ThemeAiSummaryGetPayload<S extends boolean | null | undefined | ThemeAiSummaryDefaultArgs> = $Result.GetResult<Prisma.$ThemeAiSummaryPayload, S>
+
+  type ThemeAiSummaryCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<ThemeAiSummaryFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: ThemeAiSummaryCountAggregateInputType | true
+    }
+
+  export interface ThemeAiSummaryDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['ThemeAiSummary'], meta: { name: 'ThemeAiSummary' } }
+    /**
+     * Find zero or one ThemeAiSummary that matches the filter.
+     * @param {ThemeAiSummaryFindUniqueArgs} args - Arguments to find a ThemeAiSummary
+     * @example
+     * // Get one ThemeAiSummary
+     * const themeAiSummary = await prisma.themeAiSummary.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends ThemeAiSummaryFindUniqueArgs>(args: SelectSubset<T, ThemeAiSummaryFindUniqueArgs<ExtArgs>>): Prisma__ThemeAiSummaryClient<$Result.GetResult<Prisma.$ThemeAiSummaryPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one ThemeAiSummary that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {ThemeAiSummaryFindUniqueOrThrowArgs} args - Arguments to find a ThemeAiSummary
+     * @example
+     * // Get one ThemeAiSummary
+     * const themeAiSummary = await prisma.themeAiSummary.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends ThemeAiSummaryFindUniqueOrThrowArgs>(args: SelectSubset<T, ThemeAiSummaryFindUniqueOrThrowArgs<ExtArgs>>): Prisma__ThemeAiSummaryClient<$Result.GetResult<Prisma.$ThemeAiSummaryPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first ThemeAiSummary that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ThemeAiSummaryFindFirstArgs} args - Arguments to find a ThemeAiSummary
+     * @example
+     * // Get one ThemeAiSummary
+     * const themeAiSummary = await prisma.themeAiSummary.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends ThemeAiSummaryFindFirstArgs>(args?: SelectSubset<T, ThemeAiSummaryFindFirstArgs<ExtArgs>>): Prisma__ThemeAiSummaryClient<$Result.GetResult<Prisma.$ThemeAiSummaryPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first ThemeAiSummary that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ThemeAiSummaryFindFirstOrThrowArgs} args - Arguments to find a ThemeAiSummary
+     * @example
+     * // Get one ThemeAiSummary
+     * const themeAiSummary = await prisma.themeAiSummary.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends ThemeAiSummaryFindFirstOrThrowArgs>(args?: SelectSubset<T, ThemeAiSummaryFindFirstOrThrowArgs<ExtArgs>>): Prisma__ThemeAiSummaryClient<$Result.GetResult<Prisma.$ThemeAiSummaryPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more ThemeAiSummaries that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ThemeAiSummaryFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all ThemeAiSummaries
+     * const themeAiSummaries = await prisma.themeAiSummary.findMany()
+     *
+     * // Get first 10 ThemeAiSummaries
+     * const themeAiSummaries = await prisma.themeAiSummary.findMany({ take: 10 })
+     *
+     * // Only select the `summaryId`
+     * const themeAiSummaryWithSummaryIdOnly = await prisma.themeAiSummary.findMany({ select: { summaryId: true } })
+     *
+     */
+    findMany<T extends ThemeAiSummaryFindManyArgs>(args?: SelectSubset<T, ThemeAiSummaryFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ThemeAiSummaryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a ThemeAiSummary.
+     * @param {ThemeAiSummaryCreateArgs} args - Arguments to create a ThemeAiSummary.
+     * @example
+     * // Create one ThemeAiSummary
+     * const ThemeAiSummary = await prisma.themeAiSummary.create({
+     *   data: {
+     *     // ... data to create a ThemeAiSummary
+     *   }
+     * })
+     *
+     */
+    create<T extends ThemeAiSummaryCreateArgs>(args: SelectSubset<T, ThemeAiSummaryCreateArgs<ExtArgs>>): Prisma__ThemeAiSummaryClient<$Result.GetResult<Prisma.$ThemeAiSummaryPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many ThemeAiSummaries.
+     * @param {ThemeAiSummaryCreateManyArgs} args - Arguments to create many ThemeAiSummaries.
+     * @example
+     * // Create many ThemeAiSummaries
+     * const themeAiSummary = await prisma.themeAiSummary.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *
+     */
+    createMany<T extends ThemeAiSummaryCreateManyArgs>(args?: SelectSubset<T, ThemeAiSummaryCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many ThemeAiSummaries and returns the data saved in the database.
+     * @param {ThemeAiSummaryCreateManyAndReturnArgs} args - Arguments to create many ThemeAiSummaries.
+     * @example
+     * // Create many ThemeAiSummaries
+     * const themeAiSummary = await prisma.themeAiSummary.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *
+     * // Create many ThemeAiSummaries and only return the `summaryId`
+     * const themeAiSummaryWithSummaryIdOnly = await prisma.themeAiSummary.createManyAndReturn({
+     *   select: { summaryId: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     *
+     */
+    createManyAndReturn<T extends ThemeAiSummaryCreateManyAndReturnArgs>(args?: SelectSubset<T, ThemeAiSummaryCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ThemeAiSummaryPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a ThemeAiSummary.
+     * @param {ThemeAiSummaryDeleteArgs} args - Arguments to delete one ThemeAiSummary.
+     * @example
+     * // Delete one ThemeAiSummary
+     * const ThemeAiSummary = await prisma.themeAiSummary.delete({
+     *   where: {
+     *     // ... filter to delete one ThemeAiSummary
+     *   }
+     * })
+     *
+     */
+    delete<T extends ThemeAiSummaryDeleteArgs>(args: SelectSubset<T, ThemeAiSummaryDeleteArgs<ExtArgs>>): Prisma__ThemeAiSummaryClient<$Result.GetResult<Prisma.$ThemeAiSummaryPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one ThemeAiSummary.
+     * @param {ThemeAiSummaryUpdateArgs} args - Arguments to update one ThemeAiSummary.
+     * @example
+     * // Update one ThemeAiSummary
+     * const themeAiSummary = await prisma.themeAiSummary.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     *
+     */
+    update<T extends ThemeAiSummaryUpdateArgs>(args: SelectSubset<T, ThemeAiSummaryUpdateArgs<ExtArgs>>): Prisma__ThemeAiSummaryClient<$Result.GetResult<Prisma.$ThemeAiSummaryPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more ThemeAiSummaries.
+     * @param {ThemeAiSummaryDeleteManyArgs} args - Arguments to filter ThemeAiSummaries to delete.
+     * @example
+     * // Delete a few ThemeAiSummaries
+     * const { count } = await prisma.themeAiSummary.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     *
+     */
+    deleteMany<T extends ThemeAiSummaryDeleteManyArgs>(args?: SelectSubset<T, ThemeAiSummaryDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more ThemeAiSummaries.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ThemeAiSummaryUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many ThemeAiSummaries
+     * const themeAiSummary = await prisma.themeAiSummary.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     *
+     */
+    updateMany<T extends ThemeAiSummaryUpdateManyArgs>(args: SelectSubset<T, ThemeAiSummaryUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more ThemeAiSummaries and returns the data updated in the database.
+     * @param {ThemeAiSummaryUpdateManyAndReturnArgs} args - Arguments to update many ThemeAiSummaries.
+     * @example
+     * // Update many ThemeAiSummaries
+     * const themeAiSummary = await prisma.themeAiSummary.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *
+     * // Update zero or more ThemeAiSummaries and only return the `summaryId`
+     * const themeAiSummaryWithSummaryIdOnly = await prisma.themeAiSummary.updateManyAndReturn({
+     *   select: { summaryId: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     *
+     */
+    updateManyAndReturn<T extends ThemeAiSummaryUpdateManyAndReturnArgs>(args: SelectSubset<T, ThemeAiSummaryUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ThemeAiSummaryPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one ThemeAiSummary.
+     * @param {ThemeAiSummaryUpsertArgs} args - Arguments to update or create a ThemeAiSummary.
+     * @example
+     * // Update or create a ThemeAiSummary
+     * const themeAiSummary = await prisma.themeAiSummary.upsert({
+     *   create: {
+     *     // ... data to create a ThemeAiSummary
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the ThemeAiSummary we want to update
+     *   }
+     * })
+     */
+    upsert<T extends ThemeAiSummaryUpsertArgs>(args: SelectSubset<T, ThemeAiSummaryUpsertArgs<ExtArgs>>): Prisma__ThemeAiSummaryClient<$Result.GetResult<Prisma.$ThemeAiSummaryPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of ThemeAiSummaries.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ThemeAiSummaryCountArgs} args - Arguments to filter ThemeAiSummaries to count.
+     * @example
+     * // Count the number of ThemeAiSummaries
+     * const count = await prisma.themeAiSummary.count({
+     *   where: {
+     *     // ... the filter for the ThemeAiSummaries we want to count
+     *   }
+     * })
+    **/
+    count<T extends ThemeAiSummaryCountArgs>(
+      args?: Subset<T, ThemeAiSummaryCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], ThemeAiSummaryCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a ThemeAiSummary.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ThemeAiSummaryAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends ThemeAiSummaryAggregateArgs>(args: Subset<T, ThemeAiSummaryAggregateArgs>): Prisma.PrismaPromise<GetThemeAiSummaryAggregateType<T>>
+
+    /**
+     * Group by ThemeAiSummary.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ThemeAiSummaryGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     *
+    **/
+    groupBy<
+      T extends ThemeAiSummaryGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: ThemeAiSummaryGroupByArgs['orderBy'] }
+        : { orderBy?: ThemeAiSummaryGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, ThemeAiSummaryGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetThemeAiSummaryGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the ThemeAiSummary model
+   */
+  readonly fields: ThemeAiSummaryFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for ThemeAiSummary.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__ThemeAiSummaryClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    theme<T extends ThemeDefaultArgs<ExtArgs> = {}>(args?: Subset<T, ThemeDefaultArgs<ExtArgs>>): Prisma__ThemeClient<$Result.GetResult<Prisma.$ThemePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the ThemeAiSummary model
+   */
+  interface ThemeAiSummaryFieldRefs {
+    readonly summaryId: FieldRef<"ThemeAiSummary", 'String'>
+    readonly themeCode: FieldRef<"ThemeAiSummary", 'Int'>
+    readonly tradeDate: FieldRef<"ThemeAiSummary", 'DateTime'>
+    readonly summary: FieldRef<"ThemeAiSummary", 'String'>
+    readonly sourceArticles: FieldRef<"ThemeAiSummary", 'Json'>
+    readonly model: FieldRef<"ThemeAiSummary", 'String'>
+    readonly promptVersion: FieldRef<"ThemeAiSummary", 'String'>
+    readonly status: FieldRef<"ThemeAiSummary", 'String'>
+    readonly errorMessage: FieldRef<"ThemeAiSummary", 'String'>
+    readonly generatedAt: FieldRef<"ThemeAiSummary", 'DateTime'>
+    readonly createdAt: FieldRef<"ThemeAiSummary", 'DateTime'>
+    readonly updatedAt: FieldRef<"ThemeAiSummary", 'DateTime'>
+  }
+
+
+  // Custom InputTypes
+  /**
+   * ThemeAiSummary findUnique
+   */
+  export type ThemeAiSummaryFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ThemeAiSummary
+     */
+    select?: ThemeAiSummarySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ThemeAiSummary
+     */
+    omit?: ThemeAiSummaryOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ThemeAiSummaryInclude<ExtArgs> | null
+    /**
+     * Filter, which ThemeAiSummary to fetch.
+     */
+    where: ThemeAiSummaryWhereUniqueInput
+  }
+
+  /**
+   * ThemeAiSummary findUniqueOrThrow
+   */
+  export type ThemeAiSummaryFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ThemeAiSummary
+     */
+    select?: ThemeAiSummarySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ThemeAiSummary
+     */
+    omit?: ThemeAiSummaryOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ThemeAiSummaryInclude<ExtArgs> | null
+    /**
+     * Filter, which ThemeAiSummary to fetch.
+     */
+    where: ThemeAiSummaryWhereUniqueInput
+  }
+
+  /**
+   * ThemeAiSummary findFirst
+   */
+  export type ThemeAiSummaryFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ThemeAiSummary
+     */
+    select?: ThemeAiSummarySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ThemeAiSummary
+     */
+    omit?: ThemeAiSummaryOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ThemeAiSummaryInclude<ExtArgs> | null
+    /**
+     * Filter, which ThemeAiSummary to fetch.
+     */
+    where?: ThemeAiSummaryWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     *
+     * Determine the order of ThemeAiSummaries to fetch.
+     */
+    orderBy?: ThemeAiSummaryOrderByWithRelationInput | ThemeAiSummaryOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     *
+     * Sets the position for searching for ThemeAiSummaries.
+     */
+    cursor?: ThemeAiSummaryWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Take `±n` ThemeAiSummaries from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Skip the first `n` ThemeAiSummaries.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     *
+     * Filter by unique combinations of ThemeAiSummaries.
+     */
+    distinct?: ThemeAiSummaryScalarFieldEnum | ThemeAiSummaryScalarFieldEnum[]
+  }
+
+  /**
+   * ThemeAiSummary findFirstOrThrow
+   */
+  export type ThemeAiSummaryFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ThemeAiSummary
+     */
+    select?: ThemeAiSummarySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ThemeAiSummary
+     */
+    omit?: ThemeAiSummaryOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ThemeAiSummaryInclude<ExtArgs> | null
+    /**
+     * Filter, which ThemeAiSummary to fetch.
+     */
+    where?: ThemeAiSummaryWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     *
+     * Determine the order of ThemeAiSummaries to fetch.
+     */
+    orderBy?: ThemeAiSummaryOrderByWithRelationInput | ThemeAiSummaryOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     *
+     * Sets the position for searching for ThemeAiSummaries.
+     */
+    cursor?: ThemeAiSummaryWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Take `±n` ThemeAiSummaries from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Skip the first `n` ThemeAiSummaries.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     *
+     * Filter by unique combinations of ThemeAiSummaries.
+     */
+    distinct?: ThemeAiSummaryScalarFieldEnum | ThemeAiSummaryScalarFieldEnum[]
+  }
+
+  /**
+   * ThemeAiSummary findMany
+   */
+  export type ThemeAiSummaryFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ThemeAiSummary
+     */
+    select?: ThemeAiSummarySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ThemeAiSummary
+     */
+    omit?: ThemeAiSummaryOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ThemeAiSummaryInclude<ExtArgs> | null
+    /**
+     * Filter, which ThemeAiSummaries to fetch.
+     */
+    where?: ThemeAiSummaryWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     *
+     * Determine the order of ThemeAiSummaries to fetch.
+     */
+    orderBy?: ThemeAiSummaryOrderByWithRelationInput | ThemeAiSummaryOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     *
+     * Sets the position for listing ThemeAiSummaries.
+     */
+    cursor?: ThemeAiSummaryWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Take `±n` ThemeAiSummaries from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     *
+     * Skip the first `n` ThemeAiSummaries.
+     */
+    skip?: number
+    distinct?: ThemeAiSummaryScalarFieldEnum | ThemeAiSummaryScalarFieldEnum[]
+  }
+
+  /**
+   * ThemeAiSummary create
+   */
+  export type ThemeAiSummaryCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ThemeAiSummary
+     */
+    select?: ThemeAiSummarySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ThemeAiSummary
+     */
+    omit?: ThemeAiSummaryOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ThemeAiSummaryInclude<ExtArgs> | null
+    /**
+     * The data needed to create a ThemeAiSummary.
+     */
+    data: XOR<ThemeAiSummaryCreateInput, ThemeAiSummaryUncheckedCreateInput>
+  }
+
+  /**
+   * ThemeAiSummary createMany
+   */
+  export type ThemeAiSummaryCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many ThemeAiSummaries.
+     */
+    data: ThemeAiSummaryCreateManyInput | ThemeAiSummaryCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * ThemeAiSummary createManyAndReturn
+   */
+  export type ThemeAiSummaryCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ThemeAiSummary
+     */
+    select?: ThemeAiSummarySelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the ThemeAiSummary
+     */
+    omit?: ThemeAiSummaryOmit<ExtArgs> | null
+    /**
+     * The data used to create many ThemeAiSummaries.
+     */
+    data: ThemeAiSummaryCreateManyInput | ThemeAiSummaryCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ThemeAiSummaryIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * ThemeAiSummary update
+   */
+  export type ThemeAiSummaryUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ThemeAiSummary
+     */
+    select?: ThemeAiSummarySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ThemeAiSummary
+     */
+    omit?: ThemeAiSummaryOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ThemeAiSummaryInclude<ExtArgs> | null
+    /**
+     * The data needed to update a ThemeAiSummary.
+     */
+    data: XOR<ThemeAiSummaryUpdateInput, ThemeAiSummaryUncheckedUpdateInput>
+    /**
+     * Choose, which ThemeAiSummary to update.
+     */
+    where: ThemeAiSummaryWhereUniqueInput
+  }
+
+  /**
+   * ThemeAiSummary updateMany
+   */
+  export type ThemeAiSummaryUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update ThemeAiSummaries.
+     */
+    data: XOR<ThemeAiSummaryUpdateManyMutationInput, ThemeAiSummaryUncheckedUpdateManyInput>
+    /**
+     * Filter which ThemeAiSummaries to update
+     */
+    where?: ThemeAiSummaryWhereInput
+    /**
+     * Limit how many ThemeAiSummaries to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * ThemeAiSummary updateManyAndReturn
+   */
+  export type ThemeAiSummaryUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ThemeAiSummary
+     */
+    select?: ThemeAiSummarySelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the ThemeAiSummary
+     */
+    omit?: ThemeAiSummaryOmit<ExtArgs> | null
+    /**
+     * The data used to update ThemeAiSummaries.
+     */
+    data: XOR<ThemeAiSummaryUpdateManyMutationInput, ThemeAiSummaryUncheckedUpdateManyInput>
+    /**
+     * Filter which ThemeAiSummaries to update
+     */
+    where?: ThemeAiSummaryWhereInput
+    /**
+     * Limit how many ThemeAiSummaries to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ThemeAiSummaryIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * ThemeAiSummary upsert
+   */
+  export type ThemeAiSummaryUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ThemeAiSummary
+     */
+    select?: ThemeAiSummarySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ThemeAiSummary
+     */
+    omit?: ThemeAiSummaryOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ThemeAiSummaryInclude<ExtArgs> | null
+    /**
+     * The filter to search for the ThemeAiSummary to update in case it exists.
+     */
+    where: ThemeAiSummaryWhereUniqueInput
+    /**
+     * In case the ThemeAiSummary found by the `where` argument doesn't exist, create a new ThemeAiSummary with this data.
+     */
+    create: XOR<ThemeAiSummaryCreateInput, ThemeAiSummaryUncheckedCreateInput>
+    /**
+     * In case the ThemeAiSummary was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<ThemeAiSummaryUpdateInput, ThemeAiSummaryUncheckedUpdateInput>
+  }
+
+  /**
+   * ThemeAiSummary delete
+   */
+  export type ThemeAiSummaryDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ThemeAiSummary
+     */
+    select?: ThemeAiSummarySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ThemeAiSummary
+     */
+    omit?: ThemeAiSummaryOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ThemeAiSummaryInclude<ExtArgs> | null
+    /**
+     * Filter which ThemeAiSummary to delete.
+     */
+    where: ThemeAiSummaryWhereUniqueInput
+  }
+
+  /**
+   * ThemeAiSummary deleteMany
+   */
+  export type ThemeAiSummaryDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which ThemeAiSummaries to delete
+     */
+    where?: ThemeAiSummaryWhereInput
+    /**
+     * Limit how many ThemeAiSummaries to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * ThemeAiSummary without action
+   */
+  export type ThemeAiSummaryDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ThemeAiSummary
+     */
+    select?: ThemeAiSummarySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the ThemeAiSummary
+     */
+    omit?: ThemeAiSummaryOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ThemeAiSummaryInclude<ExtArgs> | null
   }
 
 
@@ -37880,10 +39268,33 @@ export namespace Prisma {
     upCount: 'upCount',
     flatCount: 'flatCount',
     downCount: 'downCount',
+    shortTermRs: 'shortTermRs',
+    momentum: 'momentum',
+    newHighCount: 'newHighCount',
+    streakDirection: 'streakDirection',
+    streakDays: 'streakDays',
     createdAt: 'createdAt'
   };
 
   export type ThemeDailySnapshotScalarFieldEnum = (typeof ThemeDailySnapshotScalarFieldEnum)[keyof typeof ThemeDailySnapshotScalarFieldEnum]
+
+
+  export const ThemeAiSummaryScalarFieldEnum: {
+    summaryId: 'summaryId',
+    themeCode: 'themeCode',
+    tradeDate: 'tradeDate',
+    summary: 'summary',
+    sourceArticles: 'sourceArticles',
+    model: 'model',
+    promptVersion: 'promptVersion',
+    status: 'status',
+    errorMessage: 'errorMessage',
+    generatedAt: 'generatedAt',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type ThemeAiSummaryScalarFieldEnum = (typeof ThemeAiSummaryScalarFieldEnum)[keyof typeof ThemeAiSummaryScalarFieldEnum]
 
 
   export const StockTradingValueSnapshotScalarFieldEnum: {
@@ -38323,6 +39734,7 @@ export namespace Prisma {
     companies?: CompanyListRelationFilter
     stockThemes?: StockThemeListRelationFilter
     dailySnapshots?: ThemeDailySnapshotListRelationFilter
+    aiSummaries?: ThemeAiSummaryListRelationFilter
     watchlistUsers?: UserWatchlistThemeListRelationFilter
     groupThemeLinks?: ThemeGroupThemeListRelationFilter
     childThemeLinks?: ThemeGroupThemeListRelationFilter
@@ -38340,6 +39752,7 @@ export namespace Prisma {
     companies?: CompanyOrderByRelationAggregateInput
     stockThemes?: StockThemeOrderByRelationAggregateInput
     dailySnapshots?: ThemeDailySnapshotOrderByRelationAggregateInput
+    aiSummaries?: ThemeAiSummaryOrderByRelationAggregateInput
     watchlistUsers?: UserWatchlistThemeOrderByRelationAggregateInput
     groupThemeLinks?: ThemeGroupThemeOrderByRelationAggregateInput
     childThemeLinks?: ThemeGroupThemeOrderByRelationAggregateInput
@@ -38362,6 +39775,7 @@ export namespace Prisma {
     companies?: CompanyListRelationFilter
     stockThemes?: StockThemeListRelationFilter
     dailySnapshots?: ThemeDailySnapshotListRelationFilter
+    aiSummaries?: ThemeAiSummaryListRelationFilter
     watchlistUsers?: UserWatchlistThemeListRelationFilter
     groupThemeLinks?: ThemeGroupThemeListRelationFilter
     childThemeLinks?: ThemeGroupThemeListRelationFilter
@@ -40038,6 +41452,11 @@ export namespace Prisma {
     upCount?: IntFilter<"ThemeDailySnapshot"> | number
     flatCount?: IntFilter<"ThemeDailySnapshot"> | number
     downCount?: IntFilter<"ThemeDailySnapshot"> | number
+    shortTermRs?: DecimalNullableFilter<"ThemeDailySnapshot"> | Decimal | DecimalJsLike | number | string | null
+    momentum?: DecimalNullableFilter<"ThemeDailySnapshot"> | Decimal | DecimalJsLike | number | string | null
+    newHighCount?: IntFilter<"ThemeDailySnapshot"> | number
+    streakDirection?: StringNullableFilter<"ThemeDailySnapshot"> | string | null
+    streakDays?: IntFilter<"ThemeDailySnapshot"> | number
     createdAt?: DateTimeFilter<"ThemeDailySnapshot"> | Date | string
     theme?: XOR<ThemeScalarRelationFilter, ThemeWhereInput>
   }
@@ -40057,6 +41476,11 @@ export namespace Prisma {
     upCount?: SortOrder
     flatCount?: SortOrder
     downCount?: SortOrder
+    shortTermRs?: SortOrderInput | SortOrder
+    momentum?: SortOrderInput | SortOrder
+    newHighCount?: SortOrder
+    streakDirection?: SortOrderInput | SortOrder
+    streakDays?: SortOrder
     createdAt?: SortOrder
     theme?: ThemeOrderByWithRelationInput
   }
@@ -40080,6 +41504,11 @@ export namespace Prisma {
     upCount?: IntFilter<"ThemeDailySnapshot"> | number
     flatCount?: IntFilter<"ThemeDailySnapshot"> | number
     downCount?: IntFilter<"ThemeDailySnapshot"> | number
+    shortTermRs?: DecimalNullableFilter<"ThemeDailySnapshot"> | Decimal | DecimalJsLike | number | string | null
+    momentum?: DecimalNullableFilter<"ThemeDailySnapshot"> | Decimal | DecimalJsLike | number | string | null
+    newHighCount?: IntFilter<"ThemeDailySnapshot"> | number
+    streakDirection?: StringNullableFilter<"ThemeDailySnapshot"> | string | null
+    streakDays?: IntFilter<"ThemeDailySnapshot"> | number
     createdAt?: DateTimeFilter<"ThemeDailySnapshot"> | Date | string
     theme?: XOR<ThemeScalarRelationFilter, ThemeWhereInput>
   }, "snapshotId" | "themeCode_snapshotDate">
@@ -40099,6 +41528,11 @@ export namespace Prisma {
     upCount?: SortOrder
     flatCount?: SortOrder
     downCount?: SortOrder
+    shortTermRs?: SortOrderInput | SortOrder
+    momentum?: SortOrderInput | SortOrder
+    newHighCount?: SortOrder
+    streakDirection?: SortOrderInput | SortOrder
+    streakDays?: SortOrder
     createdAt?: SortOrder
     _count?: ThemeDailySnapshotCountOrderByAggregateInput
     _avg?: ThemeDailySnapshotAvgOrderByAggregateInput
@@ -40125,7 +41559,105 @@ export namespace Prisma {
     upCount?: IntWithAggregatesFilter<"ThemeDailySnapshot"> | number
     flatCount?: IntWithAggregatesFilter<"ThemeDailySnapshot"> | number
     downCount?: IntWithAggregatesFilter<"ThemeDailySnapshot"> | number
+    shortTermRs?: DecimalNullableWithAggregatesFilter<"ThemeDailySnapshot"> | Decimal | DecimalJsLike | number | string | null
+    momentum?: DecimalNullableWithAggregatesFilter<"ThemeDailySnapshot"> | Decimal | DecimalJsLike | number | string | null
+    newHighCount?: IntWithAggregatesFilter<"ThemeDailySnapshot"> | number
+    streakDirection?: StringNullableWithAggregatesFilter<"ThemeDailySnapshot"> | string | null
+    streakDays?: IntWithAggregatesFilter<"ThemeDailySnapshot"> | number
     createdAt?: DateTimeWithAggregatesFilter<"ThemeDailySnapshot"> | Date | string
+  }
+
+  export type ThemeAiSummaryWhereInput = {
+    AND?: ThemeAiSummaryWhereInput | ThemeAiSummaryWhereInput[]
+    OR?: ThemeAiSummaryWhereInput[]
+    NOT?: ThemeAiSummaryWhereInput | ThemeAiSummaryWhereInput[]
+    summaryId?: UuidFilter<"ThemeAiSummary"> | string
+    themeCode?: IntFilter<"ThemeAiSummary"> | number
+    tradeDate?: DateTimeFilter<"ThemeAiSummary"> | Date | string
+    summary?: StringNullableFilter<"ThemeAiSummary"> | string | null
+    sourceArticles?: JsonFilter<"ThemeAiSummary">
+    model?: StringNullableFilter<"ThemeAiSummary"> | string | null
+    promptVersion?: StringFilter<"ThemeAiSummary"> | string
+    status?: StringFilter<"ThemeAiSummary"> | string
+    errorMessage?: StringNullableFilter<"ThemeAiSummary"> | string | null
+    generatedAt?: DateTimeNullableFilter<"ThemeAiSummary"> | Date | string | null
+    createdAt?: DateTimeFilter<"ThemeAiSummary"> | Date | string
+    updatedAt?: DateTimeFilter<"ThemeAiSummary"> | Date | string
+    theme?: XOR<ThemeScalarRelationFilter, ThemeWhereInput>
+  }
+
+  export type ThemeAiSummaryOrderByWithRelationInput = {
+    summaryId?: SortOrder
+    themeCode?: SortOrder
+    tradeDate?: SortOrder
+    summary?: SortOrderInput | SortOrder
+    sourceArticles?: SortOrder
+    model?: SortOrderInput | SortOrder
+    promptVersion?: SortOrder
+    status?: SortOrder
+    errorMessage?: SortOrderInput | SortOrder
+    generatedAt?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    theme?: ThemeOrderByWithRelationInput
+  }
+
+  export type ThemeAiSummaryWhereUniqueInput = Prisma.AtLeast<{
+    summaryId?: string
+    themeCode_tradeDate?: ThemeAiSummaryThemeCodeTradeDateCompoundUniqueInput
+    AND?: ThemeAiSummaryWhereInput | ThemeAiSummaryWhereInput[]
+    OR?: ThemeAiSummaryWhereInput[]
+    NOT?: ThemeAiSummaryWhereInput | ThemeAiSummaryWhereInput[]
+    themeCode?: IntFilter<"ThemeAiSummary"> | number
+    tradeDate?: DateTimeFilter<"ThemeAiSummary"> | Date | string
+    summary?: StringNullableFilter<"ThemeAiSummary"> | string | null
+    sourceArticles?: JsonFilter<"ThemeAiSummary">
+    model?: StringNullableFilter<"ThemeAiSummary"> | string | null
+    promptVersion?: StringFilter<"ThemeAiSummary"> | string
+    status?: StringFilter<"ThemeAiSummary"> | string
+    errorMessage?: StringNullableFilter<"ThemeAiSummary"> | string | null
+    generatedAt?: DateTimeNullableFilter<"ThemeAiSummary"> | Date | string | null
+    createdAt?: DateTimeFilter<"ThemeAiSummary"> | Date | string
+    updatedAt?: DateTimeFilter<"ThemeAiSummary"> | Date | string
+    theme?: XOR<ThemeScalarRelationFilter, ThemeWhereInput>
+  }, "summaryId" | "themeCode_tradeDate">
+
+  export type ThemeAiSummaryOrderByWithAggregationInput = {
+    summaryId?: SortOrder
+    themeCode?: SortOrder
+    tradeDate?: SortOrder
+    summary?: SortOrderInput | SortOrder
+    sourceArticles?: SortOrder
+    model?: SortOrderInput | SortOrder
+    promptVersion?: SortOrder
+    status?: SortOrder
+    errorMessage?: SortOrderInput | SortOrder
+    generatedAt?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: ThemeAiSummaryCountOrderByAggregateInput
+    _avg?: ThemeAiSummaryAvgOrderByAggregateInput
+    _max?: ThemeAiSummaryMaxOrderByAggregateInput
+    _min?: ThemeAiSummaryMinOrderByAggregateInput
+    _sum?: ThemeAiSummarySumOrderByAggregateInput
+  }
+
+  export type ThemeAiSummaryScalarWhereWithAggregatesInput = {
+    AND?: ThemeAiSummaryScalarWhereWithAggregatesInput | ThemeAiSummaryScalarWhereWithAggregatesInput[]
+    OR?: ThemeAiSummaryScalarWhereWithAggregatesInput[]
+    NOT?: ThemeAiSummaryScalarWhereWithAggregatesInput | ThemeAiSummaryScalarWhereWithAggregatesInput[]
+    summaryId?: UuidWithAggregatesFilter<"ThemeAiSummary"> | string
+    themeCode?: IntWithAggregatesFilter<"ThemeAiSummary"> | number
+    tradeDate?: DateTimeWithAggregatesFilter<"ThemeAiSummary"> | Date | string
+    summary?: StringNullableWithAggregatesFilter<"ThemeAiSummary"> | string | null
+    sourceArticles?: JsonWithAggregatesFilter<"ThemeAiSummary">
+    model?: StringNullableWithAggregatesFilter<"ThemeAiSummary"> | string | null
+    promptVersion?: StringWithAggregatesFilter<"ThemeAiSummary"> | string
+    status?: StringWithAggregatesFilter<"ThemeAiSummary"> | string
+    errorMessage?: StringNullableWithAggregatesFilter<"ThemeAiSummary"> | string | null
+    generatedAt?: DateTimeNullableWithAggregatesFilter<"ThemeAiSummary"> | Date | string | null
+    createdAt?: DateTimeWithAggregatesFilter<"ThemeAiSummary"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"ThemeAiSummary"> | Date | string
   }
 
   export type StockTradingValueSnapshotWhereInput = {
@@ -40823,6 +42355,7 @@ export namespace Prisma {
     companies?: CompanyCreateNestedManyWithoutThemeInput
     stockThemes?: StockThemeCreateNestedManyWithoutThemeInput
     dailySnapshots?: ThemeDailySnapshotCreateNestedManyWithoutThemeInput
+    aiSummaries?: ThemeAiSummaryCreateNestedManyWithoutThemeInput
     watchlistUsers?: UserWatchlistThemeCreateNestedManyWithoutThemeInput
     groupThemeLinks?: ThemeGroupThemeCreateNestedManyWithoutGroupThemeInput
     childThemeLinks?: ThemeGroupThemeCreateNestedManyWithoutThemeInput
@@ -40840,6 +42373,7 @@ export namespace Prisma {
     companies?: CompanyUncheckedCreateNestedManyWithoutThemeInput
     stockThemes?: StockThemeUncheckedCreateNestedManyWithoutThemeInput
     dailySnapshots?: ThemeDailySnapshotUncheckedCreateNestedManyWithoutThemeInput
+    aiSummaries?: ThemeAiSummaryUncheckedCreateNestedManyWithoutThemeInput
     watchlistUsers?: UserWatchlistThemeUncheckedCreateNestedManyWithoutThemeInput
     groupThemeLinks?: ThemeGroupThemeUncheckedCreateNestedManyWithoutGroupThemeInput
     childThemeLinks?: ThemeGroupThemeUncheckedCreateNestedManyWithoutThemeInput
@@ -40857,6 +42391,7 @@ export namespace Prisma {
     companies?: CompanyUpdateManyWithoutThemeNestedInput
     stockThemes?: StockThemeUpdateManyWithoutThemeNestedInput
     dailySnapshots?: ThemeDailySnapshotUpdateManyWithoutThemeNestedInput
+    aiSummaries?: ThemeAiSummaryUpdateManyWithoutThemeNestedInput
     watchlistUsers?: UserWatchlistThemeUpdateManyWithoutThemeNestedInput
     groupThemeLinks?: ThemeGroupThemeUpdateManyWithoutGroupThemeNestedInput
     childThemeLinks?: ThemeGroupThemeUpdateManyWithoutThemeNestedInput
@@ -40874,6 +42409,7 @@ export namespace Prisma {
     companies?: CompanyUncheckedUpdateManyWithoutThemeNestedInput
     stockThemes?: StockThemeUncheckedUpdateManyWithoutThemeNestedInput
     dailySnapshots?: ThemeDailySnapshotUncheckedUpdateManyWithoutThemeNestedInput
+    aiSummaries?: ThemeAiSummaryUncheckedUpdateManyWithoutThemeNestedInput
     watchlistUsers?: UserWatchlistThemeUncheckedUpdateManyWithoutThemeNestedInput
     groupThemeLinks?: ThemeGroupThemeUncheckedUpdateManyWithoutGroupThemeNestedInput
     childThemeLinks?: ThemeGroupThemeUncheckedUpdateManyWithoutThemeNestedInput
@@ -42717,6 +44253,11 @@ export namespace Prisma {
     upCount?: number
     flatCount?: number
     downCount?: number
+    shortTermRs?: Decimal | DecimalJsLike | number | string | null
+    momentum?: Decimal | DecimalJsLike | number | string | null
+    newHighCount?: number
+    streakDirection?: string | null
+    streakDays?: number
     createdAt?: Date | string
     theme: ThemeCreateNestedOneWithoutDailySnapshotsInput
   }
@@ -42736,6 +44277,11 @@ export namespace Prisma {
     upCount?: number
     flatCount?: number
     downCount?: number
+    shortTermRs?: Decimal | DecimalJsLike | number | string | null
+    momentum?: Decimal | DecimalJsLike | number | string | null
+    newHighCount?: number
+    streakDirection?: string | null
+    streakDays?: number
     createdAt?: Date | string
   }
 
@@ -42753,6 +44299,11 @@ export namespace Prisma {
     upCount?: IntFieldUpdateOperationsInput | number
     flatCount?: IntFieldUpdateOperationsInput | number
     downCount?: IntFieldUpdateOperationsInput | number
+    shortTermRs?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    momentum?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    newHighCount?: IntFieldUpdateOperationsInput | number
+    streakDirection?: NullableStringFieldUpdateOperationsInput | string | null
+    streakDays?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     theme?: ThemeUpdateOneRequiredWithoutDailySnapshotsNestedInput
   }
@@ -42772,6 +44323,11 @@ export namespace Prisma {
     upCount?: IntFieldUpdateOperationsInput | number
     flatCount?: IntFieldUpdateOperationsInput | number
     downCount?: IntFieldUpdateOperationsInput | number
+    shortTermRs?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    momentum?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    newHighCount?: IntFieldUpdateOperationsInput | number
+    streakDirection?: NullableStringFieldUpdateOperationsInput | string | null
+    streakDays?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -42790,6 +44346,11 @@ export namespace Prisma {
     upCount?: number
     flatCount?: number
     downCount?: number
+    shortTermRs?: Decimal | DecimalJsLike | number | string | null
+    momentum?: Decimal | DecimalJsLike | number | string | null
+    newHighCount?: number
+    streakDirection?: string | null
+    streakDays?: number
     createdAt?: Date | string
   }
 
@@ -42807,6 +44368,11 @@ export namespace Prisma {
     upCount?: IntFieldUpdateOperationsInput | number
     flatCount?: IntFieldUpdateOperationsInput | number
     downCount?: IntFieldUpdateOperationsInput | number
+    shortTermRs?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    momentum?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    newHighCount?: IntFieldUpdateOperationsInput | number
+    streakDirection?: NullableStringFieldUpdateOperationsInput | string | null
+    streakDays?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -42825,7 +44391,116 @@ export namespace Prisma {
     upCount?: IntFieldUpdateOperationsInput | number
     flatCount?: IntFieldUpdateOperationsInput | number
     downCount?: IntFieldUpdateOperationsInput | number
+    shortTermRs?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    momentum?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    newHighCount?: IntFieldUpdateOperationsInput | number
+    streakDirection?: NullableStringFieldUpdateOperationsInput | string | null
+    streakDays?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ThemeAiSummaryCreateInput = {
+    summaryId?: string
+    tradeDate: Date | string
+    summary?: string | null
+    sourceArticles?: JsonNullValueInput | InputJsonValue
+    model?: string | null
+    promptVersion?: string
+    status: string
+    errorMessage?: string | null
+    generatedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    theme: ThemeCreateNestedOneWithoutAiSummariesInput
+  }
+
+  export type ThemeAiSummaryUncheckedCreateInput = {
+    summaryId?: string
+    themeCode: number
+    tradeDate: Date | string
+    summary?: string | null
+    sourceArticles?: JsonNullValueInput | InputJsonValue
+    model?: string | null
+    promptVersion?: string
+    status: string
+    errorMessage?: string | null
+    generatedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type ThemeAiSummaryUpdateInput = {
+    summaryId?: StringFieldUpdateOperationsInput | string
+    tradeDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    summary?: NullableStringFieldUpdateOperationsInput | string | null
+    sourceArticles?: JsonNullValueInput | InputJsonValue
+    model?: NullableStringFieldUpdateOperationsInput | string | null
+    promptVersion?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    errorMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    generatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    theme?: ThemeUpdateOneRequiredWithoutAiSummariesNestedInput
+  }
+
+  export type ThemeAiSummaryUncheckedUpdateInput = {
+    summaryId?: StringFieldUpdateOperationsInput | string
+    themeCode?: IntFieldUpdateOperationsInput | number
+    tradeDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    summary?: NullableStringFieldUpdateOperationsInput | string | null
+    sourceArticles?: JsonNullValueInput | InputJsonValue
+    model?: NullableStringFieldUpdateOperationsInput | string | null
+    promptVersion?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    errorMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    generatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ThemeAiSummaryCreateManyInput = {
+    summaryId?: string
+    themeCode: number
+    tradeDate: Date | string
+    summary?: string | null
+    sourceArticles?: JsonNullValueInput | InputJsonValue
+    model?: string | null
+    promptVersion?: string
+    status: string
+    errorMessage?: string | null
+    generatedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type ThemeAiSummaryUpdateManyMutationInput = {
+    summaryId?: StringFieldUpdateOperationsInput | string
+    tradeDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    summary?: NullableStringFieldUpdateOperationsInput | string | null
+    sourceArticles?: JsonNullValueInput | InputJsonValue
+    model?: NullableStringFieldUpdateOperationsInput | string | null
+    promptVersion?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    errorMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    generatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ThemeAiSummaryUncheckedUpdateManyInput = {
+    summaryId?: StringFieldUpdateOperationsInput | string
+    themeCode?: IntFieldUpdateOperationsInput | number
+    tradeDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    summary?: NullableStringFieldUpdateOperationsInput | string | null
+    sourceArticles?: JsonNullValueInput | InputJsonValue
+    model?: NullableStringFieldUpdateOperationsInput | string | null
+    promptVersion?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    errorMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    generatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type StockTradingValueSnapshotCreateInput = {
@@ -43707,6 +45382,12 @@ export namespace Prisma {
     none?: ThemeDailySnapshotWhereInput
   }
 
+  export type ThemeAiSummaryListRelationFilter = {
+    every?: ThemeAiSummaryWhereInput
+    some?: ThemeAiSummaryWhereInput
+    none?: ThemeAiSummaryWhereInput
+  }
+
   export type UserWatchlistThemeListRelationFilter = {
     every?: UserWatchlistThemeWhereInput
     some?: UserWatchlistThemeWhereInput
@@ -43733,6 +45414,10 @@ export namespace Prisma {
   }
 
   export type ThemeDailySnapshotOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type ThemeAiSummaryOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
@@ -45473,6 +47158,11 @@ export namespace Prisma {
     upCount?: SortOrder
     flatCount?: SortOrder
     downCount?: SortOrder
+    shortTermRs?: SortOrder
+    momentum?: SortOrder
+    newHighCount?: SortOrder
+    streakDirection?: SortOrder
+    streakDays?: SortOrder
     createdAt?: SortOrder
   }
 
@@ -45489,6 +47179,10 @@ export namespace Prisma {
     upCount?: SortOrder
     flatCount?: SortOrder
     downCount?: SortOrder
+    shortTermRs?: SortOrder
+    momentum?: SortOrder
+    newHighCount?: SortOrder
+    streakDays?: SortOrder
   }
 
   export type ThemeDailySnapshotMaxOrderByAggregateInput = {
@@ -45506,6 +47200,11 @@ export namespace Prisma {
     upCount?: SortOrder
     flatCount?: SortOrder
     downCount?: SortOrder
+    shortTermRs?: SortOrder
+    momentum?: SortOrder
+    newHighCount?: SortOrder
+    streakDirection?: SortOrder
+    streakDays?: SortOrder
     createdAt?: SortOrder
   }
 
@@ -45524,6 +47223,11 @@ export namespace Prisma {
     upCount?: SortOrder
     flatCount?: SortOrder
     downCount?: SortOrder
+    shortTermRs?: SortOrder
+    momentum?: SortOrder
+    newHighCount?: SortOrder
+    streakDirection?: SortOrder
+    streakDays?: SortOrder
     createdAt?: SortOrder
   }
 
@@ -45540,6 +47244,66 @@ export namespace Prisma {
     upCount?: SortOrder
     flatCount?: SortOrder
     downCount?: SortOrder
+    shortTermRs?: SortOrder
+    momentum?: SortOrder
+    newHighCount?: SortOrder
+    streakDays?: SortOrder
+  }
+
+  export type ThemeAiSummaryThemeCodeTradeDateCompoundUniqueInput = {
+    themeCode: number
+    tradeDate: Date | string
+  }
+
+  export type ThemeAiSummaryCountOrderByAggregateInput = {
+    summaryId?: SortOrder
+    themeCode?: SortOrder
+    tradeDate?: SortOrder
+    summary?: SortOrder
+    sourceArticles?: SortOrder
+    model?: SortOrder
+    promptVersion?: SortOrder
+    status?: SortOrder
+    errorMessage?: SortOrder
+    generatedAt?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type ThemeAiSummaryAvgOrderByAggregateInput = {
+    themeCode?: SortOrder
+  }
+
+  export type ThemeAiSummaryMaxOrderByAggregateInput = {
+    summaryId?: SortOrder
+    themeCode?: SortOrder
+    tradeDate?: SortOrder
+    summary?: SortOrder
+    model?: SortOrder
+    promptVersion?: SortOrder
+    status?: SortOrder
+    errorMessage?: SortOrder
+    generatedAt?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type ThemeAiSummaryMinOrderByAggregateInput = {
+    summaryId?: SortOrder
+    themeCode?: SortOrder
+    tradeDate?: SortOrder
+    summary?: SortOrder
+    model?: SortOrder
+    promptVersion?: SortOrder
+    status?: SortOrder
+    errorMessage?: SortOrder
+    generatedAt?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type ThemeAiSummarySumOrderByAggregateInput = {
+    themeCode?: SortOrder
   }
 
   export type StockTradingValueSnapshotStockCodeSnapshotDateSnapshotTimeCompoundUniqueInput = {
@@ -46082,6 +47846,13 @@ export namespace Prisma {
     connect?: ThemeDailySnapshotWhereUniqueInput | ThemeDailySnapshotWhereUniqueInput[]
   }
 
+  export type ThemeAiSummaryCreateNestedManyWithoutThemeInput = {
+    create?: XOR<ThemeAiSummaryCreateWithoutThemeInput, ThemeAiSummaryUncheckedCreateWithoutThemeInput> | ThemeAiSummaryCreateWithoutThemeInput[] | ThemeAiSummaryUncheckedCreateWithoutThemeInput[]
+    connectOrCreate?: ThemeAiSummaryCreateOrConnectWithoutThemeInput | ThemeAiSummaryCreateOrConnectWithoutThemeInput[]
+    createMany?: ThemeAiSummaryCreateManyThemeInputEnvelope
+    connect?: ThemeAiSummaryWhereUniqueInput | ThemeAiSummaryWhereUniqueInput[]
+  }
+
   export type UserWatchlistThemeCreateNestedManyWithoutThemeInput = {
     create?: XOR<UserWatchlistThemeCreateWithoutThemeInput, UserWatchlistThemeUncheckedCreateWithoutThemeInput> | UserWatchlistThemeCreateWithoutThemeInput[] | UserWatchlistThemeUncheckedCreateWithoutThemeInput[]
     connectOrCreate?: UserWatchlistThemeCreateOrConnectWithoutThemeInput | UserWatchlistThemeCreateOrConnectWithoutThemeInput[]
@@ -46122,6 +47893,13 @@ export namespace Prisma {
     connectOrCreate?: ThemeDailySnapshotCreateOrConnectWithoutThemeInput | ThemeDailySnapshotCreateOrConnectWithoutThemeInput[]
     createMany?: ThemeDailySnapshotCreateManyThemeInputEnvelope
     connect?: ThemeDailySnapshotWhereUniqueInput | ThemeDailySnapshotWhereUniqueInput[]
+  }
+
+  export type ThemeAiSummaryUncheckedCreateNestedManyWithoutThemeInput = {
+    create?: XOR<ThemeAiSummaryCreateWithoutThemeInput, ThemeAiSummaryUncheckedCreateWithoutThemeInput> | ThemeAiSummaryCreateWithoutThemeInput[] | ThemeAiSummaryUncheckedCreateWithoutThemeInput[]
+    connectOrCreate?: ThemeAiSummaryCreateOrConnectWithoutThemeInput | ThemeAiSummaryCreateOrConnectWithoutThemeInput[]
+    createMany?: ThemeAiSummaryCreateManyThemeInputEnvelope
+    connect?: ThemeAiSummaryWhereUniqueInput | ThemeAiSummaryWhereUniqueInput[]
   }
 
   export type UserWatchlistThemeUncheckedCreateNestedManyWithoutThemeInput = {
@@ -46211,6 +47989,20 @@ export namespace Prisma {
     deleteMany?: ThemeDailySnapshotScalarWhereInput | ThemeDailySnapshotScalarWhereInput[]
   }
 
+  export type ThemeAiSummaryUpdateManyWithoutThemeNestedInput = {
+    create?: XOR<ThemeAiSummaryCreateWithoutThemeInput, ThemeAiSummaryUncheckedCreateWithoutThemeInput> | ThemeAiSummaryCreateWithoutThemeInput[] | ThemeAiSummaryUncheckedCreateWithoutThemeInput[]
+    connectOrCreate?: ThemeAiSummaryCreateOrConnectWithoutThemeInput | ThemeAiSummaryCreateOrConnectWithoutThemeInput[]
+    upsert?: ThemeAiSummaryUpsertWithWhereUniqueWithoutThemeInput | ThemeAiSummaryUpsertWithWhereUniqueWithoutThemeInput[]
+    createMany?: ThemeAiSummaryCreateManyThemeInputEnvelope
+    set?: ThemeAiSummaryWhereUniqueInput | ThemeAiSummaryWhereUniqueInput[]
+    disconnect?: ThemeAiSummaryWhereUniqueInput | ThemeAiSummaryWhereUniqueInput[]
+    delete?: ThemeAiSummaryWhereUniqueInput | ThemeAiSummaryWhereUniqueInput[]
+    connect?: ThemeAiSummaryWhereUniqueInput | ThemeAiSummaryWhereUniqueInput[]
+    update?: ThemeAiSummaryUpdateWithWhereUniqueWithoutThemeInput | ThemeAiSummaryUpdateWithWhereUniqueWithoutThemeInput[]
+    updateMany?: ThemeAiSummaryUpdateManyWithWhereWithoutThemeInput | ThemeAiSummaryUpdateManyWithWhereWithoutThemeInput[]
+    deleteMany?: ThemeAiSummaryScalarWhereInput | ThemeAiSummaryScalarWhereInput[]
+  }
+
   export type UserWatchlistThemeUpdateManyWithoutThemeNestedInput = {
     create?: XOR<UserWatchlistThemeCreateWithoutThemeInput, UserWatchlistThemeUncheckedCreateWithoutThemeInput> | UserWatchlistThemeCreateWithoutThemeInput[] | UserWatchlistThemeUncheckedCreateWithoutThemeInput[]
     connectOrCreate?: UserWatchlistThemeCreateOrConnectWithoutThemeInput | UserWatchlistThemeCreateOrConnectWithoutThemeInput[]
@@ -46293,6 +48085,20 @@ export namespace Prisma {
     update?: ThemeDailySnapshotUpdateWithWhereUniqueWithoutThemeInput | ThemeDailySnapshotUpdateWithWhereUniqueWithoutThemeInput[]
     updateMany?: ThemeDailySnapshotUpdateManyWithWhereWithoutThemeInput | ThemeDailySnapshotUpdateManyWithWhereWithoutThemeInput[]
     deleteMany?: ThemeDailySnapshotScalarWhereInput | ThemeDailySnapshotScalarWhereInput[]
+  }
+
+  export type ThemeAiSummaryUncheckedUpdateManyWithoutThemeNestedInput = {
+    create?: XOR<ThemeAiSummaryCreateWithoutThemeInput, ThemeAiSummaryUncheckedCreateWithoutThemeInput> | ThemeAiSummaryCreateWithoutThemeInput[] | ThemeAiSummaryUncheckedCreateWithoutThemeInput[]
+    connectOrCreate?: ThemeAiSummaryCreateOrConnectWithoutThemeInput | ThemeAiSummaryCreateOrConnectWithoutThemeInput[]
+    upsert?: ThemeAiSummaryUpsertWithWhereUniqueWithoutThemeInput | ThemeAiSummaryUpsertWithWhereUniqueWithoutThemeInput[]
+    createMany?: ThemeAiSummaryCreateManyThemeInputEnvelope
+    set?: ThemeAiSummaryWhereUniqueInput | ThemeAiSummaryWhereUniqueInput[]
+    disconnect?: ThemeAiSummaryWhereUniqueInput | ThemeAiSummaryWhereUniqueInput[]
+    delete?: ThemeAiSummaryWhereUniqueInput | ThemeAiSummaryWhereUniqueInput[]
+    connect?: ThemeAiSummaryWhereUniqueInput | ThemeAiSummaryWhereUniqueInput[]
+    update?: ThemeAiSummaryUpdateWithWhereUniqueWithoutThemeInput | ThemeAiSummaryUpdateWithWhereUniqueWithoutThemeInput[]
+    updateMany?: ThemeAiSummaryUpdateManyWithWhereWithoutThemeInput | ThemeAiSummaryUpdateManyWithWhereWithoutThemeInput[]
+    deleteMany?: ThemeAiSummaryScalarWhereInput | ThemeAiSummaryScalarWhereInput[]
   }
 
   export type UserWatchlistThemeUncheckedUpdateManyWithoutThemeNestedInput = {
@@ -47169,6 +48975,20 @@ export namespace Prisma {
     update?: XOR<XOR<ThemeUpdateToOneWithWhereWithoutDailySnapshotsInput, ThemeUpdateWithoutDailySnapshotsInput>, ThemeUncheckedUpdateWithoutDailySnapshotsInput>
   }
 
+  export type ThemeCreateNestedOneWithoutAiSummariesInput = {
+    create?: XOR<ThemeCreateWithoutAiSummariesInput, ThemeUncheckedCreateWithoutAiSummariesInput>
+    connectOrCreate?: ThemeCreateOrConnectWithoutAiSummariesInput
+    connect?: ThemeWhereUniqueInput
+  }
+
+  export type ThemeUpdateOneRequiredWithoutAiSummariesNestedInput = {
+    create?: XOR<ThemeCreateWithoutAiSummariesInput, ThemeUncheckedCreateWithoutAiSummariesInput>
+    connectOrCreate?: ThemeCreateOrConnectWithoutAiSummariesInput
+    upsert?: ThemeUpsertWithoutAiSummariesInput
+    connect?: ThemeWhereUniqueInput
+    update?: XOR<XOR<ThemeUpdateToOneWithWhereWithoutAiSummariesInput, ThemeUpdateWithoutAiSummariesInput>, ThemeUncheckedUpdateWithoutAiSummariesInput>
+  }
+
   export type UserCreateNestedOneWithoutSubscriptionInput = {
     create?: XOR<UserCreateWithoutSubscriptionInput, UserUncheckedCreateWithoutSubscriptionInput>
     connectOrCreate?: UserCreateOrConnectWithoutSubscriptionInput
@@ -47965,6 +49785,11 @@ export namespace Prisma {
     upCount?: number
     flatCount?: number
     downCount?: number
+    shortTermRs?: Decimal | DecimalJsLike | number | string | null
+    momentum?: Decimal | DecimalJsLike | number | string | null
+    newHighCount?: number
+    streakDirection?: string | null
+    streakDays?: number
     createdAt?: Date | string
   }
 
@@ -47982,6 +49807,11 @@ export namespace Prisma {
     upCount?: number
     flatCount?: number
     downCount?: number
+    shortTermRs?: Decimal | DecimalJsLike | number | string | null
+    momentum?: Decimal | DecimalJsLike | number | string | null
+    newHighCount?: number
+    streakDirection?: string | null
+    streakDays?: number
     createdAt?: Date | string
   }
 
@@ -47992,6 +49822,44 @@ export namespace Prisma {
 
   export type ThemeDailySnapshotCreateManyThemeInputEnvelope = {
     data: ThemeDailySnapshotCreateManyThemeInput | ThemeDailySnapshotCreateManyThemeInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type ThemeAiSummaryCreateWithoutThemeInput = {
+    summaryId?: string
+    tradeDate: Date | string
+    summary?: string | null
+    sourceArticles?: JsonNullValueInput | InputJsonValue
+    model?: string | null
+    promptVersion?: string
+    status: string
+    errorMessage?: string | null
+    generatedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type ThemeAiSummaryUncheckedCreateWithoutThemeInput = {
+    summaryId?: string
+    tradeDate: Date | string
+    summary?: string | null
+    sourceArticles?: JsonNullValueInput | InputJsonValue
+    model?: string | null
+    promptVersion?: string
+    status: string
+    errorMessage?: string | null
+    generatedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type ThemeAiSummaryCreateOrConnectWithoutThemeInput = {
+    where: ThemeAiSummaryWhereUniqueInput
+    create: XOR<ThemeAiSummaryCreateWithoutThemeInput, ThemeAiSummaryUncheckedCreateWithoutThemeInput>
+  }
+
+  export type ThemeAiSummaryCreateManyThemeInputEnvelope = {
+    data: ThemeAiSummaryCreateManyThemeInput | ThemeAiSummaryCreateManyThemeInput[]
     skipDuplicates?: boolean
   }
 
@@ -48158,7 +50026,46 @@ export namespace Prisma {
     upCount?: IntFilter<"ThemeDailySnapshot"> | number
     flatCount?: IntFilter<"ThemeDailySnapshot"> | number
     downCount?: IntFilter<"ThemeDailySnapshot"> | number
+    shortTermRs?: DecimalNullableFilter<"ThemeDailySnapshot"> | Decimal | DecimalJsLike | number | string | null
+    momentum?: DecimalNullableFilter<"ThemeDailySnapshot"> | Decimal | DecimalJsLike | number | string | null
+    newHighCount?: IntFilter<"ThemeDailySnapshot"> | number
+    streakDirection?: StringNullableFilter<"ThemeDailySnapshot"> | string | null
+    streakDays?: IntFilter<"ThemeDailySnapshot"> | number
     createdAt?: DateTimeFilter<"ThemeDailySnapshot"> | Date | string
+  }
+
+  export type ThemeAiSummaryUpsertWithWhereUniqueWithoutThemeInput = {
+    where: ThemeAiSummaryWhereUniqueInput
+    update: XOR<ThemeAiSummaryUpdateWithoutThemeInput, ThemeAiSummaryUncheckedUpdateWithoutThemeInput>
+    create: XOR<ThemeAiSummaryCreateWithoutThemeInput, ThemeAiSummaryUncheckedCreateWithoutThemeInput>
+  }
+
+  export type ThemeAiSummaryUpdateWithWhereUniqueWithoutThemeInput = {
+    where: ThemeAiSummaryWhereUniqueInput
+    data: XOR<ThemeAiSummaryUpdateWithoutThemeInput, ThemeAiSummaryUncheckedUpdateWithoutThemeInput>
+  }
+
+  export type ThemeAiSummaryUpdateManyWithWhereWithoutThemeInput = {
+    where: ThemeAiSummaryScalarWhereInput
+    data: XOR<ThemeAiSummaryUpdateManyMutationInput, ThemeAiSummaryUncheckedUpdateManyWithoutThemeInput>
+  }
+
+  export type ThemeAiSummaryScalarWhereInput = {
+    AND?: ThemeAiSummaryScalarWhereInput | ThemeAiSummaryScalarWhereInput[]
+    OR?: ThemeAiSummaryScalarWhereInput[]
+    NOT?: ThemeAiSummaryScalarWhereInput | ThemeAiSummaryScalarWhereInput[]
+    summaryId?: UuidFilter<"ThemeAiSummary"> | string
+    themeCode?: IntFilter<"ThemeAiSummary"> | number
+    tradeDate?: DateTimeFilter<"ThemeAiSummary"> | Date | string
+    summary?: StringNullableFilter<"ThemeAiSummary"> | string | null
+    sourceArticles?: JsonFilter<"ThemeAiSummary">
+    model?: StringNullableFilter<"ThemeAiSummary"> | string | null
+    promptVersion?: StringFilter<"ThemeAiSummary"> | string
+    status?: StringFilter<"ThemeAiSummary"> | string
+    errorMessage?: StringNullableFilter<"ThemeAiSummary"> | string | null
+    generatedAt?: DateTimeNullableFilter<"ThemeAiSummary"> | Date | string | null
+    createdAt?: DateTimeFilter<"ThemeAiSummary"> | Date | string
+    updatedAt?: DateTimeFilter<"ThemeAiSummary"> | Date | string
   }
 
   export type UserWatchlistThemeUpsertWithWhereUniqueWithoutThemeInput = {
@@ -48241,6 +50148,7 @@ export namespace Prisma {
     companies?: CompanyCreateNestedManyWithoutThemeInput
     stockThemes?: StockThemeCreateNestedManyWithoutThemeInput
     dailySnapshots?: ThemeDailySnapshotCreateNestedManyWithoutThemeInput
+    aiSummaries?: ThemeAiSummaryCreateNestedManyWithoutThemeInput
     watchlistUsers?: UserWatchlistThemeCreateNestedManyWithoutThemeInput
     childThemeLinks?: ThemeGroupThemeCreateNestedManyWithoutThemeInput
   }
@@ -48257,6 +50165,7 @@ export namespace Prisma {
     companies?: CompanyUncheckedCreateNestedManyWithoutThemeInput
     stockThemes?: StockThemeUncheckedCreateNestedManyWithoutThemeInput
     dailySnapshots?: ThemeDailySnapshotUncheckedCreateNestedManyWithoutThemeInput
+    aiSummaries?: ThemeAiSummaryUncheckedCreateNestedManyWithoutThemeInput
     watchlistUsers?: UserWatchlistThemeUncheckedCreateNestedManyWithoutThemeInput
     childThemeLinks?: ThemeGroupThemeUncheckedCreateNestedManyWithoutThemeInput
   }
@@ -48278,6 +50187,7 @@ export namespace Prisma {
     companies?: CompanyCreateNestedManyWithoutThemeInput
     stockThemes?: StockThemeCreateNestedManyWithoutThemeInput
     dailySnapshots?: ThemeDailySnapshotCreateNestedManyWithoutThemeInput
+    aiSummaries?: ThemeAiSummaryCreateNestedManyWithoutThemeInput
     watchlistUsers?: UserWatchlistThemeCreateNestedManyWithoutThemeInput
     groupThemeLinks?: ThemeGroupThemeCreateNestedManyWithoutGroupThemeInput
   }
@@ -48294,6 +50204,7 @@ export namespace Prisma {
     companies?: CompanyUncheckedCreateNestedManyWithoutThemeInput
     stockThemes?: StockThemeUncheckedCreateNestedManyWithoutThemeInput
     dailySnapshots?: ThemeDailySnapshotUncheckedCreateNestedManyWithoutThemeInput
+    aiSummaries?: ThemeAiSummaryUncheckedCreateNestedManyWithoutThemeInput
     watchlistUsers?: UserWatchlistThemeUncheckedCreateNestedManyWithoutThemeInput
     groupThemeLinks?: ThemeGroupThemeUncheckedCreateNestedManyWithoutGroupThemeInput
   }
@@ -48326,6 +50237,7 @@ export namespace Prisma {
     companies?: CompanyUpdateManyWithoutThemeNestedInput
     stockThemes?: StockThemeUpdateManyWithoutThemeNestedInput
     dailySnapshots?: ThemeDailySnapshotUpdateManyWithoutThemeNestedInput
+    aiSummaries?: ThemeAiSummaryUpdateManyWithoutThemeNestedInput
     watchlistUsers?: UserWatchlistThemeUpdateManyWithoutThemeNestedInput
     childThemeLinks?: ThemeGroupThemeUpdateManyWithoutThemeNestedInput
   }
@@ -48342,6 +50254,7 @@ export namespace Prisma {
     companies?: CompanyUncheckedUpdateManyWithoutThemeNestedInput
     stockThemes?: StockThemeUncheckedUpdateManyWithoutThemeNestedInput
     dailySnapshots?: ThemeDailySnapshotUncheckedUpdateManyWithoutThemeNestedInput
+    aiSummaries?: ThemeAiSummaryUncheckedUpdateManyWithoutThemeNestedInput
     watchlistUsers?: UserWatchlistThemeUncheckedUpdateManyWithoutThemeNestedInput
     childThemeLinks?: ThemeGroupThemeUncheckedUpdateManyWithoutThemeNestedInput
   }
@@ -48369,6 +50282,7 @@ export namespace Prisma {
     companies?: CompanyUpdateManyWithoutThemeNestedInput
     stockThemes?: StockThemeUpdateManyWithoutThemeNestedInput
     dailySnapshots?: ThemeDailySnapshotUpdateManyWithoutThemeNestedInput
+    aiSummaries?: ThemeAiSummaryUpdateManyWithoutThemeNestedInput
     watchlistUsers?: UserWatchlistThemeUpdateManyWithoutThemeNestedInput
     groupThemeLinks?: ThemeGroupThemeUpdateManyWithoutGroupThemeNestedInput
   }
@@ -48385,6 +50299,7 @@ export namespace Prisma {
     companies?: CompanyUncheckedUpdateManyWithoutThemeNestedInput
     stockThemes?: StockThemeUncheckedUpdateManyWithoutThemeNestedInput
     dailySnapshots?: ThemeDailySnapshotUncheckedUpdateManyWithoutThemeNestedInput
+    aiSummaries?: ThemeAiSummaryUncheckedUpdateManyWithoutThemeNestedInput
     watchlistUsers?: UserWatchlistThemeUncheckedUpdateManyWithoutThemeNestedInput
     groupThemeLinks?: ThemeGroupThemeUncheckedUpdateManyWithoutGroupThemeNestedInput
   }
@@ -48400,6 +50315,7 @@ export namespace Prisma {
     deletedAt?: Date | string | null
     companies?: CompanyCreateNestedManyWithoutThemeInput
     dailySnapshots?: ThemeDailySnapshotCreateNestedManyWithoutThemeInput
+    aiSummaries?: ThemeAiSummaryCreateNestedManyWithoutThemeInput
     watchlistUsers?: UserWatchlistThemeCreateNestedManyWithoutThemeInput
     groupThemeLinks?: ThemeGroupThemeCreateNestedManyWithoutGroupThemeInput
     childThemeLinks?: ThemeGroupThemeCreateNestedManyWithoutThemeInput
@@ -48416,6 +50332,7 @@ export namespace Prisma {
     deletedAt?: Date | string | null
     companies?: CompanyUncheckedCreateNestedManyWithoutThemeInput
     dailySnapshots?: ThemeDailySnapshotUncheckedCreateNestedManyWithoutThemeInput
+    aiSummaries?: ThemeAiSummaryUncheckedCreateNestedManyWithoutThemeInput
     watchlistUsers?: UserWatchlistThemeUncheckedCreateNestedManyWithoutThemeInput
     groupThemeLinks?: ThemeGroupThemeUncheckedCreateNestedManyWithoutGroupThemeInput
     childThemeLinks?: ThemeGroupThemeUncheckedCreateNestedManyWithoutThemeInput
@@ -48448,6 +50365,7 @@ export namespace Prisma {
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     companies?: CompanyUpdateManyWithoutThemeNestedInput
     dailySnapshots?: ThemeDailySnapshotUpdateManyWithoutThemeNestedInput
+    aiSummaries?: ThemeAiSummaryUpdateManyWithoutThemeNestedInput
     watchlistUsers?: UserWatchlistThemeUpdateManyWithoutThemeNestedInput
     groupThemeLinks?: ThemeGroupThemeUpdateManyWithoutGroupThemeNestedInput
     childThemeLinks?: ThemeGroupThemeUpdateManyWithoutThemeNestedInput
@@ -48464,6 +50382,7 @@ export namespace Prisma {
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     companies?: CompanyUncheckedUpdateManyWithoutThemeNestedInput
     dailySnapshots?: ThemeDailySnapshotUncheckedUpdateManyWithoutThemeNestedInput
+    aiSummaries?: ThemeAiSummaryUncheckedUpdateManyWithoutThemeNestedInput
     watchlistUsers?: UserWatchlistThemeUncheckedUpdateManyWithoutThemeNestedInput
     groupThemeLinks?: ThemeGroupThemeUncheckedUpdateManyWithoutGroupThemeNestedInput
     childThemeLinks?: ThemeGroupThemeUncheckedUpdateManyWithoutThemeNestedInput
@@ -48981,6 +50900,7 @@ export namespace Prisma {
     deletedAt?: Date | string | null
     stockThemes?: StockThemeCreateNestedManyWithoutThemeInput
     dailySnapshots?: ThemeDailySnapshotCreateNestedManyWithoutThemeInput
+    aiSummaries?: ThemeAiSummaryCreateNestedManyWithoutThemeInput
     watchlistUsers?: UserWatchlistThemeCreateNestedManyWithoutThemeInput
     groupThemeLinks?: ThemeGroupThemeCreateNestedManyWithoutGroupThemeInput
     childThemeLinks?: ThemeGroupThemeCreateNestedManyWithoutThemeInput
@@ -48997,6 +50917,7 @@ export namespace Prisma {
     deletedAt?: Date | string | null
     stockThemes?: StockThemeUncheckedCreateNestedManyWithoutThemeInput
     dailySnapshots?: ThemeDailySnapshotUncheckedCreateNestedManyWithoutThemeInput
+    aiSummaries?: ThemeAiSummaryUncheckedCreateNestedManyWithoutThemeInput
     watchlistUsers?: UserWatchlistThemeUncheckedCreateNestedManyWithoutThemeInput
     groupThemeLinks?: ThemeGroupThemeUncheckedCreateNestedManyWithoutGroupThemeInput
     childThemeLinks?: ThemeGroupThemeUncheckedCreateNestedManyWithoutThemeInput
@@ -49089,6 +51010,7 @@ export namespace Prisma {
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     stockThemes?: StockThemeUpdateManyWithoutThemeNestedInput
     dailySnapshots?: ThemeDailySnapshotUpdateManyWithoutThemeNestedInput
+    aiSummaries?: ThemeAiSummaryUpdateManyWithoutThemeNestedInput
     watchlistUsers?: UserWatchlistThemeUpdateManyWithoutThemeNestedInput
     groupThemeLinks?: ThemeGroupThemeUpdateManyWithoutGroupThemeNestedInput
     childThemeLinks?: ThemeGroupThemeUpdateManyWithoutThemeNestedInput
@@ -49105,6 +51027,7 @@ export namespace Prisma {
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     stockThemes?: StockThemeUncheckedUpdateManyWithoutThemeNestedInput
     dailySnapshots?: ThemeDailySnapshotUncheckedUpdateManyWithoutThemeNestedInput
+    aiSummaries?: ThemeAiSummaryUncheckedUpdateManyWithoutThemeNestedInput
     watchlistUsers?: UserWatchlistThemeUncheckedUpdateManyWithoutThemeNestedInput
     groupThemeLinks?: ThemeGroupThemeUncheckedUpdateManyWithoutGroupThemeNestedInput
     childThemeLinks?: ThemeGroupThemeUncheckedUpdateManyWithoutThemeNestedInput
@@ -49464,6 +51387,7 @@ export namespace Prisma {
     companies?: CompanyCreateNestedManyWithoutThemeInput
     stockThemes?: StockThemeCreateNestedManyWithoutThemeInput
     dailySnapshots?: ThemeDailySnapshotCreateNestedManyWithoutThemeInput
+    aiSummaries?: ThemeAiSummaryCreateNestedManyWithoutThemeInput
     groupThemeLinks?: ThemeGroupThemeCreateNestedManyWithoutGroupThemeInput
     childThemeLinks?: ThemeGroupThemeCreateNestedManyWithoutThemeInput
   }
@@ -49480,6 +51404,7 @@ export namespace Prisma {
     companies?: CompanyUncheckedCreateNestedManyWithoutThemeInput
     stockThemes?: StockThemeUncheckedCreateNestedManyWithoutThemeInput
     dailySnapshots?: ThemeDailySnapshotUncheckedCreateNestedManyWithoutThemeInput
+    aiSummaries?: ThemeAiSummaryUncheckedCreateNestedManyWithoutThemeInput
     groupThemeLinks?: ThemeGroupThemeUncheckedCreateNestedManyWithoutGroupThemeInput
     childThemeLinks?: ThemeGroupThemeUncheckedCreateNestedManyWithoutThemeInput
   }
@@ -49571,6 +51496,7 @@ export namespace Prisma {
     companies?: CompanyUpdateManyWithoutThemeNestedInput
     stockThemes?: StockThemeUpdateManyWithoutThemeNestedInput
     dailySnapshots?: ThemeDailySnapshotUpdateManyWithoutThemeNestedInput
+    aiSummaries?: ThemeAiSummaryUpdateManyWithoutThemeNestedInput
     groupThemeLinks?: ThemeGroupThemeUpdateManyWithoutGroupThemeNestedInput
     childThemeLinks?: ThemeGroupThemeUpdateManyWithoutThemeNestedInput
   }
@@ -49587,6 +51513,7 @@ export namespace Prisma {
     companies?: CompanyUncheckedUpdateManyWithoutThemeNestedInput
     stockThemes?: StockThemeUncheckedUpdateManyWithoutThemeNestedInput
     dailySnapshots?: ThemeDailySnapshotUncheckedUpdateManyWithoutThemeNestedInput
+    aiSummaries?: ThemeAiSummaryUncheckedUpdateManyWithoutThemeNestedInput
     groupThemeLinks?: ThemeGroupThemeUncheckedUpdateManyWithoutGroupThemeNestedInput
     childThemeLinks?: ThemeGroupThemeUncheckedUpdateManyWithoutThemeNestedInput
   }
@@ -50254,6 +52181,7 @@ export namespace Prisma {
     deletedAt?: Date | string | null
     companies?: CompanyCreateNestedManyWithoutThemeInput
     stockThemes?: StockThemeCreateNestedManyWithoutThemeInput
+    aiSummaries?: ThemeAiSummaryCreateNestedManyWithoutThemeInput
     watchlistUsers?: UserWatchlistThemeCreateNestedManyWithoutThemeInput
     groupThemeLinks?: ThemeGroupThemeCreateNestedManyWithoutGroupThemeInput
     childThemeLinks?: ThemeGroupThemeCreateNestedManyWithoutThemeInput
@@ -50270,6 +52198,7 @@ export namespace Prisma {
     deletedAt?: Date | string | null
     companies?: CompanyUncheckedCreateNestedManyWithoutThemeInput
     stockThemes?: StockThemeUncheckedCreateNestedManyWithoutThemeInput
+    aiSummaries?: ThemeAiSummaryUncheckedCreateNestedManyWithoutThemeInput
     watchlistUsers?: UserWatchlistThemeUncheckedCreateNestedManyWithoutThemeInput
     groupThemeLinks?: ThemeGroupThemeUncheckedCreateNestedManyWithoutGroupThemeInput
     childThemeLinks?: ThemeGroupThemeUncheckedCreateNestedManyWithoutThemeInput
@@ -50302,6 +52231,7 @@ export namespace Prisma {
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     companies?: CompanyUpdateManyWithoutThemeNestedInput
     stockThemes?: StockThemeUpdateManyWithoutThemeNestedInput
+    aiSummaries?: ThemeAiSummaryUpdateManyWithoutThemeNestedInput
     watchlistUsers?: UserWatchlistThemeUpdateManyWithoutThemeNestedInput
     groupThemeLinks?: ThemeGroupThemeUpdateManyWithoutGroupThemeNestedInput
     childThemeLinks?: ThemeGroupThemeUpdateManyWithoutThemeNestedInput
@@ -50318,6 +52248,91 @@ export namespace Prisma {
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     companies?: CompanyUncheckedUpdateManyWithoutThemeNestedInput
     stockThemes?: StockThemeUncheckedUpdateManyWithoutThemeNestedInput
+    aiSummaries?: ThemeAiSummaryUncheckedUpdateManyWithoutThemeNestedInput
+    watchlistUsers?: UserWatchlistThemeUncheckedUpdateManyWithoutThemeNestedInput
+    groupThemeLinks?: ThemeGroupThemeUncheckedUpdateManyWithoutGroupThemeNestedInput
+    childThemeLinks?: ThemeGroupThemeUncheckedUpdateManyWithoutThemeNestedInput
+  }
+
+  export type ThemeCreateWithoutAiSummariesInput = {
+    themeCode: number
+    themeName: string
+    imageUrl?: string | null
+    source?: string
+    sourceThemeNo?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    deletedAt?: Date | string | null
+    companies?: CompanyCreateNestedManyWithoutThemeInput
+    stockThemes?: StockThemeCreateNestedManyWithoutThemeInput
+    dailySnapshots?: ThemeDailySnapshotCreateNestedManyWithoutThemeInput
+    watchlistUsers?: UserWatchlistThemeCreateNestedManyWithoutThemeInput
+    groupThemeLinks?: ThemeGroupThemeCreateNestedManyWithoutGroupThemeInput
+    childThemeLinks?: ThemeGroupThemeCreateNestedManyWithoutThemeInput
+  }
+
+  export type ThemeUncheckedCreateWithoutAiSummariesInput = {
+    themeCode: number
+    themeName: string
+    imageUrl?: string | null
+    source?: string
+    sourceThemeNo?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    deletedAt?: Date | string | null
+    companies?: CompanyUncheckedCreateNestedManyWithoutThemeInput
+    stockThemes?: StockThemeUncheckedCreateNestedManyWithoutThemeInput
+    dailySnapshots?: ThemeDailySnapshotUncheckedCreateNestedManyWithoutThemeInput
+    watchlistUsers?: UserWatchlistThemeUncheckedCreateNestedManyWithoutThemeInput
+    groupThemeLinks?: ThemeGroupThemeUncheckedCreateNestedManyWithoutGroupThemeInput
+    childThemeLinks?: ThemeGroupThemeUncheckedCreateNestedManyWithoutThemeInput
+  }
+
+  export type ThemeCreateOrConnectWithoutAiSummariesInput = {
+    where: ThemeWhereUniqueInput
+    create: XOR<ThemeCreateWithoutAiSummariesInput, ThemeUncheckedCreateWithoutAiSummariesInput>
+  }
+
+  export type ThemeUpsertWithoutAiSummariesInput = {
+    update: XOR<ThemeUpdateWithoutAiSummariesInput, ThemeUncheckedUpdateWithoutAiSummariesInput>
+    create: XOR<ThemeCreateWithoutAiSummariesInput, ThemeUncheckedCreateWithoutAiSummariesInput>
+    where?: ThemeWhereInput
+  }
+
+  export type ThemeUpdateToOneWithWhereWithoutAiSummariesInput = {
+    where?: ThemeWhereInput
+    data: XOR<ThemeUpdateWithoutAiSummariesInput, ThemeUncheckedUpdateWithoutAiSummariesInput>
+  }
+
+  export type ThemeUpdateWithoutAiSummariesInput = {
+    themeCode?: IntFieldUpdateOperationsInput | number
+    themeName?: StringFieldUpdateOperationsInput | string
+    imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    source?: StringFieldUpdateOperationsInput | string
+    sourceThemeNo?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    companies?: CompanyUpdateManyWithoutThemeNestedInput
+    stockThemes?: StockThemeUpdateManyWithoutThemeNestedInput
+    dailySnapshots?: ThemeDailySnapshotUpdateManyWithoutThemeNestedInput
+    watchlistUsers?: UserWatchlistThemeUpdateManyWithoutThemeNestedInput
+    groupThemeLinks?: ThemeGroupThemeUpdateManyWithoutGroupThemeNestedInput
+    childThemeLinks?: ThemeGroupThemeUpdateManyWithoutThemeNestedInput
+  }
+
+  export type ThemeUncheckedUpdateWithoutAiSummariesInput = {
+    themeCode?: IntFieldUpdateOperationsInput | number
+    themeName?: StringFieldUpdateOperationsInput | string
+    imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    source?: StringFieldUpdateOperationsInput | string
+    sourceThemeNo?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    companies?: CompanyUncheckedUpdateManyWithoutThemeNestedInput
+    stockThemes?: StockThemeUncheckedUpdateManyWithoutThemeNestedInput
+    dailySnapshots?: ThemeDailySnapshotUncheckedUpdateManyWithoutThemeNestedInput
     watchlistUsers?: UserWatchlistThemeUncheckedUpdateManyWithoutThemeNestedInput
     groupThemeLinks?: ThemeGroupThemeUncheckedUpdateManyWithoutGroupThemeNestedInput
     childThemeLinks?: ThemeGroupThemeUncheckedUpdateManyWithoutThemeNestedInput
@@ -50842,7 +52857,26 @@ export namespace Prisma {
     upCount?: number
     flatCount?: number
     downCount?: number
+    shortTermRs?: Decimal | DecimalJsLike | number | string | null
+    momentum?: Decimal | DecimalJsLike | number | string | null
+    newHighCount?: number
+    streakDirection?: string | null
+    streakDays?: number
     createdAt?: Date | string
+  }
+
+  export type ThemeAiSummaryCreateManyThemeInput = {
+    summaryId?: string
+    tradeDate: Date | string
+    summary?: string | null
+    sourceArticles?: JsonNullValueInput | InputJsonValue
+    model?: string | null
+    promptVersion?: string
+    status: string
+    errorMessage?: string | null
+    generatedAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
   }
 
   export type UserWatchlistThemeCreateManyThemeInput = {
@@ -50950,6 +52984,11 @@ export namespace Prisma {
     upCount?: IntFieldUpdateOperationsInput | number
     flatCount?: IntFieldUpdateOperationsInput | number
     downCount?: IntFieldUpdateOperationsInput | number
+    shortTermRs?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    momentum?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    newHighCount?: IntFieldUpdateOperationsInput | number
+    streakDirection?: NullableStringFieldUpdateOperationsInput | string | null
+    streakDays?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -50967,6 +53006,11 @@ export namespace Prisma {
     upCount?: IntFieldUpdateOperationsInput | number
     flatCount?: IntFieldUpdateOperationsInput | number
     downCount?: IntFieldUpdateOperationsInput | number
+    shortTermRs?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    momentum?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    newHighCount?: IntFieldUpdateOperationsInput | number
+    streakDirection?: NullableStringFieldUpdateOperationsInput | string | null
+    streakDays?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -50984,7 +53028,54 @@ export namespace Prisma {
     upCount?: IntFieldUpdateOperationsInput | number
     flatCount?: IntFieldUpdateOperationsInput | number
     downCount?: IntFieldUpdateOperationsInput | number
+    shortTermRs?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    momentum?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    newHighCount?: IntFieldUpdateOperationsInput | number
+    streakDirection?: NullableStringFieldUpdateOperationsInput | string | null
+    streakDays?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ThemeAiSummaryUpdateWithoutThemeInput = {
+    summaryId?: StringFieldUpdateOperationsInput | string
+    tradeDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    summary?: NullableStringFieldUpdateOperationsInput | string | null
+    sourceArticles?: JsonNullValueInput | InputJsonValue
+    model?: NullableStringFieldUpdateOperationsInput | string | null
+    promptVersion?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    errorMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    generatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ThemeAiSummaryUncheckedUpdateWithoutThemeInput = {
+    summaryId?: StringFieldUpdateOperationsInput | string
+    tradeDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    summary?: NullableStringFieldUpdateOperationsInput | string | null
+    sourceArticles?: JsonNullValueInput | InputJsonValue
+    model?: NullableStringFieldUpdateOperationsInput | string | null
+    promptVersion?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    errorMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    generatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ThemeAiSummaryUncheckedUpdateManyWithoutThemeInput = {
+    summaryId?: StringFieldUpdateOperationsInput | string
+    tradeDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    summary?: NullableStringFieldUpdateOperationsInput | string | null
+    sourceArticles?: JsonNullValueInput | InputJsonValue
+    model?: NullableStringFieldUpdateOperationsInput | string | null
+    promptVersion?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    errorMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    generatedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type UserWatchlistThemeUpdateWithoutThemeInput = {
