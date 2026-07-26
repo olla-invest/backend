@@ -1361,3 +1361,46 @@ events                 이벤트 목록 (String[]) — 해당 없으면 빈 배�
 관심테마/관심종목이 없어 추천 불가 시 해당 필드 null 반환
   예) { "recommendedTheme": null, "recommendedStock": { ... } }
 ```
+# 이슈테마 고도화 API (2026-07-26)
+
+## 목록
+
+`GET /issue-theme`
+
+쿼리:
+
+- `search`: 테마명 부분 검색
+- `view`: `rank`(기본), `heatmap`
+- `filter`: `all`, `rs80`, `momentum`, `stockCount5`, `changeRate5`, `hasNewHigh`
+- `favoritesOnly`: 로그인 사용자의 관심테마만 조회
+- `sort`: `rs`(기본), `changeRate`, `previousRank`
+- `display`, `page`: 페이지네이션
+
+검색, 관심테마, 선택 필터는 AND 조건이다. 응답은 `items`, `filterCounts`, `pagination`, `updatedAt`을 반환한다. 히트맵 보기에서는 검색을 지원하지 않는다.
+
+## 상세
+
+`GET /issue-theme/:themeCode`
+
+쿼리:
+
+- `stockSort`: `rs`, `shortTermRs`, `changeRate`, `tradingValue`, `previousRatio`, `newHigh`
+- `stockDisplay`: 기본 20, 최대 300
+
+상세 응답에는 단기 RS, 모멘텀, 연속 배지, 신고가 수, 연관테마, 최신 성공 AI 요약과 출처가 포함된다. AI 요약이 없거나 생성에 실패해도 상세 API는 `200`과 `aiSummary: null`을 반환한다.
+
+## AI 요약 관리자 API
+
+- `POST /issue-theme/ai-summary/generate?tradeDate=2026-07-25&limit=20`
+- `POST /issue-theme/ai-summary/:themeCode/regenerate?tradeDate=2026-07-25`
+
+두 API 모두 `x-admin-api-key`가 필요하다. 장마감 테마 스냅샷 저장 이후에도 동일 생성 작업이 하루 1회 실행된다.
+
+환경변수:
+
+- `OPENAI_API_KEY`
+- `OPENAI_THEME_SUMMARY_MODEL` (기본 `gpt-5.6-luna`)
+- `THEME_AI_SUMMARY_LIMIT` (기본 `20`)
+- `NAVER_CLIENT_ID`, `NAVER_CLIENT_SECRET`
+
+---

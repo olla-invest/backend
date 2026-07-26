@@ -109,6 +109,7 @@ model Theme {
   companies       Company[]
   stockThemes     StockTheme[]
   dailySnapshots  ThemeDailySnapshot[]
+  aiSummaries     ThemeAiSummary[]
   watchlistUsers  UserWatchlistTheme[]
   groupThemeLinks ThemeGroupTheme[] @relation("ThemeGroupLinks")
   childThemeLinks ThemeGroupTheme[] @relation("ThemeChildLinks")
@@ -568,6 +569,11 @@ model ThemeDailySnapshot {
   upCount         Int      @default(0) @map("up_count")                       // 상승 종목 수 (등락률 >= +1%)
   flatCount       Int      @default(0) @map("flat_count")                     // 보합 종목 수 (-1% ~ +1%)
   downCount       Int      @default(0) @map("down_count")                     // 하락 종목 수 (등락률 <= -1%)
+  shortTermRs     Decimal? @map("short_term_rs") @db.Decimal(5, 2)
+  momentum        Decimal? @map("momentum") @db.Decimal(6, 2)
+  newHighCount    Int      @default(0) @map("new_high_count")
+  streakDirection String?  @map("streak_direction") @db.VarChar(10)
+  streakDays      Int      @default(0) @map("streak_days")
   createdAt       DateTime @default(now()) @map("created_at")
 
   // Relations
@@ -577,6 +583,27 @@ model ThemeDailySnapshot {
   @@index([snapshotDate, rank], map: "idx_theme_snapshot_date_rank")
   @@index([themeCode, snapshotDate(sort: Desc)], map: "idx_theme_snapshot_code_date")
   @@map("theme_daily_snapshots")
+}
+
+model ThemeAiSummary {
+  summaryId      String    @id @default(uuid()) @map("summary_id") @db.Uuid
+  themeCode      Int       @map("theme_code")
+  tradeDate      DateTime  @map("trade_date") @db.Date
+  summary        String?   @db.Text
+  sourceArticles Json      @default("[]") @map("source_articles") @db.JsonB
+  model          String?   @db.VarChar(100)
+  promptVersion  String    @default("v1") @map("prompt_version") @db.VarChar(20)
+  status         String    @db.VarChar(20)
+  errorMessage   String?   @map("error_message") @db.Text
+  generatedAt    DateTime? @map("generated_at")
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedAt      DateTime  @default(now()) @updatedAt @map("updated_at")
+
+  theme Theme @relation(fields: [themeCode], references: [themeCode])
+
+  @@unique([themeCode, tradeDate], map: "uk_theme_ai_summary_code_date")
+  @@index([themeCode, status, tradeDate(sort: Desc)], map: "idx_theme_ai_summary_latest")
+  @@map("theme_ai_summaries")
 }
 
 // 18. 종목 장중 누적 거래대금 스냅샷 테이블 (전일 동시간 비교용)

@@ -5,7 +5,9 @@ import { Public } from '../../common/auth/decorators/public.decorator';
 import { OptionalJwtAuthGuard } from '../../common/auth/guards/optional-jwt-auth.guard';
 import { AdminApiKeyGuard } from '../../common/auth/guards/admin-api-key.guard';
 import { CurrentUser } from '../../common/auth/decorators/current-user.decorator';
-import { IntRangePipe } from '../../common/pipes/input-validation.pipes';
+import { DateStringPipe, IntRangePipe } from '../../common/pipes/input-validation.pipes';
+import { IssueThemeListQueryDto } from './dto/issue-theme-list-query.dto';
+import { IssueThemeDetailQueryDto } from './dto/issue-theme-detail-query.dto';
 
 @ApiTags( '이슈테마 (Issue Theme)' )
 @Controller('issue-theme')
@@ -14,6 +16,7 @@ export class IssueThemeController {
 
   @Get()
   @Public()
+  @UseGuards(OptionalJwtAuthGuard)
   @ApiOperation( { summary: '이슈테마 목록 조회', description: '상승 종목 비율 내림차순. 실시간 차트 필터 통과 종목 기준.' } )
   @ApiQuery( { name: 'display', required: false, example: '20', description: '페이지당 항목 수' } )
   @ApiQuery( { name: 'page', required: false, example: '1', description: '페이지 번호' } )
@@ -21,13 +24,10 @@ export class IssueThemeController {
   @ApiQuery( { name: 'minTotalCount', required: false, example: '3', description: '집계 대상 종목 최소 개수' } )
   @ApiQuery( { name: 'minThemeScore', required: false, example: '70', description: '테마 종합 점수 최소값' } )
   async getThemeList(
-    @Query('display', new IntRangePipe('display', 1, 300, true)) display: number = 20,
-    @Query('page', new IntRangePipe('page', 1, 10000, true)) page: number = 1,
-    @Query('minAvgRsScore', new IntRangePipe('minAvgRsScore', 0, 100, true)) minAvgRsScore?: number,
-    @Query('minTotalCount', new IntRangePipe('minTotalCount', 1, 1000, true)) minTotalCount?: number,
-    @Query('minThemeScore', new IntRangePipe('minThemeScore', 0, 100, true)) minThemeScore?: number,
+    @Query() query: IssueThemeListQueryDto,
+    @CurrentUser('userId') userId?: string,
   ) {
-    return this.issueThemeService.getThemeList(display, page, { minAvgRsScore, minTotalCount, minThemeScore });
+    return this.issueThemeService.getThemeList(query, userId);
   }
 
   @Get('admin/themes')
@@ -58,8 +58,9 @@ export class IssueThemeController {
   async getThemeDetail(
     @Param('themeCode', new IntRangePipe('themeCode', 1, 999999)) themeCode: number,
     @CurrentUser('userId') userId: string | undefined,
+    @Query() query: IssueThemeDetailQueryDto,
   ) {
-    return this.issueThemeService.getThemeDetail(themeCode, userId);
+    return this.issueThemeService.getThemeDetail(themeCode, userId, query);
   }
 
   @Post(':themeCode/favorite')
@@ -123,6 +124,28 @@ export class IssueThemeController {
   @ApiQuery( { name: 'days', required: false, example: '60', description: '백필할 최근 거래일 수' } )
   async backfillThemeSnapshots(@Query('days', new IntRangePipe('days', 1, 365, true)) days: number = 60) {
     return this.issueThemeService.backfillThemeSnapshots(days);
+  }
+
+  @Post('ai-summary/generate')
+  @Public()
+  @UseGuards(AdminApiKeyGuard)
+  @ApiOperation({ summary: '[관리자] 거래일 테마 AI 요약 생성 또는 재시도' })
+  async generateAiSummaries(
+    @Query('tradeDate', new DateStringPipe('tradeDate')) tradeDate: string,
+    @Query('limit', new IntRangePipe('limit', 1, 100, true)) limit: number = 20,
+  ) {
+    return this.issueThemeService.generateAiSummaries(new Date(`${tradeDate}T00:00:00.000Z`), limit);
+  }
+
+  @Post('ai-summary/:themeCode/regenerate')
+  @Public()
+  @UseGuards(AdminApiKeyGuard)
+  @ApiOperation({ summary: '[관리자] 단일 테마 AI 요약 재생성' })
+  async regenerateAiSummary(
+    @Param('themeCode', new IntRangePipe('themeCode', 1, 999999)) themeCode: number,
+    @Query('tradeDate', new DateStringPipe('tradeDate')) tradeDate: string,
+  ) {
+    return this.issueThemeService.regenerateAiSummary(themeCode, new Date(`${tradeDate}T00:00:00.000Z`));
   }
 
   @Post('snapshot/trading-value')
