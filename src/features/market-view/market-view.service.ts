@@ -165,15 +165,22 @@ export class MarketViewService {
             throw new BadRequestException( 'marketType은 KOSPI 또는 KOSDAQ이어야 합니다' );
         }
         const targetDate = tradeDate ? this.dateOnly( tradeDate ) : await this.getLatestMarketViewDate();
-        const rows = await this.prisma.marketViewIndexChartPoint.findMany( {
-            where: { marketType, tradeDate: targetDate },
-            orderBy: { tradeTime: 'asc' },
-        } );
+        const [ rows, previousSnapshot ] = await Promise.all( [
+            this.prisma.marketViewIndexChartPoint.findMany( {
+                where: { marketType, tradeDate: targetDate },
+                orderBy: { tradeTime: 'asc' },
+            } ),
+            this.prisma.marketViewDailySnapshot.findFirst( {
+                where: { marketType, tradeDate: { lt: targetDate } },
+                orderBy: { tradeDate: 'desc' },
+            } ),
+        ] );
 
         return {
             marketType,
             tradeDate: this.isoDate( targetDate ),
             period: 'intraday',
+            previousClose: previousSnapshot ? Number( previousSnapshot.indexClose ) : null,
             items: rows.map( ( row ) => ( {
                 tradeTime: this.formatTradeTime( row.tradeTime ),
                 indexPrice: Number( row.indexPrice ),
@@ -852,6 +859,7 @@ export class MarketViewService {
                 high: Number( row.indexHigh ),
                 low: Number( row.indexLow ),
                 close: Number( row.indexClose ),
+                previousClose: Number( row.indexClose ) - Number( row.indexChange ),
                 change: Number( row.indexChange ),
                 changeRate: Number( row.indexChangeRate ),
                 volume: row.volume.toString(),
