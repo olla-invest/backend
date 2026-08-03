@@ -350,7 +350,7 @@ export class IssueThemeService {
 
   // ─── 공통 데이터 로더 ─────────────────────────────────────────────
 
-  /** 최신 거래일 기준 RS80 이상 종목 조회 */
+  /** 최신 거래일 기준 RS 점수가 있는 종목 조회 */
   private async getFilteredMetrics() {
     const latest = await this.prisma.stockDailyMetrics.findFirst({
       orderBy: { tradeDate: 'desc' },
@@ -358,10 +358,50 @@ export class IssueThemeService {
     });
     if (!latest) return { tradeDate: null, metrics: [] };
 
-    const rs80Metrics = await this.prisma.stockDailyMetrics.findMany({
-      where: { tradeDate: latest.tradeDate, relativeStrengthScore: { gte: 80 } },
+    const measurableMetrics = await this.prisma.stockDailyMetrics.findMany({
+      where: { tradeDate: latest.tradeDate, relativeStrengthScore: { not: null } },
     });
-    return { tradeDate: latest.tradeDate, metrics: rs80Metrics };
+    return { tradeDate: latest.tradeDate, metrics: measurableMetrics };
+  }
+
+  private async getStockShortTermRs(stockCodes: string[], tradeDate: Date) {
+    const result = new Map<string, number | null>(stockCodes.map((stockCode) => [stockCode, null]));
+    if (stockCodes.length === 0) return result;
+
+    const recentDates = await this.prisma.stockDailyMetrics.findMany({
+      where: { tradeDate: { lte: tradeDate } },
+      select: { tradeDate: true },
+      distinct: ['tradeDate'],
+      orderBy: { tradeDate: 'desc' },
+      take: 3,
+    });
+    if (recentDates.length < 3) return result;
+
+    const dateKeys = new Set(recentDates.map((row) => row.tradeDate.toISOString().slice(0, 10)));
+    const rows = await this.prisma.stockDailyMetrics.findMany({
+      where: {
+        stockCode: { in: stockCodes },
+        tradeDate: { in: recentDates.map((row) => row.tradeDate) },
+      },
+      select: { stockCode: true, tradeDate: true, relativeStrengthScore: true },
+    });
+    const scoresByStock = new Map<string, Map<string, number>>();
+    for (const row of rows) {
+      const dateKey = row.tradeDate.toISOString().slice(0, 10);
+      if (!dateKeys.has(dateKey)) continue;
+      const scores = scoresByStock.get(row.stockCode) ?? new Map<string, number>();
+      scores.set(dateKey, Number(row.relativeStrengthScore));
+      scoresByStock.set(row.stockCode, scores);
+    }
+    for (const stockCode of stockCodes) {
+      const scores = scoresByStock.get(stockCode);
+      if (!scores || scores.size !== recentDates.length) continue;
+      result.set(
+        stockCode,
+        this.round2([...scores.values()].reduce((sum, score) => sum + score, 0) / recentDates.length),
+      );
+    }
+    return result;
   }
 
   // ─── 이슈테마 목록 ────────────────────────────────────────────────
@@ -388,7 +428,7 @@ export class IssueThemeService {
 
     const stockThemeRows = await this.prisma.stockTheme.findMany({
       where: { stockCode: { in: stockCodes }, source: this.naverThemeSource, theme: { deletedAt: null } },
-      select: { stockCode: true, themeCode: true, theme: { select: { themeName: true } } },
+      select: { stockCode: true, stockName: true, themeCode: true, theme: { select: { themeName: true } } },
     });
     const metricsMap = new Map(metrics.map((m) => [m.stockCode, m]));
     // 실시간 등락률
@@ -415,6 +455,7 @@ export class IssueThemeService {
       const changeRate = this.getOpenToCurrentChangeRate(m, rt);
       currentGroup.stocks.push({
         stockCode: row.stockCode,
+        stockName: row.stockName,
         rsScore: Number(m.relativeStrengthScore),
         changeRate,
         isNewHigh: Boolean(m.isNewHigh),
@@ -422,23 +463,14 @@ export class IssueThemeService {
     }
 
     const themeCodes = [...themeGroups.keys()];
-    const [snapshots, allMemberships] = themeCodes.length > 0 ? await Promise.all([
-      this.prisma.themeDailySnapshot.findMany({
+    const snapshots = themeCodes.length > 0
+      ? await this.prisma.themeDailySnapshot.findMany({
       where: { themeCode: { in: themeCodes }, snapshotDate: { lte: tradeDate } },
       orderBy: { snapshotDate: 'desc' },
-      }),
-      this.prisma.stockTheme.findMany({
-        where: { themeCode: { in: themeCodes }, source: this.naverThemeSource },
-        select: { themeCode: true, stockCode: true },
-      }),
-    ]) : [[], []];
+      })
+      : [];
     const snapshotMap = new Map<number, any>();
     for (const snapshot of snapshots) if (!snapshotMap.has(snapshot.themeCode)) snapshotMap.set(snapshot.themeCode, snapshot);
-    const allStocksByTheme = new Map<number, Set<string>>();
-    for (const membership of allMemberships) {
-      if (!allStocksByTheme.has(membership.themeCode)) allStocksByTheme.set(membership.themeCode, new Set());
-      allStocksByTheme.get(membership.themeCode)!.add(membership.stockCode);
-    }
 
     let items = [...themeGroups.entries()].map(([themeCode, group]) => {
       const metric = this.themeMetrics.calculateDailyMetric(group.stocks, []);
@@ -461,16 +493,19 @@ export class IssueThemeService {
         momentum: snapshot?.momentum != null ? Number(snapshot.momentum) : metric.momentum,
         changeRate: metric.changeRate,
         avgChangeRate: metric.changeRate,
-        stockCount: allStocksByTheme.get(themeCode)?.size ?? metric.stockCount,
+        stockCount: metric.stockCount,
         totalCount: metric.eligibleStockCount,
         eligibleStockCount: metric.eligibleStockCount,
         risingCount: metric.risingCount,
         newHighCount: metric.newHighCount,
-        themeScore: metric.changeRate,
         streakBadge: streakBadge?.tone ? streakBadge : null,
         isFavorite: false,
+        topStocks: [...group.stocks]
+          .sort((a, b) => b.rsScore - a.rsScore || a.stockCode.localeCompare(b.stockCode))
+          .slice(0, 3)
+          .map((stock) => ({ stockCode: stock.stockCode, stockName: stock.stockName })),
       };
-    }).filter((item) => item.eligibleStockCount >= 2);
+    });
 
     if (search) items = items.filter((item) => item.themeName.toLocaleLowerCase('ko').includes(search.toLocaleLowerCase('ko')));
 
@@ -671,6 +706,7 @@ export class IssueThemeService {
       metricsMap,
       tradeDate,
     );
+    const stockShortTermRs = await this.getStockShortTermRs(filteredCodes, tradeDate);
 
     // 등락률/거래대금 집계
     const changeRates: number[] = [];
@@ -707,7 +743,7 @@ export class IssueThemeService {
         priceChangeRate1d: priceSnapshot.priceChangeRate1d,
         priceSource: priceSnapshot.priceSource,
         rsScore: Number(m.relativeStrengthScore),
-        shortTermRs: null,
+        shortTermRs: stockShortTermRs.get(code) ?? null,
         tradingValue: m.tradingValue != null ? m.tradingValue.toString() : null,
         previousTradingValueRatio: tradingValueChange.ratio,
         isNewHigh: Boolean(m.isNewHigh),
@@ -740,7 +776,6 @@ export class IssueThemeService {
     const risingRatio = totalCount > 0 ? (risingCount / totalCount) * 100 : 0;
     const avgChangeRate = changeRates.reduce((a, b) => a + b, 0) / (changeRates.length || 1);
     const avgRsScore = rsScores.reduce((a, b) => a + b, 0) / (rsScores.length || 1);
-    const themeScore = this.round2(risingRatio);
 
     const prevSnapshot = await this.prisma.themeDailySnapshot.findFirst({
       where: { themeCode, snapshotDate: { lt: tradeDate } },
@@ -793,7 +828,6 @@ export class IssueThemeService {
       changeRate: currentTheme?.changeRate ?? this.round2(avgChangeRate),
       newHighCount: currentTheme?.newHighCount ?? stockRows.filter((stock) => stock.isNewHigh).length,
       streakBadge: currentTheme?.streakBadge ?? null,
-      themeScore,
       insights,
       isFavorite,
       stocks: displayedStockRows,
@@ -932,7 +966,7 @@ export class IssueThemeService {
       const risingRatio = totalCount > 0 ? (risingCount / totalCount) * 100 : 0;
       const avgChangeRate = changeRates.reduce((a, b) => a + b, 0) / (changeRates.length || 1);
       const avgRsScore = rsScores.reduce((a, b) => a + b, 0) / (rsScores.length || 1);
-      const themeScore = this.round2(risingRatio);
+      const themeScore = this.round2(avgChangeRate);
       const upCount = changeRates.filter((r) => r >= 1).length;
       const downCount = changeRates.filter((r) => r <= -1).length;
       const flatCount = totalCount - upCount - downCount;
@@ -1122,7 +1156,7 @@ export class IssueThemeService {
             )
           END AS momentum,
           new_high_count,
-          rising_ratio AS theme_score,
+          ROUND(avg_change_rate, 2) AS theme_score,
           up_count,
           flat_count,
           down_count

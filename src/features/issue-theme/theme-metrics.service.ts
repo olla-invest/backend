@@ -60,7 +60,7 @@ export class ThemeMetricsService {
 
   calculateDailyMetric(stocks: ThemeMetricStock[], history: ThemeMetricHistory[]): ThemeMetricResult {
     const uniqueStocks = new Map(stocks.map((stock) => [stock.stockCode, stock]));
-    const eligible = [...uniqueStocks.values()].filter((stock) => stock.rsScore >= 80);
+    const measurableStocks = [...uniqueStocks.values()];
     const average = (values: number[]): number | null =>
       values.length > 0 ? this.round2(values.reduce((sum, value) => sum + value, 0) / values.length) : null;
 
@@ -77,13 +77,13 @@ export class ThemeMetricsService {
       : null;
 
     return {
-      isEligible: eligible.length >= 2,
+      isEligible: measurableStocks.length > 0,
       stockCount: uniqueStocks.size,
-      eligibleStockCount: eligible.length,
-      risingCount: eligible.filter((stock) => stock.changeRate > 0).length,
-      newHighCount: eligible.filter((stock) => stock.isNewHigh).length,
-      rsScore: average(eligible.map((stock) => stock.rsScore)),
-      changeRate: average(eligible.map((stock) => stock.changeRate)),
+      eligibleStockCount: measurableStocks.length,
+      risingCount: measurableStocks.filter((stock) => stock.changeRate > 0).length,
+      newHighCount: measurableStocks.filter((stock) => stock.isNewHigh).length,
+      rsScore: average(measurableStocks.map((stock) => stock.rsScore)),
+      changeRate: average(measurableStocks.map((stock) => stock.changeRate)),
       shortTermRs,
       momentum: shortTermRs != null && periodRs != null ? this.round2(shortTermRs - periodRs) : null,
     };
