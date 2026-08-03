@@ -3,7 +3,7 @@ import { IssueThemeService } from './issue-theme.service';
 import { ThemeMetricsService } from './theme-metrics.service';
 
 describe('IssueThemeService detail stock population', () => {
-  it('returns every theme stock that has a latest RS score', async () => {
+  it('returns every theme stock but excludes zero RS from the theme average', async () => {
     const prisma: any = {
       theme: {
         findFirst: jest.fn().mockResolvedValue({ themeName: 'AI 로봇', imageUrl: null }),
@@ -12,12 +12,14 @@ describe('IssueThemeService detail stock population', () => {
         findMany: jest.fn().mockResolvedValue([
           { stockCode: 'HIGH', stockName: '고RS', inclusionReason: null },
           { stockCode: 'LOW', stockName: '저RS', inclusionReason: null },
+          { stockCode: 'ZERO', stockName: '미산출', inclusionReason: null },
         ]),
       },
       company: {
         findMany: jest.fn().mockResolvedValue([
           { stockCode: 'HIGH', companyName: '고RS' },
           { stockCode: 'LOW', companyName: '저RS' },
+          { stockCode: 'ZERO', companyName: '미산출' },
         ]),
       },
       stockDailyMetrics: { findMany: jest.fn().mockResolvedValue([]) },
@@ -43,6 +45,10 @@ describe('IssueThemeService detail stock population', () => {
           stockCode: 'LOW', relativeStrengthScore: 70, closePrice: 200,
           priceChangeRate1d: -1, priceChange1d: -2, isNewHigh: false,
         },
+        {
+          stockCode: 'ZERO', relativeStrengthScore: 0, closePrice: 300,
+          priceChangeRate1d: 0, priceChange1d: 0, isNewHigh: false,
+        },
       ],
     });
     jest.spyOn(service as any, 'getLiveTradingValueChanges').mockResolvedValue(new Map());
@@ -54,10 +60,12 @@ describe('IssueThemeService detail stock population', () => {
       stockDisplay: 20,
     });
 
-    expect(result?.totalCount).toBe(2);
+    expect(result?.totalCount).toBe(3);
+    expect(result?.avgRsScore).toBe(80);
     expect(result?.stocks.map((stock: any) => ({ stockCode: stock.stockCode, rsScore: stock.rsScore }))).toEqual([
       { stockCode: 'HIGH', rsScore: 90 },
       { stockCode: 'LOW', rsScore: 70 },
+      { stockCode: 'ZERO', rsScore: 0 },
     ]);
   });
 

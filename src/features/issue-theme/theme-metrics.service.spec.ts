@@ -31,6 +31,22 @@ describe('ThemeMetricsService', () => {
     expect(result.isEligible).toBe(true);
   });
 
+  it('excludes zero RS scores only from the RS average', () => {
+    const result = service.calculateDailyMetric([
+      { stockCode: 'A', rsScore: 90, changeRate: 2, isNewHigh: false },
+      { stockCode: 'B', rsScore: 0, changeRate: -2, isNewHigh: true },
+    ], []);
+
+    expect(result).toMatchObject({
+      stockCount: 2,
+      eligibleStockCount: 2,
+      risingCount: 1,
+      newHighCount: 1,
+      rsScore: 90,
+      changeRate: 0,
+    });
+  });
+
   it('calculates three-day RS and 63-day momentum', () => {
     const history = Array.from({ length: 63 }, (_, index) => ({
       tradeDate: `2026-05-${String(index + 1).padStart(2, '0')}`,
@@ -56,6 +72,19 @@ describe('ThemeMetricsService', () => {
 
     expect(result.shortTermRs).toBeNull();
     expect(result.momentum).toBeNull();
+  });
+
+  it('excludes zero RS snapshots from historical theme averages', () => {
+    const result = service.calculateDailyMetric([
+      { stockCode: 'A', rsScore: 90, changeRate: 2, isNewHigh: false },
+    ], [
+      { tradeDate: '2026-07-23', avgRsScore: 80 },
+      { tradeDate: '2026-07-24', avgRsScore: 0 },
+      { tradeDate: '2026-07-25', avgRsScore: 100 },
+    ]);
+
+    expect(result.shortTermRs).toBe(90);
+    expect(result.momentum).toBe(0);
   });
 
   it.each([
