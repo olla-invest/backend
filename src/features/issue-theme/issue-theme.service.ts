@@ -359,7 +359,7 @@ export class IssueThemeService {
     if (!latest) return { tradeDate: null, metrics: [] };
 
     const measurableMetrics = await this.prisma.stockDailyMetrics.findMany({
-      where: { tradeDate: latest.tradeDate, relativeStrengthScore: { not: null } },
+      where: { tradeDate: latest.tradeDate },
     });
     return { tradeDate: latest.tradeDate, metrics: measurableMetrics };
   }

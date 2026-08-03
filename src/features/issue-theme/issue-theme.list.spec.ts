@@ -119,6 +119,9 @@ describe('IssueThemeService enhanced list', () => {
     const result = await (service as any).getFilteredMetrics();
 
     expect(result.metrics.map((metric: any) => metric.stockCode)).toEqual(['HIGH', 'LOW']);
+    expect(prisma.stockDailyMetrics.findMany).toHaveBeenCalledWith({
+      where: { tradeDate },
+    });
   });
 
   it('requires authentication for favorites', async () => {
