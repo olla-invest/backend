@@ -26,6 +26,7 @@ describe('IssueThemeService enhanced list', () => {
         { stockCode: 'F', relativeStrengthScore: 87, priceChangeRate1d: 5, isNewHigh: false },
         { stockCode: 'G', relativeStrengthScore: 20, priceChangeRate1d: -10, isNewHigh: false },
         { stockCode: 'H', relativeStrengthScore: 60, priceChangeRate1d: 1, isNewHigh: false },
+        { stockCode: 'ZERO', relativeStrengthScore: 0, priceChangeRate1d: 20, isNewHigh: true },
       ],
     });
     prisma.stockTheme.findMany.mockImplementation(({ select }: any) => {
@@ -35,6 +36,7 @@ describe('IssueThemeService enhanced list', () => {
           { stockCode: 'B', stockName: '비', themeCode: 1, theme: { themeName: 'AI 로봇' } },
           { stockCode: 'E', stockName: '이', themeCode: 1, theme: { themeName: 'AI 로봇' } },
           { stockCode: 'F', stockName: '에프', themeCode: 1, theme: { themeName: 'AI 로봇' } },
+          { stockCode: 'ZERO', stockName: '미산출', themeCode: 1, theme: { themeName: 'AI 로봇' } },
           { stockCode: 'C', stockName: '씨', themeCode: 2, theme: { themeName: '바이오' } },
           { stockCode: 'D', stockName: '디', themeCode: 2, theme: { themeName: '바이오' } },
           { stockCode: 'G', stockName: '지', themeCode: 2, theme: { themeName: '바이오' } },
@@ -46,6 +48,7 @@ describe('IssueThemeService enhanced list', () => {
         { stockCode: 'B', themeCode: 1 },
         { stockCode: 'E', themeCode: 1 },
         { stockCode: 'F', themeCode: 1 },
+        { stockCode: 'ZERO', themeCode: 1 },
         { stockCode: 'C', themeCode: 2 },
         { stockCode: 'D', themeCode: 2 },
         { stockCode: 'G', themeCode: 2 },
@@ -94,6 +97,21 @@ describe('IssueThemeService enhanced list', () => {
     });
   });
 
+  it('excludes zero RS stocks from theme list counts and metrics', async () => {
+    const result = await service.getThemeList({
+      view: IssueThemeView.RANK, filter: IssueThemeFilter.ALL, sort: IssueThemeSort.RS,
+      favoritesOnly: false, display: 20, page: 1,
+    });
+
+    expect(result.items.find((item: any) => item.themeCode === 1)).toMatchObject({
+      stockCount: 4,
+      eligibleStockCount: 4,
+      rsScore: 87.5,
+      changeRate: 5,
+      newHighCount: 1,
+    });
+  });
+
   it('applies RS80 to the average theme RS only when selected', async () => {
     const result = await service.getThemeList({
       view: IssueThemeView.RANK, filter: IssueThemeFilter.RS80, sort: IssueThemeSort.RS,
@@ -107,20 +125,16 @@ describe('IssueThemeService enhanced list', () => {
     (service as any).getFilteredMetrics.mockRestore();
     const tradeDate = new Date('2026-07-25');
     prisma.stockDailyMetrics.findFirst.mockResolvedValue({ tradeDate });
-    prisma.stockDailyMetrics.findMany.mockImplementation(({ where }: any) =>
-      Promise.resolve(where.relativeStrengthScore?.gte === 80
-        ? [{ stockCode: 'HIGH', relativeStrengthScore: 90 }]
-        : [
-            { stockCode: 'HIGH', relativeStrengthScore: 90 },
-            { stockCode: 'LOW', relativeStrengthScore: 70 },
-          ]),
-    );
+    prisma.stockDailyMetrics.findMany.mockResolvedValue([
+      { stockCode: 'HIGH', relativeStrengthScore: 90 },
+      { stockCode: 'LOW', relativeStrengthScore: 70 },
+    ]);
 
     const result = await (service as any).getFilteredMetrics();
 
     expect(result.metrics.map((metric: any) => metric.stockCode)).toEqual(['HIGH', 'LOW']);
     expect(prisma.stockDailyMetrics.findMany).toHaveBeenCalledWith({
-      where: { tradeDate },
+      where: { tradeDate, relativeStrengthScore: { gt: 0 } },
     });
   });
 

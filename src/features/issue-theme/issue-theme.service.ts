@@ -359,7 +359,7 @@ export class IssueThemeService {
     if (!latest) return { tradeDate: null, metrics: [] };
 
     const measurableMetrics = await this.prisma.stockDailyMetrics.findMany({
-      where: { tradeDate: latest.tradeDate },
+      where: { tradeDate: latest.tradeDate, relativeStrengthScore: { gt: 0 } },
     });
     return { tradeDate: latest.tradeDate, metrics: measurableMetrics };
   }
@@ -414,7 +414,7 @@ export class IssueThemeService {
       throw new BadRequestException('히트맵 보기에서는 테마 검색을 사용할 수 없습니다');
     }
 
-    const { tradeDate, metrics } = await this.getFilteredMetrics();
+    const { tradeDate, metrics: loadedMetrics } = await this.getFilteredMetrics();
     if (!tradeDate) {
       return {
         updatedAt: null,
@@ -423,6 +423,7 @@ export class IssueThemeService {
         pagination: { page, display, total: 0, totalPages: 0 },
       };
     }
+    const metrics = loadedMetrics.filter((metric) => Number(metric.relativeStrengthScore) > 0);
 
     const stockCodes = metrics.map((m) => m.stockCode);
 
@@ -693,7 +694,9 @@ export class IssueThemeService {
     }
     const inclusionReasonMap = new Map(stockThemes.map((c) => [c.stockCode, c.inclusionReason]));
 
-    const metrics = allMetrics.filter((m) => themeStockCodes.has(m.stockCode));
+    const metrics = allMetrics.filter(
+      (m) => themeStockCodes.has(m.stockCode) && Number(m.relativeStrengthScore) > 0,
+    );
     const filteredCodes = metrics.map((m) => m.stockCode);
     const metricsMap = new Map(metrics.map((m) => [m.stockCode, m]));
 
@@ -760,7 +763,8 @@ export class IssueThemeService {
 
     const nullableDesc = (a: number | null, b: number | null) =>
       a == null && b == null ? 0 : a == null ? 1 : b == null ? -1 : b - a;
-    stockRows.sort((a, b) => {
+    const visibleStockRows = stockRows.filter((stock) => stock.rsScore > 0);
+    visibleStockRows.sort((a, b) => {
       if (query.stockSort === IssueThemeStockSort.SHORT_TERM_RS) return nullableDesc(a.shortTermRs, b.shortTermRs) || a.stockCode.localeCompare(b.stockCode);
       if (query.stockSort === IssueThemeStockSort.CHANGE_RATE) return nullableDesc(a.changeRate, b.changeRate) || a.stockCode.localeCompare(b.stockCode);
       if (query.stockSort === IssueThemeStockSort.TRADING_VALUE) return nullableDesc(a.currentAccTradingValue, b.currentAccTradingValue) || a.stockCode.localeCompare(b.stockCode);
@@ -768,8 +772,8 @@ export class IssueThemeService {
       if (query.stockSort === IssueThemeStockSort.NEW_HIGH) return nullableDesc(a.newHighRate, b.newHighRate) || a.stockCode.localeCompare(b.stockCode);
       return b.rsScore - a.rsScore || a.stockCode.localeCompare(b.stockCode);
     });
-    stockRows.forEach((r: any, i) => { r.rank = i + 1; });
-    const displayedStockRows = stockRows.slice(0, query.stockDisplay);
+    visibleStockRows.forEach((r: any, i) => { r.rank = i + 1; });
+    const displayedStockRows = visibleStockRows.slice(0, query.stockDisplay);
 
     // 인사이트 계산
     const totalCount = filteredCodes.length;

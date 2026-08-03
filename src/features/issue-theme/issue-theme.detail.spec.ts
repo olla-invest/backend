@@ -3,7 +3,7 @@ import { IssueThemeService } from './issue-theme.service';
 import { ThemeMetricsService } from './theme-metrics.service';
 
 describe('IssueThemeService detail stock population', () => {
-  it('returns every theme stock but excludes zero RS from the theme average', async () => {
+  it('excludes zero RS stocks from the detail list and theme counts', async () => {
     const prisma: any = {
       theme: {
         findFirst: jest.fn().mockResolvedValue({ themeName: 'AI 로봇', imageUrl: null }),
@@ -60,12 +60,11 @@ describe('IssueThemeService detail stock population', () => {
       stockDisplay: 20,
     });
 
-    expect(result?.totalCount).toBe(3);
+    expect(result?.totalCount).toBe(2);
     expect(result?.avgRsScore).toBe(80);
     expect(result?.stocks.map((stock: any) => ({ stockCode: stock.stockCode, rsScore: stock.rsScore }))).toEqual([
       { stockCode: 'HIGH', rsScore: 90 },
       { stockCode: 'LOW', rsScore: 70 },
-      { stockCode: 'ZERO', rsScore: 0 },
     ]);
   });
 
