@@ -70,10 +70,10 @@ export class ThemeMetricsService {
     const shortTermHistory = orderedHistory.slice(-3);
     const hasCompleteShortTerm = shortTermHistory.length === 3;
     const shortTermRs = hasCompleteShortTerm
-      ? average(shortTermHistory.map((item) => item.avgRsScore))
+      ? average(shortTermHistory.map((item) => item.avgRsScore).filter((score) => score > 0))
       : null;
     const periodRs = hasCompleteShortTerm
-      ? average(orderedHistory.map((item) => item.avgRsScore))
+      ? average(orderedHistory.map((item) => item.avgRsScore).filter((score) => score > 0))
       : null;
 
     return {
@@ -82,7 +82,7 @@ export class ThemeMetricsService {
       eligibleStockCount: measurableStocks.length,
       risingCount: measurableStocks.filter((stock) => stock.changeRate > 0).length,
       newHighCount: measurableStocks.filter((stock) => stock.isNewHigh).length,
-      rsScore: average(measurableStocks.map((stock) => stock.rsScore)),
+      rsScore: average(measurableStocks.map((stock) => stock.rsScore).filter((score) => score > 0)),
       changeRate: average(measurableStocks.map((stock) => stock.changeRate)),
       shortTermRs,
       momentum: shortTermRs != null && periodRs != null ? this.round2(shortTermRs - periodRs) : null,

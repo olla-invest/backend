@@ -720,7 +720,8 @@ export class IssueThemeService {
       const changeRate = priceSnapshot.changeRate;
 
       changeRates.push(changeRate);
-      rsScores.push(Number(m.relativeStrengthScore));
+      const rsScore = Number(m.relativeStrengthScore);
+      if (rsScore > 0) rsScores.push(rsScore);
 
       const tradingValueChange = tradingValueChangeMap.get(code) ?? {
         label: '-',
