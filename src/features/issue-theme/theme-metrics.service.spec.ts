@@ -3,7 +3,7 @@ import { ThemeMetricsService } from './theme-metrics.service';
 describe('ThemeMetricsService', () => {
   const service = new ThemeMetricsService();
 
-  it('deduplicates stocks and aggregates only RS80 stocks', () => {
+  it('deduplicates stocks and aggregates every stock with an RS score', () => {
     const result = service.calculateDailyMetric([
       { stockCode: 'A', rsScore: 90, changeRate: 2, isNewHigh: true },
       { stockCode: 'A', rsScore: 91, changeRate: 3, isNewHigh: true },
@@ -14,21 +14,21 @@ describe('ThemeMetricsService', () => {
     expect(result).toMatchObject({
       isEligible: true,
       stockCount: 3,
-      eligibleStockCount: 2,
-      risingCount: 1,
-      newHighCount: 1,
-      rsScore: 85.5,
-      changeRate: 1,
+      eligibleStockCount: 3,
+      risingCount: 2,
+      newHighCount: 2,
+      rsScore: 83.33,
+      changeRate: 7.33,
     });
   });
 
-  it('requires two RS80 stocks', () => {
+  it('is eligible when it has a stock with an RS score', () => {
     const result = service.calculateDailyMetric([
       { stockCode: 'A', rsScore: 90, changeRate: 2, isNewHigh: false },
       { stockCode: 'B', rsScore: 79, changeRate: 3, isNewHigh: false },
     ], []);
 
-    expect(result.isEligible).toBe(false);
+    expect(result.isEligible).toBe(true);
   });
 
   it('calculates three-day RS and 63-day momentum', () => {
