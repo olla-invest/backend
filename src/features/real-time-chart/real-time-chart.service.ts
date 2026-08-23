@@ -6,6 +6,7 @@ import { ChartStorageService } from './chart-storage.service';
 import { StockMetricsService } from './stock-metrics.service';
 import { RealtimePriceCacheService } from './realtime-price-cache.service';
 import { CurrentPriceResolver } from './current-price-resolver.service';
+import { RealtimeSubscriptionManager } from './realtime-subscription-manager.service';
 import { StockListCacheService, RangeRsRankingCache, CustomRsHistoryCache } from './stock-list-cache.service';
 import { PrismaService } from '../../common/prisma/prisma.service';
 import { mapUpNameToThemeCode } from '../../common/constants/theme-codes';
@@ -74,6 +75,7 @@ export class RealTimeChartService implements OnModuleInit {
     private readonly metricsService: StockMetricsService,
     private readonly realtimeCache: RealtimePriceCacheService,
     private readonly currentPriceResolver: CurrentPriceResolver,
+    private readonly subscriptionManager: RealtimeSubscriptionManager,
     private readonly stockListCache: StockListCacheService,
     private readonly prisma: PrismaService,
   ) {}
@@ -1133,7 +1135,7 @@ export class RealTimeChartService implements OnModuleInit {
     const naverThemesMap = await this.getNaverThemesByStockCodes(pageStockCodes);
 
     // 자동 실시간 구독 (비동기적으로 백그라운드 실행)
-    this.autoSubscribeStocks(pageStockCodes).catch((error) => {
+    this.subscriptionManager.ensureSubscribed(pageStockCodes).catch((error) => {
       this.logger.warn(`Auto-subscribe failed: ${error.message}`);
     });
 
@@ -1346,7 +1348,7 @@ export class RealTimeChartService implements OnModuleInit {
     const naverThemesMap = await this.getNaverThemesByStockCodes(pageStockCodes);
 
     // 자동 실시간 구독
-    this.autoSubscribeStocks(pageStockCodes).catch((error) => {
+    this.subscriptionManager.ensureSubscribed(pageStockCodes).catch((error) => {
       this.logger.warn(`Auto-subscribe failed: ${error.message}`);
     });
 
@@ -1613,7 +1615,7 @@ export class RealTimeChartService implements OnModuleInit {
     const closingPrices = await this.chartStorage.getLatestClosingPrices(pageStockCodes);
     const naverThemesMap = await this.getNaverThemesByStockCodes(pageStockCodes);
 
-    this.autoSubscribeStocks(pageStockCodes).catch((error) => {
+    this.subscriptionManager.ensureSubscribed(pageStockCodes).catch((error) => {
       this.logger.warn(`Auto-subscribe failed: ${error.message}`);
     });
 
@@ -3185,7 +3187,7 @@ export class RealTimeChartService implements OnModuleInit {
     ]);
     const realtimePrice = this.currentPriceResolver.getUsableRealtimePrice(this.realtimeCache.getPrice(stockCode));
     if (!realtimePrice && ['day', 'week', 'month', 'year'].includes(candleType)) {
-      this.autoSubscribeStocks([stockCode]).catch((error) => {
+      this.subscriptionManager.ensureSubscribed([stockCode]).catch((error) => {
         this.logger.warn(`Detail chart auto-subscribe failed: ${error.message}`);
       });
     }
@@ -3839,98 +3841,12 @@ export class RealTimeChartService implements OnModuleInit {
   }
 
   /**
-   * 종목 자동 구독 (아직 구독하지 않은 종목만 페이지 조회 시 사용)
-   */
-  private async autoSubscribeStocks(stockCodes: string[]) {
-    const subscribedStocks = new Set(this.realtimeCache.getSubscribedStocks());
-    const newStocks = stockCodes.filter((code) => !subscribedStocks.has(code));
-
-    if (newStocks.length === 0) {
-      return;
-    }
-
-    this.logger.log(`Auto-subscribing ${newStocks.length} new stocks`);
-
-    // 종목별 개별 REG 대신 단일 배치 요청으로 전송 (동시 다건 조회 시 요청 건수 초과 방지)
-    try {
-      await this.realtimeSource.subscribeBatch(newStocks, ['0B', '0D']);
-    } catch (error) {
-      this.logger.warn(`Failed to auto-subscribe batch: ${(error as Error).message}`);
-    }
-  }
-
-  private readonly subscriptionRetryCounts = new Map<string, number>();
-  private static readonly MAX_SUBSCRIPTION_RETRIES = 3;
-
-  /**
-   * 재시도 끝에 성공(또는 다른 경로로 confirm)한 종목은 실패 카운트를 리셋 —
-   * 서버 장기 구동 중 누적된 과거 실패 횟수 때문에 별개의 새 장애가 조기에 "영구 실패" 처리되는 것을 방지.
-   */
-  @OnEvent('kiwoom.subscription.confirmed')
-  handleSubscriptionConfirmedForRetryReset(payload: { stockCodes: string[] }): void {
-    payload.stockCodes.forEach((code) => this.subscriptionRetryCounts.delete(code));
-  }
-
-  /**
-   * 키움이 REG 요청을 거부한 종목 재시도 (지수 백오프, 최대 3회).
-   * 캐시에 "구독됨"으로 기록되지 않으므로 실패 시 다음 페이지 조회에서도 자동 재시도 대상이 되지만,
-   * 그 전에 능동적으로 짧은 지연 후 재시도해 공백 기간을 줄인다.
-   */
-  @OnEvent('kiwoom.subscription.failed')
-  async handleSubscriptionFailed(payload: { stockCodes: string[]; types: string[]; reason?: string }): Promise<void> {
-    for (const code of payload.stockCodes) {
-      const attempts = (this.subscriptionRetryCounts.get(code) ?? 0) + 1;
-      this.subscriptionRetryCounts.set(code, attempts);
-
-      if (attempts > RealTimeChartService.MAX_SUBSCRIPTION_RETRIES) {
-        this.logger.error(`Subscription permanently failed for ${code} after ${attempts} attempts: ${payload.reason}`);
-        continue;
-      }
-
-      const delayMs = 2000 * attempts;
-      setTimeout(() => {
-        this.realtimeSource.subscribe(code, payload.types).catch((error) => {
-          this.logger.warn(`Retry subscribe failed for ${code}: ${(error as Error).message}`);
-        });
-      }, delayMs);
-    }
-  }
-
-  /**
    * 필터 통과 종목 전체 일괄 구독 (서버 시작 후 / 메트릭 완료 후)
    * - DB StockDailyMetrics에서 rank > 0인 종목 전체를 구독
    * - 이미 구독된 종목은 스킵
    */
   async subscribeFilteredStocks(): Promise<void> {
-    if (!this.realtimeSource.isConnected()) {
-      this.logger.warn('WebSocket not connected, skipping bulk subscription');
-      return;
-    }
-
-    // 최신 거래일의 필터 통과 종목 조회 (rank > 0)
-    const filteredCodes = await this.metricsService.getFilteredStockCodes();
-
-    if (filteredCodes.length === 0) {
-      this.logger.warn('No filtered stocks found for subscription');
-      return;
-    }
-
-    const subscribedStocks = new Set(this.realtimeCache.getSubscribedStocks());
-    const newCodes = filteredCodes.filter((code) => !subscribedStocks.has(code));
-
-    if (newCodes.length === 0) {
-      this.logger.log(`All ${filteredCodes.length} filtered stocks already subscribed`);
-      return;
-    }
-
-    this.logger.log(`Bulk subscribing ${newCodes.length} filtered stocks via batch REG (total filtered: ${filteredCodes.length})`);
-
-    // subscribeBatch: 100종목씩 단일 REG 요청으로 효율 (개별 요청 횟수 최소화 및 속도)
-    // 캐시 등록은 kiwoom.subscription.confirmed 이벤트(REG 성공 ack)에서만 처리 — 여기서 낙관적으로
-    // 기록하면 REG가 거부돼도 재시도가 걸리지 않아 다음 날 재시작 전까지 전일 종가에 멈춰버림 (2026-07-16 확인)
-    await this.realtimeSource.subscribeBatch(newCodes, ['0B', '0D']);
-
-    this.logger.log(`Bulk subscription completed: ${newCodes.length} stocks submitted`);
+    await this.subscriptionManager.subscribeFilteredStocks();
   }
 
   /**

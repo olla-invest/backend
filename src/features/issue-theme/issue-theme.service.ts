@@ -4,6 +4,7 @@ import { readFile } from 'fs/promises';
 import { PrismaService } from '../../common/prisma/prisma.service';
 import { RealtimePriceCacheService } from '../real-time-chart/realtime-price-cache.service';
 import { CurrentPriceResolver } from '../real-time-chart/current-price-resolver.service';
+import { RealtimeSubscriptionManager } from '../real-time-chart/realtime-subscription-manager.service';
 import { KiwoomRestService } from '../../integrations/kiwoom/rest/kiwoom-rest.service';
 import { ThemeMetricsService } from './theme-metrics.service';
 import {
@@ -174,6 +175,7 @@ export class IssueThemeService {
     private readonly prisma: PrismaService,
     private readonly realtimeCache: RealtimePriceCacheService,
     private readonly currentPriceResolver: CurrentPriceResolver,
+    private readonly subscriptionManager: RealtimeSubscriptionManager,
     private readonly kiwoomRest: KiwoomRestService,
     private readonly themeMetrics: ThemeMetricsService,
     private readonly themeAiSummary: ThemeAiSummaryService,
@@ -387,6 +389,9 @@ export class IssueThemeService {
     const metrics = loadedMetrics.filter((metric) => Number(metric.relativeStrengthScore) > 0);
 
     const stockCodes = metrics.map((m) => m.stockCode);
+    this.subscriptionManager.ensureSubscribed(stockCodes).catch((error) => {
+      this.logger.warn(`Issue-theme subscription sync failed: ${(error as Error).message}`);
+    });
 
     const stockThemeRows = await this.prisma.stockTheme.findMany({
       where: { stockCode: { in: stockCodes }, source: this.naverThemeSource, theme: { deletedAt: null } },
@@ -661,6 +666,9 @@ export class IssueThemeService {
       (m) => themeStockCodes.has(m.stockCode) && Number(m.relativeStrengthScore) > 0,
     );
     const filteredCodes = metrics.map((m) => m.stockCode);
+    this.subscriptionManager.ensureSubscribed(filteredCodes).catch((error) => {
+      this.logger.warn(`Issue-theme detail subscription sync failed: ${(error as Error).message}`);
+    });
     const metricsMap = new Map(metrics.map((m) => [m.stockCode, m]));
 
     const prices = this.realtimeCache.getPrices(filteredCodes);

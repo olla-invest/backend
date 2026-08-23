@@ -63,6 +63,7 @@ describe('RealTimeChartService stock list RS ordering', () => {
       metricsService as any,
       realtimeCache as any,
       new CurrentPriceResolver(),
+      { ensureSubscribed: jest.fn().mockResolvedValue(undefined) } as any,
       {} as any,
       {} as any,
     ) as any;

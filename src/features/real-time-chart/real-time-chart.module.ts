@@ -10,6 +10,7 @@ import { RealtimePriceCacheModule } from './realtime-price-cache.module';
 import { StockListCacheService } from './stock-list-cache.service';
 import { DataSchedulerService } from './data-scheduler.service';
 import { CurrentRankService } from './current-rank.service';
+import { RealtimeSubscriptionManager } from './realtime-subscription-manager.service';
 import { DetailController } from './detail.controller';
 import { KiwoomModule } from '../../integrations/kiwoom/kiwoom.module';
 import { PrismaModule } from '../../common/prisma/prisma.module';
@@ -39,9 +40,10 @@ import { MarketViewModule } from '../market-view/market-view.module';
     ChartGateway,
     StockListCacheService,
     CurrentRankService,
+    RealtimeSubscriptionManager,
     DataSchedulerService,
     AdminApiKeyGuard,
   ],
-  exports: [RealTimeChartService, RealtimePriceCacheModule],
+  exports: [RealTimeChartService, RealtimePriceCacheModule, RealtimeSubscriptionManager],
 })
 export class RealTimeChartModule {}

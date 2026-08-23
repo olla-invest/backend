@@ -173,7 +173,6 @@ export class StockMetricsService {
         passedStaticFilters: true,
       },
       orderBy: { rank: 'asc' },
-      take: 200,
       select: { stockCode: true },
     });
 

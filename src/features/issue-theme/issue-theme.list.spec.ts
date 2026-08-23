@@ -12,10 +12,12 @@ describe('IssueThemeService enhanced list', () => {
     userWatchlistTheme: { findMany: jest.fn() },
   };
   const realtimeCache: any = { getPrices: jest.fn(() => new Map()) };
+  const subscriptionManager: any = { ensureSubscribed: jest.fn().mockResolvedValue(undefined) };
   const service = new IssueThemeService(
     prisma,
     realtimeCache,
     new CurrentPriceResolver(),
+    subscriptionManager,
     {} as any,
     new ThemeMetricsService(),
     {} as any,
@@ -23,6 +25,7 @@ describe('IssueThemeService enhanced list', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    subscriptionManager.ensureSubscribed.mockResolvedValue(undefined);
     jest.spyOn(service as any, 'getFilteredMetrics').mockResolvedValue({
       tradeDate: new Date('2026-07-25'),
       metrics: [
@@ -65,6 +68,17 @@ describe('IssueThemeService enhanced list', () => {
     });
     prisma.themeDailySnapshot.findMany.mockResolvedValue([]);
     prisma.userWatchlistTheme.findMany.mockResolvedValue([{ themeCode: 1 }]);
+  });
+
+  it('registers issue-theme metric stocks as realtime subscription candidates', async () => {
+    await service.getThemeList({
+      view: IssueThemeView.RANK, filter: IssueThemeFilter.ALL, sort: IssueThemeSort.RS,
+      favoritesOnly: false, display: 20, page: 1,
+    });
+
+    expect(subscriptionManager.ensureSubscribed).toHaveBeenCalledWith([
+      'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H',
+    ]);
   });
 
   it('combines search, favorites and selected filter with AND semantics', async () => {
