@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { RealtimePriceCacheService } from './realtime-price-cache.service';
+import { CurrentPriceResolver } from './current-price-resolver.service';
 
 /**
  * 실시간 현재가 캐시 전용 모듈.
@@ -9,7 +10,7 @@ import { RealtimePriceCacheService } from './realtime-price-cache.service';
  * 캐시 서비스만 분리해 양쪽에서 공유한다. (이벤트 수신은 전역 EventEmitter 기반)
  */
 @Module({
-  providers: [RealtimePriceCacheService],
-  exports: [RealtimePriceCacheService],
+  providers: [RealtimePriceCacheService, CurrentPriceResolver],
+  exports: [RealtimePriceCacheService, CurrentPriceResolver],
 })
 export class RealtimePriceCacheModule {}
