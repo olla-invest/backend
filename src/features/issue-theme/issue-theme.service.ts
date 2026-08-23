@@ -2,7 +2,8 @@ import { BadRequestException, Injectable, Logger, NotFoundException, Unauthorize
 import { Cron } from '@nestjs/schedule';
 import { readFile } from 'fs/promises';
 import { PrismaService } from '../../common/prisma/prisma.service';
-import { RealtimePrice, RealtimePriceCacheService } from '../real-time-chart/realtime-price-cache.service';
+import { RealtimePriceCacheService } from '../real-time-chart/realtime-price-cache.service';
+import { CurrentPriceResolver } from '../real-time-chart/current-price-resolver.service';
 import { KiwoomRestService } from '../../integrations/kiwoom/rest/kiwoom-rest.service';
 import { ThemeMetricsService } from './theme-metrics.service';
 import {
@@ -169,38 +170,10 @@ export class IssueThemeService {
     return result;
   }
 
-  private getStockPriceSnapshot(m: any, rt?: RealtimePrice) {
-    const hasRealtimePrice = rt != null && rt.currentPrice > 0;
-    const currentPrice = hasRealtimePrice ? rt.currentPrice : Number(m.closePrice);
-    const realtimeOpenPrice = rt != null && rt.openPrice > 0 ? rt.openPrice : null;
-    const changeRate = realtimeOpenPrice != null
-      ? ((currentPrice - realtimeOpenPrice) / realtimeOpenPrice) * 100
-      : m.priceChangeRate1d != null
-        ? Number(m.priceChangeRate1d)
-        : null;
-    const priceChange1d = realtimeOpenPrice != null
-      ? currentPrice - realtimeOpenPrice
-      : m.priceChange1d != null
-        ? Number(m.priceChange1d)
-        : null;
-
-    return {
-      currentPrice,
-      closePrice: currentPrice,
-      changeRate: changeRate ?? 0,
-      priceChange1d,
-      priceChangeRate1d: changeRate,
-      priceSource: rt != null ? 'REALTIME_CACHE' : 'DB',
-    };
-  }
-
-  private getOpenToCurrentChangeRate(m: any, rt?: RealtimePrice): number {
-    return this.getStockPriceSnapshot(m, rt).changeRate;
-  }
-
   constructor(
     private readonly prisma: PrismaService,
     private readonly realtimeCache: RealtimePriceCacheService,
+    private readonly currentPriceResolver: CurrentPriceResolver,
     private readonly kiwoomRest: KiwoomRestService,
     private readonly themeMetrics: ThemeMetricsService,
     private readonly themeAiSummary: ThemeAiSummaryService,
@@ -229,18 +202,6 @@ export class IssueThemeService {
     if (hours < 9 || hours > 15) return false;
     if (hours === 15 && minutes >= 30) return false;
     return true;
-  }
-
-  private getKstDateKey(date: Date): string {
-    return new Date(date.getTime() + 9 * 60 * 60 * 1000).toISOString().slice(0, 10);
-  }
-
-  private getActiveRealtimePrice(prices: Map<string, RealtimePrice>, stockCode: string): RealtimePrice | undefined {
-    const rt = prices.get(stockCode);
-    if (!rt || !this.isMarketOpenNow()) return undefined;
-    if (this.getKstDateKey(rt.timestamp) !== this.getKstDateKey(new Date())) return undefined;
-    if (Date.now() - rt.timestamp.getTime() > 10 * 60 * 1000) return undefined;
-    return rt;
   }
 
   private async getLiveTradingValueChanges(
@@ -452,8 +413,10 @@ export class IssueThemeService {
       }
       const currentGroup = themeGroups.get(themeCode)!;
       if (currentGroup.stocks.some((stock) => stock.stockCode === row.stockCode)) continue;
-      const rt = this.getActiveRealtimePrice(prices, row.stockCode);
-      const changeRate = this.getOpenToCurrentChangeRate(m, rt);
+      const changeRate = this.currentPriceResolver.resolveMetricSnapshot(
+        m,
+        prices.get(row.stockCode),
+      ).changeRate;
       currentGroup.stocks.push({
         stockCode: row.stockCode,
         stockName: row.stockName,
@@ -718,8 +681,10 @@ export class IssueThemeService {
 
     const stockRows = filteredCodes.map((code) => {
       const m = metricsMap.get(code)!;
-      const rt = this.getActiveRealtimePrice(prices, code);
-      const priceSnapshot = this.getStockPriceSnapshot(m, rt);
+      const priceSnapshot = this.currentPriceResolver.resolveMetricSnapshot(
+        m,
+        prices.get(code),
+      );
       const changeRate = priceSnapshot.changeRate;
 
       changeRates.push(changeRate);
@@ -745,7 +710,7 @@ export class IssueThemeService {
         changeRate: priceSnapshot.changeRate,
         priceChange1d: priceSnapshot.priceChange1d,
         priceChangeRate1d: priceSnapshot.priceChangeRate1d,
-        priceSource: priceSnapshot.priceSource,
+        priceSource: priceSnapshot.usedRealtime ? 'REALTIME_CACHE' : 'DB',
         rsScore: Number(m.relativeStrengthScore),
         shortTermRs: stockShortTermRs.get(code) ?? null,
         tradingValue: m.tradingValue != null ? m.tradingValue.toString() : null,
@@ -955,8 +920,10 @@ export class IssueThemeService {
       const currentGroup = themeGroups.get(themeCode)!;
       if (currentGroup.stockCodes.has(row.stockCode)) continue;
       currentGroup.stockCodes.add(row.stockCode);
-      const rt = this.getActiveRealtimePrice(prices, row.stockCode);
-      const changeRate = this.getOpenToCurrentChangeRate(m, rt);
+      const changeRate = this.currentPriceResolver.resolveMetricSnapshot(
+        m,
+        prices.get(row.stockCode),
+      ).changeRate;
       currentGroup.changeRates.push(changeRate);
       currentGroup.rsScores.push(Number(m.relativeStrengthScore));
       if (m.isNewHigh) currentGroup.newHighCount++;

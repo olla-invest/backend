@@ -1,9 +1,15 @@
 import { IssueThemeStockSort } from './dto/issue-theme-detail-query.dto';
 import { IssueThemeService } from './issue-theme.service';
 import { ThemeMetricsService } from './theme-metrics.service';
+import { CurrentPriceResolver } from '../real-time-chart/current-price-resolver.service';
 
 describe('IssueThemeService detail stock population', () => {
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
   it('excludes zero RS stocks from the detail list and theme counts', async () => {
+    jest.useFakeTimers().setSystemTime(new Date('2026-08-05T01:20:01.000Z'));
     const prisma: any = {
       theme: {
         findFirst: jest.fn().mockResolvedValue({ themeName: 'AI 로봇', imageUrl: null }),
@@ -25,11 +31,21 @@ describe('IssueThemeService detail stock population', () => {
       stockDailyMetrics: { findMany: jest.fn().mockResolvedValue([]) },
       themeDailySnapshot: { findFirst: jest.fn().mockResolvedValue(null) },
     };
-    const realtimeCache: any = { getPrices: jest.fn(() => new Map()) };
+    const realtimeCache: any = {
+      getPrices: jest.fn(() => new Map([
+        ['HIGH', {
+          stockCode: 'HIGH', currentPrice: -100, changeAmount: -200, changeRate: -2,
+          volume: 1, accVolume: 1, accAmount: 1, openPrice: 100,
+          highPrice: 100, lowPrice: 90,
+          timestamp: new Date('2026-08-05T01:20:00.000Z'),
+        }],
+      ])),
+    };
     const themeAiSummary: any = { getLatestSuccess: jest.fn().mockResolvedValue(null) };
     const service = new IssueThemeService(
       prisma,
       realtimeCache,
+      new CurrentPriceResolver(),
       {} as any,
       new ThemeMetricsService(),
       themeAiSummary,
@@ -66,6 +82,11 @@ describe('IssueThemeService detail stock population', () => {
       { stockCode: 'HIGH', rsScore: 90 },
       { stockCode: 'LOW', rsScore: 70 },
     ]);
+    expect(result?.stocks.find((stock: any) => stock.stockCode === 'HIGH')).toMatchObject({
+      currentPrice: 100,
+      closePrice: 100,
+      priceSource: 'DB',
+    });
   });
 
   it('returns and sorts complete three-trading-day stock RS averages', async () => {
@@ -112,6 +133,7 @@ describe('IssueThemeService detail stock population', () => {
     const service = new IssueThemeService(
       prisma,
       realtimeCache,
+      new CurrentPriceResolver(),
       {} as any,
       new ThemeMetricsService(),
       themeAiSummary,

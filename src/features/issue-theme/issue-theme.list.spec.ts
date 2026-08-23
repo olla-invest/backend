@@ -1,6 +1,7 @@
 import { BadRequestException, UnauthorizedException } from '@nestjs/common';
 import { IssueThemeService } from './issue-theme.service';
 import { ThemeMetricsService } from './theme-metrics.service';
+import { CurrentPriceResolver } from '../real-time-chart/current-price-resolver.service';
 import { IssueThemeFilter, IssueThemeSort, IssueThemeView } from './dto/issue-theme-list-query.dto';
 
 describe('IssueThemeService enhanced list', () => {
@@ -11,7 +12,14 @@ describe('IssueThemeService enhanced list', () => {
     userWatchlistTheme: { findMany: jest.fn() },
   };
   const realtimeCache: any = { getPrices: jest.fn(() => new Map()) };
-  const service = new IssueThemeService(prisma, realtimeCache, {} as any, new ThemeMetricsService(), {} as any);
+  const service = new IssueThemeService(
+    prisma,
+    realtimeCache,
+    new CurrentPriceResolver(),
+    {} as any,
+    new ThemeMetricsService(),
+    {} as any,
+  );
 
   beforeEach(() => {
     jest.clearAllMocks();
