@@ -2,6 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { randomUUID } from 'crypto';
 import { PrismaService } from '../../common/prisma/prisma.service';
 import { RealtimePriceCacheService } from './realtime-price-cache.service';
+import { CurrentPriceResolver } from './current-price-resolver.service';
 
 type MetricRow = {
   stock_code: string;
@@ -37,6 +38,7 @@ export class CurrentRankService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly realtimeCache: RealtimePriceCacheService,
+    private readonly currentPriceResolver: CurrentPriceResolver,
   ) {}
 
   async createCurrentRankSnapshot(now: Date = new Date(), tradeDate?: Date) {
@@ -212,7 +214,9 @@ export class CurrentRankService {
   private buildRankRows(metrics: MetricRow[], snapshotTradeDate: Date, snapshotTime: Date): CurrentRankRow[] {
     const tradeDate = this.toDateOnly(snapshotTradeDate);
     const rows = metrics.map((metric) => {
-      const realtimePrice = this.realtimeCache.getPrice(metric.stock_code);
+      const realtimePrice = this.currentPriceResolver.getUsableRealtimePrice(
+        this.realtimeCache.getPrice(metric.stock_code),
+      );
       const closePrice = Number(metric.close_price);
       const currentPrice = realtimePrice?.currentPrice && realtimePrice.currentPrice > 0
         ? realtimePrice.currentPrice

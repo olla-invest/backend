@@ -156,8 +156,8 @@ export class DataSchedulerService implements OnApplicationBootstrap {
       const lockKey = 'cron:lock:metrics-after-close';
       const result = await this.redisLock.withLock(lockKey, DataSchedulerService.LOCK_TTL_MS, async () => {
         await this.runCatchUp();
-        await this.currentRankService.createCurrentRankSnapshot(new Date(), tradeDate);
         await this.runMetricsFor(tradeDate);
+        await this.currentRankService.createCurrentRankSnapshot(new Date(), tradeDate);
         await this.currentRankService.finalizeDailyCurrentRank(tradeDate);
         await this.runMarketViewFor(tradeDate, true);
       });
