@@ -5,6 +5,7 @@ import { IRealtimeSource, REALTIME_SOURCE_TOKEN } from '../../integrations/kiwoo
 import { ChartStorageService } from './chart-storage.service';
 import { StockMetricsService } from './stock-metrics.service';
 import { RealtimePriceCacheService } from './realtime-price-cache.service';
+import { CurrentPriceResolver } from './current-price-resolver.service';
 import { StockListCacheService, RangeRsRankingCache, CustomRsHistoryCache } from './stock-list-cache.service';
 import { PrismaService } from '../../common/prisma/prisma.service';
 import { mapUpNameToThemeCode } from '../../common/constants/theme-codes';
@@ -72,6 +73,7 @@ export class RealTimeChartService implements OnModuleInit {
     private readonly chartStorage: ChartStorageService,
     private readonly metricsService: StockMetricsService,
     private readonly realtimeCache: RealtimePriceCacheService,
+    private readonly currentPriceResolver: CurrentPriceResolver,
     private readonly stockListCache: StockListCacheService,
     private readonly prisma: PrismaService,
   ) {}
@@ -880,7 +882,7 @@ export class RealTimeChartService implements OnModuleInit {
    */
   async getStockSummary(stockCode: string) {
     const today = this.formatDateToYYYYMMDD(this.todayKstDateOnly());
-    const realtimePrice = this.getUsableRealtimePrice(this.realtimeCache.getPrice(stockCode));
+    const realtimePrice = this.currentPriceResolver.getUsableRealtimePrice(this.realtimeCache.getPrice(stockCode));
 
     const [kiwoomData, dbCandles, company, basicInfo] = await Promise.all([
       this.kiwoomRest.getDayCandles(stockCode, today).catch((error) => {
@@ -1044,7 +1046,7 @@ export class RealTimeChartService implements OnModuleInit {
         if (!item.metrics?.passedStaticFilters) return false;
 
         // 동적 필터: 현재가 기준 실시간 적용 (실시간 가격 우선, 없으면 지수)
-        const realtimePrice = this.getUsableRealtimePrice(allRealtimePrices.get(item.stock.code));
+        const realtimePrice = this.currentPriceResolver.getUsableRealtimePrice(allRealtimePrices.get(item.stock.code));
         const currentPrice = realtimePrice?.currentPrice || item.metrics?.closePrice || 0;
 
         const low52w = item.metrics.lowPrice52w;
@@ -1161,7 +1163,7 @@ export class RealTimeChartService implements OnModuleInit {
         const metrics = item.metrics;
         const currentRankHistory = currentRankHistoryMap.get(s.code) || [];
 
-        const realtimePrice = this.getUsableRealtimePrice(realtimePrices.get(s.code));
+        const realtimePrice = this.currentPriceResolver.getUsableRealtimePrice(realtimePrices.get(s.code));
         const dbPrice = metrics?.closePrice || closingPrices.get(s.code) || 0;
         const priceChangeRateText = this.formatPriceChangeRateText(realtimePrice, metrics);
         const investmentIndicators = this.buildInvestmentIndicators(metrics);
@@ -1277,7 +1279,7 @@ export class RealTimeChartService implements OnModuleInit {
         if (item.rsScore <= 0) return false;
 
         // 동적 필터: 현재가 기준 실시간 적용
-        const realtimePrice = this.getUsableRealtimePrice(allRealtimePrices.get(item.stock.code));
+        const realtimePrice = this.currentPriceResolver.getUsableRealtimePrice(allRealtimePrices.get(item.stock.code));
         const currentPrice = realtimePrice?.currentPrice || item.metrics?.closePrice || 0;
 
         const low52w = item.metrics?.lowPrice52w;
@@ -1389,7 +1391,7 @@ export class RealTimeChartService implements OnModuleInit {
         const metrics = item.metrics;
         const currentRankHistory = currentRankHistoryMap.get(s.code) || [];
 
-        const realtimePrice = this.getUsableRealtimePrice(realtimePrices.get(s.code));
+        const realtimePrice = this.currentPriceResolver.getUsableRealtimePrice(realtimePrices.get(s.code));
         const dbPrice = metrics?.closePrice || closingPrices.get(s.code) || 0;
         const priceChangeRateText = this.formatPriceChangeRateText(realtimePrice, metrics);
         const investmentIndicators = this.buildInvestmentIndicators(metrics);
@@ -1640,7 +1642,7 @@ export class RealTimeChartService implements OnModuleInit {
         const metrics = item.metrics;
         const currentRankHistory = currentRankHistoryMap.get(s.code) || [];
 
-        const realtimePrice = this.getUsableRealtimePrice(realtimePrices.get(s.code));
+        const realtimePrice = this.currentPriceResolver.getUsableRealtimePrice(realtimePrices.get(s.code));
         const dbPrice = metrics?.closePrice || closingPrices.get(s.code) || 0;
         const priceChangeRateText = this.formatPriceChangeRateText(realtimePrice, metrics);
         const investmentIndicators = this.buildInvestmentIndicators(metrics);
@@ -1718,7 +1720,7 @@ export class RealTimeChartService implements OnModuleInit {
       .filter((item) => {
         if (!item.metrics?.passedStaticFilters) return false;
 
-        const realtimePrice = this.getUsableRealtimePrice(allRealtimePrices.get(item.stock.code));
+        const realtimePrice = this.currentPriceResolver.getUsableRealtimePrice(allRealtimePrices.get(item.stock.code));
         const currentPrice = realtimePrice?.currentPrice || item.metrics?.closePrice || 0;
         const low52w = item.metrics.lowPrice52w;
         const high52w = item.metrics.highPrice52w;
@@ -1915,7 +1917,7 @@ export class RealTimeChartService implements OnModuleInit {
    * 정렬용 등락률 값: 실시간가 우선, 없으면 일별 지표 (formatPriceChangeRateText와 동일 소스)
    */
   private getChangeRateValue(item: SortableStockItem, realtimePrices: Map<string, any>): number | null {
-    const realtimePrice = this.getUsableRealtimePrice(realtimePrices.get(item.stock.code));
+    const realtimePrice = this.currentPriceResolver.getUsableRealtimePrice(realtimePrices.get(item.stock.code));
     if (realtimePrice) {
       const rate = Number(realtimePrice.changeRate);
       if (Number.isFinite(rate)) return rate;
@@ -2055,26 +2057,6 @@ export class RealTimeChartService implements OnModuleInit {
       count: suggestions.length,
       suggestions,
     };
-  }
-
-  private getUsableRealtimePrice(realtimePrice: any): any | undefined {
-    if (!realtimePrice) return undefined;
-
-    const now = new Date();
-    const nowKst = new Date(now.getTime() + 9 * 60 * 60 * 1000);
-    const day = nowKst.getUTCDay();
-    const minutes = nowKst.getUTCHours() * 60 + nowKst.getUTCMinutes();
-    const isWeekday = day >= 1 && day <= 5;
-    const isMarketSession = isWeekday && minutes >= 9 * 60 && minutes <= 15 * 60 + 30;
-    if (!isMarketSession) return undefined;
-
-    const timestamp = new Date(realtimePrice.timestamp);
-    if (Number.isNaN(timestamp.getTime())) return undefined;
-
-    const timestampKst = new Date(timestamp.getTime() + 9 * 60 * 60 * 1000);
-    const sameKstDate = nowKst.toISOString().slice(0, 10) === timestampKst.toISOString().slice(0, 10);
-    const isFresh = now.getTime() - timestamp.getTime() <= 10 * 60 * 1000;
-    return sameKstDate && isFresh ? realtimePrice : undefined;
   }
 
   private formatPriceChangeRateText(realtimePrice: any, metrics: any): string {
@@ -3201,7 +3183,7 @@ export class RealTimeChartService implements OnModuleInit {
         orderBy: { candleTime: 'desc' },
       }),
     ]);
-    const realtimePrice = this.getUsableRealtimePrice(this.realtimeCache.getPrice(stockCode));
+    const realtimePrice = this.currentPriceResolver.getUsableRealtimePrice(this.realtimeCache.getPrice(stockCode));
     if (!realtimePrice && ['day', 'week', 'month', 'year'].includes(candleType)) {
       this.autoSubscribeStocks([stockCode]).catch((error) => {
         this.logger.warn(`Detail chart auto-subscribe failed: ${error.message}`);

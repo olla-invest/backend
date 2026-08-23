@@ -1,7 +1,13 @@
 import { RealTimeChartService } from './real-time-chart.service';
+import { CurrentPriceResolver } from './current-price-resolver.service';
 
 describe('RealTimeChartService stock list RS ordering', () => {
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
   it('ranks higher RS scores first and uses current rank then stock code for ties', async () => {
+    jest.useFakeTimers().setSystemTime(new Date('2026-08-05T01:20:01.000Z'));
     const metricsService = {
       getLatestMetrics: jest.fn().mockResolvedValue(new Map([
         ['LOW', {
@@ -33,13 +39,30 @@ describe('RealTimeChartService stock list RS ordering', () => {
     const chartStorage = {
       getLatestClosingPrices: jest.fn().mockResolvedValue(new Map()),
     };
-    const realtimeCache = { getPrices: jest.fn().mockReturnValue(new Map()) };
+    const realtimeCache = {
+      getPrices: jest.fn().mockReturnValue(new Map([
+        ['LOW', {
+          stockCode: 'LOW',
+          currentPrice: -999,
+          changeAmount: 99,
+          changeRate: 11,
+          volume: 1,
+          accVolume: 1,
+          accAmount: 999,
+          openPrice: 900,
+          highPrice: 999,
+          lowPrice: 900,
+          timestamp: new Date('2026-08-05T01:20:00.000Z'),
+        }],
+      ])),
+    };
     const service = new RealTimeChartService(
       {} as any,
       {} as any,
       chartStorage as any,
       metricsService as any,
       realtimeCache as any,
+      new CurrentPriceResolver(),
       {} as any,
       {} as any,
     ) as any;
@@ -64,5 +87,6 @@ describe('RealTimeChartService stock list RS ordering', () => {
       { stockCode: 'TIE-B', rank: 2, relativeStrengthScore: 97 },
       { stockCode: 'LOW', rank: 3, relativeStrengthScore: 91 },
     ]);
+    expect(result.stocks.find((stock: any) => stock.stockCode === 'LOW').currentPrice).toBe(100);
   });
 });
