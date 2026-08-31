@@ -152,6 +152,35 @@ export class CurrentRankService {
     };
   }
 
+  async rebuildClosingSnapshot(tradeDate: Date) {
+    const targetDate = this.dateOnly(tradeDate);
+    const metrics = await this.getStaticFilteredMetrics(targetDate);
+    if (metrics.length === 0) {
+      return {
+        success: false, count: 0, rankedCount: 0,
+        tradeDate: this.toDateOnly(targetDate), snapshotTime: null,
+      };
+    }
+    const snapshotTime = new Date(targetDate);
+    snapshotTime.setUTCHours(6, 50, 0, 0);
+    const previousTradingValues = await this.getPreviousTradingValues(targetDate);
+    const rows = this.buildRankRows(
+      metrics,
+      targetDate,
+      snapshotTime,
+      previousTradingValues,
+      false,
+    );
+    await this.saveSnapshotRows(rows);
+    return {
+      success: true,
+      count: rows.length,
+      rankedCount: rows.filter((row) => row.passedDynamicFilters).length,
+      tradeDate: this.toDateOnly(targetDate),
+      snapshotTime: snapshotTime.toISOString(),
+    };
+  }
+
   async pruneSnapshots(retentionDays = 90) {
     const cutoff = new Date();
     cutoff.setUTCDate(cutoff.getUTCDate() - retentionDays);
@@ -269,12 +298,13 @@ export class CurrentRankService {
     snapshotTradeDate: Date,
     snapshotTime: Date,
     previousTradingValues: Map<string, bigint> = new Map(),
+    useRealtime = true,
   ): CurrentRankRow[] {
     const tradeDate = this.toDateOnly(snapshotTradeDate);
     const rows = metrics.map((metric) => {
-      const realtimePrice = this.currentPriceResolver.getUsableRealtimePrice(
-        this.realtimeCache.getPrice(metric.stock_code),
-      );
+      const realtimePrice = useRealtime
+        ? this.currentPriceResolver.getUsableRealtimePrice(this.realtimeCache.getPrice(metric.stock_code))
+        : null;
       const closePrice = Number(metric.close_price);
       const currentPrice = realtimePrice?.currentPrice && realtimePrice.currentPrice > 0
         ? realtimePrice.currentPrice

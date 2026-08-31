@@ -725,6 +725,7 @@ DART 기업개황·손익현황·현금흐름·재무지표를 통합 조회합�
 | GET | `/issue-theme/:themeCode` | 테마 상세 팝업 |
 | POST | `/issue-theme/sync-themes` | 테마 마스터 동기화 (최초 1회) |
 | POST | `/issue-theme/snapshot/theme` | 테마 일별 스냅샷 저장 (장 마감 후) |
+| POST | `/issue-theme/snapshot/theme/backfill` | 종목 종가 스냅샷 기반 테마 백필 |
 | POST | `/issue-theme/snapshot/trading-value` | 거래대금 스냅샷 저장 (10분 단위) |
 
 ---
@@ -738,6 +739,8 @@ DART 기업개황·손익현황·현금흐름·재무지표를 통합 조회합�
 | `display` | number | `20` | 페이지당 항목 수 |
 | `page` | number | `1` | 페이지 번호 |
 
+> 목록과 상세의 순위·종목 수·가격·RS·등락률은 하나의 확정된 종목 순위 스냅샷(`trade_date + snapshot_time`)을 공통 소스로 사용합니다. RS 80 이상 조건은 기본 집계 조건이 아니라 요청 시 적용되는 테마 응답 필터입니다.
+>
 > 종목 필터 기준: 정적 필터(passedStaticFilters=true) + 동적 필터(DF1·DF2·DF3) 통과 종목만 집계
 > - DF1: `현재가 >= 52주 저가 × 1.3`
 > - DF2: `현재가 >= 52주 고가 × 0.75`
@@ -865,13 +868,29 @@ DART 기업개황·손익현황·현금흐름·재무지표를 통합 조회합�
 
 ### POST `/issue-theme/snapshot/theme` — 테마 일별 스냅샷 저장
 
-장 마감 후 1회 호출. 당일 테마 순위·지표를 DB에 저장합니다.
+장 마감 후 1회 호출. 최신 확정 종목 순위 스냅샷만 사용해 테마 순위·지표를 저장합니다.
 
 **Response `201`**
 ```json
 {
   "saved": 19,
-  "date": "2026-03-20"
+  "tradeDate": "2026-03-20",
+  "stockSnapshotTime": "2026-03-20T06:50:00.000Z"
+}
+```
+
+---
+
+### POST `/issue-theme/snapshot/theme/backfill` — 테마 스냅샷 백필
+
+`days`(1~365)만큼의 최근 거래일을 대상으로 종가 기준 종목 순위 스냅샷을 먼저 재구축한 뒤, 성공한 날짜만 테마 스냅샷으로 집계합니다. 과거 날짜에는 현재 실시간 캐시를 사용하지 않습니다.
+
+**Response `201`**
+```json
+{
+  "requestedDays": 3,
+  "rebuiltDates": ["2026-03-20", "2026-03-19"],
+  "skippedDates": ["2026-03-18"]
 }
 ```
 

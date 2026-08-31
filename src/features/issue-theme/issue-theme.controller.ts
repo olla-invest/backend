@@ -8,11 +8,15 @@ import { CurrentUser } from '../../common/auth/decorators/current-user.decorator
 import { DateStringPipe, IntRangePipe } from '../../common/pipes/input-validation.pipes';
 import { IssueThemeListQueryDto } from './dto/issue-theme-list-query.dto';
 import { IssueThemeDetailQueryDto } from './dto/issue-theme-detail-query.dto';
+import { ThemeSnapshotService } from './theme-snapshot.service';
 
 @ApiTags( '이슈테마 (Issue Theme)' )
 @Controller('issue-theme')
 export class IssueThemeController {
-  constructor(private readonly issueThemeService: IssueThemeService) {}
+  constructor(
+    private readonly issueThemeService: IssueThemeService,
+    private readonly themeSnapshotService: ThemeSnapshotService,
+  ) {}
 
   @Get()
   @Public()
@@ -114,7 +118,7 @@ export class IssueThemeController {
   @UseGuards(AdminApiKeyGuard)
   @ApiOperation( { summary: '[관리자] 테마 일별 스냅샷 저장', description: '장 마감 후 1회 실행' } )
   async saveThemeSnapshot() {
-    return this.issueThemeService.saveThemeSnapshot();
+    return this.themeSnapshotService.buildLatestDailySnapshot();
   }
 
   @Post('snapshot/theme/backfill')
@@ -123,7 +127,7 @@ export class IssueThemeController {
   @ApiOperation( { summary: '[관리자] 테마 일별 스냅샷 백필', description: 'stock_daily_metrics 기준으로 최근 N거래일 테마 순위를 재계산합니다.' } )
   @ApiQuery( { name: 'days', required: false, example: '60', description: '백필할 최근 거래일 수' } )
   async backfillThemeSnapshots(@Query('days', new IntRangePipe('days', 1, 365, true)) days: number = 60) {
-    return this.issueThemeService.backfillThemeSnapshots(days);
+    return this.themeSnapshotService.backfillFromStockSnapshots(days);
   }
 
   @Post('ai-summary/generate')

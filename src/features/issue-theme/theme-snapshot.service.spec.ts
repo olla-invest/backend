@@ -26,7 +26,7 @@ describe('ThemeSnapshotService', () => {
         themeDailySnapshot: { deleteMany, createMany },
       })),
     };
-    const service = new ThemeSnapshotService(prisma);
+    const service = new ThemeSnapshotService(prisma, {} as any);
 
     const result = await service.buildDailySnapshot(new Date('2026-08-10'));
 
@@ -55,7 +55,7 @@ describe('ThemeSnapshotService', () => {
     const prisma: any = {
       $queryRawUnsafe: jest.fn().mockResolvedValue([]),
     };
-    const service = new ThemeSnapshotService(prisma);
+    const service = new ThemeSnapshotService(prisma, {} as any);
 
     await expect(service.buildDailySnapshot(new Date('2026-08-10')))
       .rejects.toThrow('stock snapshot not found for 2026-08-10');
@@ -74,7 +74,7 @@ describe('ThemeSnapshotService', () => {
         themeDailySnapshot: { deleteMany: jest.fn(), createMany },
       })),
     };
-    const service = new ThemeSnapshotService(prisma);
+    const service = new ThemeSnapshotService(prisma, {} as any);
 
     await service.buildDailySnapshot(new Date('2026-08-10'));
 
@@ -98,7 +98,7 @@ describe('ThemeSnapshotService', () => {
           previous_trading_value_ratio: null, is_new_high: false, short_term_rs: null },
       ]),
     };
-    const service = new ThemeSnapshotService(prisma);
+    const service = new ThemeSnapshotService(prisma, {} as any);
 
     const result = await (service as any).getThemeStocksForThemes(
       [1, 2],
@@ -109,5 +109,35 @@ describe('ThemeSnapshotService', () => {
     expect(result.get(1)).toEqual([expect.objectContaining({ stockCode: 'A', shortTermRs: 88 })]);
     expect(result.get(2)).toEqual([expect.objectContaining({ stockCode: 'B', shortTermRs: null })]);
     expect(prisma.$queryRawUnsafe).toHaveBeenCalledTimes(1);
+  });
+
+  it('rebuilds closing stock snapshots before backfilling each theme date', async () => {
+    const prisma: any = {
+      $queryRawUnsafe: jest.fn().mockResolvedValue([
+        { trade_date: new Date('2026-08-10') },
+        { trade_date: new Date('2026-08-09') },
+        { trade_date: new Date('2026-08-08') },
+      ]),
+    };
+    const currentRank: any = {
+      rebuildClosingSnapshot: jest.fn()
+        .mockResolvedValueOnce({ success: true })
+        .mockResolvedValueOnce({ success: false })
+        .mockResolvedValueOnce({ success: true }),
+    };
+    const service = new ThemeSnapshotService(prisma, currentRank);
+    const build = jest.spyOn(service, 'buildDailySnapshot').mockResolvedValue({
+      saved: 1, tradeDate: '2026-08-10', stockSnapshotTime: '2026-08-10T06:50:00.000Z',
+    });
+
+    const result = await service.backfillFromStockSnapshots(3);
+
+    expect(build.mock.calls.map(([date]) => date.toISOString().slice(0, 10)))
+      .toEqual(['2026-08-10', '2026-08-08']);
+    expect(result).toEqual({
+      requestedDays: 3,
+      rebuiltDates: ['2026-08-10', '2026-08-08'],
+      skippedDates: ['2026-08-09'],
+    });
   });
 });

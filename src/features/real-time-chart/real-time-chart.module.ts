@@ -44,6 +44,6 @@ import { MarketViewModule } from '../market-view/market-view.module';
     DataSchedulerService,
     AdminApiKeyGuard,
   ],
-  exports: [RealTimeChartService, RealtimePriceCacheModule, RealtimeSubscriptionManager],
+  exports: [RealTimeChartService, RealtimePriceCacheModule, RealtimeSubscriptionManager, CurrentRankService],
 })
 export class RealTimeChartModule {}

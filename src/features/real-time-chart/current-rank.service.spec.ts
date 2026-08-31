@@ -79,4 +79,34 @@ describe('CurrentRankService price selection', () => {
     expect(sql).toContain('short_term_rs');
     expect(params).toEqual(expect.arrayContaining([2.5, 12_000n, false]));
   });
+
+  it('rebuilds a historical closing snapshot without using the realtime cache', async () => {
+    const realtimeCache = { getPrice: jest.fn(() => { throw new Error('realtime must not be read'); }) };
+    const service = new CurrentRankService(
+      {} as any,
+      realtimeCache as any,
+      new CurrentPriceResolver(),
+    ) as any;
+    jest.spyOn(service, 'getStaticFilteredMetrics').mockResolvedValue([{
+      stock_code: '041830', trade_date: new Date('2026-08-10'), close_price: '30800',
+      relative_strength_score: '90', rank: 1, high_price_52w: '35000',
+      low_price_52w: '20000', ma_50: '25000', price_change_rate_1d: '2.5',
+      trading_value: 12_000n, is_new_high: false, short_term_rs: '88.67',
+    }]);
+    jest.spyOn(service, 'getPreviousTradingValues').mockResolvedValue(new Map());
+    const save = jest.spyOn(service, 'saveSnapshotRows').mockResolvedValue(undefined);
+
+    const result = await service.rebuildClosingSnapshot(new Date('2026-08-10'));
+
+    expect(result).toMatchObject({
+      success: true,
+      tradeDate: '2026-08-10',
+      snapshotTime: '2026-08-10T06:50:00.000Z',
+    });
+    expect(save.mock.calls[0][0][0]).toMatchObject({
+      currentPrice: 30_800,
+      priceSource: 'close',
+    });
+    expect(realtimeCache.getPrice).not.toHaveBeenCalled();
+  });
 });

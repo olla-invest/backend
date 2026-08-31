@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../../common/prisma/prisma.service';
 import { OnEvent } from '@nestjs/event-emitter';
+import { CurrentRankService } from '../real-time-chart/current-rank.service';
 
 export interface ThemeSnapshotItem {
   themeCode: number;
@@ -47,7 +48,10 @@ type ThemeSourceRow = {
 export class ThemeSnapshotService {
   private readonly logger = new Logger(ThemeSnapshotService.name);
 
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly currentRank: CurrentRankService,
+  ) {}
 
   @OnEvent('stock-ranks.finalized')
   async handleStockRanksFinalized({ tradeDate }: { tradeDate: string }): Promise<void> {
@@ -173,6 +177,53 @@ export class ThemeSnapshotService {
       `sourceRows=${sourceRows.length} themes=${themes.length}`,
     );
     return { saved: themes.length, tradeDate: date, stockSnapshotTime: stockSnapshotTime.toISOString() };
+  }
+
+  async buildLatestDailySnapshot() {
+    const latest = await this.prisma.$queryRawUnsafe<Array<{ trade_date: Date }>>(
+      `
+        SELECT trade_date
+        FROM stock_current_rank_snapshots
+        WHERE price_change_rate IS NOT NULL
+        ORDER BY trade_date DESC, snapshot_time DESC
+        LIMIT 1
+      `,
+    );
+    if (!latest[0]?.trade_date) throw new Error('stock snapshot not found');
+    return this.buildDailySnapshot(latest[0].trade_date);
+  }
+
+  async backfillFromStockSnapshots(days: number): Promise<{
+    requestedDays: number;
+    rebuiltDates: string[];
+    skippedDates: string[];
+  }> {
+    if (!Number.isInteger(days) || days < 1 || days > 365) {
+      throw new Error('days must be an integer between 1 and 365');
+    }
+    const dates = await this.prisma.$queryRawUnsafe<Array<{ trade_date: Date }>>(
+      `
+        SELECT DISTINCT trade_date
+        FROM stock_daily_metrics
+        WHERE passed_static_filters = TRUE
+        ORDER BY trade_date DESC
+        LIMIT $1::int
+      `,
+      days,
+    );
+    const rebuiltDates: string[] = [];
+    const skippedDates: string[] = [];
+    for (const row of dates) {
+      const date = this.dateKey(row.trade_date);
+      const stockResult = await this.currentRank.rebuildClosingSnapshot(row.trade_date);
+      if (!stockResult.success) {
+        skippedDates.push(date);
+        continue;
+      }
+      await this.buildDailySnapshot(row.trade_date);
+      rebuiltDates.push(date);
+    }
+    return { requestedDays: days, rebuiltDates, skippedDates };
   }
 
   async getLatestThemeItems(themeCodes?: number[]): Promise<Map<number, ThemeSnapshotItem>> {
