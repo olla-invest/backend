@@ -50,6 +50,12 @@ describe('IssueThemeService detail stock population', () => {
       {} as any,
       new ThemeMetricsService(),
       themeAiSummary,
+      { getLatestThemeItems: jest.fn().mockResolvedValue(new Map()), getThemeStocks: jest.fn().mockResolvedValue([
+        { stockCode: 'HIGH', currentRank: 1, currentPrice: 100, relativeStrengthScore: 90,
+          priceChangeRate: 2, tradingValue: null, previousTradingValueRatio: null, isNewHigh: false, shortTermRs: null },
+        { stockCode: 'LOW', currentRank: 2, currentPrice: 200, relativeStrengthScore: 70,
+          priceChangeRate: -1, tradingValue: null, previousTradingValueRatio: null, isNewHigh: false, shortTermRs: null },
+      ]) } as any,
     );
     jest.spyOn(service as any, 'getFilteredMetrics').mockResolvedValue({
       tradeDate: new Date('2026-07-25'),
@@ -69,7 +75,12 @@ describe('IssueThemeService detail stock population', () => {
       ],
     });
     jest.spyOn(service as any, 'getLiveTradingValueChanges').mockResolvedValue(new Map());
-    jest.spyOn(service, 'getCurrentThemeRankMap').mockResolvedValue(new Map());
+    jest.spyOn(service, 'getCurrentThemeRankMap').mockResolvedValue(new Map([[1, {
+      rank: 1, previousRank: null, rankChange: null, risingCount: 1, totalCount: 2,
+      rsScore: 80, avgRsScore: 80, changeRate: 0.5, newHighCount: 0,
+      shortTermRs: null, momentum: null, stockSnapshotTime: new Date('2026-07-25T06:50:00Z'),
+      snapshotDate: new Date('2026-07-25'),
+    }]]));
     jest.spyOn(service as any, 'getRelatedThemes').mockResolvedValue([]);
 
     const result = await service.getThemeDetail(1, undefined, {
@@ -86,7 +97,7 @@ describe('IssueThemeService detail stock population', () => {
     expect(result?.stocks.find((stock: any) => stock.stockCode === 'HIGH')).toMatchObject({
       currentPrice: 100,
       closePrice: 100,
-      priceSource: 'DB',
+      priceSource: 'STOCK_SNAPSHOT',
     });
   });
 
@@ -139,6 +150,14 @@ describe('IssueThemeService detail stock population', () => {
       {} as any,
       new ThemeMetricsService(),
       themeAiSummary,
+      { getLatestThemeItems: jest.fn().mockResolvedValue(new Map()), getThemeStocks: jest.fn().mockResolvedValue([
+        { stockCode: 'A', currentRank: 1, currentPrice: 100, relativeStrengthScore: 90,
+          priceChangeRate: 1, tradingValue: null, previousTradingValueRatio: null, isNewHigh: false, shortTermRs: 80 },
+        { stockCode: 'B', currentRank: 2, currentPrice: 200, relativeStrengthScore: 95,
+          priceChangeRate: 1, tradingValue: null, previousTradingValueRatio: null, isNewHigh: false, shortTermRs: 90 },
+        { stockCode: 'C', currentRank: 3, currentPrice: 300, relativeStrengthScore: 99,
+          priceChangeRate: 1, tradingValue: null, previousTradingValueRatio: null, isNewHigh: false, shortTermRs: null },
+      ]) } as any,
     );
     jest.spyOn(service as any, 'getFilteredMetrics').mockResolvedValue({
       tradeDate: new Date('2026-07-25'),
@@ -149,7 +168,12 @@ describe('IssueThemeService detail stock population', () => {
       ],
     });
     jest.spyOn(service as any, 'getLiveTradingValueChanges').mockResolvedValue(new Map());
-    jest.spyOn(service, 'getCurrentThemeRankMap').mockResolvedValue(new Map());
+    jest.spyOn(service, 'getCurrentThemeRankMap').mockResolvedValue(new Map([[1, {
+      rank: 1, previousRank: null, rankChange: null, risingCount: 3, totalCount: 3,
+      rsScore: 94.67, avgRsScore: 94.67, changeRate: 1, newHighCount: 0,
+      shortTermRs: null, momentum: null, stockSnapshotTime: new Date('2026-07-25T06:50:00Z'),
+      snapshotDate: new Date('2026-07-25'),
+    }]]));
     jest.spyOn(service as any, 'getRelatedThemes').mockResolvedValue([]);
 
     const result = await service.getThemeDetail(1, undefined, {
@@ -162,19 +186,6 @@ describe('IssueThemeService detail stock population', () => {
       { stockCode: 'A', shortTermRs: 80 },
       { stockCode: 'C', shortTermRs: null },
     ]);
-    expect(prisma.stockDailyMetrics.findMany).toHaveBeenCalledTimes(2);
-    expect(prisma.stockDailyMetrics.findMany).toHaveBeenNthCalledWith(2, {
-      where: {
-        stockCode: { in: ['A', 'B', 'C'] },
-        tradeDate: {
-          in: [
-            new Date('2026-07-25'),
-            new Date('2026-07-24'),
-            new Date('2026-07-23'),
-          ],
-        },
-      },
-      select: { stockCode: true, tradeDate: true, relativeStrengthScore: true },
-    });
+    expect(prisma.stockDailyMetrics.findMany).not.toHaveBeenCalled();
   });
 });

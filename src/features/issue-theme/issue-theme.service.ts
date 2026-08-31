@@ -15,6 +15,7 @@ import {
 } from './dto/issue-theme-list-query.dto';
 import { IssueThemeDetailQueryDto, IssueThemeStockSort } from './dto/issue-theme-detail-query.dto';
 import { ThemeAiSummaryService } from './theme-ai-summary.service';
+import { ThemeSnapshotService } from './theme-snapshot.service';
 
 interface TradingValueChange {
   label: string;
@@ -179,6 +180,7 @@ export class IssueThemeService {
     private readonly kiwoomRest: KiwoomRestService,
     private readonly themeMetrics: ThemeMetricsService,
     private readonly themeAiSummary: ThemeAiSummaryService,
+    private readonly themeSnapshot: ThemeSnapshotService,
   ) {}
 
   // ─── 헬퍼 ────────────────────────────────────────────────────────
@@ -391,8 +393,8 @@ export class IssueThemeService {
       throw new BadRequestException('히트맵 보기에서는 테마 검색을 사용할 수 없습니다');
     }
 
-    const { tradeDate, metrics: loadedMetrics } = await this.getFilteredMetrics();
-    if (!tradeDate) {
+    const canonicalSnapshots = await this.themeSnapshot.getLatestThemeItems();
+    if (canonicalSnapshots.size === 0) {
       return {
         updatedAt: null,
         items: [],
@@ -400,95 +402,53 @@ export class IssueThemeService {
         pagination: { page, display, total: 0, totalPages: 0 },
       };
     }
-    const metrics = loadedMetrics.filter((metric) => Number(metric.relativeStrengthScore) > 0);
+    const themeCodes = [...canonicalSnapshots.keys()];
+    const firstSnapshot = canonicalSnapshots.values().next().value;
+    const [themeRows, stocksByTheme] = await Promise.all([
+      this.prisma.theme.findMany({
+        where: { themeCode: { in: themeCodes }, deletedAt: null },
+        select: { themeCode: true, themeName: true },
+      }),
+      this.themeSnapshot.getThemeStocksForThemes(
+        themeCodes,
+        firstSnapshot.snapshotDate,
+        firstSnapshot.stockSnapshotTime,
+      ),
+    ]);
+    const themeNames = new Map(themeRows.map((theme) => [theme.themeCode, theme.themeName]));
+    const stockCodes = [...new Set([...stocksByTheme.values()].flat().map((stock) => stock.stockCode))];
+    const companies = stockCodes.length > 0 ? await this.prisma.company.findMany({
+      where: { stockCode: { in: stockCodes }, deletedAt: null },
+      select: { stockCode: true, companyName: true },
+    }) : [];
+    const companyNames = new Map(companies.map((company) => [company.stockCode, company.companyName]));
 
-    const stockCodes = metrics.map((m) => m.stockCode);
-    this.subscriptionManager.ensureSubscribed(stockCodes).catch((error) => {
-      this.logger.warn(`Issue-theme subscription sync failed: ${(error as Error).message}`);
-    });
-
-    const stockThemeRows = await this.prisma.stockTheme.findMany({
-      where: { stockCode: { in: stockCodes }, source: this.naverThemeSource, theme: { deletedAt: null } },
-      select: { stockCode: true, stockName: true, themeCode: true, theme: { select: { themeName: true } } },
-    });
-    const metricsMap = new Map(metrics.map((m) => [m.stockCode, m]));
-    // 실시간 등락률
-    const prices = this.realtimeCache.getPrices(stockCodes);
-
-    const themeGroups = new Map<number, {
-      themeName: string;
-      stocks: any[];
-    }>();
-
-    for (const row of stockThemeRows) {
-      const m = metricsMap.get(row.stockCode);
-      if (!m) continue;
-      const themeCode = row.themeCode;
-      if (!themeGroups.has(themeCode)) {
-        themeGroups.set(themeCode, {
-          themeName: row.theme.themeName,
-          stocks: [],
-        });
-      }
-      const currentGroup = themeGroups.get(themeCode)!;
-      if (currentGroup.stocks.some((stock) => stock.stockCode === row.stockCode)) continue;
-      const changeRate = this.currentPriceResolver.resolveMetricSnapshot(
-        m,
-        prices.get(row.stockCode),
-      ).changeRate;
-      currentGroup.stocks.push({
-        stockCode: row.stockCode,
-        stockName: row.stockName,
-        rsScore: Number(m.relativeStrengthScore),
-        changeRate,
-        isNewHigh: Boolean(m.isNewHigh),
-      });
-    }
-
-    const themeCodes = [...themeGroups.keys()];
-    const snapshots = themeCodes.length > 0
-      ? await this.prisma.themeDailySnapshot.findMany({
-      where: { themeCode: { in: themeCodes }, snapshotDate: { lte: tradeDate } },
-      orderBy: { snapshotDate: 'desc' },
-      })
-      : [];
-    const snapshotMap = new Map<number, any>();
-    for (const snapshot of snapshots) if (!snapshotMap.has(snapshot.themeCode)) snapshotMap.set(snapshot.themeCode, snapshot);
-
-    let items = [...themeGroups.entries()].map(([themeCode, group]) => {
-      const metric = this.themeMetrics.calculateDailyMetric(group.stocks, []);
-      const snapshot = snapshotMap.get(themeCode);
-      const streakBadge = snapshot?.streakDirection
-        ? this.themeMetrics.calculateStreak(Number(snapshot.avgChangeRate), {
-            direction: snapshot.streakDirection,
-            days: Math.max(0, snapshot.streakDays - 1),
-          })
-        : null;
-      return {
-        rank: null as number | null,
-        previousRank: snapshot?.rank ?? null,
-        rankChange: null as number | null,
-        themeCode,
-        themeName: group.themeName,
-        rsScore: metric.rsScore,
-        avgRsScore: metric.rsScore,
-        shortTermRs: snapshot?.shortTermRs != null ? Number(snapshot.shortTermRs) : metric.shortTermRs,
-        momentum: snapshot?.momentum != null ? Number(snapshot.momentum) : metric.momentum,
-        changeRate: metric.changeRate,
-        avgChangeRate: metric.changeRate,
-        stockCount: metric.stockCount,
-        totalCount: metric.eligibleStockCount,
-        eligibleStockCount: metric.eligibleStockCount,
-        risingCount: metric.risingCount,
-        newHighCount: metric.newHighCount,
-        streakBadge: streakBadge?.tone ? streakBadge : null,
+    let items = [...canonicalSnapshots.values()]
+      .filter((snapshot) => themeNames.has(snapshot.themeCode))
+      .map((snapshot) => ({
+        rank: snapshot.rank,
+        previousRank: snapshot.previousRank,
+        rankChange: snapshot.previousRank == null ? null : snapshot.previousRank - snapshot.rank,
+        themeCode: snapshot.themeCode,
+        themeName: themeNames.get(snapshot.themeCode)!,
+        rsScore: snapshot.avgRsScore,
+        avgRsScore: snapshot.avgRsScore,
+        shortTermRs: snapshot.shortTermRs,
+        momentum: snapshot.momentum,
+        changeRate: snapshot.avgChangeRate,
+        avgChangeRate: snapshot.avgChangeRate,
+        stockCount: snapshot.totalCount,
+        totalCount: snapshot.totalCount,
+        eligibleStockCount: snapshot.totalCount,
+        risingCount: snapshot.risingCount,
+        newHighCount: snapshot.newHighCount,
+        streakBadge: null,
         isFavorite: false,
-        topStocks: [...group.stocks]
-          .sort((a, b) => b.rsScore - a.rsScore || a.stockCode.localeCompare(b.stockCode))
+        topStocks: [...(stocksByTheme.get(snapshot.themeCode) ?? [])]
+          .sort((a, b) => b.relativeStrengthScore - a.relativeStrengthScore || a.stockCode.localeCompare(b.stockCode))
           .slice(0, 3)
-          .map((stock) => ({ stockCode: stock.stockCode, stockName: stock.stockName })),
-      };
-    });
+          .map((stock) => ({ stockCode: stock.stockCode, stockName: companyNames.get(stock.stockCode) ?? '' })),
+      }));
 
     if (search) items = items.filter((item) => item.themeName.toLocaleLowerCase('ko').includes(search.toLocaleLowerCase('ko')));
 
@@ -522,37 +482,40 @@ export class IssueThemeService {
       if (query.sort === IssueThemeSort.PREVIOUS_RANK) return (a.previousRank ?? Infinity) - (b.previousRank ?? Infinity) || (b.rsScore ?? 0) - (a.rsScore ?? 0) || a.themeCode - b.themeCode;
       return (b.rsScore ?? 0) - (a.rsScore ?? 0) || (b.changeRate ?? 0) - (a.changeRate ?? 0) || a.themeCode - b.themeCode;
     });
-    items.forEach((item, index) => {
-      item.rank = index + 1;
-      item.rankChange = item.previousRank != null ? item.previousRank - item.rank : null;
-    });
 
     const total = items.length;
     return {
       items: items.slice((page - 1) * display, page * display),
       filterCounts,
       pagination: { page, display, total, totalPages: total === 0 ? 0 : Math.ceil(total / display) },
-      updatedAt: new Date().toISOString(),
+      updatedAt: firstSnapshot.stockSnapshotTime.toISOString(),
     };
   }
 
   async getCurrentThemeRankMap(themeCodes: number[]): Promise<Map<number, any>> {
     if (themeCodes.length === 0) return new Map();
-
-    const themeCodeSet = new Set(themeCodes);
-    const result = await this.getThemeList({
-      view: IssueThemeView.RANK,
-      filter: IssueThemeFilter.ALL,
-      sort: IssueThemeSort.RS,
-      favoritesOnly: false,
-      display: 300,
-      page: 1,
-    });
-    return new Map(
-      result.items
-        .filter((theme: any) => themeCodeSet.has(theme.themeCode))
-        .map((theme: any) => [theme.themeCode, theme]),
-    );
+    const snapshots = await this.themeSnapshot.getLatestThemeItems(themeCodes);
+    return new Map([...snapshots].map(([themeCode, snapshot]) => [themeCode, {
+      themeCode,
+      rank: snapshot.rank,
+      previousRank: snapshot.previousRank,
+      rankChange: snapshot.previousRank == null ? null : snapshot.previousRank - snapshot.rank,
+      risingCount: snapshot.risingCount,
+      totalCount: snapshot.totalCount,
+      upCount: snapshot.upCount,
+      flatCount: snapshot.flatCount,
+      downCount: snapshot.downCount,
+      risingRatio: snapshot.risingRatio,
+      rsScore: snapshot.avgRsScore,
+      avgRsScore: snapshot.avgRsScore,
+      changeRate: snapshot.avgChangeRate,
+      avgChangeRate: snapshot.avgChangeRate,
+      shortTermRs: snapshot.shortTermRs,
+      momentum: snapshot.momentum,
+      newHighCount: snapshot.newHighCount,
+      stockSnapshotTime: snapshot.stockSnapshotTime,
+      snapshotDate: snapshot.snapshotDate,
+    }]));
   }
 
   async adminListThemes(params: {
@@ -662,6 +625,8 @@ export class IssueThemeService {
         select: { stockCode: true, stockName: true, inclusionReason: true },
       });
     }
+
+    return this.buildSnapshotThemeDetail(themeCode, theme, stockThemes, userId, query);
 
     const { tradeDate, metrics: allMetrics } = await this.getFilteredMetrics();
     if (!tradeDate) return null;
@@ -828,6 +793,101 @@ export class IssueThemeService {
       aiSummaryUpdatedAt: aiSummaryRecord?.generatedAt?.toISOString() ?? null,
       aiSummarySources: Array.isArray(aiSummaryRecord?.sourceArticles) ? aiSummaryRecord.sourceArticles : [],
       updatedAt: new Date().toISOString(),
+    };
+  }
+
+  private async buildSnapshotThemeDetail(
+    themeCode: number,
+    theme: { themeName: string; imageUrl?: string | null },
+    stockThemes: { stockCode: string; stockName: string | null; inclusionReason: string | null }[],
+    userId: string | undefined,
+    query: IssueThemeDetailQueryDto,
+  ) {
+    const currentTheme = (await this.getCurrentThemeRankMap([themeCode])).get(themeCode);
+    if (!currentTheme?.snapshotDate || !currentTheme?.stockSnapshotTime) return null;
+    const snapshotStocks = await this.themeSnapshot.getThemeStocks(
+      themeCode,
+      currentTheme.snapshotDate,
+      currentTheme.stockSnapshotTime,
+    );
+    const companies = await this.prisma.company.findMany({
+      where: { stockCode: { in: snapshotStocks.map((stock) => stock.stockCode) }, deletedAt: null },
+      select: { stockCode: true, companyName: true },
+    });
+    const companyNames = new Map(companies.map((company) => [company.stockCode, company.companyName]));
+    const memberships = new Map(stockThemes.map((stock) => [stock.stockCode, stock]));
+    const stockRows = snapshotStocks.map((stock) => {
+      const membership = memberships.get(stock.stockCode);
+      const ratio = stock.previousTradingValueRatio;
+      return {
+        stockCode: stock.stockCode,
+        companyName: companyNames.get(stock.stockCode) ?? membership?.stockName ?? '',
+        inclusionReason: membership?.inclusionReason ?? null,
+        currentPrice: stock.currentPrice,
+        closePrice: stock.currentPrice,
+        changeRate: stock.priceChangeRate,
+        priceChange1d: null,
+        priceChangeRate1d: stock.priceChangeRate,
+        priceSource: 'STOCK_SNAPSHOT',
+        rsScore: stock.relativeStrengthScore,
+        shortTermRs: stock.shortTermRs,
+        tradingValue: stock.tradingValue?.toString() ?? null,
+        previousTradingValueRatio: ratio,
+        isNewHigh: stock.isNewHigh,
+        newHighRate: null,
+        tradingValueRatio: ratio == null ? '-' : `${ratio.toFixed(1)}배`,
+        tradingValueChange: ratio == null ? '-' : `${ratio.toFixed(1)}배`,
+        currentAccTradingValue: stock.tradingValue == null ? null : Number(stock.tradingValue),
+        prevSameTimeAccTradingValue: ratio != null && ratio > 0 && stock.tradingValue != null
+          ? Number(stock.tradingValue) / ratio : null,
+      };
+    });
+    const nullableDesc = (a: number | null, b: number | null) =>
+      a == null && b == null ? 0 : a == null ? 1 : b == null ? -1 : b - a;
+    stockRows.sort((a, b) => {
+      if (query.stockSort === IssueThemeStockSort.SHORT_TERM_RS) return nullableDesc(a.shortTermRs, b.shortTermRs) || a.stockCode.localeCompare(b.stockCode);
+      if (query.stockSort === IssueThemeStockSort.CHANGE_RATE) return b.changeRate - a.changeRate || a.stockCode.localeCompare(b.stockCode);
+      if (query.stockSort === IssueThemeStockSort.TRADING_VALUE) return nullableDesc(a.currentAccTradingValue, b.currentAccTradingValue) || a.stockCode.localeCompare(b.stockCode);
+      if (query.stockSort === IssueThemeStockSort.PREVIOUS_RATIO) return nullableDesc(a.previousTradingValueRatio, b.previousTradingValueRatio) || a.stockCode.localeCompare(b.stockCode);
+      if (query.stockSort === IssueThemeStockSort.NEW_HIGH) return Number(b.isNewHigh) - Number(a.isNewHigh) || a.stockCode.localeCompare(b.stockCode);
+      return b.rsScore - a.rsScore || a.stockCode.localeCompare(b.stockCode);
+    });
+    stockRows.forEach((stock: any, index) => { stock.rank = index + 1; });
+
+    let isFavorite: boolean | null = null;
+    if (userId) {
+      isFavorite = await this.prisma.userWatchlistTheme.findFirst({
+        where: { userId, themeCode, deletedAt: null },
+      }) != null;
+    }
+    const aiSummaryRecord = await this.themeAiSummary.getLatestSuccess(themeCode);
+    const insights: string[] = [];
+    if (currentTheme.avgChangeRate >= 2) insights.push('평균 등락률 상승');
+    if (stockRows.some((stock) => stock.changeRate >= 7)) insights.push('상위 종목 급등');
+
+    return {
+      themeCode,
+      themeName: theme.themeName,
+      imageUrl: theme.imageUrl ?? null,
+      rank: currentTheme.rank,
+      rankChange: currentTheme.rankChange,
+      risingCount: currentTheme.risingCount,
+      totalCount: currentTheme.totalCount,
+      avgRsScore: currentTheme.avgRsScore,
+      rsScore: currentTheme.rsScore,
+      shortTermRs: currentTheme.shortTermRs,
+      momentum: currentTheme.momentum,
+      changeRate: currentTheme.avgChangeRate,
+      newHighCount: currentTheme.newHighCount,
+      streakBadge: null,
+      insights,
+      isFavorite,
+      stocks: stockRows.slice(0, query.stockDisplay),
+      relatedThemes: [],
+      aiSummary: aiSummaryRecord?.summary ?? null,
+      aiSummaryUpdatedAt: aiSummaryRecord?.generatedAt?.toISOString() ?? null,
+      aiSummarySources: Array.isArray(aiSummaryRecord?.sourceArticles) ? aiSummaryRecord.sourceArticles : [],
+      updatedAt: currentTheme.stockSnapshotTime.toISOString(),
     };
   }
 

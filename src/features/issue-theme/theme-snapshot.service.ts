@@ -30,6 +30,7 @@ export interface ThemeSnapshotStock {
   tradingValue: bigint | null;
   previousTradingValueRatio: number | null;
   isNewHigh: boolean;
+  shortTermRs: number | null;
 }
 
 type ThemeSourceRow = {
@@ -75,8 +76,28 @@ export class ThemeSnapshotService {
 
     const sourceRows = await this.prisma.$queryRawUnsafe<ThemeSourceRow[]>(
       `
+        WITH theme_memberships AS (
+          SELECT st.stock_code, st.theme_code
+          FROM stock_themes st
+          JOIN themes t
+            ON t.theme_code = st.theme_code
+           AND t.deleted_at IS NULL
+          WHERE st.source = 'NAVER'
+
+          UNION
+
+          SELECT st.stock_code, tgt.group_theme_code AS theme_code
+          FROM stock_themes st
+          JOIN theme_group_themes tgt
+            ON tgt.theme_code = st.theme_code
+          JOIN themes grouped_theme
+            ON grouped_theme.theme_code = tgt.group_theme_code
+           AND grouped_theme.source = 'GROUP'
+           AND grouped_theme.deleted_at IS NULL
+          WHERE st.source = 'NAVER'
+        )
         SELECT
-          st.theme_code,
+          membership.theme_code,
           s.stock_code,
           s.relative_strength_score::text AS rs_score,
           s.price_change_rate::text AS change_rate,
@@ -84,12 +105,8 @@ export class ThemeSnapshotService {
           s.previous_trading_value_ratio::text,
           s.is_new_high
         FROM stock_current_rank_snapshots s
-        JOIN stock_themes st
-          ON st.stock_code = s.stock_code
-         AND st.source = 'NAVER'
-        JOIN themes t
-          ON t.theme_code = st.theme_code
-         AND t.deleted_at IS NULL
+        JOIN theme_memberships membership
+          ON membership.stock_code = s.stock_code
         WHERE s.trade_date = $1::date
           AND s.snapshot_time = $2::timestamp
           AND s.passed_dynamic_filters = TRUE
@@ -212,7 +229,21 @@ export class ThemeSnapshotService {
     tradeDate: Date,
     stockSnapshotTime: Date,
   ): Promise<ThemeSnapshotStock[]> {
+    return (await this.getThemeStocksForThemes(
+      [themeCode],
+      tradeDate,
+      stockSnapshotTime,
+    )).get(themeCode) ?? [];
+  }
+
+  async getThemeStocksForThemes(
+    themeCodes: number[],
+    tradeDate: Date,
+    stockSnapshotTime: Date,
+  ): Promise<Map<number, ThemeSnapshotStock[]>> {
+    if (themeCodes.length === 0) return new Map();
     const rows = await this.prisma.$queryRawUnsafe<Array<{
+      theme_code: number;
       stock_code: string;
       current_rank: number;
       current_price: string;
@@ -221,37 +252,58 @@ export class ThemeSnapshotService {
       trading_value: bigint | null;
       previous_trading_value_ratio: string | null;
       is_new_high: boolean;
+      short_term_rs: string | null;
     }>>(
       `
-        SELECT DISTINCT ON (s.stock_code)
-          s.stock_code, s.current_rank, s.current_price::text,
+        WITH theme_memberships AS (
+          SELECT st.stock_code, st.theme_code
+          FROM stock_themes st
+          WHERE st.source = 'NAVER'
+
+          UNION
+
+          SELECT st.stock_code, tgt.group_theme_code AS theme_code
+          FROM stock_themes st
+          JOIN theme_group_themes tgt
+            ON tgt.theme_code = st.theme_code
+          WHERE st.source = 'NAVER'
+        )
+        SELECT DISTINCT ON (membership.theme_code, s.stock_code)
+          membership.theme_code, s.stock_code, s.current_rank, s.current_price::text,
           s.relative_strength_score::text, s.price_change_rate::text,
-          s.trading_value, s.previous_trading_value_ratio::text, s.is_new_high
+          s.trading_value, s.previous_trading_value_ratio::text, s.is_new_high,
+          s.short_term_rs::text
         FROM stock_current_rank_snapshots s
-        JOIN stock_themes st ON st.stock_code = s.stock_code AND st.source = 'NAVER'
-        WHERE st.theme_code = $1::int
+        JOIN theme_memberships membership ON membership.stock_code = s.stock_code
+        WHERE membership.theme_code = ANY($1::int[])
           AND s.trade_date = $2::date
           AND s.snapshot_time = $3::timestamp
           AND s.passed_dynamic_filters = TRUE
           AND s.current_rank IS NOT NULL
           AND s.price_change_rate IS NOT NULL
-        ORDER BY s.stock_code, s.current_rank
+        ORDER BY membership.theme_code, s.stock_code, s.current_rank
       `,
-      themeCode,
+      themeCodes,
       this.dateKey(tradeDate),
       stockSnapshotTime.toISOString(),
     );
-    return rows.map((row) => ({
-      stockCode: row.stock_code,
-      currentRank: row.current_rank,
-      currentPrice: Number(row.current_price),
-      relativeStrengthScore: Number(row.relative_strength_score),
-      priceChangeRate: Number(row.price_change_rate),
-      tradingValue: row.trading_value,
-      previousTradingValueRatio: row.previous_trading_value_ratio == null
-        ? null : Number(row.previous_trading_value_ratio),
-      isNewHigh: row.is_new_high,
-    }));
+    const result = new Map<number, ThemeSnapshotStock[]>();
+    for (const themeCode of themeCodes) result.set(themeCode, []);
+    for (const row of rows) {
+      result.get(row.theme_code)?.push({
+        stockCode: row.stock_code,
+        currentRank: row.current_rank,
+        currentPrice: Number(row.current_price),
+        relativeStrengthScore: Number(row.relative_strength_score),
+        priceChangeRate: Number(row.price_change_rate),
+        tradingValue: row.trading_value,
+        previousTradingValueRatio: row.previous_trading_value_ratio == null
+          ? null : Number(row.previous_trading_value_ratio),
+        isNewHigh: row.is_new_high,
+        shortTermRs: row.short_term_rs == null ? null : Number(row.short_term_rs),
+      });
+    }
+    return result;
   }
 
   private average(values: number[]): number {
