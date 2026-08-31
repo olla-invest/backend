@@ -250,7 +250,7 @@ If no source exists, throw an error containing the trade date. Do not query `sto
 
 - [ ] **Step 4: Aggregate and rank deterministically**
 
-Deduplicate by `themeCode + stockCode`. Calculate counts using literal boundaries `> 0`, `>= 1`, and `<= -1`. Sort themes by `avgRsScore DESC`, `avgChangeRate DESC`, `themeCode ASC`; assign `index + 1` ranks.
+Deduplicate by `themeCode + stockCode`. Calculate counts using literal boundaries `> 0`, `= 0`, and `< 0`, matching the issue-theme detail's rise/flat/fall display. Sort themes by `avgRsScore DESC`, `avgChangeRate DESC`, `themeCode ASC`; assign `index + 1` ranks.
 
 - [ ] **Step 5: Persist atomically**
 

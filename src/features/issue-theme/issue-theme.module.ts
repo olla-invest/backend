@@ -11,6 +11,7 @@ import { ThemeNewsService } from './theme-news.service';
 import { ThemeAiSummaryService } from './theme-ai-summary.service';
 import { LLM_CLIENT } from './llm/llm-client.interface';
 import { OpenAiLlmClient } from './llm/openai-llm.client';
+import { ThemeSnapshotService } from './theme-snapshot.service';
 
 @Module({
   imports: [ConfigModule, PrismaModule, RealTimeChartModule, KiwoomModule],
@@ -20,10 +21,11 @@ import { OpenAiLlmClient } from './llm/openai-llm.client';
     ThemeMetricsService,
     ThemeNewsService,
     ThemeAiSummaryService,
+    ThemeSnapshotService,
     OpenAiLlmClient,
     { provide: LLM_CLIENT, useExisting: OpenAiLlmClient },
     AdminApiKeyGuard,
   ],
-  exports: [IssueThemeService, ThemeMetricsService, ThemeAiSummaryService],
+  exports: [IssueThemeService, ThemeMetricsService, ThemeAiSummaryService, ThemeSnapshotService],
 })
 export class IssueThemeModule {}

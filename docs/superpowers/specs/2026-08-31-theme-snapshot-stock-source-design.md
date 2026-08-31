@@ -47,9 +47,9 @@
 
 - `total_count`: 포함된 고유 종목 수
 - `rising_count`: `price_change_rate > 0`인 종목 수
-- `up_count`: `price_change_rate >= 1`인 종목 수
-- `down_count`: `price_change_rate <= -1`인 종목 수
-- `flat_count`: 전체에서 상승·하락 버킷을 제외한 수
+- `up_count`: `price_change_rate > 0`인 종목 수
+- `down_count`: `price_change_rate < 0`인 종목 수
+- `flat_count`: `price_change_rate = 0`인 종목 수
 - `rising_ratio`: 상승 종목 수 / 전체 종목 수
 - `avg_change_rate`: 평균 등락률
 - `avg_rs_score`: 평균 RS 점수

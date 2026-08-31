@@ -1,0 +1,262 @@
+import { Injectable, Logger } from '@nestjs/common';
+import { PrismaService } from '../../common/prisma/prisma.service';
+
+export interface ThemeSnapshotItem {
+  themeCode: number;
+  rank: number;
+  previousRank: number | null;
+  risingCount: number;
+  totalCount: number;
+  upCount: number;
+  flatCount: number;
+  downCount: number;
+  risingRatio: number;
+  avgChangeRate: number;
+  avgRsScore: number;
+  shortTermRs: number | null;
+  momentum: number | null;
+  newHighCount: number;
+  stockSnapshotTime: Date;
+  snapshotDate: Date;
+}
+
+export interface ThemeSnapshotStock {
+  stockCode: string;
+  currentRank: number;
+  currentPrice: number;
+  relativeStrengthScore: number;
+  priceChangeRate: number;
+  tradingValue: bigint | null;
+  previousTradingValueRatio: number | null;
+  isNewHigh: boolean;
+}
+
+type ThemeSourceRow = {
+  theme_code: number;
+  stock_code: string;
+  rs_score: string;
+  change_rate: string;
+  trading_value: bigint | null;
+  previous_trading_value_ratio: string | null;
+  is_new_high: boolean | null;
+};
+
+@Injectable()
+export class ThemeSnapshotService {
+  private readonly logger = new Logger(ThemeSnapshotService.name);
+
+  constructor(private readonly prisma: PrismaService) {}
+
+  async buildDailySnapshot(tradeDate: Date): Promise<{
+    saved: number;
+    tradeDate: string;
+    stockSnapshotTime: string;
+  }> {
+    const date = this.dateKey(tradeDate);
+    const latest = await this.prisma.$queryRawUnsafe<Array<{ snapshot_time: Date }>>(
+      `
+        SELECT snapshot_time
+        FROM stock_current_rank_snapshots
+        WHERE trade_date = $1::date
+          AND price_change_rate IS NOT NULL
+        ORDER BY snapshot_time DESC
+        LIMIT 1
+      `,
+      date,
+    );
+    const stockSnapshotTime = latest[0]?.snapshot_time;
+    if (!stockSnapshotTime) throw new Error(`stock snapshot not found for ${date}`);
+
+    const sourceRows = await this.prisma.$queryRawUnsafe<ThemeSourceRow[]>(
+      `
+        SELECT
+          st.theme_code,
+          s.stock_code,
+          s.relative_strength_score::text AS rs_score,
+          s.price_change_rate::text AS change_rate,
+          s.trading_value,
+          s.previous_trading_value_ratio::text,
+          s.is_new_high
+        FROM stock_current_rank_snapshots s
+        JOIN stock_themes st
+          ON st.stock_code = s.stock_code
+         AND st.source = 'NAVER'
+        JOIN themes t
+          ON t.theme_code = st.theme_code
+         AND t.deleted_at IS NULL
+        WHERE s.trade_date = $1::date
+          AND s.snapshot_time = $2::timestamp
+          AND s.passed_dynamic_filters = TRUE
+          AND s.current_rank IS NOT NULL
+          AND s.price_change_rate IS NOT NULL
+      `,
+      date,
+      stockSnapshotTime.toISOString(),
+    );
+
+    const groups = new Map<number, Map<string, ThemeSourceRow>>();
+    for (const row of sourceRows) {
+      const stocks = groups.get(row.theme_code) ?? new Map<string, ThemeSourceRow>();
+      stocks.set(row.stock_code, row);
+      groups.set(row.theme_code, stocks);
+    }
+
+    const themes = [...groups.entries()].map(([themeCode, stockMap]) => {
+      const stocks = [...stockMap.values()];
+      const changes = stocks.map((row) => Number(row.change_rate));
+      const scores = stocks.map((row) => Number(row.rs_score));
+      const totalCount = stocks.length;
+      const risingCount = changes.filter((value) => value > 0).length;
+      const upCount = risingCount;
+      const downCount = changes.filter((value) => value < 0).length;
+      const flatCount = changes.filter((value) => value === 0).length;
+      const avgChangeRate = this.average(changes);
+      const avgRsScore = this.average(scores);
+      return {
+        themeCode,
+        snapshotDate: new Date(`${date}T00:00:00.000Z`),
+        rank: 0,
+        risingCount,
+        totalCount,
+        risingRatio: this.round2((risingCount / totalCount) * 100),
+        avgChangeRate,
+        avgRsScore,
+        themeScore: this.round2(avgChangeRate),
+        highVolumeCount: stocks.filter((row) =>
+          row.previous_trading_value_ratio != null && Number(row.previous_trading_value_ratio) >= 2,
+        ).length,
+        upCount,
+        flatCount,
+        downCount,
+        shortTermRs: null,
+        momentum: null,
+        newHighCount: stocks.filter((row) => row.is_new_high === true).length,
+        stockSnapshotTime,
+      };
+    });
+    themes.sort((a, b) =>
+      b.avgRsScore - a.avgRsScore ||
+      b.avgChangeRate - a.avgChangeRate ||
+      a.themeCode - b.themeCode,
+    );
+    themes.forEach((theme, index) => { theme.rank = index + 1; });
+
+    await this.prisma.$transaction(async (tx) => {
+      await tx.themeDailySnapshot.deleteMany({ where: { snapshotDate: new Date(`${date}T00:00:00.000Z`) } });
+      if (themes.length > 0) await tx.themeDailySnapshot.createMany({ data: themes });
+    });
+    this.logger.log(
+      `[theme-snapshot] tradeDate=${date} stockSnapshotTime=${stockSnapshotTime.toISOString()} ` +
+      `sourceRows=${sourceRows.length} themes=${themes.length}`,
+    );
+    return { saved: themes.length, tradeDate: date, stockSnapshotTime: stockSnapshotTime.toISOString() };
+  }
+
+  async getLatestThemeItems(themeCodes?: number[]): Promise<Map<number, ThemeSnapshotItem>> {
+    const latest = await this.prisma.themeDailySnapshot.findFirst({
+      where: { stockSnapshotTime: { not: null } },
+      orderBy: { snapshotDate: 'desc' },
+      select: { snapshotDate: true },
+    });
+    if (!latest) return new Map();
+    const previous = await this.prisma.themeDailySnapshot.findFirst({
+      where: { snapshotDate: { lt: latest.snapshotDate }, stockSnapshotTime: { not: null } },
+      orderBy: { snapshotDate: 'desc' },
+      select: { snapshotDate: true },
+    });
+    const [currentRows, previousRows] = await Promise.all([
+      this.prisma.themeDailySnapshot.findMany({
+        where: {
+          snapshotDate: latest.snapshotDate,
+          stockSnapshotTime: { not: null },
+          ...(themeCodes ? { themeCode: { in: themeCodes } } : {}),
+        },
+      }),
+      previous ? this.prisma.themeDailySnapshot.findMany({
+        where: {
+          snapshotDate: previous.snapshotDate,
+          ...(themeCodes ? { themeCode: { in: themeCodes } } : {}),
+        },
+        select: { themeCode: true, rank: true },
+      }) : Promise.resolve([]),
+    ]);
+    const previousRanks = new Map(previousRows.map((row) => [row.themeCode, row.rank]));
+    return new Map(currentRows.map((row) => [row.themeCode, {
+      themeCode: row.themeCode,
+      rank: row.rank,
+      previousRank: previousRanks.get(row.themeCode) ?? null,
+      risingCount: row.risingCount,
+      totalCount: row.totalCount,
+      upCount: row.upCount,
+      flatCount: row.flatCount,
+      downCount: row.downCount,
+      risingRatio: Number(row.risingRatio),
+      avgChangeRate: Number(row.avgChangeRate),
+      avgRsScore: Number(row.avgRsScore),
+      shortTermRs: row.shortTermRs == null ? null : Number(row.shortTermRs),
+      momentum: row.momentum == null ? null : Number(row.momentum),
+      newHighCount: row.newHighCount,
+      stockSnapshotTime: row.stockSnapshotTime!,
+      snapshotDate: row.snapshotDate,
+    }]));
+  }
+
+  async getThemeStocks(
+    themeCode: number,
+    tradeDate: Date,
+    stockSnapshotTime: Date,
+  ): Promise<ThemeSnapshotStock[]> {
+    const rows = await this.prisma.$queryRawUnsafe<Array<{
+      stock_code: string;
+      current_rank: number;
+      current_price: string;
+      relative_strength_score: string;
+      price_change_rate: string;
+      trading_value: bigint | null;
+      previous_trading_value_ratio: string | null;
+      is_new_high: boolean;
+    }>>(
+      `
+        SELECT DISTINCT ON (s.stock_code)
+          s.stock_code, s.current_rank, s.current_price::text,
+          s.relative_strength_score::text, s.price_change_rate::text,
+          s.trading_value, s.previous_trading_value_ratio::text, s.is_new_high
+        FROM stock_current_rank_snapshots s
+        JOIN stock_themes st ON st.stock_code = s.stock_code AND st.source = 'NAVER'
+        WHERE st.theme_code = $1::int
+          AND s.trade_date = $2::date
+          AND s.snapshot_time = $3::timestamp
+          AND s.passed_dynamic_filters = TRUE
+          AND s.current_rank IS NOT NULL
+          AND s.price_change_rate IS NOT NULL
+        ORDER BY s.stock_code, s.current_rank
+      `,
+      themeCode,
+      this.dateKey(tradeDate),
+      stockSnapshotTime.toISOString(),
+    );
+    return rows.map((row) => ({
+      stockCode: row.stock_code,
+      currentRank: row.current_rank,
+      currentPrice: Number(row.current_price),
+      relativeStrengthScore: Number(row.relative_strength_score),
+      priceChangeRate: Number(row.price_change_rate),
+      tradingValue: row.trading_value,
+      previousTradingValueRatio: row.previous_trading_value_ratio == null
+        ? null : Number(row.previous_trading_value_ratio),
+      isNewHigh: row.is_new_high,
+    }));
+  }
+
+  private average(values: number[]): number {
+    return this.round2(values.reduce((sum, value) => sum + value, 0) / values.length);
+  }
+
+  private round2(value: number): number {
+    return Math.round(value * 100) / 100;
+  }
+
+  private dateKey(date: Date): string {
+    return new Date(date).toISOString().slice(0, 10);
+  }
+}
