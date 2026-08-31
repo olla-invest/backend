@@ -1,5 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../../common/prisma/prisma.service';
+import { OnEvent } from '@nestjs/event-emitter';
 
 export interface ThemeSnapshotItem {
   themeCode: number;
@@ -46,6 +47,11 @@ export class ThemeSnapshotService {
   private readonly logger = new Logger(ThemeSnapshotService.name);
 
   constructor(private readonly prisma: PrismaService) {}
+
+  @OnEvent('stock-ranks.finalized')
+  async handleStockRanksFinalized({ tradeDate }: { tradeDate: string }): Promise<void> {
+    await this.buildDailySnapshot(new Date(`${tradeDate}T00:00:00.000Z`));
+  }
 
   async buildDailySnapshot(tradeDate: Date): Promise<{
     saved: number;

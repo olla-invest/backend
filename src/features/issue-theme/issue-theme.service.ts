@@ -313,7 +313,7 @@ export class IssueThemeService {
 
   // ─── 공통 데이터 로더 ─────────────────────────────────────────────
 
-  /** 최신 거래일 기준 RS 점수가 있는 종목 조회 */
+  /** 최신 거래일 기준 RS 점수와 실시간 차트 동적 필터를 통과한 종목 조회 */
   private async getFilteredMetrics() {
     const latest = await this.prisma.stockDailyMetrics.findFirst({
       orderBy: { tradeDate: 'desc' },
@@ -324,7 +324,21 @@ export class IssueThemeService {
     const measurableMetrics = await this.prisma.stockDailyMetrics.findMany({
       where: { tradeDate: latest.tradeDate, relativeStrengthScore: { gt: 0 } },
     });
-    return { tradeDate: latest.tradeDate, metrics: measurableMetrics };
+    const prices = this.realtimeCache.getPrices(
+      measurableMetrics.map((metric) => metric.stockCode),
+    );
+    const metrics = measurableMetrics.filter((metric) => {
+      const currentPrice = this.currentPriceResolver.resolveMetricSnapshot(
+        metric,
+        prices.get(metric.stockCode),
+      ).currentPrice;
+
+      if (metric.lowPrice52w != null && currentPrice < Number(metric.lowPrice52w) * 1.3) return false;
+      if (metric.highPrice52w != null && currentPrice < Number(metric.highPrice52w) * 0.75) return false;
+      if (metric.ma50 != null && currentPrice <= Number(metric.ma50)) return false;
+      return true;
+    });
+    return { tradeDate: latest.tradeDate, metrics };
   }
 
   private async getStockShortTermRs(stockCodes: string[], tradeDate: Date) {
@@ -904,7 +918,6 @@ export class IssueThemeService {
   // ─── 스냅샷 저장 ──────────────────────────────────────────────────
 
   /** 테마 일별 스냅샷 저장 (장 마감 후 1회 호출) */
-  @Cron('50 15 * * 1-5', { timeZone: 'Asia/Seoul' })
   async saveThemeSnapshot() {
     const { tradeDate, metrics } = await this.getFilteredMetrics();
     if (!tradeDate) return { saved: 0 };

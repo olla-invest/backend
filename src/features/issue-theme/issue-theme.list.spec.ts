@@ -143,18 +143,33 @@ describe('IssueThemeService enhanced list', () => {
     expect(result.items.map((item: any) => item.themeCode)).toEqual([1]);
   });
 
-  it('loads every latest metric that has an RS score', async () => {
+  it('loads only latest RS metrics that pass the realtime-chart dynamic filters', async () => {
     (service as any).getFilteredMetrics.mockRestore();
     const tradeDate = new Date('2026-07-25');
     prisma.stockDailyMetrics.findFirst.mockResolvedValue({ tradeDate });
     prisma.stockDailyMetrics.findMany.mockResolvedValue([
-      { stockCode: 'HIGH', relativeStrengthScore: 90 },
-      { stockCode: 'LOW', relativeStrengthScore: 70 },
+      {
+        stockCode: 'PASS', relativeStrengthScore: 90, closePrice: 80,
+        lowPrice52w: 50, highPrice52w: 100, ma50: 70,
+      },
+      {
+        stockCode: 'LOW52', relativeStrengthScore: 99, closePrice: 64,
+        lowPrice52w: 50, highPrice52w: 80, ma50: 60,
+      },
+      {
+        stockCode: 'HIGH52', relativeStrengthScore: 98, closePrice: 74,
+        lowPrice52w: 50, highPrice52w: 100, ma50: 60,
+      },
+      {
+        stockCode: 'MA50', relativeStrengthScore: 97, closePrice: 70,
+        lowPrice52w: 50, highPrice52w: 90, ma50: 70,
+      },
     ]);
+    realtimeCache.getPrices.mockReturnValue(new Map());
 
     const result = await (service as any).getFilteredMetrics();
 
-    expect(result.metrics.map((metric: any) => metric.stockCode)).toEqual(['HIGH', 'LOW']);
+    expect(result.metrics.map((metric: any) => metric.stockCode)).toEqual(['PASS']);
     expect(prisma.stockDailyMetrics.findMany).toHaveBeenCalledWith({
       where: { tradeDate, relativeStrengthScore: { gt: 0 } },
     });

@@ -8,6 +8,7 @@ import { isKrxTradingDay, previousTradingDay } from '../../common/utils/market-c
 import { PrismaService } from '../../common/prisma/prisma.service';
 import { CurrentRankService } from './current-rank.service';
 import { MarketViewService } from '../market-view/market-view.service';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 
 /**
  * 스케줄 잡 정리
@@ -42,6 +43,7 @@ export class DataSchedulerService implements OnApplicationBootstrap {
     private readonly prisma: PrismaService,
     private readonly currentRankService: CurrentRankService,
     private readonly marketViewService: MarketViewService,
+    private readonly eventEmitter: EventEmitter2,
   ) {}
 
   // ─────────────────────────────────────────────────────────────
@@ -159,6 +161,9 @@ export class DataSchedulerService implements OnApplicationBootstrap {
         await this.runMetricsFor(tradeDate);
         await this.currentRankService.createCurrentRankSnapshot(new Date(), tradeDate);
         await this.currentRankService.finalizeDailyCurrentRank(tradeDate);
+        await this.eventEmitter.emitAsync('stock-ranks.finalized', {
+          tradeDate: tradeDate.toISOString().slice(0, 10),
+        });
         await this.runMarketViewFor(tradeDate, true);
       });
 
