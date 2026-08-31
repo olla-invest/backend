@@ -402,6 +402,7 @@ exports.Prisma.ThemeDailySnapshotScalarFieldEnum = {
   newHighCount: 'newHighCount',
   streakDirection: 'streakDirection',
   streakDays: 'streakDays',
+  stockSnapshotTime: 'stockSnapshotTime',
   createdAt: 'createdAt'
 };
 
@@ -469,6 +470,10 @@ exports.Prisma.StockCurrentRankSnapshotScalarFieldEnum = {
   ma50: 'ma50',
   passedDynamicFilters: 'passedDynamicFilters',
   priceSource: 'priceSource',
+  priceChangeRate: 'priceChangeRate',
+  tradingValue: 'tradingValue',
+  previousTradingValueRatio: 'previousTradingValueRatio',
+  isNewHigh: 'isNewHigh',
   createdAt: 'createdAt'
 };
 

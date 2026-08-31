@@ -574,6 +574,7 @@ model ThemeDailySnapshot {
   newHighCount    Int      @default(0) @map("new_high_count")
   streakDirection String?  @map("streak_direction") @db.VarChar(10)
   streakDays      Int      @default(0) @map("streak_days")
+  stockSnapshotTime DateTime? @map("stock_snapshot_time")
   createdAt       DateTime @default(now()) @map("created_at")
 
   // Relations
@@ -670,6 +671,10 @@ model StockCurrentRankSnapshot {
   ma50                  Decimal? @map("ma_50") @db.Decimal(15, 2)
   passedDynamicFilters  Boolean  @default(false) @map("passed_dynamic_filters")
   priceSource           String   @default("close") @map("price_source") @db.VarChar(20)
+  priceChangeRate       Decimal? @map("price_change_rate") @db.Decimal(10, 4)
+  tradingValue          BigInt?  @map("trading_value")
+  previousTradingValueRatio Decimal? @map("previous_trading_value_ratio") @db.Decimal(12, 4)
+  isNewHigh             Boolean? @map("is_new_high")
   createdAt             DateTime @default(now()) @map("created_at")
 
   @@unique([tradeDate, snapshotTime, stockCode], map: "uk_current_rank_snapshot")

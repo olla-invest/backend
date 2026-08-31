@@ -555,26 +555,27 @@ model StockCandle {
 
 // 15. 테마 일별 스냅샷 테이블 (이슈테마 순위변동/인사이트 계산용)
 model ThemeDailySnapshot {
-  snapshotId      String   @id @default(uuid()) @map("snapshot_id") @db.Uuid
-  themeCode       Int      @map("theme_code")
-  snapshotDate    DateTime @map("snapshot_date") @db.Date
-  rank            Int      @map("rank") // 당일 순위 (상승비율 기준)
-  risingCount     Int      @map("rising_count") // 상승 종목 수 (등락률 > 0%)
-  totalCount      Int      @map("total_count") // 전체 종목 수 (실시간차트 기준)
-  risingRatio     Decimal  @map("rising_ratio") @db.Decimal(5, 2) // 상승 비율 (%)
-  avgChangeRate   Decimal  @map("avg_change_rate") @db.Decimal(8, 4) // 평균 등락률 (%)
-  avgRsScore      Decimal  @default(0) @map("avg_rs_score") @db.Decimal(5, 2)
-  themeScore      Decimal  @default(0) @map("theme_score") @db.Decimal(6, 2)
-  highVolumeCount Int      @default(0) @map("high_volume_count") // 거래대금 급증 종목 수
-  upCount         Int      @default(0) @map("up_count") // 상승 종목 수 (등락률 >= +1%)
-  flatCount       Int      @default(0) @map("flat_count") // 보합 종목 수 (-1% ~ +1%)
-  downCount       Int      @default(0) @map("down_count") // 하락 종목 수 (등락률 <= -1%)
-  shortTermRs     Decimal? @map("short_term_rs") @db.Decimal(5, 2)
-  momentum        Decimal? @map("momentum") @db.Decimal(6, 2)
-  newHighCount    Int      @default(0) @map("new_high_count")
-  streakDirection String?  @map("streak_direction") @db.VarChar(10)
-  streakDays      Int      @default(0) @map("streak_days")
-  createdAt       DateTime @default(now()) @map("created_at")
+  snapshotId        String    @id @default(uuid()) @map("snapshot_id") @db.Uuid
+  themeCode         Int       @map("theme_code")
+  snapshotDate      DateTime  @map("snapshot_date") @db.Date
+  rank              Int       @map("rank") // 당일 순위 (상승비율 기준)
+  risingCount       Int       @map("rising_count") // 상승 종목 수 (등락률 > 0%)
+  totalCount        Int       @map("total_count") // 전체 종목 수 (실시간차트 기준)
+  risingRatio       Decimal   @map("rising_ratio") @db.Decimal(5, 2) // 상승 비율 (%)
+  avgChangeRate     Decimal   @map("avg_change_rate") @db.Decimal(8, 4) // 평균 등락률 (%)
+  avgRsScore        Decimal   @default(0) @map("avg_rs_score") @db.Decimal(5, 2)
+  themeScore        Decimal   @default(0) @map("theme_score") @db.Decimal(6, 2)
+  highVolumeCount   Int       @default(0) @map("high_volume_count") // 거래대금 급증 종목 수
+  upCount           Int       @default(0) @map("up_count") // 상승 종목 수 (등락률 >= +1%)
+  flatCount         Int       @default(0) @map("flat_count") // 보합 종목 수 (-1% ~ +1%)
+  downCount         Int       @default(0) @map("down_count") // 하락 종목 수 (등락률 <= -1%)
+  shortTermRs       Decimal?  @map("short_term_rs") @db.Decimal(5, 2)
+  momentum          Decimal?  @map("momentum") @db.Decimal(6, 2)
+  newHighCount      Int       @default(0) @map("new_high_count")
+  streakDirection   String?   @map("streak_direction") @db.VarChar(10)
+  streakDays        Int       @default(0) @map("streak_days")
+  stockSnapshotTime DateTime? @map("stock_snapshot_time")
+  createdAt         DateTime  @default(now()) @map("created_at")
 
   // Relations
   theme Theme @relation(fields: [themeCode], references: [themeCode])
@@ -657,20 +658,24 @@ model StockDailyMetrics {
 
 // 19-1. 장중 현재가 기준 DF 통과 순위 스냅샷
 model StockCurrentRankSnapshot {
-  snapshotId            String   @id @default(uuid()) @map("snapshot_id") @db.Uuid
-  stockCode             String   @map("stock_code") @db.VarChar(20)
-  tradeDate             DateTime @map("trade_date") @db.Date
-  snapshotTime          DateTime @map("snapshot_time")
-  currentRank           Int?     @map("current_rank")
-  relativeStrengthScore Decimal  @map("relative_strength_score") @db.Decimal(5, 2)
-  currentPrice          Decimal  @map("current_price") @db.Decimal(15, 2)
-  closePrice            Decimal  @map("close_price") @db.Decimal(15, 2)
-  highPrice52w          Decimal? @map("high_price_52w") @db.Decimal(15, 2)
-  lowPrice52w           Decimal? @map("low_price_52w") @db.Decimal(15, 2)
-  ma50                  Decimal? @map("ma_50") @db.Decimal(15, 2)
-  passedDynamicFilters  Boolean  @default(false) @map("passed_dynamic_filters")
-  priceSource           String   @default("close") @map("price_source") @db.VarChar(20)
-  createdAt             DateTime @default(now()) @map("created_at")
+  snapshotId                String   @id @default(uuid()) @map("snapshot_id") @db.Uuid
+  stockCode                 String   @map("stock_code") @db.VarChar(20)
+  tradeDate                 DateTime @map("trade_date") @db.Date
+  snapshotTime              DateTime @map("snapshot_time")
+  currentRank               Int?     @map("current_rank")
+  relativeStrengthScore     Decimal  @map("relative_strength_score") @db.Decimal(5, 2)
+  currentPrice              Decimal  @map("current_price") @db.Decimal(15, 2)
+  closePrice                Decimal  @map("close_price") @db.Decimal(15, 2)
+  highPrice52w              Decimal? @map("high_price_52w") @db.Decimal(15, 2)
+  lowPrice52w               Decimal? @map("low_price_52w") @db.Decimal(15, 2)
+  ma50                      Decimal? @map("ma_50") @db.Decimal(15, 2)
+  passedDynamicFilters      Boolean  @default(false) @map("passed_dynamic_filters")
+  priceSource               String   @default("close") @map("price_source") @db.VarChar(20)
+  priceChangeRate           Decimal? @map("price_change_rate") @db.Decimal(10, 4)
+  tradingValue              BigInt?  @map("trading_value")
+  previousTradingValueRatio Decimal? @map("previous_trading_value_ratio") @db.Decimal(12, 4)
+  isNewHigh                 Boolean? @map("is_new_high")
+  createdAt                 DateTime @default(now()) @map("created_at")
 
   @@unique([tradeDate, snapshotTime, stockCode], map: "uk_current_rank_snapshot")
   @@index([tradeDate, snapshotTime, currentRank], map: "idx_current_rank_snapshot_rank")
