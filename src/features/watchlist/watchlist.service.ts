@@ -535,52 +535,38 @@ export class WatchlistService {
     const stockThemeCodes = [...new Set(stockThemeRows.map((row) => row.themeCode))];
 
     if (stockThemeCodes.length > 0) {
-      const latestSnapshot = await this.prisma.themeDailySnapshot.findFirst({
-        orderBy: { snapshotDate: 'desc' },
-        select: { snapshotDate: true },
-      });
-      if (latestSnapshot) {
-        const best = await this.prisma.themeDailySnapshot.findFirst({
-          where: { themeCode: { in: stockThemeCodes }, snapshotDate: latestSnapshot.snapshotDate },
-          orderBy: { rank: 'asc' },
+      const candidates = await this.issueThemeService.getCurrentThemeRankMap(stockThemeCodes);
+      const best = [...candidates.values()].sort((a, b) => a.rank - b.rank)[0];
+      if (best) {
+        const theme = await this.prisma.theme.findFirst({
+          where: { themeCode: best.themeCode, deletedAt: null },
         });
-        if (best) {
-          const [theme, prevRank] = await Promise.all([
-            this.prisma.theme.findFirst({ where: { themeCode: best.themeCode, deletedAt: null } }),
-            this.getPreviousThemeRank(best.themeCode),
-          ]);
-          if (theme) {
-            return this.buildThemeRecommendResult('1순위', theme, best, prevRank);
-          }
+        if (theme) {
+          return this.buildThemeRecommendResult(
+            '1순위', theme, best, best.previousRank ?? null,
+          );
         }
       }
     }
 
-    // 2순위: 장마감 후 저장된 Top10 테마 중 매일 다르게 1개
-    const latestSnapshot = await this.prisma.themeDailySnapshot.findFirst({
-      orderBy: { snapshotDate: 'desc' },
-      select: { snapshotDate: true },
-    });
-    if (!latestSnapshot) return null;
-
-    const top10 = await this.prisma.themeDailySnapshot.findMany({
+    // 2순위: 동일한 현재 테마 스냅샷의 Top10 중 매일 다르게 1개
+    const availableThemes = await this.prisma.theme.findMany({
       where: {
-        snapshotDate: latestSnapshot.snapshotDate,
         themeCode: { notIn: Array.from(watchlistThemeCodes) },
+        deletedAt: null,
       },
-      orderBy: { rank: 'asc' },
-      take: 10,
+      select: { themeCode: true, themeName: true, imageUrl: true },
     });
+    const availableCodes = availableThemes.map((theme) => theme.themeCode);
+    const currentThemes = await this.issueThemeService.getCurrentThemeRankMap(availableCodes);
+    const top10 = [...currentThemes.values()].sort((a, b) => a.rank - b.rank).slice(0, 10);
     if (top10.length === 0) return null;
 
     const picked = top10[dayIndex % top10.length];
-    const [theme, prevRank] = await Promise.all([
-      this.prisma.theme.findFirst({ where: { themeCode: picked.themeCode, deletedAt: null } }),
-      this.getPreviousThemeRank(picked.themeCode),
-    ]);
+    const theme = availableThemes.find((item) => item.themeCode === picked.themeCode);
     if (!theme) return null;
 
-    return this.buildThemeRecommendResult('2순위', theme, picked, prevRank);
+    return this.buildThemeRecommendResult('2순위', theme, picked, picked.previousRank ?? null);
   }
 
   private async getPreviousThemeRank(themeCode: number): Promise<number | null> {
