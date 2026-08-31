@@ -16,6 +16,7 @@ type MetricRow = {
   price_change_rate_1d: string | null;
   trading_value: bigint | null;
   is_new_high: boolean;
+  short_term_rs: string | null;
 };
 
 type CurrentRankRow = {
@@ -35,6 +36,7 @@ type CurrentRankRow = {
   tradingValue: bigint | null;
   previousTradingValueRatio: number | null;
   isNewHigh: boolean;
+  shortTermRs: number | null;
 };
 
 @Injectable()
@@ -187,22 +189,34 @@ export class CurrentRankService {
     return this.prisma.$queryRawUnsafe<MetricRow[]>(
       `
         SELECT
-          stock_code,
-          trade_date,
-          close_price::text,
-          relative_strength_score::text,
-          rank,
-          high_price_52w::text,
-          low_price_52w::text,
-          ma_50::text,
-          price_change_rate_1d::text,
-          trading_value,
-          is_new_high
-        FROM stock_daily_metrics
-        WHERE trade_date = $1::date
-          AND passed_static_filters = TRUE
-          AND rank > 0
-        ORDER BY rank ASC, stock_code ASC
+          m.stock_code,
+          m.trade_date,
+          m.close_price::text,
+          m.relative_strength_score::text,
+          m.rank,
+          m.high_price_52w::text,
+          m.low_price_52w::text,
+          m.ma_50::text,
+          m.price_change_rate_1d::text,
+          m.trading_value,
+          m.is_new_high,
+          (
+            SELECT CASE WHEN COUNT(*) = 3 THEN AVG(recent.relative_strength_score)::text END
+            FROM (
+              SELECT history.relative_strength_score
+              FROM stock_daily_metrics history
+              WHERE history.stock_code = m.stock_code
+                AND history.trade_date <= m.trade_date
+                AND history.relative_strength_score > 0
+              ORDER BY history.trade_date DESC
+              LIMIT 3
+            ) recent
+          ) AS short_term_rs
+        FROM stock_daily_metrics m
+        WHERE m.trade_date = $1::date
+          AND m.passed_static_filters = TRUE
+          AND m.rank > 0
+        ORDER BY m.rank ASC, m.stock_code ASC
       `,
       this.toDateOnly(tradeDate),
     );
@@ -304,6 +318,7 @@ export class CurrentRankService {
         tradingValue,
         previousTradingValueRatio,
         isNewHigh: highPrice52w != null ? currentPrice >= highPrice52w : metric.is_new_high,
+        shortTermRs: metric.short_term_rs == null ? null : Number(metric.short_term_rs),
       };
     });
 
@@ -331,7 +346,7 @@ export class CurrentRankService {
           `($${p++}::uuid, $${p++}::text, $${p++}::date, $${p++}::timestamp, $${p++}::int, ` +
           `$${p++}::numeric, $${p++}::numeric, $${p++}::numeric, $${p++}::numeric, $${p++}::numeric, ` +
           `$${p++}::numeric, $${p++}::boolean, $${p++}::text, $${p++}::numeric, $${p++}::bigint, ` +
-          `$${p++}::numeric, $${p++}::boolean)`,
+          `$${p++}::numeric, $${p++}::boolean, $${p++}::numeric)`,
         );
         params.push(
           randomUUID(),
@@ -351,6 +366,7 @@ export class CurrentRankService {
           row.tradingValue,
           row.previousTradingValueRatio,
           row.isNewHigh,
+          row.shortTermRs,
         );
       }
 
@@ -360,7 +376,8 @@ export class CurrentRankService {
             snapshot_id, stock_code, trade_date, snapshot_time, current_rank,
             relative_strength_score, current_price, close_price, high_price_52w,
             low_price_52w, ma_50, passed_dynamic_filters, price_source,
-            price_change_rate, trading_value, previous_trading_value_ratio, is_new_high
+            price_change_rate, trading_value, previous_trading_value_ratio, is_new_high,
+            short_term_rs
           )
           VALUES ${placeholders.join(', ')}
           ON CONFLICT (trade_date, snapshot_time, stock_code) DO UPDATE SET
@@ -376,7 +393,8 @@ export class CurrentRankService {
             price_change_rate = EXCLUDED.price_change_rate,
             trading_value = EXCLUDED.trading_value,
             previous_trading_value_ratio = EXCLUDED.previous_trading_value_ratio,
-            is_new_high = EXCLUDED.is_new_high
+            is_new_high = EXCLUDED.is_new_high,
+            short_term_rs = EXCLUDED.short_term_rs
         `,
         ...params,
       );

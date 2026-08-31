@@ -474,6 +474,7 @@ exports.Prisma.StockCurrentRankSnapshotScalarFieldEnum = {
   tradingValue: 'tradingValue',
   previousTradingValueRatio: 'previousTradingValueRatio',
   isNewHigh: 'isNewHigh',
+  shortTermRs: 'shortTermRs',
   createdAt: 'createdAt'
 };
 

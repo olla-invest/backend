@@ -675,6 +675,7 @@ model StockCurrentRankSnapshot {
   tradingValue          BigInt?  @map("trading_value")
   previousTradingValueRatio Decimal? @map("previous_trading_value_ratio") @db.Decimal(12, 4)
   isNewHigh             Boolean? @map("is_new_high")
+  shortTermRs           Decimal? @map("short_term_rs") @db.Decimal(5, 2)
   createdAt             DateTime @default(now()) @map("created_at")
 
   @@unique([tradeDate, snapshotTime, stockCode], map: "uk_current_rank_snapshot")

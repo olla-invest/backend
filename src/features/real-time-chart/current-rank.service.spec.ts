@@ -27,7 +27,7 @@ describe('CurrentRankService price selection', () => {
         stock_code: '041830', trade_date: new Date('2026-08-04'), close_price: '30800',
         relative_strength_score: '90', rank: 1, high_price_52w: '35000',
         low_price_52w: '20000', ma_50: '25000', price_change_rate_1d: '2.5',
-        trading_value: 12_000n, is_new_high: false,
+        trading_value: 12_000n, is_new_high: false, short_term_rs: '88.67',
       },
     ], new Date('2026-08-05'), new Date('2026-08-05T01:20:00.000Z'), new Map([
       ['041830', 4_800n],
@@ -41,6 +41,7 @@ describe('CurrentRankService price selection', () => {
       tradingValue: 12_000n,
       previousTradingValueRatio: 2.5,
       isNewHigh: false,
+      shortTermRs: 88.67,
     });
   });
 
@@ -69,11 +70,13 @@ describe('CurrentRankService price selection', () => {
       tradingValue: 12_000n,
       previousTradingValueRatio: 2.5,
       isNewHigh: false,
+      shortTermRs: 88.67,
     }]);
 
     const [sql, ...params] = prisma.$executeRawUnsafe.mock.calls[0];
     expect(sql).toContain('price_change_rate');
     expect(sql).toContain('previous_trading_value_ratio');
+    expect(sql).toContain('short_term_rs');
     expect(params).toEqual(expect.arrayContaining([2.5, 12_000n, false]));
   });
 });

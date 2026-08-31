@@ -33104,6 +33104,7 @@ export namespace Prisma {
     priceChangeRate: Decimal | null
     tradingValue: number | null
     previousTradingValueRatio: Decimal | null
+    shortTermRs: Decimal | null
   }
 
   export type StockCurrentRankSnapshotSumAggregateOutputType = {
@@ -33117,6 +33118,7 @@ export namespace Prisma {
     priceChangeRate: Decimal | null
     tradingValue: bigint | null
     previousTradingValueRatio: Decimal | null
+    shortTermRs: Decimal | null
   }
 
   export type StockCurrentRankSnapshotMinAggregateOutputType = {
@@ -33137,6 +33139,7 @@ export namespace Prisma {
     tradingValue: bigint | null
     previousTradingValueRatio: Decimal | null
     isNewHigh: boolean | null
+    shortTermRs: Decimal | null
     createdAt: Date | null
   }
 
@@ -33158,6 +33161,7 @@ export namespace Prisma {
     tradingValue: bigint | null
     previousTradingValueRatio: Decimal | null
     isNewHigh: boolean | null
+    shortTermRs: Decimal | null
     createdAt: Date | null
   }
 
@@ -33179,6 +33183,7 @@ export namespace Prisma {
     tradingValue: number
     previousTradingValueRatio: number
     isNewHigh: number
+    shortTermRs: number
     createdAt: number
     _all: number
   }
@@ -33195,6 +33200,7 @@ export namespace Prisma {
     priceChangeRate?: true
     tradingValue?: true
     previousTradingValueRatio?: true
+    shortTermRs?: true
   }
 
   export type StockCurrentRankSnapshotSumAggregateInputType = {
@@ -33208,6 +33214,7 @@ export namespace Prisma {
     priceChangeRate?: true
     tradingValue?: true
     previousTradingValueRatio?: true
+    shortTermRs?: true
   }
 
   export type StockCurrentRankSnapshotMinAggregateInputType = {
@@ -33228,6 +33235,7 @@ export namespace Prisma {
     tradingValue?: true
     previousTradingValueRatio?: true
     isNewHigh?: true
+    shortTermRs?: true
     createdAt?: true
   }
 
@@ -33249,6 +33257,7 @@ export namespace Prisma {
     tradingValue?: true
     previousTradingValueRatio?: true
     isNewHigh?: true
+    shortTermRs?: true
     createdAt?: true
   }
 
@@ -33270,6 +33279,7 @@ export namespace Prisma {
     tradingValue?: true
     previousTradingValueRatio?: true
     isNewHigh?: true
+    shortTermRs?: true
     createdAt?: true
     _all?: true
   }
@@ -33378,6 +33388,7 @@ export namespace Prisma {
     tradingValue: bigint | null
     previousTradingValueRatio: Decimal | null
     isNewHigh: boolean | null
+    shortTermRs: Decimal | null
     createdAt: Date
     _count: StockCurrentRankSnapshotCountAggregateOutputType | null
     _avg: StockCurrentRankSnapshotAvgAggregateOutputType | null
@@ -33418,6 +33429,7 @@ export namespace Prisma {
     tradingValue?: boolean
     previousTradingValueRatio?: boolean
     isNewHigh?: boolean
+    shortTermRs?: boolean
     createdAt?: boolean
   }, ExtArgs["result"]["stockCurrentRankSnapshot"]>
 
@@ -33439,6 +33451,7 @@ export namespace Prisma {
     tradingValue?: boolean
     previousTradingValueRatio?: boolean
     isNewHigh?: boolean
+    shortTermRs?: boolean
     createdAt?: boolean
   }, ExtArgs["result"]["stockCurrentRankSnapshot"]>
 
@@ -33460,6 +33473,7 @@ export namespace Prisma {
     tradingValue?: boolean
     previousTradingValueRatio?: boolean
     isNewHigh?: boolean
+    shortTermRs?: boolean
     createdAt?: boolean
   }, ExtArgs["result"]["stockCurrentRankSnapshot"]>
 
@@ -33481,10 +33495,11 @@ export namespace Prisma {
     tradingValue?: boolean
     previousTradingValueRatio?: boolean
     isNewHigh?: boolean
+    shortTermRs?: boolean
     createdAt?: boolean
   }
 
-  export type StockCurrentRankSnapshotOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"snapshotId" | "stockCode" | "tradeDate" | "snapshotTime" | "currentRank" | "relativeStrengthScore" | "currentPrice" | "closePrice" | "highPrice52w" | "lowPrice52w" | "ma50" | "passedDynamicFilters" | "priceSource" | "priceChangeRate" | "tradingValue" | "previousTradingValueRatio" | "isNewHigh" | "createdAt", ExtArgs["result"]["stockCurrentRankSnapshot"]>
+  export type StockCurrentRankSnapshotOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"snapshotId" | "stockCode" | "tradeDate" | "snapshotTime" | "currentRank" | "relativeStrengthScore" | "currentPrice" | "closePrice" | "highPrice52w" | "lowPrice52w" | "ma50" | "passedDynamicFilters" | "priceSource" | "priceChangeRate" | "tradingValue" | "previousTradingValueRatio" | "isNewHigh" | "shortTermRs" | "createdAt", ExtArgs["result"]["stockCurrentRankSnapshot"]>
 
   export type $StockCurrentRankSnapshotPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "StockCurrentRankSnapshot"
@@ -33507,6 +33522,7 @@ export namespace Prisma {
       tradingValue: bigint | null
       previousTradingValueRatio: Prisma.Decimal | null
       isNewHigh: boolean | null
+      shortTermRs: Prisma.Decimal | null
       createdAt: Date
     }, ExtArgs["result"]["stockCurrentRankSnapshot"]>
     composites: {}
@@ -33948,6 +33964,7 @@ export namespace Prisma {
     readonly tradingValue: FieldRef<"StockCurrentRankSnapshot", 'BigInt'>
     readonly previousTradingValueRatio: FieldRef<"StockCurrentRankSnapshot", 'Decimal'>
     readonly isNewHigh: FieldRef<"StockCurrentRankSnapshot", 'Boolean'>
+    readonly shortTermRs: FieldRef<"StockCurrentRankSnapshot", 'Decimal'>
     readonly createdAt: FieldRef<"StockCurrentRankSnapshot", 'DateTime'>
   }
     
@@ -39434,6 +39451,7 @@ export namespace Prisma {
     tradingValue: 'tradingValue',
     previousTradingValueRatio: 'previousTradingValueRatio',
     isNewHigh: 'isNewHigh',
+    shortTermRs: 'shortTermRs',
     createdAt: 'createdAt'
   };
 
@@ -41973,6 +41991,7 @@ export namespace Prisma {
     tradingValue?: BigIntNullableFilter<"StockCurrentRankSnapshot"> | bigint | number | null
     previousTradingValueRatio?: DecimalNullableFilter<"StockCurrentRankSnapshot"> | Decimal | DecimalJsLike | number | string | null
     isNewHigh?: BoolNullableFilter<"StockCurrentRankSnapshot"> | boolean | null
+    shortTermRs?: DecimalNullableFilter<"StockCurrentRankSnapshot"> | Decimal | DecimalJsLike | number | string | null
     createdAt?: DateTimeFilter<"StockCurrentRankSnapshot"> | Date | string
   }
 
@@ -41994,6 +42013,7 @@ export namespace Prisma {
     tradingValue?: SortOrderInput | SortOrder
     previousTradingValueRatio?: SortOrderInput | SortOrder
     isNewHigh?: SortOrderInput | SortOrder
+    shortTermRs?: SortOrderInput | SortOrder
     createdAt?: SortOrder
   }
 
@@ -42019,6 +42039,7 @@ export namespace Prisma {
     tradingValue?: BigIntNullableFilter<"StockCurrentRankSnapshot"> | bigint | number | null
     previousTradingValueRatio?: DecimalNullableFilter<"StockCurrentRankSnapshot"> | Decimal | DecimalJsLike | number | string | null
     isNewHigh?: BoolNullableFilter<"StockCurrentRankSnapshot"> | boolean | null
+    shortTermRs?: DecimalNullableFilter<"StockCurrentRankSnapshot"> | Decimal | DecimalJsLike | number | string | null
     createdAt?: DateTimeFilter<"StockCurrentRankSnapshot"> | Date | string
   }, "snapshotId" | "tradeDate_snapshotTime_stockCode">
 
@@ -42040,6 +42061,7 @@ export namespace Prisma {
     tradingValue?: SortOrderInput | SortOrder
     previousTradingValueRatio?: SortOrderInput | SortOrder
     isNewHigh?: SortOrderInput | SortOrder
+    shortTermRs?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     _count?: StockCurrentRankSnapshotCountOrderByAggregateInput
     _avg?: StockCurrentRankSnapshotAvgOrderByAggregateInput
@@ -42069,6 +42091,7 @@ export namespace Prisma {
     tradingValue?: BigIntNullableWithAggregatesFilter<"StockCurrentRankSnapshot"> | bigint | number | null
     previousTradingValueRatio?: DecimalNullableWithAggregatesFilter<"StockCurrentRankSnapshot"> | Decimal | DecimalJsLike | number | string | null
     isNewHigh?: BoolNullableWithAggregatesFilter<"StockCurrentRankSnapshot"> | boolean | null
+    shortTermRs?: DecimalNullableWithAggregatesFilter<"StockCurrentRankSnapshot"> | Decimal | DecimalJsLike | number | string | null
     createdAt?: DateTimeWithAggregatesFilter<"StockCurrentRankSnapshot"> | Date | string
   }
 
@@ -44880,6 +44903,7 @@ export namespace Prisma {
     tradingValue?: bigint | number | null
     previousTradingValueRatio?: Decimal | DecimalJsLike | number | string | null
     isNewHigh?: boolean | null
+    shortTermRs?: Decimal | DecimalJsLike | number | string | null
     createdAt?: Date | string
   }
 
@@ -44901,6 +44925,7 @@ export namespace Prisma {
     tradingValue?: bigint | number | null
     previousTradingValueRatio?: Decimal | DecimalJsLike | number | string | null
     isNewHigh?: boolean | null
+    shortTermRs?: Decimal | DecimalJsLike | number | string | null
     createdAt?: Date | string
   }
 
@@ -44922,6 +44947,7 @@ export namespace Prisma {
     tradingValue?: NullableBigIntFieldUpdateOperationsInput | bigint | number | null
     previousTradingValueRatio?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     isNewHigh?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    shortTermRs?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -44943,6 +44969,7 @@ export namespace Prisma {
     tradingValue?: NullableBigIntFieldUpdateOperationsInput | bigint | number | null
     previousTradingValueRatio?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     isNewHigh?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    shortTermRs?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -44964,6 +44991,7 @@ export namespace Prisma {
     tradingValue?: bigint | number | null
     previousTradingValueRatio?: Decimal | DecimalJsLike | number | string | null
     isNewHigh?: boolean | null
+    shortTermRs?: Decimal | DecimalJsLike | number | string | null
     createdAt?: Date | string
   }
 
@@ -44985,6 +45013,7 @@ export namespace Prisma {
     tradingValue?: NullableBigIntFieldUpdateOperationsInput | bigint | number | null
     previousTradingValueRatio?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     isNewHigh?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    shortTermRs?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -45006,6 +45035,7 @@ export namespace Prisma {
     tradingValue?: NullableBigIntFieldUpdateOperationsInput | bigint | number | null
     previousTradingValueRatio?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     isNewHigh?: NullableBoolFieldUpdateOperationsInput | boolean | null
+    shortTermRs?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -47634,6 +47664,7 @@ export namespace Prisma {
     tradingValue?: SortOrder
     previousTradingValueRatio?: SortOrder
     isNewHigh?: SortOrder
+    shortTermRs?: SortOrder
     createdAt?: SortOrder
   }
 
@@ -47648,6 +47679,7 @@ export namespace Prisma {
     priceChangeRate?: SortOrder
     tradingValue?: SortOrder
     previousTradingValueRatio?: SortOrder
+    shortTermRs?: SortOrder
   }
 
   export type StockCurrentRankSnapshotMaxOrderByAggregateInput = {
@@ -47668,6 +47700,7 @@ export namespace Prisma {
     tradingValue?: SortOrder
     previousTradingValueRatio?: SortOrder
     isNewHigh?: SortOrder
+    shortTermRs?: SortOrder
     createdAt?: SortOrder
   }
 
@@ -47689,6 +47722,7 @@ export namespace Prisma {
     tradingValue?: SortOrder
     previousTradingValueRatio?: SortOrder
     isNewHigh?: SortOrder
+    shortTermRs?: SortOrder
     createdAt?: SortOrder
   }
 
@@ -47703,6 +47737,7 @@ export namespace Prisma {
     priceChangeRate?: SortOrder
     tradingValue?: SortOrder
     previousTradingValueRatio?: SortOrder
+    shortTermRs?: SortOrder
   }
 
   export type BoolNullableWithAggregatesFilter<$PrismaModel = never> = {

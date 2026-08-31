@@ -34,6 +34,7 @@
 - `trading_value`: 스냅샷 시점 누적 거래대금 또는 확정 거래대금
 - `previous_trading_value_ratio`: 전일 동일 시각 또는 전일 확정 거래대금 대비 비율
 - `is_new_high`: 해당 스냅샷 가격 기준 신고가 여부
+- `short_term_rs`: 최근 3거래일 RS가 모두 있을 때의 평균
 
 등락률은 스냅샷 생성 시 한 번 계산해 저장한다. 테마 서비스가 `current_price`와 `close_price`로 다시 계산하지 않는다. 실시간 가격 사용 여부와 종가 폴백은 기존 `CurrentPriceResolver`의 판정을 따른다.
 
@@ -118,6 +119,7 @@
 - `stock_current_rank_snapshots.trading_value`
 - `stock_current_rank_snapshots.previous_trading_value_ratio`
 - `stock_current_rank_snapshots.is_new_high`
+- `stock_current_rank_snapshots.short_term_rs`
 - `theme_daily_snapshots.stock_snapshot_time`
 
 새 생성 경로가 모든 필드를 채우도록 배포한 뒤 백필한다. 과거 데이터 검증이 끝나기 전에는 데이터베이스 NOT NULL 제약을 추가하지 않는다.
