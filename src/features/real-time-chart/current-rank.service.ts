@@ -13,6 +13,9 @@ type MetricRow = {
   high_price_52w: string | null;
   low_price_52w: string | null;
   ma_50: string | null;
+  price_change_rate_1d: string | null;
+  trading_value: bigint | null;
+  is_new_high: boolean;
 };
 
 type CurrentRankRow = {
@@ -28,6 +31,10 @@ type CurrentRankRow = {
   ma50: number | null;
   passedDynamicFilters: boolean;
   priceSource: 'realtime' | 'close';
+  priceChangeRate: number | null;
+  tradingValue: bigint | null;
+  previousTradingValueRatio: number | null;
+  isNewHigh: boolean;
 };
 
 @Injectable()
@@ -65,7 +72,8 @@ export class CurrentRankService {
     }
 
     const snapshotTime = this.truncateToTenMinutes(now);
-    const rows = this.buildRankRows(metrics, snapshotTradeDate, snapshotTime);
+    const previousTradingValues = await this.getPreviousTradingValues(snapshotTradeDate);
+    const rows = this.buildRankRows(metrics, snapshotTradeDate, snapshotTime, previousTradingValues);
     await this.saveSnapshotRows(rows);
 
     const rankedCount = rows.filter((row) => row.passedDynamicFilters).length;
@@ -186,7 +194,10 @@ export class CurrentRankService {
           rank,
           high_price_52w::text,
           low_price_52w::text,
-          ma_50::text
+          ma_50::text,
+          price_change_rate_1d::text,
+          trading_value,
+          is_new_high
         FROM stock_daily_metrics
         WHERE trade_date = $1::date
           AND passed_static_filters = TRUE
@@ -211,7 +222,40 @@ export class CurrentRankService {
     return rows[0]?.snapshot_time ?? null;
   }
 
-  private buildRankRows(metrics: MetricRow[], snapshotTradeDate: Date, snapshotTime: Date): CurrentRankRow[] {
+  private async getPreviousTradingValues(tradeDate: Date): Promise<Map<string, bigint>> {
+    const rows = await this.prisma.$queryRawUnsafe<Array<{
+      stock_code: string;
+      trading_value: bigint;
+    }>>(
+      `
+        WITH previous_date AS (
+          SELECT MAX(trade_date) AS trade_date
+          FROM stock_current_rank_snapshots
+          WHERE trade_date < $1::date
+            AND trading_value IS NOT NULL
+        ), latest_time AS (
+          SELECT MAX(snapshot_time) AS snapshot_time
+          FROM stock_current_rank_snapshots s
+          JOIN previous_date d ON d.trade_date = s.trade_date
+          WHERE s.trading_value IS NOT NULL
+        )
+        SELECT s.stock_code, s.trading_value
+        FROM stock_current_rank_snapshots s
+        JOIN previous_date d ON d.trade_date = s.trade_date
+        JOIN latest_time t ON t.snapshot_time = s.snapshot_time
+        WHERE s.trading_value IS NOT NULL
+      `,
+      this.toDateOnly(tradeDate),
+    );
+    return new Map(rows.map((row) => [row.stock_code, row.trading_value]));
+  }
+
+  private buildRankRows(
+    metrics: MetricRow[],
+    snapshotTradeDate: Date,
+    snapshotTime: Date,
+    previousTradingValues: Map<string, bigint> = new Map(),
+  ): CurrentRankRow[] {
     const tradeDate = this.toDateOnly(snapshotTradeDate);
     const rows = metrics.map((metric) => {
       const realtimePrice = this.currentPriceResolver.getUsableRealtimePrice(
@@ -224,6 +268,17 @@ export class CurrentRankService {
       const highPrice52w = metric.high_price_52w == null ? null : Number(metric.high_price_52w);
       const lowPrice52w = metric.low_price_52w == null ? null : Number(metric.low_price_52w);
       const ma50 = metric.ma_50 == null ? null : Number(metric.ma_50);
+      const priceChangeRate = realtimePrice
+        ? realtimePrice.changeRate
+        : metric.price_change_rate_1d == null ? null : Number(metric.price_change_rate_1d);
+      const tradingValue = realtimePrice?.accAmount && realtimePrice.accAmount > 0
+        ? BigInt(Math.trunc(realtimePrice.accAmount))
+        : metric.trading_value;
+      const previousTradingValue = previousTradingValues.get(metric.stock_code);
+      const previousTradingValueRatio =
+        tradingValue != null && previousTradingValue != null && previousTradingValue > 0n
+          ? Number(tradingValue) / Number(previousTradingValue)
+          : null;
       const passedDynamicFilters =
         lowPrice52w != null &&
         highPrice52w != null &&
@@ -245,6 +300,10 @@ export class CurrentRankService {
         ma50,
         passedDynamicFilters,
         priceSource: realtimePrice ? 'realtime' as const : 'close' as const,
+        priceChangeRate,
+        tradingValue,
+        previousTradingValueRatio,
+        isNewHigh: highPrice52w != null ? currentPrice >= highPrice52w : metric.is_new_high,
       };
     });
 
@@ -271,7 +330,8 @@ export class CurrentRankService {
         placeholders.push(
           `($${p++}::uuid, $${p++}::text, $${p++}::date, $${p++}::timestamp, $${p++}::int, ` +
           `$${p++}::numeric, $${p++}::numeric, $${p++}::numeric, $${p++}::numeric, $${p++}::numeric, ` +
-          `$${p++}::numeric, $${p++}::boolean, $${p++}::text)`,
+          `$${p++}::numeric, $${p++}::boolean, $${p++}::text, $${p++}::numeric, $${p++}::bigint, ` +
+          `$${p++}::numeric, $${p++}::boolean)`,
         );
         params.push(
           randomUUID(),
@@ -287,6 +347,10 @@ export class CurrentRankService {
           row.ma50,
           row.passedDynamicFilters,
           row.priceSource,
+          row.priceChangeRate,
+          row.tradingValue,
+          row.previousTradingValueRatio,
+          row.isNewHigh,
         );
       }
 
@@ -295,7 +359,8 @@ export class CurrentRankService {
           INSERT INTO stock_current_rank_snapshots (
             snapshot_id, stock_code, trade_date, snapshot_time, current_rank,
             relative_strength_score, current_price, close_price, high_price_52w,
-            low_price_52w, ma_50, passed_dynamic_filters, price_source
+            low_price_52w, ma_50, passed_dynamic_filters, price_source,
+            price_change_rate, trading_value, previous_trading_value_ratio, is_new_high
           )
           VALUES ${placeholders.join(', ')}
           ON CONFLICT (trade_date, snapshot_time, stock_code) DO UPDATE SET
@@ -307,7 +372,11 @@ export class CurrentRankService {
             low_price_52w = EXCLUDED.low_price_52w,
             ma_50 = EXCLUDED.ma_50,
             passed_dynamic_filters = EXCLUDED.passed_dynamic_filters,
-            price_source = EXCLUDED.price_source
+            price_source = EXCLUDED.price_source,
+            price_change_rate = EXCLUDED.price_change_rate,
+            trading_value = EXCLUDED.trading_value,
+            previous_trading_value_ratio = EXCLUDED.previous_trading_value_ratio,
+            is_new_high = EXCLUDED.is_new_high
         `,
         ...params,
       );
