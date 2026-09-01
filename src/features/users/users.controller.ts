@@ -61,7 +61,7 @@ export class UsersController {
     }
 
     @Patch( 'me' )
-    @ApiOperation( { summary: '프로필 수정', description: '이름, 휴대폰 번호 수정' } )
+    @ApiOperation( { summary: '프로필 수정', description: '이름, 휴대폰 번호, 이메일 수정 (이메일 중복 시 409)' } )
     updateProfile(
         @CurrentUser( 'userId' ) userId: string,
         @Body() dto: UpdateProfileDto,

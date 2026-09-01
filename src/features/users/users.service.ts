@@ -187,11 +187,25 @@ export class UsersService {
             throw new NotFoundException( '사용자를 찾을 수 없습니다.' );
         }
 
+        if ( dto.email !== undefined && dto.email !== user.email ) {
+            const existingEmail = await this.prisma.user.findFirst( {
+                where: {
+                    email: dto.email,
+                    deletedAt: null,
+                    NOT: { userId },
+                },
+            } );
+            if ( existingEmail ) {
+                throw new ConflictException( '이미 사용 중인 이메일입니다.' );
+            }
+        }
+
         const updated = await this.prisma.user.update( {
             where: { userId },
             data: {
                 ...(dto.name !== undefined && { name: dto.name }),
                 ...(dto.phone !== undefined && { phone: dto.phone }),
+                ...(dto.email !== undefined && { email: dto.email }),
             },
             select: {
                 userId: true,
