@@ -1,7 +1,6 @@
 import { BadRequestException, UnauthorizedException } from '@nestjs/common';
 import { IssueThemeService } from './issue-theme.service';
 import { ThemeMetricsService } from './theme-metrics.service';
-import { CurrentPriceResolver } from '../real-time-chart/current-price-resolver.service';
 import { IssueThemeFilter, IssueThemeSort, IssueThemeView } from './dto/issue-theme-list-query.dto';
 
 describe('IssueThemeService enhanced list', () => {
@@ -14,7 +13,6 @@ describe('IssueThemeService enhanced list', () => {
     company: { findMany: jest.fn() },
   };
   const realtimeCache: any = { getPrices: jest.fn(() => new Map()) };
-  const subscriptionManager: any = { ensureSubscribed: jest.fn().mockResolvedValue(undefined) };
   const themeSnapshot: any = {
     getLatestThemeItems: jest.fn().mockResolvedValue(new Map()),
     getThemeStocksForThemes: jest.fn().mockResolvedValue(new Map()),
@@ -22,8 +20,6 @@ describe('IssueThemeService enhanced list', () => {
   const service = new IssueThemeService(
     prisma,
     realtimeCache,
-    new CurrentPriceResolver(),
-    subscriptionManager,
     {} as any,
     new ThemeMetricsService(),
     {} as any,
@@ -32,7 +28,6 @@ describe('IssueThemeService enhanced list', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    subscriptionManager.ensureSubscribed.mockResolvedValue(undefined);
     const stockSnapshotTime = new Date('2026-07-25T06:50:00.000Z');
     const snapshotDate = new Date('2026-07-25');
     themeSnapshot.getLatestThemeItems.mockResolvedValue(new Map([
@@ -70,20 +65,6 @@ describe('IssueThemeService enhanced list', () => {
       [2, [stock('C', 95), stock('D', 82), stock('G', 20)]],
       [3, [stock('H', 60)]],
     ]));
-    jest.spyOn(service as any, 'getFilteredMetrics').mockResolvedValue({
-      tradeDate: new Date('2026-07-25'),
-      metrics: [
-        { stockCode: 'A', relativeStrengthScore: 90, priceChangeRate1d: 6, isNewHigh: true },
-        { stockCode: 'B', relativeStrengthScore: 85, priceChangeRate1d: 4, isNewHigh: false },
-        { stockCode: 'C', relativeStrengthScore: 95, priceChangeRate1d: 8, isNewHigh: false },
-        { stockCode: 'D', relativeStrengthScore: 82, priceChangeRate1d: 5, isNewHigh: false },
-        { stockCode: 'E', relativeStrengthScore: 88, priceChangeRate1d: 5, isNewHigh: false },
-        { stockCode: 'F', relativeStrengthScore: 87, priceChangeRate1d: 5, isNewHigh: false },
-        { stockCode: 'G', relativeStrengthScore: 20, priceChangeRate1d: -10, isNewHigh: false },
-        { stockCode: 'H', relativeStrengthScore: 60, priceChangeRate1d: 1, isNewHigh: false },
-        { stockCode: 'ZERO', relativeStrengthScore: 0, priceChangeRate1d: 20, isNewHigh: true },
-      ],
-    });
     prisma.stockTheme.findMany.mockImplementation(({ select }: any) => {
       if (select?.theme) {
         return Promise.resolve([
@@ -112,15 +93,6 @@ describe('IssueThemeService enhanced list', () => {
     });
     prisma.themeDailySnapshot.findMany.mockResolvedValue([]);
     prisma.userWatchlistTheme.findMany.mockResolvedValue([{ themeCode: 1 }]);
-  });
-
-  it('does not start realtime subscriptions while serving a finalized theme snapshot', async () => {
-    await service.getThemeList({
-      view: IssueThemeView.RANK, filter: IssueThemeFilter.ALL, sort: IssueThemeSort.RS,
-      favoritesOnly: false, display: 20, page: 1,
-    });
-
-    expect(subscriptionManager.ensureSubscribed).not.toHaveBeenCalled();
   });
 
   it('combines search, favorites and selected filter with AND semantics', async () => {
@@ -185,38 +157,6 @@ describe('IssueThemeService enhanced list', () => {
     expect(result.items.map((item: any) => item.themeCode)).toEqual([1]);
   });
 
-  it('loads only latest RS metrics that pass the realtime-chart dynamic filters', async () => {
-    (service as any).getFilteredMetrics.mockRestore();
-    const tradeDate = new Date('2026-07-25');
-    prisma.stockDailyMetrics.findFirst.mockResolvedValue({ tradeDate });
-    prisma.stockDailyMetrics.findMany.mockResolvedValue([
-      {
-        stockCode: 'PASS', relativeStrengthScore: 90, closePrice: 80,
-        lowPrice52w: 50, highPrice52w: 100, ma50: 70,
-      },
-      {
-        stockCode: 'LOW52', relativeStrengthScore: 99, closePrice: 64,
-        lowPrice52w: 50, highPrice52w: 80, ma50: 60,
-      },
-      {
-        stockCode: 'HIGH52', relativeStrengthScore: 98, closePrice: 74,
-        lowPrice52w: 50, highPrice52w: 100, ma50: 60,
-      },
-      {
-        stockCode: 'MA50', relativeStrengthScore: 97, closePrice: 70,
-        lowPrice52w: 50, highPrice52w: 90, ma50: 70,
-      },
-    ]);
-    realtimeCache.getPrices.mockReturnValue(new Map());
-
-    const result = await (service as any).getFilteredMetrics();
-
-    expect(result.metrics.map((metric: any) => metric.stockCode)).toEqual(['PASS']);
-    expect(prisma.stockDailyMetrics.findMany).toHaveBeenCalledWith({
-      where: { tradeDate, relativeStrengthScore: { gt: 0 } },
-    });
-  });
-
   it('requires authentication for favorites', async () => {
     await expect(service.getThemeList({
       view: IssueThemeView.RANK, filter: IssueThemeFilter.ALL, sort: IssueThemeSort.RS,
@@ -242,7 +182,7 @@ describe('IssueThemeService enhanced list', () => {
   });
 
   it('builds the list without reading daily metrics or realtime prices', async () => {
-    (service as any).getFilteredMetrics.mockRejectedValue(new Error('legacy metrics must not be read'));
+    prisma.stockDailyMetrics.findMany.mockImplementation(() => { throw new Error('legacy metrics must not be read'); });
     realtimeCache.getPrices.mockImplementation(() => { throw new Error('realtime must not be read'); });
 
     const result = await service.getThemeList({

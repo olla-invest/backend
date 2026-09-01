@@ -672,6 +672,7 @@ model StockCurrentRankSnapshot {
   passedDynamicFilters      Boolean  @default(false) @map("passed_dynamic_filters")
   priceSource               String   @default("close") @map("price_source") @db.VarChar(20)
   priceChangeRate           Decimal? @map("price_change_rate") @db.Decimal(10, 4)
+  priceChange1d             Decimal? @map("price_change_1d") @db.Decimal(15, 2)
   tradingValue              BigInt?  @map("trading_value")
   previousTradingValueRatio Decimal? @map("previous_trading_value_ratio") @db.Decimal(12, 4)
   isNewHigh                 Boolean? @map("is_new_high")

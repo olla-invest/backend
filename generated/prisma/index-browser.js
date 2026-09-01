@@ -471,6 +471,7 @@ exports.Prisma.StockCurrentRankSnapshotScalarFieldEnum = {
   passedDynamicFilters: 'passedDynamicFilters',
   priceSource: 'priceSource',
   priceChangeRate: 'priceChangeRate',
+  priceChange1d: 'priceChange1d',
   tradingValue: 'tradingValue',
   previousTradingValueRatio: 'previousTradingValueRatio',
   isNewHigh: 'isNewHigh',

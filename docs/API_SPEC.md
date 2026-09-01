@@ -741,6 +741,8 @@ DART 기업개황·손익현황·현금흐름·재무지표를 통합 조회합�
 
 > 목록과 상세의 순위·종목 수·가격·RS·등락률은 하나의 확정된 종목 순위 스냅샷(`trade_date + snapshot_time`)을 공통 소스로 사용합니다. RS 80 이상 조건은 기본 집계 조건이 아니라 요청 시 적용되는 테마 응답 필터입니다.
 >
+> 테마 `shortTermRs`(최근 3거래일 평균 RS)와 `momentum`(단기 RS - 최대 63거래일 평균 RS)은 저장된 테마 스냅샷 이력에서 계산되어 `theme_daily_snapshots`에 함께 기록됩니다. 이력이 3거래일 미만이면 두 값 모두 `null`이며, `filter=momentum`은 `momentum > 0`인 테마만 남깁니다.
+>
 > 종목 필터 기준: 정적 필터(passedStaticFilters=true) + 동적 필터(DF1·DF2·DF3) 통과 종목만 집계
 > - DF1: `현재가 >= 52주 저가 × 1.3`
 > - DF2: `현재가 >= 52주 고가 × 0.75`
@@ -830,8 +832,14 @@ DART 기업개황·손익현황·현금흐름·재무지표를 통합 조회합�
 | `rank` | number \| null | 당일 스냅샷 기준 순위 (스냅샷 없으면 null) |
 | `rankChange` | number \| null | 전일 대비 순위 변동 |
 | `insights` | string[] | 인사이트 문구 목록 (아래 참고) |
+| `shortTermRs` | number \| null | 테마 단기 RS (최근 3거래일 평균, 이력 부족 시 null) |
+| `momentum` | number \| null | 테마 모멘텀 (단기 RS - 기간 평균 RS) |
+| `relatedThemes` | array | 연관 테마 (동일 스냅샷 기준 공유 종목 2개 이상 · 유사도 0.1 이상, 최대 3개) |
 | `stocks[].rank` | number | RS점수 기준 종목 순위 |
 | `stocks[].rsScore` | number | 상대강도 점수 |
+| `stocks[].priceChange1d` | number \| null | 전일 대비 가격 변동 (스냅샷 시점 기준) |
+| `stocks[].newHighRate` | number \| null | 52주 고가 대비 현재가 괴리율 (%) |
+| `stocks[].previousTradingValueRatio` | number \| null | 전일 동시간 누적 거래대금 대비 배율 |
 | `stocks[].tradingValueRatio` | string | 전일 동시간 대비 거래대금 배율 (예: `"2.3배"`, 비교 불가 시 `"-"`) |
 
 **인사이트 발생 조건**
@@ -884,6 +892,8 @@ DART 기업개황·손익현황·현금흐름·재무지표를 통합 조회합�
 ### POST `/issue-theme/snapshot/theme/backfill` — 테마 스냅샷 백필
 
 `days`(1~365)만큼의 최근 거래일을 대상으로 종가 기준 종목 순위 스냅샷을 먼저 재구축한 뒤, 성공한 날짜만 테마 스냅샷으로 집계합니다. 과거 날짜에는 현재 실시간 캐시를 사용하지 않습니다.
+
+날짜는 과거→최신 순으로 처리합니다. 거래대금 전일비(`previousTradingValueRatio`)는 직전 거래일 종목 스냅샷을 참조하므로, 백필 구간의 첫 거래일은 비교 대상이 없어 `null`이 될 수 있습니다. 테마 AI 요약은 백필에서 생성되지 않고, 장 마감 후 확정된 당일 스냅샷에서만 생성됩니다.
 
 **Response `201`**
 ```json

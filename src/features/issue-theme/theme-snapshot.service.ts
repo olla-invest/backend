@@ -2,6 +2,8 @@ import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../../common/prisma/prisma.service';
 import { OnEvent } from '@nestjs/event-emitter';
 import { CurrentRankService } from '../real-time-chart/current-rank.service';
+import { ThemeMetricsService } from './theme-metrics.service';
+import { ThemeAiSummaryService } from './theme-ai-summary.service';
 
 export interface ThemeSnapshotItem {
   themeCode: number;
@@ -28,9 +30,11 @@ export interface ThemeSnapshotStock {
   currentPrice: number;
   relativeStrengthScore: number;
   priceChangeRate: number;
+  priceChange1d: number | null;
   tradingValue: bigint | null;
   previousTradingValueRatio: number | null;
   isNewHigh: boolean;
+  highPrice52w: number | null;
   shortTermRs: number | null;
 }
 
@@ -51,11 +55,20 @@ export class ThemeSnapshotService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly currentRank: CurrentRankService,
+    private readonly themeMetrics: ThemeMetricsService,
+    private readonly themeAiSummary: ThemeAiSummaryService,
   ) {}
 
   @OnEvent('stock-ranks.finalized')
   async handleStockRanksFinalized({ tradeDate }: { tradeDate: string }): Promise<void> {
-    await this.buildDailySnapshot(new Date(`${tradeDate}T00:00:00.000Z`));
+    const date = new Date(`${tradeDate}T00:00:00.000Z`);
+    await this.buildDailySnapshot(date);
+    // AI 요약은 확정된 당일 스냅샷에만 필요하므로 백필 경로에서는 호출하지 않는다.
+    void this.themeAiSummary
+      .generateForTradeDate(date, Number(process.env.THEME_AI_SUMMARY_LIMIT || 20))
+      .catch((error) => this.logger.error(
+        `[theme-snapshot] AI summary batch failed: ${error?.message ?? error}`,
+      ));
   }
 
   async buildDailySnapshot(tradeDate: Date): Promise<{
@@ -128,6 +141,38 @@ export class ThemeSnapshotService {
       groups.set(row.theme_code, stocks);
     }
 
+    const themeCodes = [...groups.keys()];
+    const historyRows = themeCodes.length === 0 ? [] : await this.prisma.$queryRawUnsafe<Array<{
+      theme_code: number;
+      snapshot_date: Date;
+      avg_rs_score: string;
+    }>>(
+      `
+        SELECT theme_code, snapshot_date, avg_rs_score::text
+        FROM (
+          SELECT theme_code, snapshot_date, avg_rs_score,
+                 ROW_NUMBER() OVER (PARTITION BY theme_code ORDER BY snapshot_date DESC) AS row_num
+          FROM theme_daily_snapshots
+          WHERE theme_code = ANY($1::int[])
+            AND snapshot_date < $2::date
+            AND stock_snapshot_time IS NOT NULL
+        ) history
+        WHERE row_num <= 62
+        ORDER BY theme_code, snapshot_date
+      `,
+      themeCodes,
+      date,
+    );
+    const histories = new Map<number, Array<{ tradeDate: string; avgRsScore: number }>>();
+    for (const row of historyRows) {
+      const history = histories.get(row.theme_code) ?? [];
+      history.push({
+        tradeDate: this.dateKey(row.snapshot_date),
+        avgRsScore: Number(row.avg_rs_score),
+      });
+      histories.set(row.theme_code, history);
+    }
+
     const themes = [...groups.entries()].map(([themeCode, stockMap]) => {
       const stocks = [...stockMap.values()];
       const changes = stocks.map((row) => Number(row.change_rate));
@@ -139,6 +184,19 @@ export class ThemeSnapshotService {
       const flatCount = changes.filter((value) => value === 0).length;
       const avgChangeRate = this.average(changes);
       const avgRsScore = this.average(scores);
+      const history = [
+        ...(histories.get(themeCode) ?? []),
+        { tradeDate: date, avgRsScore },
+      ];
+      const historicalMetrics = this.themeMetrics.calculateDailyMetric(
+        stocks.map((row) => ({
+          stockCode: row.stock_code,
+          rsScore: Number(row.rs_score),
+          changeRate: Number(row.change_rate),
+          isNewHigh: row.is_new_high === true,
+        })),
+        history,
+      );
       return {
         themeCode,
         snapshotDate: new Date(`${date}T00:00:00.000Z`),
@@ -155,8 +213,8 @@ export class ThemeSnapshotService {
         upCount,
         flatCount,
         downCount,
-        shortTermRs: null,
-        momentum: null,
+        shortTermRs: historicalMetrics.shortTermRs,
+        momentum: historicalMetrics.momentum,
         newHighCount: stocks.filter((row) => row.is_new_high === true).length,
         stockSnapshotTime,
       };
@@ -211,6 +269,7 @@ export class ThemeSnapshotService {
       `,
       days,
     );
+    dates.sort((a, b) => a.trade_date.getTime() - b.trade_date.getTime());
     const rebuiltDates: string[] = [];
     const skippedDates: string[] = [];
     for (const row of dates) {
@@ -300,9 +359,11 @@ export class ThemeSnapshotService {
       current_price: string;
       relative_strength_score: string;
       price_change_rate: string;
+      price_change_1d: string | null;
       trading_value: bigint | null;
       previous_trading_value_ratio: string | null;
       is_new_high: boolean;
+      high_price_52w: string | null;
       short_term_rs: string | null;
     }>>(
       `
@@ -322,8 +383,9 @@ export class ThemeSnapshotService {
         SELECT DISTINCT ON (membership.theme_code, s.stock_code)
           membership.theme_code, s.stock_code, s.current_rank, s.current_price::text,
           s.relative_strength_score::text, s.price_change_rate::text,
-          s.trading_value, s.previous_trading_value_ratio::text, s.is_new_high,
-          s.short_term_rs::text
+          s.price_change_1d::text, s.trading_value,
+          s.previous_trading_value_ratio::text, s.is_new_high,
+          s.high_price_52w::text, s.short_term_rs::text
         FROM stock_current_rank_snapshots s
         JOIN theme_memberships membership ON membership.stock_code = s.stock_code
         WHERE membership.theme_code = ANY($1::int[])
@@ -347,10 +409,12 @@ export class ThemeSnapshotService {
         currentPrice: Number(row.current_price),
         relativeStrengthScore: Number(row.relative_strength_score),
         priceChangeRate: Number(row.price_change_rate),
+        priceChange1d: row.price_change_1d == null ? null : Number(row.price_change_1d),
         tradingValue: row.trading_value,
         previousTradingValueRatio: row.previous_trading_value_ratio == null
           ? null : Number(row.previous_trading_value_ratio),
         isNewHigh: row.is_new_high,
+        highPrice52w: row.high_price_52w == null ? null : Number(row.high_price_52w),
         shortTermRs: row.short_term_rs == null ? null : Number(row.short_term_rs),
       });
     }

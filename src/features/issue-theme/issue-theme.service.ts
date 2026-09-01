@@ -3,8 +3,6 @@ import { Cron } from '@nestjs/schedule';
 import { readFile } from 'fs/promises';
 import { PrismaService } from '../../common/prisma/prisma.service';
 import { RealtimePriceCacheService } from '../real-time-chart/realtime-price-cache.service';
-import { CurrentPriceResolver } from '../real-time-chart/current-price-resolver.service';
-import { RealtimeSubscriptionManager } from '../real-time-chart/realtime-subscription-manager.service';
 import { KiwoomRestService } from '../../integrations/kiwoom/rest/kiwoom-rest.service';
 import { ThemeMetricsService } from './theme-metrics.service';
 import {
@@ -16,13 +14,6 @@ import {
 import { IssueThemeDetailQueryDto, IssueThemeStockSort } from './dto/issue-theme-detail-query.dto';
 import { ThemeAiSummaryService } from './theme-ai-summary.service';
 import { ThemeSnapshotService } from './theme-snapshot.service';
-
-interface TradingValueChange {
-  label: string;
-  ratio: number | null;
-  currentAccTradingValue: number | null;
-  prevSameTimeAccTradingValue: number | null;
-}
 
 interface NaverThemeStock {
   name?: string;
@@ -52,7 +43,6 @@ interface GroupedThemeDefinition {
 @Injectable()
 export class IssueThemeService {
   private readonly logger = new Logger(IssueThemeService.name);
-  private readonly minPrevTradingValueForRatio = 0;
   private readonly naverThemeSource = 'NAVER';
   private readonly groupedThemeSource = 'GROUP';
   private readonly naverThemeCodeOffset = 100000;
@@ -175,8 +165,6 @@ export class IssueThemeService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly realtimeCache: RealtimePriceCacheService,
-    private readonly currentPriceResolver: CurrentPriceResolver,
-    private readonly subscriptionManager: RealtimeSubscriptionManager,
     private readonly kiwoomRest: KiwoomRestService,
     private readonly themeMetrics: ThemeMetricsService,
     private readonly themeAiSummary: ThemeAiSummaryService,
@@ -198,115 +186,6 @@ export class IssueThemeService {
     return `${hh}${mm}`;
   }
 
-  private isMarketOpenNow(): boolean {
-    const kst = this.getKstNow();
-    const hours = kst.getUTCHours();
-    const minutes = kst.getUTCMinutes();
-
-    if (hours < 9 || hours > 15) return false;
-    if (hours === 15 && minutes >= 30) return false;
-    return true;
-  }
-
-  private async getLiveTradingValueChanges(
-    stockCodes: string[],
-    prices: Map<string, { accAmount: number }>,
-    metricsMap: Map<string, any>,
-    tradeDate: Date,
-  ): Promise<Map<string, TradingValueChange>> {
-    if (stockCodes.length === 0) return new Map();
-
-    const isMarketOpen = this.isMarketOpenNow();
-    const snapshotTime = this.getCurrentSnapshotTime();
-    const fallback: TradingValueChange = {
-      label: '-',
-      ratio: null,
-      currentAccTradingValue: null,
-      prevSameTimeAccTradingValue: null,
-    };
-
-    const tradingValueChangeMap = new Map(stockCodes.map((code) => [code, fallback]));
-    const todayDate = this.dateOnly(tradeDate);
-    const prevSnapshotDate = await this.prisma.stockTradingValueSnapshot.findFirst({
-      where: { stockCode: { in: stockCodes }, snapshotDate: { lt: todayDate } },
-      orderBy: { snapshotDate: 'desc' },
-      select: { snapshotDate: true },
-    });
-
-    let prevIntradayMap = new Map<string, number>();
-    if (prevSnapshotDate) {
-      const prevSnapshots = await this.prisma.stockTradingValueSnapshot.findMany({
-        where: {
-          stockCode: { in: stockCodes },
-          snapshotDate: prevSnapshotDate.snapshotDate,
-          snapshotTime: { lte: snapshotTime },
-        },
-        orderBy: [{ stockCode: 'asc' }, { snapshotTime: 'desc' }],
-      });
-      for (const snapshot of prevSnapshots) {
-        if (!prevIntradayMap.has(snapshot.stockCode)) {
-          prevIntradayMap.set(snapshot.stockCode, Number(snapshot.accTradingValue));
-        }
-      }
-    }
-
-    let prevDailyMap = new Map<string, number>();
-    const prevMetricDate = await this.prisma.stockDailyMetrics.findFirst({
-      where: { stockCode: { in: stockCodes }, tradeDate: { lt: tradeDate } },
-      orderBy: { tradeDate: 'desc' },
-      select: { tradeDate: true },
-    });
-    if (prevMetricDate) {
-      const prevMetrics = await this.prisma.stockDailyMetrics.findMany({
-        where: { stockCode: { in: stockCodes }, tradeDate: prevMetricDate.tradeDate },
-        select: { stockCode: true, tradingValue: true },
-      });
-      prevDailyMap = new Map(
-        prevMetrics
-          .filter((m) => m.tradingValue != null)
-          .map((m) => [m.stockCode, Number(m.tradingValue)]),
-      );
-    }
-
-    for (const stockCode of stockCodes) {
-      const realtimeAccAmount = prices.get(stockCode)?.accAmount;
-      const currentAccTradingValue =
-        isMarketOpen && realtimeAccAmount && realtimeAccAmount > 0
-          ? realtimeAccAmount
-          : metricsMap.get(stockCode)?.tradingValue != null
-            ? Number(metricsMap.get(stockCode).tradingValue)
-            : null;
-
-      const prevSameTimeAccTradingValue =
-        isMarketOpen && realtimeAccAmount && realtimeAccAmount > 0
-          ? prevIntradayMap.get(stockCode) ?? prevDailyMap.get(stockCode) ?? null
-          : prevDailyMap.get(stockCode) ?? null;
-
-      if (
-        currentAccTradingValue == null ||
-        prevSameTimeAccTradingValue == null ||
-        prevSameTimeAccTradingValue <= this.minPrevTradingValueForRatio
-      ) {
-        tradingValueChangeMap.set(stockCode, {
-          ...fallback,
-          currentAccTradingValue,
-          prevSameTimeAccTradingValue,
-        });
-        continue;
-      }
-
-      const ratio = currentAccTradingValue / prevSameTimeAccTradingValue;
-      tradingValueChangeMap.set(stockCode, {
-        label: `${ratio.toFixed(1)}배`,
-        ratio,
-        currentAccTradingValue,
-        prevSameTimeAccTradingValue,
-      });
-    }
-
-    return tradingValueChangeMap;
-  }
-
   private dateOnly(d: Date): Date {
     const out = new Date(d);
     out.setUTCHours(0, 0, 0, 0);
@@ -314,75 +193,6 @@ export class IssueThemeService {
   }
 
   // ─── 공통 데이터 로더 ─────────────────────────────────────────────
-
-  /** 최신 거래일 기준 RS 점수와 실시간 차트 동적 필터를 통과한 종목 조회 */
-  private async getFilteredMetrics() {
-    const latest = await this.prisma.stockDailyMetrics.findFirst({
-      orderBy: { tradeDate: 'desc' },
-      select: { tradeDate: true },
-    });
-    if (!latest) return { tradeDate: null, metrics: [] };
-
-    const measurableMetrics = await this.prisma.stockDailyMetrics.findMany({
-      where: { tradeDate: latest.tradeDate, relativeStrengthScore: { gt: 0 } },
-    });
-    const prices = this.realtimeCache.getPrices(
-      measurableMetrics.map((metric) => metric.stockCode),
-    );
-    const metrics = measurableMetrics.filter((metric) => {
-      const currentPrice = this.currentPriceResolver.resolveMetricSnapshot(
-        metric,
-        prices.get(metric.stockCode),
-      ).currentPrice;
-
-      if (metric.lowPrice52w != null && currentPrice < Number(metric.lowPrice52w) * 1.3) return false;
-      if (metric.highPrice52w != null && currentPrice < Number(metric.highPrice52w) * 0.75) return false;
-      if (metric.ma50 != null && currentPrice <= Number(metric.ma50)) return false;
-      return true;
-    });
-    return { tradeDate: latest.tradeDate, metrics };
-  }
-
-  private async getStockShortTermRs(stockCodes: string[], tradeDate: Date) {
-    const result = new Map<string, number | null>(stockCodes.map((stockCode) => [stockCode, null]));
-    if (stockCodes.length === 0) return result;
-
-    const recentDates = await this.prisma.stockDailyMetrics.findMany({
-      where: { tradeDate: { lte: tradeDate } },
-      select: { tradeDate: true },
-      distinct: ['tradeDate'],
-      orderBy: { tradeDate: 'desc' },
-      take: 3,
-    });
-    if (recentDates.length < 3) return result;
-
-    const dateKeys = new Set(recentDates.map((row) => row.tradeDate.toISOString().slice(0, 10)));
-    const rows = await this.prisma.stockDailyMetrics.findMany({
-      where: {
-        stockCode: { in: stockCodes },
-        tradeDate: { in: recentDates.map((row) => row.tradeDate) },
-      },
-      select: { stockCode: true, tradeDate: true, relativeStrengthScore: true },
-    });
-    const scoresByStock = new Map<string, Map<string, number>>();
-    for (const row of rows) {
-      const dateKey = row.tradeDate.toISOString().slice(0, 10);
-      if (!dateKeys.has(dateKey)) continue;
-      const scores = scoresByStock.get(row.stockCode) ?? new Map<string, number>();
-      scores.set(dateKey, Number(row.relativeStrengthScore));
-      scoresByStock.set(row.stockCode, scores);
-    }
-    for (const stockCode of stockCodes) {
-      const scores = scoresByStock.get(stockCode);
-      if (!scores || scores.size !== recentDates.length) continue;
-      result.set(
-        stockCode,
-        this.round2([...scores.values()].reduce((sum, score) => sum + score, 0) / recentDates.length),
-      );
-    }
-    return result;
-  }
-
   // ─── 이슈테마 목록 ────────────────────────────────────────────────
 
   async getThemeList(query: IssueThemeListQueryDto, userId?: string) {
@@ -627,173 +437,6 @@ export class IssueThemeService {
     }
 
     return this.buildSnapshotThemeDetail(themeCode, theme, stockThemes, userId, query);
-
-    const { tradeDate, metrics: allMetrics } = await this.getFilteredMetrics();
-    if (!tradeDate) return null;
-    const themeStockCodes = new Set(stockThemes.map((c) => c.stockCode));
-    const companies = await this.prisma.company.findMany({
-      where: { stockCode: { in: Array.from(themeStockCodes) }, deletedAt: null },
-      select: { stockCode: true, companyName: true },
-    });
-    const companyNameMap = new Map(companies.map((c) => [c.stockCode, c.companyName]));
-    for (const row of stockThemes) {
-      if (row.stockName && !companyNameMap.has(row.stockCode)) companyNameMap.set(row.stockCode, row.stockName);
-    }
-    const inclusionReasonMap = new Map(stockThemes.map((c) => [c.stockCode, c.inclusionReason]));
-
-    const metrics = allMetrics.filter(
-      (m) => themeStockCodes.has(m.stockCode) && Number(m.relativeStrengthScore) > 0,
-    );
-    const filteredCodes = metrics.map((m) => m.stockCode);
-    this.subscriptionManager.ensureSubscribed(filteredCodes).catch((error) => {
-      this.logger.warn(`Issue-theme detail subscription sync failed: ${(error as Error).message}`);
-    });
-    const metricsMap = new Map(metrics.map((m) => [m.stockCode, m]));
-
-    const prices = this.realtimeCache.getPrices(filteredCodes);
-
-    // 거래대금 변화는 팝업 로딩 중 키움 API를 호출하지 않고 캐시/DB 스냅샷으로 계산한다.
-    const tradingValueChangeMap = await this.getLiveTradingValueChanges(
-      filteredCodes,
-      prices,
-      metricsMap,
-      tradeDate,
-    );
-    const stockShortTermRs = await this.getStockShortTermRs(filteredCodes, tradeDate);
-
-    // 등락률/거래대금 집계
-    const changeRates: number[] = [];
-    const rsScores: number[] = [];
-    let highVolumeCount = 0;
-
-    const stockRows = filteredCodes.map((code) => {
-      const m = metricsMap.get(code)!;
-      const priceSnapshot = this.currentPriceResolver.resolveMetricSnapshot(
-        m,
-        prices.get(code),
-      );
-      const changeRate = priceSnapshot.changeRate;
-
-      changeRates.push(changeRate);
-      const rsScore = Number(m.relativeStrengthScore);
-      if (rsScore > 0) rsScores.push(rsScore);
-
-      const tradingValueChange = tradingValueChangeMap.get(code) ?? {
-        label: '-',
-        ratio: null,
-        currentAccTradingValue: null,
-        prevSameTimeAccTradingValue: null,
-      };
-      if (tradingValueChange.ratio != null && tradingValueChange.ratio >= 2.0) {
-        highVolumeCount++;
-      }
-
-      return {
-        stockCode: code,
-        companyName: companyNameMap.get(code) ?? '',
-        inclusionReason: inclusionReasonMap.get(code) ?? null,
-        currentPrice: priceSnapshot.currentPrice,
-        closePrice: priceSnapshot.closePrice,
-        changeRate: priceSnapshot.changeRate,
-        priceChange1d: priceSnapshot.priceChange1d,
-        priceChangeRate1d: priceSnapshot.priceChangeRate1d,
-        priceSource: priceSnapshot.usedRealtime ? 'REALTIME_CACHE' : 'DB',
-        rsScore: Number(m.relativeStrengthScore),
-        shortTermRs: stockShortTermRs.get(code) ?? null,
-        tradingValue: m.tradingValue != null ? m.tradingValue.toString() : null,
-        previousTradingValueRatio: tradingValueChange.ratio,
-        isNewHigh: Boolean(m.isNewHigh),
-        newHighRate: m.highPrice52w != null && Number(m.highPrice52w) > 0
-          ? this.round2(((priceSnapshot.currentPrice - Number(m.highPrice52w)) / Number(m.highPrice52w)) * 100)
-          : null,
-        tradingValueRatio: tradingValueChange.label,
-        tradingValueChange: tradingValueChange.label,
-        currentAccTradingValue: tradingValueChange.currentAccTradingValue,
-        prevSameTimeAccTradingValue: tradingValueChange.prevSameTimeAccTradingValue,
-      };
-    });
-
-    const nullableDesc = (a: number | null, b: number | null) =>
-      a == null && b == null ? 0 : a == null ? 1 : b == null ? -1 : b - a;
-    const visibleStockRows = stockRows.filter((stock) => stock.rsScore > 0);
-    visibleStockRows.sort((a, b) => {
-      if (query.stockSort === IssueThemeStockSort.SHORT_TERM_RS) return nullableDesc(a.shortTermRs, b.shortTermRs) || a.stockCode.localeCompare(b.stockCode);
-      if (query.stockSort === IssueThemeStockSort.CHANGE_RATE) return nullableDesc(a.changeRate, b.changeRate) || a.stockCode.localeCompare(b.stockCode);
-      if (query.stockSort === IssueThemeStockSort.TRADING_VALUE) return nullableDesc(a.currentAccTradingValue, b.currentAccTradingValue) || a.stockCode.localeCompare(b.stockCode);
-      if (query.stockSort === IssueThemeStockSort.PREVIOUS_RATIO) return nullableDesc(a.previousTradingValueRatio, b.previousTradingValueRatio) || a.stockCode.localeCompare(b.stockCode);
-      if (query.stockSort === IssueThemeStockSort.NEW_HIGH) return nullableDesc(a.newHighRate, b.newHighRate) || a.stockCode.localeCompare(b.stockCode);
-      return b.rsScore - a.rsScore || a.stockCode.localeCompare(b.stockCode);
-    });
-    visibleStockRows.forEach((r: any, i) => { r.rank = i + 1; });
-    const displayedStockRows = visibleStockRows.slice(0, query.stockDisplay);
-
-    // 인사이트 계산
-    const totalCount = filteredCodes.length;
-    const risingCount = changeRates.filter((r) => r > 0).length;
-    const risingRatio = totalCount > 0 ? (risingCount / totalCount) * 100 : 0;
-    const avgChangeRate = changeRates.reduce((a, b) => a + b, 0) / (changeRates.length || 1);
-    const avgRsScore = rsScores.reduce((a, b) => a + b, 0) / (rsScores.length || 1);
-
-    const prevSnapshot = await this.prisma.themeDailySnapshot.findFirst({
-      where: { themeCode, snapshotDate: { lt: tradeDate } },
-      orderBy: { snapshotDate: 'desc' },
-    });
-
-    const insights: string[] = [];
-    if (prevSnapshot) {
-      if (risingRatio - Number(prevSnapshot.risingRatio) >= 10 && risingRatio >= 50) {
-        insights.push('테마 내 상승 종목 비율 증가');
-      }
-      if (highVolumeCount - prevSnapshot.highVolumeCount >= 2) {
-        insights.push('거래대금 급증 종목 증가');
-      }
-    }
-    if (avgChangeRate >= 2) insights.push('평균 등락률 상승');
-    if (changeRates.some((r) => r >= 7)) insights.push('상위 종목 급등');
-
-    // 현재 순위는 이슈테마 목록의 런타임 계산값을 사용하고, 스냅샷은 이전 순위 비교에만 사용한다.
-    const currentTheme = (await this.getCurrentThemeRankMap([themeCode])).get(themeCode);
-    const currentRank = currentTheme?.rank ?? null;
-    const rankChange =
-      currentRank != null && prevSnapshot ? prevSnapshot.rank - currentRank : null;
-
-    let isFavorite: boolean | null = null;
-    if (userId) {
-      const favorite = await this.prisma.userWatchlistTheme.findFirst({
-        where: { userId, themeCode, deletedAt: null },
-      });
-      isFavorite = favorite != null;
-    }
-
-    const [aiSummaryRecord, relatedThemes] = await Promise.all([
-      this.themeAiSummary.getLatestSuccess(themeCode),
-      this.getRelatedThemes(themeCode),
-    ]);
-
-    return {
-      themeCode,
-      themeName: theme.themeName,
-      imageUrl: theme.imageUrl ?? null,
-      rank: currentRank,
-      rankChange,
-      risingCount,
-      totalCount,
-      avgRsScore: this.round2(avgRsScore),
-      rsScore: currentTheme?.rsScore ?? this.round2(avgRsScore),
-      shortTermRs: currentTheme?.shortTermRs ?? null,
-      momentum: currentTheme?.momentum ?? null,
-      changeRate: currentTheme?.changeRate ?? this.round2(avgChangeRate),
-      newHighCount: currentTheme?.newHighCount ?? stockRows.filter((stock) => stock.isNewHigh).length,
-      streakBadge: currentTheme?.streakBadge ?? null,
-      insights,
-      isFavorite,
-      stocks: displayedStockRows,
-      relatedThemes,
-      aiSummary: aiSummaryRecord?.summary ?? null,
-      aiSummaryUpdatedAt: aiSummaryRecord?.generatedAt?.toISOString() ?? null,
-      aiSummarySources: Array.isArray(aiSummaryRecord?.sourceArticles) ? aiSummaryRecord.sourceArticles : [],
-      updatedAt: new Date().toISOString(),
-    };
   }
 
   private async buildSnapshotThemeDetail(
@@ -826,7 +469,7 @@ export class IssueThemeService {
         currentPrice: stock.currentPrice,
         closePrice: stock.currentPrice,
         changeRate: stock.priceChangeRate,
-        priceChange1d: null,
+        priceChange1d: stock.priceChange1d ?? null,
         priceChangeRate1d: stock.priceChangeRate,
         priceSource: 'STOCK_SNAPSHOT',
         rsScore: stock.relativeStrengthScore,
@@ -834,7 +477,9 @@ export class IssueThemeService {
         tradingValue: stock.tradingValue?.toString() ?? null,
         previousTradingValueRatio: ratio,
         isNewHigh: stock.isNewHigh,
-        newHighRate: null,
+        newHighRate: stock.highPrice52w != null && stock.highPrice52w > 0
+          ? this.round2(((stock.currentPrice - stock.highPrice52w) / stock.highPrice52w) * 100)
+          : null,
         tradingValueRatio: ratio == null ? '-' : `${ratio.toFixed(1)}배`,
         tradingValueChange: ratio == null ? '-' : `${ratio.toFixed(1)}배`,
         currentAccTradingValue: stock.tradingValue == null ? null : Number(stock.tradingValue),
@@ -860,7 +505,14 @@ export class IssueThemeService {
         where: { userId, themeCode, deletedAt: null },
       }) != null;
     }
-    const aiSummaryRecord = await this.themeAiSummary.getLatestSuccess(themeCode);
+    const [aiSummaryRecord, relatedThemes] = await Promise.all([
+      this.themeAiSummary.getLatestSuccess(themeCode),
+      this.getSnapshotRelatedThemes(
+        themeCode,
+        currentTheme.snapshotDate,
+        currentTheme.stockSnapshotTime,
+      ),
+    ]);
     const insights: string[] = [];
     if (currentTheme.avgChangeRate >= 2) insights.push('평균 등락률 상승');
     if (stockRows.some((stock) => stock.changeRate >= 7)) insights.push('상위 종목 급등');
@@ -883,7 +535,7 @@ export class IssueThemeService {
       insights,
       isFavorite,
       stocks: stockRows.slice(0, query.stockDisplay),
-      relatedThemes: [],
+      relatedThemes,
       aiSummary: aiSummaryRecord?.summary ?? null,
       aiSummaryUpdatedAt: aiSummaryRecord?.generatedAt?.toISOString() ?? null,
       aiSummarySources: Array.isArray(aiSummaryRecord?.sourceArticles) ? aiSummaryRecord.sourceArticles : [],
@@ -891,45 +543,36 @@ export class IssueThemeService {
     };
   }
 
-  private async getRelatedThemes(themeCode: number) {
-    const { metrics } = await this.getFilteredMetrics();
-    const eligibleMetrics = metrics.filter((metric) => Number(metric.relativeStrengthScore) >= 80);
-    const stockCodes = eligibleMetrics.map((metric) => metric.stockCode);
-    if (stockCodes.length === 0) return [];
-    const rows = await this.prisma.stockTheme.findMany({
-      where: { stockCode: { in: stockCodes }, source: this.naverThemeSource, theme: { deletedAt: null } },
-      select: { themeCode: true, stockCode: true, theme: { select: { themeName: true } } },
-    });
-    const groups = new Map<number, { themeName: string; stockCodes: string[] }>();
-    for (const row of rows) {
-      const group = groups.get(row.themeCode) ?? { themeName: row.theme.themeName, stockCodes: [] };
-      if (!group.stockCodes.includes(row.stockCode)) group.stockCodes.push(row.stockCode);
-      groups.set(row.themeCode, group);
-    }
-    const list = await this.getThemeList({
-      view: IssueThemeView.RANK,
-      filter: IssueThemeFilter.ALL,
-      sort: IssueThemeSort.RS,
-      favoritesOnly: false,
-      display: 300,
-      page: 1,
-    });
-    const itemMap = new Map(list.items.map((item) => [item.themeCode, item]));
-    const currentGroup = groups.get(themeCode);
-    if (!currentGroup) return [];
-    return this.themeMetrics.calculateRelatedThemes(
-      {
-        themeCode,
-        rsScore: itemMap.get(themeCode)?.rsScore ?? 0,
-        stockCodes: currentGroup.stockCodes,
-      },
-      [...groups.entries()].map(([candidateCode, group]) => ({
+  // 연관 테마도 동일한 종목 스냅샷에서만 계산해야 상세 화면의 순위/등락률과 어긋나지 않는다.
+  private async getSnapshotRelatedThemes(
+    themeCode: number,
+    snapshotDate: Date,
+    stockSnapshotTime: Date,
+  ) {
+    const canonicalSnapshots = await this.themeSnapshot.getLatestThemeItems();
+    if (!canonicalSnapshots.has(themeCode)) return [];
+    const themeCodes = [...canonicalSnapshots.keys()];
+    const [themeRows, stocksByTheme] = await Promise.all([
+      this.prisma.theme.findMany({
+        where: { themeCode: { in: themeCodes }, deletedAt: null },
+        select: { themeCode: true, themeName: true },
+      }),
+      this.themeSnapshot.getThemeStocksForThemes(themeCodes, snapshotDate, stockSnapshotTime),
+    ]);
+    const themeNames = new Map(themeRows.map((theme) => [theme.themeCode, theme.themeName]));
+    const toInput = (candidateCode: number) => {
+      const snapshot = canonicalSnapshots.get(candidateCode)!;
+      return {
         themeCode: candidateCode,
-        themeName: group.themeName,
-        rsScore: itemMap.get(candidateCode)?.rsScore ?? 0,
-        changeRate: itemMap.get(candidateCode)?.changeRate ?? 0,
-        stockCodes: group.stockCodes,
-      })),
+        themeName: themeNames.get(candidateCode) ?? '',
+        rsScore: snapshot.avgRsScore,
+        changeRate: snapshot.avgChangeRate,
+        stockCodes: (stocksByTheme.get(candidateCode) ?? []).map((stock) => stock.stockCode),
+      };
+    };
+    return this.themeMetrics.calculateRelatedThemes(
+      toInput(themeCode),
+      themeCodes.filter((candidateCode) => themeNames.has(candidateCode)).map(toInput),
     );
   }
 
@@ -976,153 +619,6 @@ export class IssueThemeService {
   }
 
   // ─── 스냅샷 저장 ──────────────────────────────────────────────────
-
-  /** 테마 일별 스냅샷 저장 (장 마감 후 1회 호출) */
-  async saveThemeSnapshot() {
-    const { tradeDate, metrics } = await this.getFilteredMetrics();
-    if (!tradeDate) return { saved: 0 };
-
-    const stockCodes = metrics.map((m) => m.stockCode);
-    const stockThemeRows = await this.prisma.stockTheme.findMany({
-      where: { stockCode: { in: stockCodes }, source: this.naverThemeSource, theme: { deletedAt: null } },
-      select: { stockCode: true, themeCode: true },
-    });
-    const metricsMap = new Map(metrics.map((m) => [m.stockCode, m]));
-
-    const prices = this.realtimeCache.getPrices(stockCodes);
-    const themeGroups = new Map<number, { stockCodes: Set<string>; changeRates: number[]; rsScores: number[]; newHighCount: number }>();
-
-    for (const row of stockThemeRows) {
-      const m = metricsMap.get(row.stockCode);
-      if (!m) continue;
-      if (Number(m.relativeStrengthScore) < 80) continue;
-      const themeCode = row.themeCode;
-      if (!themeGroups.has(themeCode)) themeGroups.set(themeCode, { stockCodes: new Set(), changeRates: [], rsScores: [], newHighCount: 0 });
-      const currentGroup = themeGroups.get(themeCode)!;
-      if (currentGroup.stockCodes.has(row.stockCode)) continue;
-      currentGroup.stockCodes.add(row.stockCode);
-      const changeRate = this.currentPriceResolver.resolveMetricSnapshot(
-        m,
-        prices.get(row.stockCode),
-      ).changeRate;
-      currentGroup.changeRates.push(changeRate);
-      currentGroup.rsScores.push(Number(m.relativeStrengthScore));
-      if (m.isNewHigh) currentGroup.newHighCount++;
-    }
-
-    // 순위 산출
-    const themeList: any[] = [];
-    for (const [themeCode, { changeRates, rsScores, newHighCount }] of themeGroups) {
-      const totalCount = changeRates.length;
-      if (totalCount < 2) continue;
-      const risingCount = changeRates.filter((r) => r > 0).length;
-      const risingRatio = totalCount > 0 ? (risingCount / totalCount) * 100 : 0;
-      const avgChangeRate = changeRates.reduce((a, b) => a + b, 0) / (changeRates.length || 1);
-      const avgRsScore = rsScores.reduce((a, b) => a + b, 0) / (rsScores.length || 1);
-      const themeScore = this.round2(avgChangeRate);
-      const upCount = changeRates.filter((r) => r >= 1).length;
-      const downCount = changeRates.filter((r) => r <= -1).length;
-      const flatCount = totalCount - upCount - downCount;
-      themeList.push({ themeCode, totalCount, risingCount, risingRatio, avgChangeRate, avgRsScore, themeScore, upCount, flatCount, downCount, newHighCount });
-    }
-
-    themeList.sort((a, b) =>
-      b.risingRatio - a.risingRatio ||
-      b.themeCode - a.themeCode,
-    );
-    let rank = 1;
-    for (let i = 0; i < themeList.length; i++) {
-      if (
-        i > 0 &&
-        themeList[i].risingRatio === themeList[i - 1].risingRatio
-      ) {
-        themeList[i].rank = themeList[i - 1].rank;
-      } else {
-        themeList[i].rank = rank;
-        rank++;
-      }
-    }
-
-    const snapshotDate = new Date(Date.UTC(
-      (tradeDate as Date).getUTCFullYear(),
-      (tradeDate as Date).getUTCMonth(),
-      (tradeDate as Date).getUTCDate(),
-    ));
-
-    const priorSnapshots = themeList.length > 0
-      ? await this.prisma.themeDailySnapshot.findMany({
-          where: { themeCode: { in: themeList.map((theme) => theme.themeCode) }, snapshotDate: { lt: snapshotDate } },
-          orderBy: [{ themeCode: 'asc' }, { snapshotDate: 'desc' }],
-        })
-      : [];
-    const historyByTheme = new Map<number, any[]>();
-    for (const snapshot of priorSnapshots) {
-      const history = historyByTheme.get(snapshot.themeCode) ?? [];
-      if (history.length < 62) history.push(snapshot);
-      historyByTheme.set(snapshot.themeCode, history);
-    }
-
-    for (const theme of themeList) {
-      const history = historyByTheme.get(theme.themeCode) ?? [];
-      const rsHistory = [
-        ...history.map((snapshot) => ({
-          tradeDate: snapshot.snapshotDate.toISOString().slice(0, 10),
-          avgRsScore: Number(snapshot.avgRsScore),
-        })).reverse(),
-        { tradeDate: snapshotDate.toISOString().slice(0, 10), avgRsScore: theme.avgRsScore },
-      ];
-      const metric = this.themeMetrics.calculateDailyMetric(
-        [{ stockCode: 'THEME-A', rsScore: theme.avgRsScore, changeRate: theme.avgChangeRate, isNewHigh: false },
-         { stockCode: 'THEME-B', rsScore: theme.avgRsScore, changeRate: theme.avgChangeRate, isNewHigh: false }],
-        rsHistory,
-      );
-      const previous = history[0];
-      const streak = this.themeMetrics.calculateStreak(theme.avgChangeRate, previous ? {
-        direction: previous.streakDirection ?? 'NEUTRAL',
-        days: previous.streakDays ?? 0,
-      } : null);
-      theme.shortTermRs = metric.shortTermRs;
-      theme.momentum = metric.momentum;
-      theme.streakDirection = streak.direction;
-      theme.streakDays = streak.days;
-    }
-
-    await this.prisma.themeDailySnapshot.deleteMany({
-      where: { snapshotDate },
-    });
-
-    await this.prisma.themeDailySnapshot.createMany({
-      data: themeList.map((t) => ({
-        themeCode: t.themeCode,
-        snapshotDate,
-        rank: t.rank,
-        risingCount: t.risingCount,
-        totalCount: t.totalCount,
-        risingRatio: t.risingRatio,
-        avgChangeRate: t.avgChangeRate,
-        avgRsScore: t.avgRsScore,
-        themeScore: t.themeScore,
-        highVolumeCount: 0,
-        upCount: t.upCount,
-        flatCount: t.flatCount,
-        downCount: t.downCount,
-        shortTermRs: t.shortTermRs,
-        momentum: t.momentum,
-        newHighCount: t.newHighCount,
-        streakDirection: t.streakDirection,
-        streakDays: t.streakDays,
-      })),
-      skipDuplicates: true,
-    });
-
-    this.logger.log(`Theme snapshot saved: ${themeList.length} themes for ${snapshotDate.toISOString().split('T')[0]}`);
-    void this.themeAiSummary.generateForTradeDate(
-      snapshotDate,
-      Number(process.env.THEME_AI_SUMMARY_LIMIT || 20),
-    ).catch((error) => this.logger.error(`Theme AI summary batch failed: ${error?.message ?? error}`));
-    return { saved: themeList.length, date: snapshotDate.toISOString().split('T')[0] };
-  }
-
   async generateAiSummaries(tradeDate: Date, limit = 20) {
     return this.themeAiSummary.generateForTradeDate(this.dateOnly(tradeDate), limit);
   }
@@ -1131,185 +627,6 @@ export class IssueThemeService {
     const theme = await this.prisma.theme.findFirst({ where: { themeCode, deletedAt: null } });
     if (!theme) throw new NotFoundException(`Theme ${themeCode} not found`);
     return this.themeAiSummary.generateForTradeDate(this.dateOnly(tradeDate), 1, themeCode);
-  }
-
-  async backfillThemeSnapshots(days: number = 60) {
-    const normalizedDays = Math.min(Math.max(Math.floor(days) || 60, 1), 365);
-
-    const inserted = await this.prisma.$queryRawUnsafe<{ snapshot_date: Date; theme_code: number }[]>(
-      `
-      WITH target_dates AS (
-        SELECT DISTINCT trade_date
-        FROM stock_daily_metrics
-        ORDER BY trade_date DESC
-        LIMIT $1
-      ), filtered_raw AS (
-        SELECT DISTINCT ON (m.trade_date, st.theme_code, m.stock_code)
-          m.trade_date,
-          st.theme_code,
-          m.stock_code,
-          COALESCE(m.price_change_rate_1d, 0)::numeric AS change_rate,
-          m.relative_strength_score::numeric AS rs_score,
-          m.is_new_high
-        FROM stock_daily_metrics m
-        JOIN stock_themes st ON st.stock_code = m.stock_code
-        JOIN companies co ON co.stock_code = m.stock_code
-        JOIN themes t ON t.theme_code = st.theme_code
-        JOIN target_dates td ON td.trade_date = m.trade_date
-        WHERE st.source = 'NAVER'
-          AND t.deleted_at IS NULL
-          AND co.deleted_at IS NULL
-          AND m.relative_strength_score >= 80
-        ORDER BY m.trade_date, st.theme_code, m.stock_code
-      ), filtered AS (
-        SELECT
-          trade_date,
-          theme_code,
-          change_rate,
-          rs_score,
-          is_new_high
-        FROM filtered_raw
-      ), grouped AS (
-        SELECT
-          trade_date,
-          theme_code,
-          COUNT(*)::int AS total_count,
-          COUNT(*) FILTER (WHERE change_rate > 0)::int AS rising_count,
-          ROUND((COUNT(*) FILTER (WHERE change_rate > 0)::numeric / NULLIF(COUNT(*), 0)) * 100, 2) AS rising_ratio,
-          AVG(change_rate) AS avg_change_rate,
-          AVG(rs_score) AS avg_rs_score,
-          COUNT(*) FILTER (WHERE is_new_high)::int AS new_high_count,
-          COUNT(*) FILTER (WHERE change_rate >= 1)::int AS up_count,
-          COUNT(*) FILTER (WHERE change_rate <= -1)::int AS down_count,
-          (COUNT(*) - COUNT(*) FILTER (WHERE change_rate >= 1) - COUNT(*) FILTER (WHERE change_rate <= -1))::int AS flat_count
-        FROM filtered
-        GROUP BY trade_date, theme_code
-        HAVING COUNT(*) >= 2
-      ), scored AS (
-        SELECT
-          trade_date,
-          theme_code,
-          total_count,
-          rising_count,
-          rising_ratio,
-          avg_change_rate,
-          avg_rs_score,
-          CASE WHEN COUNT(*) OVER (
-            PARTITION BY theme_code ORDER BY trade_date ROWS BETWEEN 2 PRECEDING AND CURRENT ROW
-          ) = 3 THEN AVG(avg_rs_score) OVER (
-            PARTITION BY theme_code ORDER BY trade_date ROWS BETWEEN 2 PRECEDING AND CURRENT ROW
-          ) END AS short_term_rs,
-          CASE WHEN COUNT(*) OVER (
-            PARTITION BY theme_code ORDER BY trade_date ROWS BETWEEN 2 PRECEDING AND CURRENT ROW
-          ) = 3 THEN
-            AVG(avg_rs_score) OVER (
-              PARTITION BY theme_code ORDER BY trade_date ROWS BETWEEN 2 PRECEDING AND CURRENT ROW
-            ) - AVG(avg_rs_score) OVER (
-              PARTITION BY theme_code ORDER BY trade_date ROWS BETWEEN 62 PRECEDING AND CURRENT ROW
-            )
-          END AS momentum,
-          new_high_count,
-          ROUND(avg_change_rate, 2) AS theme_score,
-          up_count,
-          flat_count,
-          down_count
-        FROM grouped
-      ), ranked AS (
-        SELECT
-          trade_date,
-          theme_code,
-          DENSE_RANK() OVER (PARTITION BY trade_date ORDER BY rising_ratio DESC) AS rank,
-          rising_count,
-          total_count,
-          rising_ratio,
-          avg_change_rate,
-          avg_rs_score,
-          short_term_rs,
-          momentum,
-          new_high_count,
-          theme_score,
-          up_count,
-          flat_count,
-          down_count
-        FROM scored
-      )
-      INSERT INTO theme_daily_snapshots (
-        snapshot_id,
-        theme_code,
-        snapshot_date,
-        rank,
-        rising_count,
-        total_count,
-        rising_ratio,
-        avg_change_rate,
-        avg_rs_score,
-        theme_score,
-        high_volume_count,
-        up_count,
-        flat_count,
-        down_count,
-        short_term_rs,
-        momentum,
-        new_high_count
-      )
-      SELECT
-        gen_random_uuid(),
-        theme_code,
-        trade_date,
-        rank,
-        rising_count,
-        total_count,
-        rising_ratio,
-        avg_change_rate,
-        avg_rs_score,
-        theme_score,
-        0,
-        up_count,
-        flat_count,
-        down_count,
-        short_term_rs,
-        momentum,
-        new_high_count
-      FROM ranked
-      ON CONFLICT (theme_code, snapshot_date) DO UPDATE SET
-        rank = EXCLUDED.rank,
-        rising_count = EXCLUDED.rising_count,
-        total_count = EXCLUDED.total_count,
-        rising_ratio = EXCLUDED.rising_ratio,
-        avg_change_rate = EXCLUDED.avg_change_rate,
-        avg_rs_score = EXCLUDED.avg_rs_score,
-        theme_score = EXCLUDED.theme_score,
-        high_volume_count = EXCLUDED.high_volume_count,
-        up_count = EXCLUDED.up_count,
-        flat_count = EXCLUDED.flat_count,
-        down_count = EXCLUDED.down_count,
-        short_term_rs = EXCLUDED.short_term_rs,
-        momentum = EXCLUDED.momentum,
-        new_high_count = EXCLUDED.new_high_count
-      RETURNING snapshot_date, theme_code
-      `,
-      normalizedDays,
-    );
-
-    const dateRows = await this.prisma.$queryRawUnsafe<{ snapshot_date: Date; count: number }[]>(
-      `
-      SELECT snapshot_date, COUNT(*)::int AS count
-      FROM theme_daily_snapshots
-      GROUP BY snapshot_date
-      ORDER BY snapshot_date DESC
-      LIMIT $1
-      `,
-      normalizedDays,
-    );
-
-    return {
-      days: normalizedDays,
-      inserted: inserted.length,
-      snapshotDates: dateRows.map((row) => ({
-        date: row.snapshot_date.toISOString().slice(0, 10),
-        count: row.count,
-      })),
-    };
   }
 
   /** 거래대금 스냅샷 저장 (10분 단위 호출) */

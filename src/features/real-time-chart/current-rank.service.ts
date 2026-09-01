@@ -14,6 +14,7 @@ type MetricRow = {
   low_price_52w: string | null;
   ma_50: string | null;
   price_change_rate_1d: string | null;
+  price_change_1d: string | null;
   trading_value: bigint | null;
   is_new_high: boolean;
   short_term_rs: string | null;
@@ -33,6 +34,7 @@ type CurrentRankRow = {
   passedDynamicFilters: boolean;
   priceSource: 'realtime' | 'close';
   priceChangeRate: number | null;
+  priceChange1d: number | null;
   tradingValue: bigint | null;
   previousTradingValueRatio: number | null;
   isNewHigh: boolean;
@@ -74,7 +76,7 @@ export class CurrentRankService {
     }
 
     const snapshotTime = this.truncateToTenMinutes(now);
-    const previousTradingValues = await this.getPreviousTradingValues(snapshotTradeDate);
+    const previousTradingValues = await this.getPreviousTradingValues(snapshotTradeDate, snapshotTime);
     const rows = this.buildRankRows(metrics, snapshotTradeDate, snapshotTime, previousTradingValues);
     await this.saveSnapshotRows(rows);
 
@@ -163,7 +165,7 @@ export class CurrentRankService {
     }
     const snapshotTime = new Date(targetDate);
     snapshotTime.setUTCHours(6, 50, 0, 0);
-    const previousTradingValues = await this.getPreviousTradingValues(targetDate);
+    const previousTradingValues = await this.getPreviousTradingValues(targetDate, snapshotTime);
     const rows = this.buildRankRows(
       metrics,
       targetDate,
@@ -227,6 +229,7 @@ export class CurrentRankService {
           m.low_price_52w::text,
           m.ma_50::text,
           m.price_change_rate_1d::text,
+          m.price_change_1d::text,
           m.trading_value,
           m.is_new_high,
           (
@@ -265,7 +268,12 @@ export class CurrentRankService {
     return rows[0]?.snapshot_time ?? null;
   }
 
-  private async getPreviousTradingValues(tradeDate: Date): Promise<Map<string, bigint>> {
+  // 누적 거래대금은 장중에 계속 늘어나므로 전일 종가 스냅샷과 비교하면 비율이 항상 낮게 나온다.
+  // 전일 같은 시각(없으면 그날 첫 스냅샷)의 누적 거래대금과 비교해야 전일비가 의미를 갖는다.
+  private async getPreviousTradingValues(
+    tradeDate: Date,
+    snapshotTime: Date,
+  ): Promise<Map<string, bigint>> {
     const rows = await this.prisma.$queryRawUnsafe<Array<{
       stock_code: string;
       trading_value: bigint;
@@ -276,8 +284,11 @@ export class CurrentRankService {
           FROM stock_current_rank_snapshots
           WHERE trade_date < $1::date
             AND trading_value IS NOT NULL
-        ), latest_time AS (
-          SELECT MAX(snapshot_time) AS snapshot_time
+        ), comparable_time AS (
+          SELECT COALESCE(
+            MAX(s.snapshot_time) FILTER (WHERE s.snapshot_time::time <= $2::time),
+            MIN(s.snapshot_time)
+          ) AS snapshot_time
           FROM stock_current_rank_snapshots s
           JOIN previous_date d ON d.trade_date = s.trade_date
           WHERE s.trading_value IS NOT NULL
@@ -285,12 +296,17 @@ export class CurrentRankService {
         SELECT s.stock_code, s.trading_value
         FROM stock_current_rank_snapshots s
         JOIN previous_date d ON d.trade_date = s.trade_date
-        JOIN latest_time t ON t.snapshot_time = s.snapshot_time
+        JOIN comparable_time t ON t.snapshot_time = s.snapshot_time
         WHERE s.trading_value IS NOT NULL
       `,
       this.toDateOnly(tradeDate),
+      this.timeOfDay(snapshotTime),
     );
     return new Map(rows.map((row) => [row.stock_code, row.trading_value]));
+  }
+
+  private timeOfDay(date: Date): string {
+    return date.toISOString().slice(11, 19);
   }
 
   private buildRankRows(
@@ -315,6 +331,9 @@ export class CurrentRankService {
       const priceChangeRate = realtimePrice
         ? realtimePrice.changeRate
         : metric.price_change_rate_1d == null ? null : Number(metric.price_change_rate_1d);
+      const priceChange1d = realtimePrice
+        ? realtimePrice.changeAmount
+        : metric.price_change_1d == null ? null : Number(metric.price_change_1d);
       const tradingValue = realtimePrice?.accAmount && realtimePrice.accAmount > 0
         ? BigInt(Math.trunc(realtimePrice.accAmount))
         : metric.trading_value;
@@ -345,6 +364,7 @@ export class CurrentRankService {
         passedDynamicFilters,
         priceSource: realtimePrice ? 'realtime' as const : 'close' as const,
         priceChangeRate,
+        priceChange1d,
         tradingValue,
         previousTradingValueRatio,
         isNewHigh: highPrice52w != null ? currentPrice >= highPrice52w : metric.is_new_high,
@@ -375,8 +395,8 @@ export class CurrentRankService {
         placeholders.push(
           `($${p++}::uuid, $${p++}::text, $${p++}::date, $${p++}::timestamp, $${p++}::int, ` +
           `$${p++}::numeric, $${p++}::numeric, $${p++}::numeric, $${p++}::numeric, $${p++}::numeric, ` +
-          `$${p++}::numeric, $${p++}::boolean, $${p++}::text, $${p++}::numeric, $${p++}::bigint, ` +
-          `$${p++}::numeric, $${p++}::boolean, $${p++}::numeric)`,
+          `$${p++}::numeric, $${p++}::boolean, $${p++}::text, $${p++}::numeric, $${p++}::numeric, ` +
+          `$${p++}::bigint, $${p++}::numeric, $${p++}::boolean, $${p++}::numeric)`,
         );
         params.push(
           randomUUID(),
@@ -393,6 +413,7 @@ export class CurrentRankService {
           row.passedDynamicFilters,
           row.priceSource,
           row.priceChangeRate,
+          row.priceChange1d,
           row.tradingValue,
           row.previousTradingValueRatio,
           row.isNewHigh,
@@ -406,8 +427,8 @@ export class CurrentRankService {
             snapshot_id, stock_code, trade_date, snapshot_time, current_rank,
             relative_strength_score, current_price, close_price, high_price_52w,
             low_price_52w, ma_50, passed_dynamic_filters, price_source,
-            price_change_rate, trading_value, previous_trading_value_ratio, is_new_high,
-            short_term_rs
+            price_change_rate, price_change_1d, trading_value,
+            previous_trading_value_ratio, is_new_high, short_term_rs
           )
           VALUES ${placeholders.join(', ')}
           ON CONFLICT (trade_date, snapshot_time, stock_code) DO UPDATE SET
@@ -421,6 +442,7 @@ export class CurrentRankService {
             passed_dynamic_filters = EXCLUDED.passed_dynamic_filters,
             price_source = EXCLUDED.price_source,
             price_change_rate = EXCLUDED.price_change_rate,
+            price_change_1d = EXCLUDED.price_change_1d,
             trading_value = EXCLUDED.trading_value,
             previous_trading_value_ratio = EXCLUDED.previous_trading_value_ratio,
             is_new_high = EXCLUDED.is_new_high,

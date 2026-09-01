@@ -1,7 +1,6 @@
 import { IssueThemeStockSort } from './dto/issue-theme-detail-query.dto';
 import { IssueThemeService } from './issue-theme.service';
 import { ThemeMetricsService } from './theme-metrics.service';
-import { CurrentPriceResolver } from '../real-time-chart/current-price-resolver.service';
 
 describe('IssueThemeService detail stock population', () => {
   afterEach(() => {
@@ -45,8 +44,6 @@ describe('IssueThemeService detail stock population', () => {
     const service = new IssueThemeService(
       prisma,
       realtimeCache,
-      new CurrentPriceResolver(),
-      { ensureSubscribed: jest.fn().mockResolvedValue(undefined) } as any,
       {} as any,
       new ThemeMetricsService(),
       themeAiSummary,
@@ -57,31 +54,12 @@ describe('IssueThemeService detail stock population', () => {
           priceChangeRate: -1, tradingValue: null, previousTradingValueRatio: null, isNewHigh: false, shortTermRs: null },
       ]) } as any,
     );
-    jest.spyOn(service as any, 'getFilteredMetrics').mockResolvedValue({
-      tradeDate: new Date('2026-07-25'),
-      metrics: [
-        {
-          stockCode: 'HIGH', relativeStrengthScore: 90, closePrice: 100,
-          priceChangeRate1d: 2, priceChange1d: 2, isNewHigh: false,
-        },
-        {
-          stockCode: 'LOW', relativeStrengthScore: 70, closePrice: 200,
-          priceChangeRate1d: -1, priceChange1d: -2, isNewHigh: false,
-        },
-        {
-          stockCode: 'ZERO', relativeStrengthScore: 0, closePrice: 300,
-          priceChangeRate1d: 0, priceChange1d: 0, isNewHigh: false,
-        },
-      ],
-    });
-    jest.spyOn(service as any, 'getLiveTradingValueChanges').mockResolvedValue(new Map());
     jest.spyOn(service, 'getCurrentThemeRankMap').mockResolvedValue(new Map([[1, {
       rank: 1, previousRank: null, rankChange: null, risingCount: 1, totalCount: 2,
       rsScore: 80, avgRsScore: 80, changeRate: 0.5, newHighCount: 0,
       shortTermRs: null, momentum: null, stockSnapshotTime: new Date('2026-07-25T06:50:00Z'),
       snapshotDate: new Date('2026-07-25'),
     }]]));
-    jest.spyOn(service as any, 'getRelatedThemes').mockResolvedValue([]);
 
     const result = await service.getThemeDetail(1, undefined, {
       stockSort: IssueThemeStockSort.RS,
@@ -145,8 +123,6 @@ describe('IssueThemeService detail stock population', () => {
     const service = new IssueThemeService(
       prisma,
       realtimeCache,
-      new CurrentPriceResolver(),
-      { ensureSubscribed: jest.fn().mockResolvedValue(undefined) } as any,
       {} as any,
       new ThemeMetricsService(),
       themeAiSummary,
@@ -159,22 +135,12 @@ describe('IssueThemeService detail stock population', () => {
           priceChangeRate: 1, tradingValue: null, previousTradingValueRatio: null, isNewHigh: false, shortTermRs: null },
       ]) } as any,
     );
-    jest.spyOn(service as any, 'getFilteredMetrics').mockResolvedValue({
-      tradeDate: new Date('2026-07-25'),
-      metrics: [
-        { stockCode: 'A', relativeStrengthScore: 90, closePrice: 100, priceChangeRate1d: 1, priceChange1d: 1, isNewHigh: false },
-        { stockCode: 'B', relativeStrengthScore: 95, closePrice: 200, priceChangeRate1d: 1, priceChange1d: 2, isNewHigh: false },
-        { stockCode: 'C', relativeStrengthScore: 99, closePrice: 300, priceChangeRate1d: 1, priceChange1d: 3, isNewHigh: false },
-      ],
-    });
-    jest.spyOn(service as any, 'getLiveTradingValueChanges').mockResolvedValue(new Map());
     jest.spyOn(service, 'getCurrentThemeRankMap').mockResolvedValue(new Map([[1, {
       rank: 1, previousRank: null, rankChange: null, risingCount: 3, totalCount: 3,
       rsScore: 94.67, avgRsScore: 94.67, changeRate: 1, newHighCount: 0,
       shortTermRs: null, momentum: null, stockSnapshotTime: new Date('2026-07-25T06:50:00Z'),
       snapshotDate: new Date('2026-07-25'),
     }]]));
-    jest.spyOn(service as any, 'getRelatedThemes').mockResolvedValue([]);
 
     const result = await service.getThemeDetail(1, undefined, {
       stockSort: IssueThemeStockSort.SHORT_TERM_RS,
@@ -187,5 +153,86 @@ describe('IssueThemeService detail stock population', () => {
       { stockCode: 'C', shortTermRs: null },
     ]);
     expect(prisma.stockDailyMetrics.findMany).not.toHaveBeenCalled();
+  });
+  it('derives price change amount, new-high gap, and related themes from the stock snapshot', async () => {
+    const snapshotItem = (themeCode: number, rank: number, avgRsScore: number) => ({
+      themeCode, rank, previousRank: null, risingCount: 2, totalCount: 3,
+      upCount: 2, flatCount: 0, downCount: 1, risingRatio: 66.67,
+      avgChangeRate: 1.5, avgRsScore, shortTermRs: 85, momentum: 2.5, newHighCount: 1,
+      stockSnapshotTime: new Date('2026-08-10T06:50:00.000Z'),
+      snapshotDate: new Date('2026-08-10'),
+    });
+    const snapshotStock = (stockCode: string, overrides: any = {}) => ({
+      stockCode, currentRank: 1, currentPrice: 100, relativeStrengthScore: 90,
+      priceChangeRate: 5, priceChange1d: 5, tradingValue: 1000n,
+      previousTradingValueRatio: 2, isNewHigh: false, highPrice52w: 125,
+      shortTermRs: 88, ...overrides,
+    });
+    const prisma: any = {
+      theme: {
+        findFirst: jest.fn().mockResolvedValue({ themeName: 'OLED', imageUrl: null }),
+        findMany: jest.fn().mockResolvedValue([
+          { themeCode: 1, themeName: 'OLED' },
+          { themeCode: 2, themeName: '2차전지' },
+        ]),
+      },
+      stockTheme: {
+        findMany: jest.fn().mockResolvedValue([
+          { stockCode: 'A', stockName: '에이', inclusionReason: 'OLED 소재' },
+        ]),
+      },
+      company: {
+        findMany: jest.fn().mockResolvedValue([{ stockCode: 'A', companyName: '에이' }]),
+      },
+      stockDailyMetrics: {
+        findMany: jest.fn(() => { throw new Error('daily metrics must not be read'); }),
+        findFirst: jest.fn(() => { throw new Error('daily metrics must not be read'); }),
+      },
+      themeDailySnapshot: {
+        findFirst: jest.fn(() => { throw new Error('legacy theme snapshot must not be read'); }),
+      },
+    };
+    const themeSnapshot: any = {
+      getLatestThemeItems: jest.fn().mockResolvedValue(new Map([
+        [1, snapshotItem(1, 34, 90)],
+        [2, snapshotItem(2, 40, 82)],
+      ])),
+      getThemeStocks: jest.fn().mockResolvedValue([
+        snapshotStock('A'),
+        snapshotStock('B', { currentRank: 2, priceChange1d: -3, highPrice52w: null }),
+        snapshotStock('C', { currentRank: 3, priceChange1d: null, highPrice52w: 200 }),
+      ]),
+      getThemeStocksForThemes: jest.fn().mockResolvedValue(new Map([
+        [1, [snapshotStock('A'), snapshotStock('B'), snapshotStock('C')]],
+        [2, [snapshotStock('A'), snapshotStock('B'), snapshotStock('D')]],
+      ])),
+    };
+    const service = new IssueThemeService(
+      prisma,
+      { getPrices: jest.fn(() => new Map()) } as any,
+      {} as any,
+      new ThemeMetricsService(),
+      { getLatestSuccess: jest.fn().mockResolvedValue(null) } as any,
+      themeSnapshot,
+    );
+
+    const result = await service.getThemeDetail(1, undefined, {
+      stockSort: IssueThemeStockSort.RS,
+      stockDisplay: 20,
+    });
+
+    const stocks = new Map(result!.stocks.map((stock: any) => [stock.stockCode, stock]));
+    expect(stocks.get('A')).toMatchObject({ priceChange1d: 5, newHighRate: -20 });
+    expect(stocks.get('B')).toMatchObject({ priceChange1d: -3, newHighRate: null });
+    expect(stocks.get('C')).toMatchObject({ priceChange1d: null, newHighRate: -50 });
+    expect(result?.relatedThemes).toEqual([{
+      themeCode: 2,
+      themeName: '2차전지',
+      sharedStockCount: 2,
+      similarity: 0.5,
+      rsScore: 82,
+      changeRate: 1.5,
+      signal: 'STRONG',
+    }]);
   });
 });

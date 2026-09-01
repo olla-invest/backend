@@ -33102,6 +33102,7 @@ export namespace Prisma {
     lowPrice52w: Decimal | null
     ma50: Decimal | null
     priceChangeRate: Decimal | null
+    priceChange1d: Decimal | null
     tradingValue: number | null
     previousTradingValueRatio: Decimal | null
     shortTermRs: Decimal | null
@@ -33116,6 +33117,7 @@ export namespace Prisma {
     lowPrice52w: Decimal | null
     ma50: Decimal | null
     priceChangeRate: Decimal | null
+    priceChange1d: Decimal | null
     tradingValue: bigint | null
     previousTradingValueRatio: Decimal | null
     shortTermRs: Decimal | null
@@ -33136,6 +33138,7 @@ export namespace Prisma {
     passedDynamicFilters: boolean | null
     priceSource: string | null
     priceChangeRate: Decimal | null
+    priceChange1d: Decimal | null
     tradingValue: bigint | null
     previousTradingValueRatio: Decimal | null
     isNewHigh: boolean | null
@@ -33158,6 +33161,7 @@ export namespace Prisma {
     passedDynamicFilters: boolean | null
     priceSource: string | null
     priceChangeRate: Decimal | null
+    priceChange1d: Decimal | null
     tradingValue: bigint | null
     previousTradingValueRatio: Decimal | null
     isNewHigh: boolean | null
@@ -33180,6 +33184,7 @@ export namespace Prisma {
     passedDynamicFilters: number
     priceSource: number
     priceChangeRate: number
+    priceChange1d: number
     tradingValue: number
     previousTradingValueRatio: number
     isNewHigh: number
@@ -33198,6 +33203,7 @@ export namespace Prisma {
     lowPrice52w?: true
     ma50?: true
     priceChangeRate?: true
+    priceChange1d?: true
     tradingValue?: true
     previousTradingValueRatio?: true
     shortTermRs?: true
@@ -33212,6 +33218,7 @@ export namespace Prisma {
     lowPrice52w?: true
     ma50?: true
     priceChangeRate?: true
+    priceChange1d?: true
     tradingValue?: true
     previousTradingValueRatio?: true
     shortTermRs?: true
@@ -33232,6 +33239,7 @@ export namespace Prisma {
     passedDynamicFilters?: true
     priceSource?: true
     priceChangeRate?: true
+    priceChange1d?: true
     tradingValue?: true
     previousTradingValueRatio?: true
     isNewHigh?: true
@@ -33254,6 +33262,7 @@ export namespace Prisma {
     passedDynamicFilters?: true
     priceSource?: true
     priceChangeRate?: true
+    priceChange1d?: true
     tradingValue?: true
     previousTradingValueRatio?: true
     isNewHigh?: true
@@ -33276,6 +33285,7 @@ export namespace Prisma {
     passedDynamicFilters?: true
     priceSource?: true
     priceChangeRate?: true
+    priceChange1d?: true
     tradingValue?: true
     previousTradingValueRatio?: true
     isNewHigh?: true
@@ -33385,6 +33395,7 @@ export namespace Prisma {
     passedDynamicFilters: boolean
     priceSource: string
     priceChangeRate: Decimal | null
+    priceChange1d: Decimal | null
     tradingValue: bigint | null
     previousTradingValueRatio: Decimal | null
     isNewHigh: boolean | null
@@ -33426,6 +33437,7 @@ export namespace Prisma {
     passedDynamicFilters?: boolean
     priceSource?: boolean
     priceChangeRate?: boolean
+    priceChange1d?: boolean
     tradingValue?: boolean
     previousTradingValueRatio?: boolean
     isNewHigh?: boolean
@@ -33448,6 +33460,7 @@ export namespace Prisma {
     passedDynamicFilters?: boolean
     priceSource?: boolean
     priceChangeRate?: boolean
+    priceChange1d?: boolean
     tradingValue?: boolean
     previousTradingValueRatio?: boolean
     isNewHigh?: boolean
@@ -33470,6 +33483,7 @@ export namespace Prisma {
     passedDynamicFilters?: boolean
     priceSource?: boolean
     priceChangeRate?: boolean
+    priceChange1d?: boolean
     tradingValue?: boolean
     previousTradingValueRatio?: boolean
     isNewHigh?: boolean
@@ -33492,6 +33506,7 @@ export namespace Prisma {
     passedDynamicFilters?: boolean
     priceSource?: boolean
     priceChangeRate?: boolean
+    priceChange1d?: boolean
     tradingValue?: boolean
     previousTradingValueRatio?: boolean
     isNewHigh?: boolean
@@ -33499,7 +33514,7 @@ export namespace Prisma {
     createdAt?: boolean
   }
 
-  export type StockCurrentRankSnapshotOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"snapshotId" | "stockCode" | "tradeDate" | "snapshotTime" | "currentRank" | "relativeStrengthScore" | "currentPrice" | "closePrice" | "highPrice52w" | "lowPrice52w" | "ma50" | "passedDynamicFilters" | "priceSource" | "priceChangeRate" | "tradingValue" | "previousTradingValueRatio" | "isNewHigh" | "shortTermRs" | "createdAt", ExtArgs["result"]["stockCurrentRankSnapshot"]>
+  export type StockCurrentRankSnapshotOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"snapshotId" | "stockCode" | "tradeDate" | "snapshotTime" | "currentRank" | "relativeStrengthScore" | "currentPrice" | "closePrice" | "highPrice52w" | "lowPrice52w" | "ma50" | "passedDynamicFilters" | "priceSource" | "priceChangeRate" | "priceChange1d" | "tradingValue" | "previousTradingValueRatio" | "isNewHigh" | "shortTermRs" | "createdAt", ExtArgs["result"]["stockCurrentRankSnapshot"]>
 
   export type $StockCurrentRankSnapshotPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "StockCurrentRankSnapshot"
@@ -33519,6 +33534,7 @@ export namespace Prisma {
       passedDynamicFilters: boolean
       priceSource: string
       priceChangeRate: Prisma.Decimal | null
+      priceChange1d: Prisma.Decimal | null
       tradingValue: bigint | null
       previousTradingValueRatio: Prisma.Decimal | null
       isNewHigh: boolean | null
@@ -33961,6 +33977,7 @@ export namespace Prisma {
     readonly passedDynamicFilters: FieldRef<"StockCurrentRankSnapshot", 'Boolean'>
     readonly priceSource: FieldRef<"StockCurrentRankSnapshot", 'String'>
     readonly priceChangeRate: FieldRef<"StockCurrentRankSnapshot", 'Decimal'>
+    readonly priceChange1d: FieldRef<"StockCurrentRankSnapshot", 'Decimal'>
     readonly tradingValue: FieldRef<"StockCurrentRankSnapshot", 'BigInt'>
     readonly previousTradingValueRatio: FieldRef<"StockCurrentRankSnapshot", 'Decimal'>
     readonly isNewHigh: FieldRef<"StockCurrentRankSnapshot", 'Boolean'>
@@ -39448,6 +39465,7 @@ export namespace Prisma {
     passedDynamicFilters: 'passedDynamicFilters',
     priceSource: 'priceSource',
     priceChangeRate: 'priceChangeRate',
+    priceChange1d: 'priceChange1d',
     tradingValue: 'tradingValue',
     previousTradingValueRatio: 'previousTradingValueRatio',
     isNewHigh: 'isNewHigh',
@@ -41988,6 +42006,7 @@ export namespace Prisma {
     passedDynamicFilters?: BoolFilter<"StockCurrentRankSnapshot"> | boolean
     priceSource?: StringFilter<"StockCurrentRankSnapshot"> | string
     priceChangeRate?: DecimalNullableFilter<"StockCurrentRankSnapshot"> | Decimal | DecimalJsLike | number | string | null
+    priceChange1d?: DecimalNullableFilter<"StockCurrentRankSnapshot"> | Decimal | DecimalJsLike | number | string | null
     tradingValue?: BigIntNullableFilter<"StockCurrentRankSnapshot"> | bigint | number | null
     previousTradingValueRatio?: DecimalNullableFilter<"StockCurrentRankSnapshot"> | Decimal | DecimalJsLike | number | string | null
     isNewHigh?: BoolNullableFilter<"StockCurrentRankSnapshot"> | boolean | null
@@ -42010,6 +42029,7 @@ export namespace Prisma {
     passedDynamicFilters?: SortOrder
     priceSource?: SortOrder
     priceChangeRate?: SortOrderInput | SortOrder
+    priceChange1d?: SortOrderInput | SortOrder
     tradingValue?: SortOrderInput | SortOrder
     previousTradingValueRatio?: SortOrderInput | SortOrder
     isNewHigh?: SortOrderInput | SortOrder
@@ -42036,6 +42056,7 @@ export namespace Prisma {
     passedDynamicFilters?: BoolFilter<"StockCurrentRankSnapshot"> | boolean
     priceSource?: StringFilter<"StockCurrentRankSnapshot"> | string
     priceChangeRate?: DecimalNullableFilter<"StockCurrentRankSnapshot"> | Decimal | DecimalJsLike | number | string | null
+    priceChange1d?: DecimalNullableFilter<"StockCurrentRankSnapshot"> | Decimal | DecimalJsLike | number | string | null
     tradingValue?: BigIntNullableFilter<"StockCurrentRankSnapshot"> | bigint | number | null
     previousTradingValueRatio?: DecimalNullableFilter<"StockCurrentRankSnapshot"> | Decimal | DecimalJsLike | number | string | null
     isNewHigh?: BoolNullableFilter<"StockCurrentRankSnapshot"> | boolean | null
@@ -42058,6 +42079,7 @@ export namespace Prisma {
     passedDynamicFilters?: SortOrder
     priceSource?: SortOrder
     priceChangeRate?: SortOrderInput | SortOrder
+    priceChange1d?: SortOrderInput | SortOrder
     tradingValue?: SortOrderInput | SortOrder
     previousTradingValueRatio?: SortOrderInput | SortOrder
     isNewHigh?: SortOrderInput | SortOrder
@@ -42088,6 +42110,7 @@ export namespace Prisma {
     passedDynamicFilters?: BoolWithAggregatesFilter<"StockCurrentRankSnapshot"> | boolean
     priceSource?: StringWithAggregatesFilter<"StockCurrentRankSnapshot"> | string
     priceChangeRate?: DecimalNullableWithAggregatesFilter<"StockCurrentRankSnapshot"> | Decimal | DecimalJsLike | number | string | null
+    priceChange1d?: DecimalNullableWithAggregatesFilter<"StockCurrentRankSnapshot"> | Decimal | DecimalJsLike | number | string | null
     tradingValue?: BigIntNullableWithAggregatesFilter<"StockCurrentRankSnapshot"> | bigint | number | null
     previousTradingValueRatio?: DecimalNullableWithAggregatesFilter<"StockCurrentRankSnapshot"> | Decimal | DecimalJsLike | number | string | null
     isNewHigh?: BoolNullableWithAggregatesFilter<"StockCurrentRankSnapshot"> | boolean | null
@@ -44900,6 +44923,7 @@ export namespace Prisma {
     passedDynamicFilters?: boolean
     priceSource?: string
     priceChangeRate?: Decimal | DecimalJsLike | number | string | null
+    priceChange1d?: Decimal | DecimalJsLike | number | string | null
     tradingValue?: bigint | number | null
     previousTradingValueRatio?: Decimal | DecimalJsLike | number | string | null
     isNewHigh?: boolean | null
@@ -44922,6 +44946,7 @@ export namespace Prisma {
     passedDynamicFilters?: boolean
     priceSource?: string
     priceChangeRate?: Decimal | DecimalJsLike | number | string | null
+    priceChange1d?: Decimal | DecimalJsLike | number | string | null
     tradingValue?: bigint | number | null
     previousTradingValueRatio?: Decimal | DecimalJsLike | number | string | null
     isNewHigh?: boolean | null
@@ -44944,6 +44969,7 @@ export namespace Prisma {
     passedDynamicFilters?: BoolFieldUpdateOperationsInput | boolean
     priceSource?: StringFieldUpdateOperationsInput | string
     priceChangeRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    priceChange1d?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     tradingValue?: NullableBigIntFieldUpdateOperationsInput | bigint | number | null
     previousTradingValueRatio?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     isNewHigh?: NullableBoolFieldUpdateOperationsInput | boolean | null
@@ -44966,6 +44992,7 @@ export namespace Prisma {
     passedDynamicFilters?: BoolFieldUpdateOperationsInput | boolean
     priceSource?: StringFieldUpdateOperationsInput | string
     priceChangeRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    priceChange1d?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     tradingValue?: NullableBigIntFieldUpdateOperationsInput | bigint | number | null
     previousTradingValueRatio?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     isNewHigh?: NullableBoolFieldUpdateOperationsInput | boolean | null
@@ -44988,6 +45015,7 @@ export namespace Prisma {
     passedDynamicFilters?: boolean
     priceSource?: string
     priceChangeRate?: Decimal | DecimalJsLike | number | string | null
+    priceChange1d?: Decimal | DecimalJsLike | number | string | null
     tradingValue?: bigint | number | null
     previousTradingValueRatio?: Decimal | DecimalJsLike | number | string | null
     isNewHigh?: boolean | null
@@ -45010,6 +45038,7 @@ export namespace Prisma {
     passedDynamicFilters?: BoolFieldUpdateOperationsInput | boolean
     priceSource?: StringFieldUpdateOperationsInput | string
     priceChangeRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    priceChange1d?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     tradingValue?: NullableBigIntFieldUpdateOperationsInput | bigint | number | null
     previousTradingValueRatio?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     isNewHigh?: NullableBoolFieldUpdateOperationsInput | boolean | null
@@ -45032,6 +45061,7 @@ export namespace Prisma {
     passedDynamicFilters?: BoolFieldUpdateOperationsInput | boolean
     priceSource?: StringFieldUpdateOperationsInput | string
     priceChangeRate?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
+    priceChange1d?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     tradingValue?: NullableBigIntFieldUpdateOperationsInput | bigint | number | null
     previousTradingValueRatio?: NullableDecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string | null
     isNewHigh?: NullableBoolFieldUpdateOperationsInput | boolean | null
@@ -47661,6 +47691,7 @@ export namespace Prisma {
     passedDynamicFilters?: SortOrder
     priceSource?: SortOrder
     priceChangeRate?: SortOrder
+    priceChange1d?: SortOrder
     tradingValue?: SortOrder
     previousTradingValueRatio?: SortOrder
     isNewHigh?: SortOrder
@@ -47677,6 +47708,7 @@ export namespace Prisma {
     lowPrice52w?: SortOrder
     ma50?: SortOrder
     priceChangeRate?: SortOrder
+    priceChange1d?: SortOrder
     tradingValue?: SortOrder
     previousTradingValueRatio?: SortOrder
     shortTermRs?: SortOrder
@@ -47697,6 +47729,7 @@ export namespace Prisma {
     passedDynamicFilters?: SortOrder
     priceSource?: SortOrder
     priceChangeRate?: SortOrder
+    priceChange1d?: SortOrder
     tradingValue?: SortOrder
     previousTradingValueRatio?: SortOrder
     isNewHigh?: SortOrder
@@ -47719,6 +47752,7 @@ export namespace Prisma {
     passedDynamicFilters?: SortOrder
     priceSource?: SortOrder
     priceChangeRate?: SortOrder
+    priceChange1d?: SortOrder
     tradingValue?: SortOrder
     previousTradingValueRatio?: SortOrder
     isNewHigh?: SortOrder
@@ -47735,6 +47769,7 @@ export namespace Prisma {
     lowPrice52w?: SortOrder
     ma50?: SortOrder
     priceChangeRate?: SortOrder
+    priceChange1d?: SortOrder
     tradingValue?: SortOrder
     previousTradingValueRatio?: SortOrder
     shortTermRs?: SortOrder
