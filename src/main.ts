@@ -82,6 +82,10 @@ async function bootstrap() {
     fs.mkdirSync( path.dirname( swaggerOutputPath ), { recursive: true } );
     fs.writeFileSync( swaggerOutputPath, JSON.stringify( document, null, 2 ) );
 
+    // 스케줄러 등록은 onApplicationBootstrap 에서 일어난다. listen() 이 알아서 호출하지만
+    // 그 전에 크론을 정지시켜야 하므로 여기서 명시적으로 초기화한다 (listen 은 재초기화하지 않는다).
+    await app.init();
+
     // 보조 환경(develop 등)이 운영과 같은 크론을 이중 실행하는 것을 막는다.
     // 방치하면 키움 API를 두 배로 호출하고, 분산락이 걸린 잡은 develop이 락을 선점해
     // 운영 크론이 조용히 스킵된다.
