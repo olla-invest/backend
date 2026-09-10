@@ -1,13 +1,14 @@
 import { NestFactory } from '@nestjs/core';
-import { ValidationPipe } from '@nestjs/common';
+import { Logger, ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app.module';
 import { ConfigService } from '@nestjs/config';
+import { SchedulerRegistry } from '@nestjs/schedule';
 import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import * as fs from 'fs';
 import * as express from 'express';
 import * as path from 'path';
-import session = require('express-session');
+import session = require( 'express-session' );
 import { addDefaultResponseSchemas } from './common/swagger/default-response-schemas';
 
 async function bootstrap() {
@@ -75,11 +76,23 @@ async function bootstrap() {
             'access-token',
         )
         .build();
-    const document = addDefaultResponseSchemas(SwaggerModule.createDocument( app, swaggerConfig ));
+    const document = addDefaultResponseSchemas( SwaggerModule.createDocument( app, swaggerConfig ) );
     SwaggerModule.setup( 'api-docs', app, document );
     const swaggerOutputPath = configService.get<string>( 'SWAGGER_OUTPUT_PATH', './swagger.json' );
     fs.mkdirSync( path.dirname( swaggerOutputPath ), { recursive: true } );
     fs.writeFileSync( swaggerOutputPath, JSON.stringify( document, null, 2 ) );
+
+    // 보조 환경(develop 등)이 운영과 같은 크론을 이중 실행하는 것을 막는다.
+    // 방치하면 키움 API를 두 배로 호출하고, 분산락이 걸린 잡은 develop이 락을 선점해
+    // 운영 크론이 조용히 스킵된다.
+    if ( configService.get( 'SCHEDULER_ENABLED', 'true' ) === 'false' ) {
+        const schedulerRegistry = app.get( SchedulerRegistry );
+        const cronJobs = schedulerRegistry.getCronJobs();
+        cronJobs.forEach( ( job ) => job.stop() );
+        schedulerRegistry.getIntervals().forEach( ( name ) => schedulerRegistry.deleteInterval( name ) );
+        schedulerRegistry.getTimeouts().forEach( ( name ) => schedulerRegistry.deleteTimeout( name ) );
+        new Logger( 'Bootstrap' ).warn( `SCHEDULER_ENABLED=false: 크론 ${cronJobs.size}개 정지됨` );
+    }
 
     // Get port from environment or use default
     const port = configService.get( 'PORT', 3000 );
