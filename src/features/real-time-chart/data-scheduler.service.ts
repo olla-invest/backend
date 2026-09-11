@@ -1,5 +1,6 @@
 import { Injectable, Logger, OnApplicationBootstrap } from '@nestjs/common';
 import { Cron } from '@nestjs/schedule';
+import { ConfigService } from '@nestjs/config';
 import { RealTimeChartService } from './real-time-chart.service';
 import { ChartStorageService } from './chart-storage.service';
 import { RedisLockService } from '../../common/redis/redis-lock.service';
@@ -44,6 +45,7 @@ export class DataSchedulerService implements OnApplicationBootstrap {
     private readonly currentRankService: CurrentRankService,
     private readonly marketViewService: MarketViewService,
     private readonly eventEmitter: EventEmitter2,
+    private readonly configService: ConfigService,
   ) {}
 
   // ─────────────────────────────────────────────────────────────
@@ -209,6 +211,13 @@ export class DataSchedulerService implements OnApplicationBootstrap {
    * - Redis 분산락으로 중복 실행 방지.
    */
   async onApplicationBootstrap() {
+    // 부팅 훅은 @Cron 이 아니라서 main.ts 의 SCHEDULER_ENABLED 가드가 막지 못한다.
+    // 보조 환경은 메트릭스가 계속 비어 있어 재시작마다 최대 5거래일치를 전량 재계산하게 되므로
+    // (전 종목 RS 재계산 — 락 TTL 30분) 여기서도 동일 플래그를 존중한다.
+    if (this.configService.get('SCHEDULER_ENABLED', 'true') === 'false') {
+      this.logger.warn('[bootstrap] SCHEDULER_ENABLED=false — 메트릭스 catch-up 생략');
+      return;
+    }
     this.logger.log('[bootstrap] Checking for missed metrics...');
     await this.runMetricsSafetyNet();
   }

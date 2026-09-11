@@ -41,6 +41,7 @@ describe('DataSchedulerService end-of-day ranking finalization', () => {
       currentRankService as any,
       {} as any,
       eventEmitter as any,
+      { get: (_k: string, d?: unknown) => d } as any,
     ) as any;
     jest.spyOn(service, 'runCatchUp').mockResolvedValue(undefined);
     jest.spyOn(service, 'runMetricsFor').mockImplementation(async () => {
@@ -72,6 +73,7 @@ describe('DataSchedulerService end-of-day ranking finalization', () => {
       } as any,
       {} as any,
       eventEmitter as any,
+      { get: (_k: string, d?: unknown) => d } as any,
     ) as any;
     jest.spyOn(service, 'runCatchUp').mockResolvedValue(undefined);
     jest.spyOn(service, 'runMetricsFor').mockResolvedValue(undefined);
