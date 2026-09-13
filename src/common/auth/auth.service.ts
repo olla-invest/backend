@@ -6,6 +6,7 @@ import {
     UnauthorizedException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
 import * as crypto from 'crypto';
 import { AuthProvider } from '../../../generated/prisma';
@@ -26,6 +27,7 @@ export class AuthService {
         private readonly prisma: PrismaService,
         private readonly jwtService: JwtService,
         private readonly emailService: EmailService,
+        private readonly configService: ConfigService,
     ) {}
 
     async register( dto: RegisterDto ) {
@@ -69,8 +71,14 @@ export class AuthService {
     }
 
     async login( dto: LoginDto ) {
+        const developmentBypassEnabled =
+            this.configService.get<string>( 'NODE_ENV' ) !== 'production'
+            && this.configService.get<string>( 'DEV_AUTH_BYPASS' ) === 'true';
+        const username = developmentBypassEnabled
+            ? this.configService.get<string>( 'DEV_AUTH_BYPASS_USERNAME', 'test' )
+            : dto.username;
         const user = await this.prisma.user.findFirst( {
-            where: { username: dto.username, deletedAt: null },
+            where: { username, deletedAt: null },
         } );
 
         if ( !user ) {
@@ -84,9 +92,11 @@ export class AuthService {
             );
         }
 
-        const isPasswordValid = await bcrypt.compare( dto.password, user.password );
-        if ( !isPasswordValid ) {
-            throw new UnauthorizedException( '비밀번호가 일치하지 않습니다.' );
+        if ( !developmentBypassEnabled ) {
+            const isPasswordValid = await bcrypt.compare( dto.password, user.password );
+            if ( !isPasswordValid ) {
+                throw new UnauthorizedException( '비밀번호가 일치하지 않습니다.' );
+            }
         }
 
         const payload: JwtPayload = {
