@@ -384,20 +384,18 @@ export class InitialSetupService {
     this.logger.log(`Calculating historical metrics (last ${days} days)`);
 
     // 지정된 일수만큼 거래일 찾기
-    const recentDates = await this.prisma.stockCandle.findMany({
-      where: {
-        candleType: 'day',
-        stockCode: { not: { startsWith: 'INDEX_' } },
-      },
-      select: {
-        candleTime: true,
-      },
-      orderBy: {
-        candleTime: 'desc',
-      },
-      take: days,
-      distinct: ['candleTime'],
-    });
+    // Prisma 의 distinct 는 클라이언트 측 처리라 take 가 SQL LIMIT 이 되지 않는다.
+    // stock_candles(200만 행) 전체를 끌어오게 되므로 DISTINCT ON + LIMIT 을 직접 쓴다.
+    const recentDates = await this.prisma.$queryRawUnsafe<Array<{ candleTime: Date }>>(
+      `
+        SELECT DISTINCT ON (candle_time) candle_time AS "candleTime"
+        FROM stock_candles
+        WHERE candle_type = 'day' AND stock_code NOT LIKE 'INDEX_%'
+        ORDER BY candle_time DESC
+        LIMIT $1::int
+      `,
+      days,
+    );
 
     const uniqueDates = [
       ...new Set(
