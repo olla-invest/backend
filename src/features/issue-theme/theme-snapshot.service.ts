@@ -285,15 +285,32 @@ export class ThemeSnapshotService {
     return { requestedDays: days, rebuiltDates, skippedDates };
   }
 
+  /**
+   * 최신 테마 스냅샷을 반환한다.
+   *
+   * stock_current_rank_snapshots 에서 파생된 스냅샷(stockSnapshotTime 보유)을 우선하되,
+   * 하나도 없으면 그 이전 방식으로 쌓인 스냅샷으로 폴백한다.
+   * 폴백이 없으면 마이그레이션 직후~백필 완료 사이에 테마 랭킹이 통째로 비어
+   * 추천 2순위("Top10 중 1개 노출")가 무너지고 API 가 null 을 반환하게 된다.
+   */
   async getLatestThemeItems(themeCodes?: number[]): Promise<Map<number, ThemeSnapshotItem>> {
-    const latest = await this.prisma.themeDailySnapshot.findFirst({
+    let latest = await this.prisma.themeDailySnapshot.findFirst({
       where: { stockSnapshotTime: { not: null } },
       orderBy: { snapshotDate: 'desc' },
       select: { snapshotDate: true },
     });
+    const requireStockSource = latest != null;
+    if (!latest) {
+      latest = await this.prisma.themeDailySnapshot.findFirst({
+        orderBy: { snapshotDate: 'desc' },
+        select: { snapshotDate: true },
+      });
+    }
     if (!latest) return new Map();
+
+    const sourceWhere = requireStockSource ? { stockSnapshotTime: { not: null } } : {};
     const previous = await this.prisma.themeDailySnapshot.findFirst({
-      where: { snapshotDate: { lt: latest.snapshotDate }, stockSnapshotTime: { not: null } },
+      where: { snapshotDate: { lt: latest.snapshotDate }, ...sourceWhere },
       orderBy: { snapshotDate: 'desc' },
       select: { snapshotDate: true },
     });
@@ -301,7 +318,7 @@ export class ThemeSnapshotService {
       this.prisma.themeDailySnapshot.findMany({
         where: {
           snapshotDate: latest.snapshotDate,
-          stockSnapshotTime: { not: null },
+          ...sourceWhere,
           ...(themeCodes ? { themeCode: { in: themeCodes } } : {}),
         },
       }),
@@ -329,7 +346,8 @@ export class ThemeSnapshotService {
       shortTermRs: row.shortTermRs == null ? null : Number(row.shortTermRs),
       momentum: row.momentum == null ? null : Number(row.momentum),
       newHighCount: row.newHighCount,
-      stockSnapshotTime: row.stockSnapshotTime!,
+      // 폴백 스냅샷은 파생 시각이 없으므로 행 생성 시각을 갱신 시각으로 사용한다
+      stockSnapshotTime: row.stockSnapshotTime ?? row.createdAt,
       snapshotDate: row.snapshotDate,
     }]));
   }

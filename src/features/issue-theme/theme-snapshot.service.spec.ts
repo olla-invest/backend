@@ -197,4 +197,60 @@ describe('ThemeSnapshotService', () => {
 
     expect(themeAiSummary.generateForTradeDate).not.toHaveBeenCalled();
   });
+
+  describe('getLatestThemeItems', () => {
+    const row = (overrides: any = {}) => ({
+      themeCode: 34,
+      rank: 3,
+      risingCount: 5,
+      totalCount: 10,
+      upCount: 5,
+      flatCount: 2,
+      downCount: 3,
+      risingRatio: '50',
+      avgChangeRate: '1.5',
+      avgRsScore: '80',
+      shortTermRs: null,
+      momentum: null,
+      newHighCount: 0,
+      stockSnapshotTime: null,
+      snapshotDate: new Date('2026-08-10'),
+      createdAt: new Date('2026-08-10T07:00:00.000Z'),
+      ...overrides,
+    });
+
+    function createService(findFirst: jest.Mock, findMany: jest.Mock) {
+      const prisma: any = { themeDailySnapshot: { findFirst, findMany } };
+      return new ThemeSnapshotService(prisma, new ThemeMetricsService(), aiSummaryStub());
+    }
+
+    it('파생 스냅샷이 없으면 기존 스냅샷으로 폴백한다', async () => {
+      const findFirst = jest.fn()
+        .mockResolvedValueOnce(null)                                   // stockSnapshotTime 보유 행 없음
+        .mockResolvedValueOnce({ snapshotDate: new Date('2026-08-10') }) // 폴백으로 찾은 최신일
+        .mockResolvedValueOnce(null);                                  // 직전일 없음
+      const findMany = jest.fn().mockResolvedValue([row()]);
+
+      const result = await createService(findFirst, findMany).getLatestThemeItems();
+
+      expect(result.size).toBe(1);
+      // 폴백 경로에서는 stockSnapshotTime 조건이 빠져야 한다
+      expect(findMany.mock.calls[0][0].where.stockSnapshotTime).toBeUndefined();
+      // 파생 시각이 없으므로 행 생성 시각으로 대체된다
+      expect(result.get(34)!.stockSnapshotTime).toEqual(new Date('2026-08-10T07:00:00.000Z'));
+    });
+
+    it('파생 스냅샷이 있으면 그것만 사용한다', async () => {
+      const stockSnapshotTime = new Date('2026-08-10T06:50:00.000Z');
+      const findFirst = jest.fn()
+        .mockResolvedValueOnce({ snapshotDate: new Date('2026-08-10') })
+        .mockResolvedValueOnce(null);
+      const findMany = jest.fn().mockResolvedValue([row({ stockSnapshotTime })]);
+
+      const result = await createService(findFirst, findMany).getLatestThemeItems();
+
+      expect(findMany.mock.calls[0][0].where.stockSnapshotTime).toEqual({ not: null });
+      expect(result.get(34)!.stockSnapshotTime).toEqual(stockSnapshotTime);
+    });
+  });
 });
