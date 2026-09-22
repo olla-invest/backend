@@ -220,6 +220,44 @@ export class StockMetricsService {
    * 최근 N개 거래일의 확정 currentRank 이력 조회.
    * 장중/장전 화면의 D-1/D-2/D-3는 전일 daily metric에 확정 저장된 current_rank를 사용한다.
    */
+  /**
+   * 최근 N개 거래일을 최신순으로 조회한다.
+   *
+   * Prisma 의 distinct 는 클라이언트 측에서 처리되어 take 가 SQL LIMIT 으로 내려가지 않는다.
+   * findMany({ distinct: ['tradeDate'], take: 3 }) 은 조건에 맞는 전 행
+   * (stock_daily_metrics 기준 40만 행 이상)을 받아 메모리에서 중복을 제거하므로,
+   * 거래일 3개를 구하는 데 수 초가 걸린다. DISTINCT ON + LIMIT 으로 DB 에서 끝낸다.
+   */
+  async getRecentTradeDates(
+    days: number,
+    beforeTradeDate?: Date | null,
+    inclusive = false,
+  ): Promise<Date[]> {
+    const comparison = inclusive ? '<=' : '<';
+    const rows = beforeTradeDate
+      ? await this.prisma.$queryRawUnsafe<Array<{ trade_date: Date }>>(
+          `
+            SELECT DISTINCT ON (trade_date) trade_date
+            FROM stock_daily_metrics
+            WHERE trade_date ${comparison} $1::date
+            ORDER BY trade_date DESC
+            LIMIT $2::int
+          `,
+          beforeTradeDate,
+          days,
+        )
+      : await this.prisma.$queryRawUnsafe<Array<{ trade_date: Date }>>(
+          `
+            SELECT DISTINCT ON (trade_date) trade_date
+            FROM stock_daily_metrics
+            ORDER BY trade_date DESC
+            LIMIT $1::int
+          `,
+          days,
+        );
+    return rows.map((row) => row.trade_date);
+  }
+
   async getCurrentRankHistory(
     stockCodes: string[],
     days: number = 3,
@@ -228,16 +266,7 @@ export class StockMetricsService {
   ): Promise<Map<string, Array<number | null>>> {
     if (stockCodes.length === 0) return new Map();
 
-    const recentDates = await this.prisma.stockDailyMetrics.findMany({
-      where: beforeTradeDate
-        ? { tradeDate: inclusive ? { lte: beforeTradeDate } : { lt: beforeTradeDate } }
-        : undefined,
-      orderBy: { tradeDate: 'desc' },
-      take: days,
-      distinct: ['tradeDate'],
-      select: { tradeDate: true },
-    });
-    const tradeDates = recentDates.map((d) => d.tradeDate);
+    const tradeDates = await this.getRecentTradeDates(days, beforeTradeDate, inclusive);
     const dateKeys = tradeDates.map((date) => date.toISOString().slice(0, 10));
 
     if (tradeDates.length === 0) return new Map();
@@ -279,16 +308,7 @@ export class StockMetricsService {
     beforeTradeDate?: Date | null,
     inclusive = false,
   ): Promise<Array<number | null>> {
-    const recentDates = await this.prisma.stockDailyMetrics.findMany({
-      where: beforeTradeDate
-        ? { tradeDate: inclusive ? { lte: beforeTradeDate } : { lt: beforeTradeDate } }
-        : undefined,
-      orderBy: { tradeDate: 'desc' },
-      take: days,
-      distinct: ['tradeDate'],
-      select: { tradeDate: true },
-    });
-    const tradeDates = recentDates.map((d) => d.tradeDate);
+    const tradeDates = await this.getRecentTradeDates(days, beforeTradeDate, inclusive);
     if (tradeDates.length === 0) return Array(days).fill(null);
 
     const counts = await this.prisma.stockDailyMetrics.groupBy({
@@ -321,18 +341,11 @@ export class StockMetricsService {
     days: number = 4,
   ): Promise<Map<string, Array<{ tradeDate: Date; rank: number; rsScore: number }>>> {
     // 최근 N개 거래일 조회
-    const recentDates = await this.prisma.stockDailyMetrics.findMany({
-      orderBy: { tradeDate: 'desc' },
-      take: days,
-      distinct: ['tradeDate'],
-      select: { tradeDate: true },
-    });
+    const tradeDates = await this.getRecentTradeDates(days);
 
-    if (recentDates.length === 0) {
+    if (tradeDates.length === 0) {
       return new Map();
     }
-
-    const tradeDates = recentDates.map((d) => d.tradeDate);
 
     // 해당 종목들의 최근 N개 거래일 지표 조회
     const metrics = await this.prisma.stockDailyMetrics.findMany({
@@ -392,23 +405,13 @@ export class StockMetricsService {
     );
 
     // 최근 N개 거래일 조회
-    const recentDates = await this.prisma.stockCandle.findMany({
-      where: {
-        candleType: 'day',
-        stockCode: { not: { startsWith: 'INDEX_' } },
-      },
-      orderBy: { candleTime: 'desc' },
-      take: tradingDays,
-      distinct: ['candleTime'],
-      select: { candleTime: true },
-    });
+    const tradeDates = await this.getRecentTradingDates(tradingDays);
 
-    if (recentDates.length === 0) {
+    if (tradeDates.length === 0) {
       this.logger.warn('No trading days found');
       return new Map();
     }
 
-    const tradeDates = recentDates.map((d) => d.candleTime);
     this.logger.log(`Found ${tradeDates.length} recent trading days`);
 
     // 최대 기간 계산 (52주 = 365일)
@@ -857,17 +860,20 @@ export class StockMetricsService {
    * 최근 N개 거래일 날짜 조회
    */
   async getRecentTradingDates(count: number = 4): Promise<Date[]> {
-    const recentDates = await this.prisma.stockCandle.findMany({
-      where: {
-        candleType: 'day',
-        stockCode: { not: { startsWith: 'INDEX_' } },
-      },
-      orderBy: { candleTime: 'desc' },
-      take: count,
-      distinct: ['candleTime'],
-      select: { candleTime: true },
-    });
-    return recentDates.map((r) => r.candleTime);
+    // Prisma 의 distinct 는 클라이언트 측 처리라 take 가 SQL LIMIT 으로 내려가지 않는다.
+    // stock_candles 는 200만 행이 넘어 거래일 4개를 구하는 데 수십 분이 걸리고,
+    // 그 사이 커넥션을 붙들어 서비스 전체가 멎는다. DISTINCT ON + LIMIT 으로 DB 에서 끝낸다.
+    const rows = await this.prisma.$queryRawUnsafe<Array<{ candle_time: Date }>>(
+      `
+        SELECT DISTINCT ON (candle_time) candle_time
+        FROM stock_candles
+        WHERE candle_type = 'day' AND stock_code NOT LIKE 'INDEX_%'
+        ORDER BY candle_time DESC
+        LIMIT $1::int
+      `,
+      count,
+    );
+    return rows.map((row) => row.candle_time);
   }
 
   async calculateAndSaveDailyMetrics(
