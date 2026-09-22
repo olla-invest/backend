@@ -221,7 +221,7 @@ describe('ThemeSnapshotService', () => {
 
     function createService(findFirst: jest.Mock, findMany: jest.Mock) {
       const prisma: any = { themeDailySnapshot: { findFirst, findMany } };
-      return new ThemeSnapshotService(prisma, new ThemeMetricsService(), aiSummaryStub());
+      return new ThemeSnapshotService(prisma, {} as any, new ThemeMetricsService(), aiSummaryStub());
     }
 
     it('파생 스냅샷이 없으면 기존 스냅샷으로 폴백한다', async () => {
