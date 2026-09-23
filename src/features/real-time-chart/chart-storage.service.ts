@@ -175,12 +175,18 @@ export class ChartStorageService {
     from.setUTCDate(from.getUTCDate() - lookbackDays);
     from.setUTCHours(0, 0, 0, 0);
 
-    const distinctTimes = await this.prisma.stockCandle.findMany({
-      where: { candleType: 'day', candleTime: { gte: from, lte: today } },
-      distinct: ['candleTime'],
-      select: { candleTime: true },
-      orderBy: { candleTime: 'asc' },
-    });
+    // Prisma 의 distinct 는 클라이언트 측 처리라 범위 내 전 행(수십만 건)을 받아
+    // 메모리에서 중복을 제거한다. 거래일 목록만 필요하므로 DB 에서 집계한다.
+    const distinctTimes = await this.prisma.$queryRawUnsafe<Array<{ candleTime: Date }>>(
+      `
+        SELECT DISTINCT candle_time AS "candleTime"
+        FROM stock_candles
+        WHERE candle_type = 'day' AND candle_time >= $1 AND candle_time <= $2
+        ORDER BY candle_time ASC
+      `,
+      from,
+      today,
+    );
 
     const nonTradingDates = distinctTimes
       .map((r) => r.candleTime)
