@@ -354,12 +354,8 @@ export class RealTimeChartService implements OnModuleInit {
         where,
         orderBy: [{ rank: 'asc' }, { stockCode: 'asc' }],
       }),
-      this.prisma.stockDailyMetrics.findMany({
-        distinct: ['tradeDate'],
-        orderBy: { tradeDate: 'desc' },
-        take: 30,
-        select: { tradeDate: true },
-      }),
+      // Prisma 의 distinct 는 클라이언트 측 처리라 take 가 SQL LIMIT 이 되지 않는다.
+      this.metricsService.getRecentTradeDates(30),
     ]);
 
     const companies = await this.prisma.company.findMany({
@@ -423,7 +419,7 @@ export class RealTimeChartService implements OnModuleInit {
       totalPages: Math.ceil(totalCount / pageSize),
       tradeDate: latest.toISOString().split('T')[0],
       mode,
-      dates: dates.map((date) => date.tradeDate.toISOString().split('T')[0]),
+      dates: dates.map((date) => date.toISOString().split('T')[0]),
       rows: rows.map((row, index) => {
         const company = companyMap.get(row.stockCode);
         const movingAverages = movingAverageMap.get(row.stockCode);
