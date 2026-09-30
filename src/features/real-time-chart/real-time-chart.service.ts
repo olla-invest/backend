@@ -1729,12 +1729,16 @@ export class RealTimeChartService implements OnModuleInit {
         if (ma50 != null && currentPrice <= ma50) return false;
         return true;
       })
+      // 정렬 기준은 getStockList 와 동일해야 한다. 이 맵은 내 관심 화면이 쓰는데,
+      // 예전에는 currentRank 를 1차 키로 써서 실시간차트와 순위가 어긋났다.
       .sort((a, b) => {
+        const scoreDiff = b.rsScore - a.rsScore;
+        if (scoreDiff !== 0) return scoreDiff;
         const aRank = a.metrics?.currentRank ?? a.metrics?.rank ?? 999999;
         const bRank = b.metrics?.currentRank ?? b.metrics?.rank ?? 999999;
         const rankDiff = aRank - bRank;
         if (rankDiff !== 0) return rankDiff;
-        return b.rsScore - a.rsScore;
+        return a.stock.code.localeCompare(b.stock.code);
       });
 
     const displayRankMap = new Map<string, number>();
