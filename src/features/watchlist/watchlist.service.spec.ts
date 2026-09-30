@@ -123,7 +123,7 @@ describe('WatchlistService theme recommendations', () => {
     expect(item).toMatchObject({ rank: 2, prevRank: 3, rankChange: 1 });
   });
 
-  it('returns null instead of a dash for a missing numeric rank', () => {
+  it('falls back to the current rank when there is no previous rank', () => {
     const service = new WatchlistService({} as any, {} as any, {} as any, {} as any) as any;
     const item = service.buildStockItem(
       {
@@ -139,7 +139,10 @@ describe('WatchlistService theme recommendations', () => {
       },
     );
 
-    expect(item.prevRank).toBeNull();
+    // 직전 순위가 없으면 현재 순위를 그대로 돌려준다. null 을 내보내면 클라이언트가
+    // prevRank > rank 를 false 로 읽어 "하락"으로 표시해버린다.
+    expect(item.prevRank).toBe(2);
+    // 변화량은 여전히 '알 수 없음'이다. 0 으로 단정하지 않는다.
     expect(item.rankChange).toBeNull();
   });
 
