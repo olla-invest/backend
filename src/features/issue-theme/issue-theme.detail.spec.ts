@@ -39,11 +39,13 @@ describe('IssueThemeService detail stock population', () => {
           timestamp: new Date('2026-08-05T01:20:00.000Z'),
         }],
       ])),
+      getPrice: jest.fn(() => undefined),
     };
     const themeAiSummary: any = { getLatestSuccess: jest.fn().mockResolvedValue(null) };
     const service = new IssueThemeService(
       prisma,
       realtimeCache,
+      { getUsableRealtimePrice: () => undefined } as any,
       {} as any,
       new ThemeMetricsService(),
       themeAiSummary,
@@ -118,11 +120,12 @@ describe('IssueThemeService detail stock population', () => {
       },
       themeDailySnapshot: { findFirst: jest.fn().mockResolvedValue(null) },
     };
-    const realtimeCache: any = { getPrices: jest.fn(() => new Map()) };
+    const realtimeCache: any = { getPrices: jest.fn(() => new Map()), getPrice: jest.fn(() => undefined) };
     const themeAiSummary: any = { getLatestSuccess: jest.fn().mockResolvedValue(null) };
     const service = new IssueThemeService(
       prisma,
       realtimeCache,
+      { getUsableRealtimePrice: () => undefined } as any,
       {} as any,
       new ThemeMetricsService(),
       themeAiSummary,
@@ -209,7 +212,8 @@ describe('IssueThemeService detail stock population', () => {
     };
     const service = new IssueThemeService(
       prisma,
-      { getPrices: jest.fn(() => new Map()) } as any,
+      { getPrices: jest.fn(() => new Map()), getPrice: jest.fn(() => undefined) } as any,
+      { getUsableRealtimePrice: () => undefined } as any,
       {} as any,
       new ThemeMetricsService(),
       { getLatestSuccess: jest.fn().mockResolvedValue(null) } as any,

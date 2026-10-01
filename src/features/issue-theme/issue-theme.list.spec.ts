@@ -20,6 +20,7 @@ describe('IssueThemeService enhanced list', () => {
   const service = new IssueThemeService(
     prisma,
     realtimeCache,
+    { getUsableRealtimePrice: () => undefined } as any,
     {} as any,
     new ThemeMetricsService(),
     {} as any,
