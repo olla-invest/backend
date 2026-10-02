@@ -20,6 +20,8 @@ import { ChangePasswordDto } from './dto/change-password.dto';
 import { CompleteSocialProfileDto } from './dto/complete-social-profile.dto';
 import { JwtPayload } from './strategies/jwt.strategy';
 import { SocialProfile } from './types/social-profile.type';
+import { Request } from 'express';
+import { extractClientInfo } from '../../features/admin/utils/client-info.util';
 
 @Injectable()
 export class AuthService {
@@ -70,7 +72,7 @@ export class AuthService {
         };
     }
 
-    async login( dto: LoginDto ) {
+    async login( dto: LoginDto, request?: Request ) {
         const developmentBypassEnabled =
             this.configService.get<string>( 'NODE_ENV' ) !== 'production'
             && this.configService.get<string>( 'DEV_AUTH_BYPASS' ) === 'true';
@@ -106,6 +108,8 @@ export class AuthService {
         };
 
         const accessToken = this.jwtService.sign( payload );
+
+        await this.recordLoginHistory( user.userId, user.provider, request );
 
         return {
             accessToken,
@@ -206,7 +210,7 @@ export class AuthService {
         return { message: '비밀번호가 변경되었습니다.' };
     }
 
-    async socialLogin( profile: SocialProfile ): Promise<{ accessToken: string; user: object }> {
+    async socialLogin( profile: SocialProfile , request?: Request): Promise<{ accessToken: string; user: object }> {
         const provider = AuthProvider[ profile.provider ];
         const isFallbackEmail = this.isFallbackSocialEmail( profile.email );
 
@@ -284,6 +288,8 @@ export class AuthService {
         };
 
         const accessToken = this.jwtService.sign( payload );
+
+        await this.recordLoginHistory( user.userId, user.provider, request );
 
         return {
             accessToken,
@@ -438,5 +444,32 @@ export class AuthService {
         const number = crypto.randomInt( 100, 10000 );
 
         return `${word}${special}${number}`;
+    }
+
+    /**
+     * 회원 상세 화면의 로그인 이력(최근 5건)에 쓰이는 접속 기록을 남긴다.
+     * 기록 실패가 로그인 자체를 막지 않도록 예외는 삼킨다.
+     */
+    private async recordLoginHistory( userId: string, provider: AuthProvider, request?: Request ) {
+        if ( !request ) {
+            return;
+        }
+
+        const client = extractClientInfo( request );
+
+        try {
+            await this.prisma.userLoginHistory.create( {
+                data: {
+                    userId,
+                    provider,
+                    ipAddress: client.ipAddress,
+                    userAgent: client.userAgent,
+                    deviceType: client.deviceType,
+                    osName: client.osName,
+                },
+            } );
+        } catch {
+            // 로그인 이력은 부가 데이터이므로 실패를 무시한다.
+        }
     }
 }

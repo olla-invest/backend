@@ -163,6 +163,26 @@ export type PaymentCard = $Result.DefaultSelection<Prisma.$PaymentCardPayload>
  * 
  */
 export type Payment = $Result.DefaultSelection<Prisma.$PaymentPayload>
+/**
+ * Model Admin
+ * 
+ */
+export type Admin = $Result.DefaultSelection<Prisma.$AdminPayload>
+/**
+ * Model UserLoginHistory
+ * 
+ */
+export type UserLoginHistory = $Result.DefaultSelection<Prisma.$UserLoginHistoryPayload>
+/**
+ * Model UserPlanHistory
+ * 
+ */
+export type UserPlanHistory = $Result.DefaultSelection<Prisma.$UserPlanHistoryPayload>
+/**
+ * Model AdminAuditLog
+ * 
+ */
+export type AdminAuditLog = $Result.DefaultSelection<Prisma.$AdminAuditLogPayload>
 
 /**
  * Enums
@@ -251,6 +271,40 @@ export const BillingCycle: {
 
 export type BillingCycle = (typeof BillingCycle)[keyof typeof BillingCycle]
 
+
+export const AdminRole: {
+  SUPER_ADMIN: 'SUPER_ADMIN',
+  OPERATOR: 'OPERATOR',
+  VIEWER: 'VIEWER'
+};
+
+export type AdminRole = (typeof AdminRole)[keyof typeof AdminRole]
+
+
+export const UserStatus: {
+  ACTIVE: 'ACTIVE',
+  INACTIVE: 'INACTIVE',
+  DORMANT: 'DORMANT',
+  DELETED: 'DELETED'
+};
+
+export type UserStatus = (typeof UserStatus)[keyof typeof UserStatus]
+
+
+export const AdminAuditAction: {
+  LOGIN: 'LOGIN',
+  USER_DETAIL_VIEW: 'USER_DETAIL_VIEW',
+  USER_LIST_EXPORT: 'USER_LIST_EXPORT',
+  USER_UNMASK: 'USER_UNMASK',
+  USER_PLAN_CHANGE: 'USER_PLAN_CHANGE',
+  USER_STATUS_CHANGE: 'USER_STATUS_CHANGE',
+  USER_PASSWORD_RESET: 'USER_PASSWORD_RESET',
+  USER_PROFILE_UPDATE: 'USER_PROFILE_UPDATE',
+  DASHBOARD_EXPORT: 'DASHBOARD_EXPORT'
+};
+
+export type AdminAuditAction = (typeof AdminAuditAction)[keyof typeof AdminAuditAction]
+
 }
 
 export type MarketType = $Enums.MarketType
@@ -288,6 +342,18 @@ export const PaymentStatus: typeof $Enums.PaymentStatus
 export type BillingCycle = $Enums.BillingCycle
 
 export const BillingCycle: typeof $Enums.BillingCycle
+
+export type AdminRole = $Enums.AdminRole
+
+export const AdminRole: typeof $Enums.AdminRole
+
+export type UserStatus = $Enums.UserStatus
+
+export const UserStatus: typeof $Enums.UserStatus
+
+export type AdminAuditAction = $Enums.AdminAuditAction
+
+export const AdminAuditAction: typeof $Enums.AdminAuditAction
 
 /**
  * ##  Prisma Client ʲˢ
@@ -705,6 +771,46 @@ export class PrismaClient<
     * ```
     */
   get payment(): Prisma.PaymentDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.admin`: Exposes CRUD operations for the **Admin** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more Admins
+    * const admins = await prisma.admin.findMany()
+    * ```
+    */
+  get admin(): Prisma.AdminDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.userLoginHistory`: Exposes CRUD operations for the **UserLoginHistory** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more UserLoginHistories
+    * const userLoginHistories = await prisma.userLoginHistory.findMany()
+    * ```
+    */
+  get userLoginHistory(): Prisma.UserLoginHistoryDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.userPlanHistory`: Exposes CRUD operations for the **UserPlanHistory** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more UserPlanHistories
+    * const userPlanHistories = await prisma.userPlanHistory.findMany()
+    * ```
+    */
+  get userPlanHistory(): Prisma.UserPlanHistoryDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.adminAuditLog`: Exposes CRUD operations for the **AdminAuditLog** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more AdminAuditLogs
+    * const adminAuditLogs = await prisma.adminAuditLog.findMany()
+    * ```
+    */
+  get adminAuditLog(): Prisma.AdminAuditLogDelegate<ExtArgs, ClientOptions>;
 }
 
 export namespace Prisma {
@@ -1168,7 +1274,11 @@ export namespace Prisma {
     CronRunLog: 'CronRunLog',
     UserSubscription: 'UserSubscription',
     PaymentCard: 'PaymentCard',
-    Payment: 'Payment'
+    Payment: 'Payment',
+    Admin: 'Admin',
+    UserLoginHistory: 'UserLoginHistory',
+    UserPlanHistory: 'UserPlanHistory',
+    AdminAuditLog: 'AdminAuditLog'
   };
 
   export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -1184,7 +1294,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "theme" | "themeGroupTheme" | "stockTheme" | "user" | "company" | "userWatchlist" | "userWatchlistTheme" | "tag" | "watchlistTag" | "rsFilterPreset" | "rsFilterPeriod" | "searchFilterPreset" | "stockPriceHistory" | "marketIndexHistory" | "marketViewDailySnapshot" | "marketViewDistributionDay" | "marketViewIndexChartPoint" | "kiwoomApiCallLog" | "batchJobHistory" | "kiwoomToken" | "stockCandle" | "themeDailySnapshot" | "themeAiSummary" | "stockTradingValueSnapshot" | "stockDailyMetrics" | "stockCurrentRankSnapshot" | "cronRunLog" | "userSubscription" | "paymentCard" | "payment"
+      modelProps: "theme" | "themeGroupTheme" | "stockTheme" | "user" | "company" | "userWatchlist" | "userWatchlistTheme" | "tag" | "watchlistTag" | "rsFilterPreset" | "rsFilterPeriod" | "searchFilterPreset" | "stockPriceHistory" | "marketIndexHistory" | "marketViewDailySnapshot" | "marketViewDistributionDay" | "marketViewIndexChartPoint" | "kiwoomApiCallLog" | "batchJobHistory" | "kiwoomToken" | "stockCandle" | "themeDailySnapshot" | "themeAiSummary" | "stockTradingValueSnapshot" | "stockDailyMetrics" | "stockCurrentRankSnapshot" | "cronRunLog" | "userSubscription" | "paymentCard" | "payment" | "admin" | "userLoginHistory" | "userPlanHistory" | "adminAuditLog"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -3408,6 +3518,302 @@ export namespace Prisma {
           }
         }
       }
+      Admin: {
+        payload: Prisma.$AdminPayload<ExtArgs>
+        fields: Prisma.AdminFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.AdminFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AdminPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.AdminFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AdminPayload>
+          }
+          findFirst: {
+            args: Prisma.AdminFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AdminPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.AdminFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AdminPayload>
+          }
+          findMany: {
+            args: Prisma.AdminFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AdminPayload>[]
+          }
+          create: {
+            args: Prisma.AdminCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AdminPayload>
+          }
+          createMany: {
+            args: Prisma.AdminCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.AdminCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AdminPayload>[]
+          }
+          delete: {
+            args: Prisma.AdminDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AdminPayload>
+          }
+          update: {
+            args: Prisma.AdminUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AdminPayload>
+          }
+          deleteMany: {
+            args: Prisma.AdminDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.AdminUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.AdminUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AdminPayload>[]
+          }
+          upsert: {
+            args: Prisma.AdminUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AdminPayload>
+          }
+          aggregate: {
+            args: Prisma.AdminAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateAdmin>
+          }
+          groupBy: {
+            args: Prisma.AdminGroupByArgs<ExtArgs>
+            result: $Utils.Optional<AdminGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.AdminCountArgs<ExtArgs>
+            result: $Utils.Optional<AdminCountAggregateOutputType> | number
+          }
+        }
+      }
+      UserLoginHistory: {
+        payload: Prisma.$UserLoginHistoryPayload<ExtArgs>
+        fields: Prisma.UserLoginHistoryFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.UserLoginHistoryFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$UserLoginHistoryPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.UserLoginHistoryFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$UserLoginHistoryPayload>
+          }
+          findFirst: {
+            args: Prisma.UserLoginHistoryFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$UserLoginHistoryPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.UserLoginHistoryFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$UserLoginHistoryPayload>
+          }
+          findMany: {
+            args: Prisma.UserLoginHistoryFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$UserLoginHistoryPayload>[]
+          }
+          create: {
+            args: Prisma.UserLoginHistoryCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$UserLoginHistoryPayload>
+          }
+          createMany: {
+            args: Prisma.UserLoginHistoryCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.UserLoginHistoryCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$UserLoginHistoryPayload>[]
+          }
+          delete: {
+            args: Prisma.UserLoginHistoryDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$UserLoginHistoryPayload>
+          }
+          update: {
+            args: Prisma.UserLoginHistoryUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$UserLoginHistoryPayload>
+          }
+          deleteMany: {
+            args: Prisma.UserLoginHistoryDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.UserLoginHistoryUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.UserLoginHistoryUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$UserLoginHistoryPayload>[]
+          }
+          upsert: {
+            args: Prisma.UserLoginHistoryUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$UserLoginHistoryPayload>
+          }
+          aggregate: {
+            args: Prisma.UserLoginHistoryAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateUserLoginHistory>
+          }
+          groupBy: {
+            args: Prisma.UserLoginHistoryGroupByArgs<ExtArgs>
+            result: $Utils.Optional<UserLoginHistoryGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.UserLoginHistoryCountArgs<ExtArgs>
+            result: $Utils.Optional<UserLoginHistoryCountAggregateOutputType> | number
+          }
+        }
+      }
+      UserPlanHistory: {
+        payload: Prisma.$UserPlanHistoryPayload<ExtArgs>
+        fields: Prisma.UserPlanHistoryFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.UserPlanHistoryFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$UserPlanHistoryPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.UserPlanHistoryFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$UserPlanHistoryPayload>
+          }
+          findFirst: {
+            args: Prisma.UserPlanHistoryFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$UserPlanHistoryPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.UserPlanHistoryFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$UserPlanHistoryPayload>
+          }
+          findMany: {
+            args: Prisma.UserPlanHistoryFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$UserPlanHistoryPayload>[]
+          }
+          create: {
+            args: Prisma.UserPlanHistoryCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$UserPlanHistoryPayload>
+          }
+          createMany: {
+            args: Prisma.UserPlanHistoryCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.UserPlanHistoryCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$UserPlanHistoryPayload>[]
+          }
+          delete: {
+            args: Prisma.UserPlanHistoryDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$UserPlanHistoryPayload>
+          }
+          update: {
+            args: Prisma.UserPlanHistoryUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$UserPlanHistoryPayload>
+          }
+          deleteMany: {
+            args: Prisma.UserPlanHistoryDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.UserPlanHistoryUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.UserPlanHistoryUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$UserPlanHistoryPayload>[]
+          }
+          upsert: {
+            args: Prisma.UserPlanHistoryUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$UserPlanHistoryPayload>
+          }
+          aggregate: {
+            args: Prisma.UserPlanHistoryAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateUserPlanHistory>
+          }
+          groupBy: {
+            args: Prisma.UserPlanHistoryGroupByArgs<ExtArgs>
+            result: $Utils.Optional<UserPlanHistoryGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.UserPlanHistoryCountArgs<ExtArgs>
+            result: $Utils.Optional<UserPlanHistoryCountAggregateOutputType> | number
+          }
+        }
+      }
+      AdminAuditLog: {
+        payload: Prisma.$AdminAuditLogPayload<ExtArgs>
+        fields: Prisma.AdminAuditLogFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.AdminAuditLogFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AdminAuditLogPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.AdminAuditLogFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AdminAuditLogPayload>
+          }
+          findFirst: {
+            args: Prisma.AdminAuditLogFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AdminAuditLogPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.AdminAuditLogFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AdminAuditLogPayload>
+          }
+          findMany: {
+            args: Prisma.AdminAuditLogFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AdminAuditLogPayload>[]
+          }
+          create: {
+            args: Prisma.AdminAuditLogCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AdminAuditLogPayload>
+          }
+          createMany: {
+            args: Prisma.AdminAuditLogCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.AdminAuditLogCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AdminAuditLogPayload>[]
+          }
+          delete: {
+            args: Prisma.AdminAuditLogDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AdminAuditLogPayload>
+          }
+          update: {
+            args: Prisma.AdminAuditLogUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AdminAuditLogPayload>
+          }
+          deleteMany: {
+            args: Prisma.AdminAuditLogDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.AdminAuditLogUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.AdminAuditLogUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AdminAuditLogPayload>[]
+          }
+          upsert: {
+            args: Prisma.AdminAuditLogUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AdminAuditLogPayload>
+          }
+          aggregate: {
+            args: Prisma.AdminAuditLogAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateAdminAuditLog>
+          }
+          groupBy: {
+            args: Prisma.AdminAuditLogGroupByArgs<ExtArgs>
+            result: $Utils.Optional<AdminAuditLogGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.AdminAuditLogCountArgs<ExtArgs>
+            result: $Utils.Optional<AdminAuditLogCountAggregateOutputType> | number
+          }
+        }
+      }
     }
   } & {
     other: {
@@ -3546,6 +3952,10 @@ export namespace Prisma {
     userSubscription?: UserSubscriptionOmit
     paymentCard?: PaymentCardOmit
     payment?: PaymentOmit
+    admin?: AdminOmit
+    userLoginHistory?: UserLoginHistoryOmit
+    userPlanHistory?: UserPlanHistoryOmit
+    adminAuditLog?: AdminAuditLogOmit
   }
 
   /* Types for Logging */
@@ -3718,6 +4128,9 @@ export namespace Prisma {
     apiCallLogs: number
     paymentCards: number
     payments: number
+    loginHistories: number
+    planHistories: number
+    auditLogs: number
   }
 
   export type UserCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -3728,6 +4141,9 @@ export namespace Prisma {
     apiCallLogs?: boolean | UserCountOutputTypeCountApiCallLogsArgs
     paymentCards?: boolean | UserCountOutputTypeCountPaymentCardsArgs
     payments?: boolean | UserCountOutputTypeCountPaymentsArgs
+    loginHistories?: boolean | UserCountOutputTypeCountLoginHistoriesArgs
+    planHistories?: boolean | UserCountOutputTypeCountPlanHistoriesArgs
+    auditLogs?: boolean | UserCountOutputTypeCountAuditLogsArgs
   }
 
   // Custom InputTypes
@@ -3788,6 +4204,27 @@ export namespace Prisma {
    */
   export type UserCountOutputTypeCountPaymentsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: PaymentWhereInput
+  }
+
+  /**
+   * UserCountOutputType without action
+   */
+  export type UserCountOutputTypeCountLoginHistoriesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: UserLoginHistoryWhereInput
+  }
+
+  /**
+   * UserCountOutputType without action
+   */
+  export type UserCountOutputTypeCountPlanHistoriesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: UserPlanHistoryWhereInput
+  }
+
+  /**
+   * UserCountOutputType without action
+   */
+  export type UserCountOutputTypeCountAuditLogsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: AdminAuditLogWhereInput
   }
 
 
@@ -3952,6 +4389,46 @@ export namespace Prisma {
    */
   export type UserSubscriptionCountOutputTypeCountPaymentsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: PaymentWhereInput
+  }
+
+
+  /**
+   * Count Type AdminCountOutputType
+   */
+
+  export type AdminCountOutputType = {
+    auditLogs: number
+    planHistories: number
+  }
+
+  export type AdminCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    auditLogs?: boolean | AdminCountOutputTypeCountAuditLogsArgs
+    planHistories?: boolean | AdminCountOutputTypeCountPlanHistoriesArgs
+  }
+
+  // Custom InputTypes
+  /**
+   * AdminCountOutputType without action
+   */
+  export type AdminCountOutputTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AdminCountOutputType
+     */
+    select?: AdminCountOutputTypeSelect<ExtArgs> | null
+  }
+
+  /**
+   * AdminCountOutputType without action
+   */
+  export type AdminCountOutputTypeCountAuditLogsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: AdminAuditLogWhereInput
+  }
+
+  /**
+   * AdminCountOutputType without action
+   */
+  export type AdminCountOutputTypeCountPlanHistoriesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: UserPlanHistoryWhereInput
   }
 
 
@@ -7501,6 +7978,7 @@ export namespace Prisma {
     marketingConsent: boolean | null
     isTempPassword: boolean | null
     planType: $Enums.PlanType | null
+    status: $Enums.UserStatus | null
     createdAt: Date | null
     updatedAt: Date | null
     deletedAt: Date | null
@@ -7518,6 +7996,7 @@ export namespace Prisma {
     marketingConsent: boolean | null
     isTempPassword: boolean | null
     planType: $Enums.PlanType | null
+    status: $Enums.UserStatus | null
     createdAt: Date | null
     updatedAt: Date | null
     deletedAt: Date | null
@@ -7535,6 +8014,7 @@ export namespace Prisma {
     marketingConsent: number
     isTempPassword: number
     planType: number
+    status: number
     createdAt: number
     updatedAt: number
     deletedAt: number
@@ -7554,6 +8034,7 @@ export namespace Prisma {
     marketingConsent?: true
     isTempPassword?: true
     planType?: true
+    status?: true
     createdAt?: true
     updatedAt?: true
     deletedAt?: true
@@ -7571,6 +8052,7 @@ export namespace Prisma {
     marketingConsent?: true
     isTempPassword?: true
     planType?: true
+    status?: true
     createdAt?: true
     updatedAt?: true
     deletedAt?: true
@@ -7588,6 +8070,7 @@ export namespace Prisma {
     marketingConsent?: true
     isTempPassword?: true
     planType?: true
+    status?: true
     createdAt?: true
     updatedAt?: true
     deletedAt?: true
@@ -7678,6 +8161,7 @@ export namespace Prisma {
     marketingConsent: boolean
     isTempPassword: boolean
     planType: $Enums.PlanType
+    status: $Enums.UserStatus
     createdAt: Date
     updatedAt: Date
     deletedAt: Date | null
@@ -7712,6 +8196,7 @@ export namespace Prisma {
     marketingConsent?: boolean
     isTempPassword?: boolean
     planType?: boolean
+    status?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     deletedAt?: boolean
@@ -7723,6 +8208,9 @@ export namespace Prisma {
     subscription?: boolean | User$subscriptionArgs<ExtArgs>
     paymentCards?: boolean | User$paymentCardsArgs<ExtArgs>
     payments?: boolean | User$paymentsArgs<ExtArgs>
+    loginHistories?: boolean | User$loginHistoriesArgs<ExtArgs>
+    planHistories?: boolean | User$planHistoriesArgs<ExtArgs>
+    auditLogs?: boolean | User$auditLogsArgs<ExtArgs>
     _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["user"]>
 
@@ -7738,6 +8226,7 @@ export namespace Prisma {
     marketingConsent?: boolean
     isTempPassword?: boolean
     planType?: boolean
+    status?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     deletedAt?: boolean
@@ -7755,6 +8244,7 @@ export namespace Prisma {
     marketingConsent?: boolean
     isTempPassword?: boolean
     planType?: boolean
+    status?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     deletedAt?: boolean
@@ -7772,12 +8262,13 @@ export namespace Prisma {
     marketingConsent?: boolean
     isTempPassword?: boolean
     planType?: boolean
+    status?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     deletedAt?: boolean
   }
 
-  export type UserOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"userId" | "username" | "email" | "password" | "provider" | "socialId" | "name" | "phone" | "marketingConsent" | "isTempPassword" | "planType" | "createdAt" | "updatedAt" | "deletedAt", ExtArgs["result"]["user"]>
+  export type UserOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"userId" | "username" | "email" | "password" | "provider" | "socialId" | "name" | "phone" | "marketingConsent" | "isTempPassword" | "planType" | "status" | "createdAt" | "updatedAt" | "deletedAt", ExtArgs["result"]["user"]>
   export type UserInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     watchlist?: boolean | User$watchlistArgs<ExtArgs>
     watchlistThemes?: boolean | User$watchlistThemesArgs<ExtArgs>
@@ -7787,6 +8278,9 @@ export namespace Prisma {
     subscription?: boolean | User$subscriptionArgs<ExtArgs>
     paymentCards?: boolean | User$paymentCardsArgs<ExtArgs>
     payments?: boolean | User$paymentsArgs<ExtArgs>
+    loginHistories?: boolean | User$loginHistoriesArgs<ExtArgs>
+    planHistories?: boolean | User$planHistoriesArgs<ExtArgs>
+    auditLogs?: boolean | User$auditLogsArgs<ExtArgs>
     _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type UserIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
@@ -7803,6 +8297,9 @@ export namespace Prisma {
       subscription: Prisma.$UserSubscriptionPayload<ExtArgs> | null
       paymentCards: Prisma.$PaymentCardPayload<ExtArgs>[]
       payments: Prisma.$PaymentPayload<ExtArgs>[]
+      loginHistories: Prisma.$UserLoginHistoryPayload<ExtArgs>[]
+      planHistories: Prisma.$UserPlanHistoryPayload<ExtArgs>[]
+      auditLogs: Prisma.$AdminAuditLogPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       userId: string
@@ -7816,6 +8313,7 @@ export namespace Prisma {
       marketingConsent: boolean
       isTempPassword: boolean
       planType: $Enums.PlanType
+      status: $Enums.UserStatus
       createdAt: Date
       updatedAt: Date
       deletedAt: Date | null
@@ -8221,6 +8719,9 @@ export namespace Prisma {
     subscription<T extends User$subscriptionArgs<ExtArgs> = {}>(args?: Subset<T, User$subscriptionArgs<ExtArgs>>): Prisma__UserSubscriptionClient<$Result.GetResult<Prisma.$UserSubscriptionPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     paymentCards<T extends User$paymentCardsArgs<ExtArgs> = {}>(args?: Subset<T, User$paymentCardsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PaymentCardPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     payments<T extends User$paymentsArgs<ExtArgs> = {}>(args?: Subset<T, User$paymentsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PaymentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    loginHistories<T extends User$loginHistoriesArgs<ExtArgs> = {}>(args?: Subset<T, User$loginHistoriesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$UserLoginHistoryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    planHistories<T extends User$planHistoriesArgs<ExtArgs> = {}>(args?: Subset<T, User$planHistoriesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$UserPlanHistoryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    auditLogs<T extends User$auditLogsArgs<ExtArgs> = {}>(args?: Subset<T, User$auditLogsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AdminAuditLogPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -8261,6 +8762,7 @@ export namespace Prisma {
     readonly marketingConsent: FieldRef<"User", 'Boolean'>
     readonly isTempPassword: FieldRef<"User", 'Boolean'>
     readonly planType: FieldRef<"User", 'PlanType'>
+    readonly status: FieldRef<"User", 'UserStatus'>
     readonly createdAt: FieldRef<"User", 'DateTime'>
     readonly updatedAt: FieldRef<"User", 'DateTime'>
     readonly deletedAt: FieldRef<"User", 'DateTime'>
@@ -8836,6 +9338,78 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: PaymentScalarFieldEnum | PaymentScalarFieldEnum[]
+  }
+
+  /**
+   * User.loginHistories
+   */
+  export type User$loginHistoriesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the UserLoginHistory
+     */
+    select?: UserLoginHistorySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the UserLoginHistory
+     */
+    omit?: UserLoginHistoryOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserLoginHistoryInclude<ExtArgs> | null
+    where?: UserLoginHistoryWhereInput
+    orderBy?: UserLoginHistoryOrderByWithRelationInput | UserLoginHistoryOrderByWithRelationInput[]
+    cursor?: UserLoginHistoryWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: UserLoginHistoryScalarFieldEnum | UserLoginHistoryScalarFieldEnum[]
+  }
+
+  /**
+   * User.planHistories
+   */
+  export type User$planHistoriesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the UserPlanHistory
+     */
+    select?: UserPlanHistorySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the UserPlanHistory
+     */
+    omit?: UserPlanHistoryOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserPlanHistoryInclude<ExtArgs> | null
+    where?: UserPlanHistoryWhereInput
+    orderBy?: UserPlanHistoryOrderByWithRelationInput | UserPlanHistoryOrderByWithRelationInput[]
+    cursor?: UserPlanHistoryWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: UserPlanHistoryScalarFieldEnum | UserPlanHistoryScalarFieldEnum[]
+  }
+
+  /**
+   * User.auditLogs
+   */
+  export type User$auditLogsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AdminAuditLog
+     */
+    select?: AdminAuditLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AdminAuditLog
+     */
+    omit?: AdminAuditLogOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AdminAuditLogInclude<ExtArgs> | null
+    where?: AdminAuditLogWhereInput
+    orderBy?: AdminAuditLogOrderByWithRelationInput | AdminAuditLogOrderByWithRelationInput[]
+    cursor?: AdminAuditLogWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: AdminAuditLogScalarFieldEnum | AdminAuditLogScalarFieldEnum[]
   }
 
   /**
@@ -39026,6 +39600,4597 @@ export namespace Prisma {
 
 
   /**
+   * Model Admin
+   */
+
+  export type AggregateAdmin = {
+    _count: AdminCountAggregateOutputType | null
+    _min: AdminMinAggregateOutputType | null
+    _max: AdminMaxAggregateOutputType | null
+  }
+
+  export type AdminMinAggregateOutputType = {
+    adminId: string | null
+    loginId: string | null
+    password: string | null
+    name: string | null
+    role: $Enums.AdminRole | null
+    isActive: boolean | null
+    lastLoginAt: Date | null
+    createdAt: Date | null
+    updatedAt: Date | null
+    deletedAt: Date | null
+  }
+
+  export type AdminMaxAggregateOutputType = {
+    adminId: string | null
+    loginId: string | null
+    password: string | null
+    name: string | null
+    role: $Enums.AdminRole | null
+    isActive: boolean | null
+    lastLoginAt: Date | null
+    createdAt: Date | null
+    updatedAt: Date | null
+    deletedAt: Date | null
+  }
+
+  export type AdminCountAggregateOutputType = {
+    adminId: number
+    loginId: number
+    password: number
+    name: number
+    role: number
+    isActive: number
+    lastLoginAt: number
+    createdAt: number
+    updatedAt: number
+    deletedAt: number
+    _all: number
+  }
+
+
+  export type AdminMinAggregateInputType = {
+    adminId?: true
+    loginId?: true
+    password?: true
+    name?: true
+    role?: true
+    isActive?: true
+    lastLoginAt?: true
+    createdAt?: true
+    updatedAt?: true
+    deletedAt?: true
+  }
+
+  export type AdminMaxAggregateInputType = {
+    adminId?: true
+    loginId?: true
+    password?: true
+    name?: true
+    role?: true
+    isActive?: true
+    lastLoginAt?: true
+    createdAt?: true
+    updatedAt?: true
+    deletedAt?: true
+  }
+
+  export type AdminCountAggregateInputType = {
+    adminId?: true
+    loginId?: true
+    password?: true
+    name?: true
+    role?: true
+    isActive?: true
+    lastLoginAt?: true
+    createdAt?: true
+    updatedAt?: true
+    deletedAt?: true
+    _all?: true
+  }
+
+  export type AdminAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which Admin to aggregate.
+     */
+    where?: AdminWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Admins to fetch.
+     */
+    orderBy?: AdminOrderByWithRelationInput | AdminOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: AdminWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Admins from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Admins.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned Admins
+    **/
+    _count?: true | AdminCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: AdminMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: AdminMaxAggregateInputType
+  }
+
+  export type GetAdminAggregateType<T extends AdminAggregateArgs> = {
+        [P in keyof T & keyof AggregateAdmin]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateAdmin[P]>
+      : GetScalarType<T[P], AggregateAdmin[P]>
+  }
+
+
+
+
+  export type AdminGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: AdminWhereInput
+    orderBy?: AdminOrderByWithAggregationInput | AdminOrderByWithAggregationInput[]
+    by: AdminScalarFieldEnum[] | AdminScalarFieldEnum
+    having?: AdminScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: AdminCountAggregateInputType | true
+    _min?: AdminMinAggregateInputType
+    _max?: AdminMaxAggregateInputType
+  }
+
+  export type AdminGroupByOutputType = {
+    adminId: string
+    loginId: string
+    password: string
+    name: string
+    role: $Enums.AdminRole
+    isActive: boolean
+    lastLoginAt: Date | null
+    createdAt: Date
+    updatedAt: Date
+    deletedAt: Date | null
+    _count: AdminCountAggregateOutputType | null
+    _min: AdminMinAggregateOutputType | null
+    _max: AdminMaxAggregateOutputType | null
+  }
+
+  type GetAdminGroupByPayload<T extends AdminGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<AdminGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof AdminGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], AdminGroupByOutputType[P]>
+            : GetScalarType<T[P], AdminGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type AdminSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    adminId?: boolean
+    loginId?: boolean
+    password?: boolean
+    name?: boolean
+    role?: boolean
+    isActive?: boolean
+    lastLoginAt?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    deletedAt?: boolean
+    auditLogs?: boolean | Admin$auditLogsArgs<ExtArgs>
+    planHistories?: boolean | Admin$planHistoriesArgs<ExtArgs>
+    _count?: boolean | AdminCountOutputTypeDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["admin"]>
+
+  export type AdminSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    adminId?: boolean
+    loginId?: boolean
+    password?: boolean
+    name?: boolean
+    role?: boolean
+    isActive?: boolean
+    lastLoginAt?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    deletedAt?: boolean
+  }, ExtArgs["result"]["admin"]>
+
+  export type AdminSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    adminId?: boolean
+    loginId?: boolean
+    password?: boolean
+    name?: boolean
+    role?: boolean
+    isActive?: boolean
+    lastLoginAt?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    deletedAt?: boolean
+  }, ExtArgs["result"]["admin"]>
+
+  export type AdminSelectScalar = {
+    adminId?: boolean
+    loginId?: boolean
+    password?: boolean
+    name?: boolean
+    role?: boolean
+    isActive?: boolean
+    lastLoginAt?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    deletedAt?: boolean
+  }
+
+  export type AdminOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"adminId" | "loginId" | "password" | "name" | "role" | "isActive" | "lastLoginAt" | "createdAt" | "updatedAt" | "deletedAt", ExtArgs["result"]["admin"]>
+  export type AdminInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    auditLogs?: boolean | Admin$auditLogsArgs<ExtArgs>
+    planHistories?: boolean | Admin$planHistoriesArgs<ExtArgs>
+    _count?: boolean | AdminCountOutputTypeDefaultArgs<ExtArgs>
+  }
+  export type AdminIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
+  export type AdminIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
+
+  export type $AdminPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "Admin"
+    objects: {
+      auditLogs: Prisma.$AdminAuditLogPayload<ExtArgs>[]
+      planHistories: Prisma.$UserPlanHistoryPayload<ExtArgs>[]
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      adminId: string
+      loginId: string
+      password: string
+      name: string
+      role: $Enums.AdminRole
+      isActive: boolean
+      lastLoginAt: Date | null
+      createdAt: Date
+      updatedAt: Date
+      deletedAt: Date | null
+    }, ExtArgs["result"]["admin"]>
+    composites: {}
+  }
+
+  type AdminGetPayload<S extends boolean | null | undefined | AdminDefaultArgs> = $Result.GetResult<Prisma.$AdminPayload, S>
+
+  type AdminCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<AdminFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: AdminCountAggregateInputType | true
+    }
+
+  export interface AdminDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['Admin'], meta: { name: 'Admin' } }
+    /**
+     * Find zero or one Admin that matches the filter.
+     * @param {AdminFindUniqueArgs} args - Arguments to find a Admin
+     * @example
+     * // Get one Admin
+     * const admin = await prisma.admin.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends AdminFindUniqueArgs>(args: SelectSubset<T, AdminFindUniqueArgs<ExtArgs>>): Prisma__AdminClient<$Result.GetResult<Prisma.$AdminPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one Admin that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {AdminFindUniqueOrThrowArgs} args - Arguments to find a Admin
+     * @example
+     * // Get one Admin
+     * const admin = await prisma.admin.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends AdminFindUniqueOrThrowArgs>(args: SelectSubset<T, AdminFindUniqueOrThrowArgs<ExtArgs>>): Prisma__AdminClient<$Result.GetResult<Prisma.$AdminPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first Admin that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AdminFindFirstArgs} args - Arguments to find a Admin
+     * @example
+     * // Get one Admin
+     * const admin = await prisma.admin.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends AdminFindFirstArgs>(args?: SelectSubset<T, AdminFindFirstArgs<ExtArgs>>): Prisma__AdminClient<$Result.GetResult<Prisma.$AdminPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first Admin that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AdminFindFirstOrThrowArgs} args - Arguments to find a Admin
+     * @example
+     * // Get one Admin
+     * const admin = await prisma.admin.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends AdminFindFirstOrThrowArgs>(args?: SelectSubset<T, AdminFindFirstOrThrowArgs<ExtArgs>>): Prisma__AdminClient<$Result.GetResult<Prisma.$AdminPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more Admins that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AdminFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all Admins
+     * const admins = await prisma.admin.findMany()
+     * 
+     * // Get first 10 Admins
+     * const admins = await prisma.admin.findMany({ take: 10 })
+     * 
+     * // Only select the `adminId`
+     * const adminWithAdminIdOnly = await prisma.admin.findMany({ select: { adminId: true } })
+     * 
+     */
+    findMany<T extends AdminFindManyArgs>(args?: SelectSubset<T, AdminFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AdminPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a Admin.
+     * @param {AdminCreateArgs} args - Arguments to create a Admin.
+     * @example
+     * // Create one Admin
+     * const Admin = await prisma.admin.create({
+     *   data: {
+     *     // ... data to create a Admin
+     *   }
+     * })
+     * 
+     */
+    create<T extends AdminCreateArgs>(args: SelectSubset<T, AdminCreateArgs<ExtArgs>>): Prisma__AdminClient<$Result.GetResult<Prisma.$AdminPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many Admins.
+     * @param {AdminCreateManyArgs} args - Arguments to create many Admins.
+     * @example
+     * // Create many Admins
+     * const admin = await prisma.admin.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends AdminCreateManyArgs>(args?: SelectSubset<T, AdminCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many Admins and returns the data saved in the database.
+     * @param {AdminCreateManyAndReturnArgs} args - Arguments to create many Admins.
+     * @example
+     * // Create many Admins
+     * const admin = await prisma.admin.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many Admins and only return the `adminId`
+     * const adminWithAdminIdOnly = await prisma.admin.createManyAndReturn({
+     *   select: { adminId: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends AdminCreateManyAndReturnArgs>(args?: SelectSubset<T, AdminCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AdminPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a Admin.
+     * @param {AdminDeleteArgs} args - Arguments to delete one Admin.
+     * @example
+     * // Delete one Admin
+     * const Admin = await prisma.admin.delete({
+     *   where: {
+     *     // ... filter to delete one Admin
+     *   }
+     * })
+     * 
+     */
+    delete<T extends AdminDeleteArgs>(args: SelectSubset<T, AdminDeleteArgs<ExtArgs>>): Prisma__AdminClient<$Result.GetResult<Prisma.$AdminPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one Admin.
+     * @param {AdminUpdateArgs} args - Arguments to update one Admin.
+     * @example
+     * // Update one Admin
+     * const admin = await prisma.admin.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends AdminUpdateArgs>(args: SelectSubset<T, AdminUpdateArgs<ExtArgs>>): Prisma__AdminClient<$Result.GetResult<Prisma.$AdminPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more Admins.
+     * @param {AdminDeleteManyArgs} args - Arguments to filter Admins to delete.
+     * @example
+     * // Delete a few Admins
+     * const { count } = await prisma.admin.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends AdminDeleteManyArgs>(args?: SelectSubset<T, AdminDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Admins.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AdminUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many Admins
+     * const admin = await prisma.admin.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends AdminUpdateManyArgs>(args: SelectSubset<T, AdminUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Admins and returns the data updated in the database.
+     * @param {AdminUpdateManyAndReturnArgs} args - Arguments to update many Admins.
+     * @example
+     * // Update many Admins
+     * const admin = await prisma.admin.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more Admins and only return the `adminId`
+     * const adminWithAdminIdOnly = await prisma.admin.updateManyAndReturn({
+     *   select: { adminId: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends AdminUpdateManyAndReturnArgs>(args: SelectSubset<T, AdminUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AdminPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one Admin.
+     * @param {AdminUpsertArgs} args - Arguments to update or create a Admin.
+     * @example
+     * // Update or create a Admin
+     * const admin = await prisma.admin.upsert({
+     *   create: {
+     *     // ... data to create a Admin
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the Admin we want to update
+     *   }
+     * })
+     */
+    upsert<T extends AdminUpsertArgs>(args: SelectSubset<T, AdminUpsertArgs<ExtArgs>>): Prisma__AdminClient<$Result.GetResult<Prisma.$AdminPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of Admins.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AdminCountArgs} args - Arguments to filter Admins to count.
+     * @example
+     * // Count the number of Admins
+     * const count = await prisma.admin.count({
+     *   where: {
+     *     // ... the filter for the Admins we want to count
+     *   }
+     * })
+    **/
+    count<T extends AdminCountArgs>(
+      args?: Subset<T, AdminCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], AdminCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a Admin.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AdminAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends AdminAggregateArgs>(args: Subset<T, AdminAggregateArgs>): Prisma.PrismaPromise<GetAdminAggregateType<T>>
+
+    /**
+     * Group by Admin.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AdminGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends AdminGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: AdminGroupByArgs['orderBy'] }
+        : { orderBy?: AdminGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, AdminGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetAdminGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the Admin model
+   */
+  readonly fields: AdminFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for Admin.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__AdminClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    auditLogs<T extends Admin$auditLogsArgs<ExtArgs> = {}>(args?: Subset<T, Admin$auditLogsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AdminAuditLogPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    planHistories<T extends Admin$planHistoriesArgs<ExtArgs> = {}>(args?: Subset<T, Admin$planHistoriesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$UserPlanHistoryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the Admin model
+   */
+  interface AdminFieldRefs {
+    readonly adminId: FieldRef<"Admin", 'String'>
+    readonly loginId: FieldRef<"Admin", 'String'>
+    readonly password: FieldRef<"Admin", 'String'>
+    readonly name: FieldRef<"Admin", 'String'>
+    readonly role: FieldRef<"Admin", 'AdminRole'>
+    readonly isActive: FieldRef<"Admin", 'Boolean'>
+    readonly lastLoginAt: FieldRef<"Admin", 'DateTime'>
+    readonly createdAt: FieldRef<"Admin", 'DateTime'>
+    readonly updatedAt: FieldRef<"Admin", 'DateTime'>
+    readonly deletedAt: FieldRef<"Admin", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * Admin findUnique
+   */
+  export type AdminFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Admin
+     */
+    select?: AdminSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Admin
+     */
+    omit?: AdminOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AdminInclude<ExtArgs> | null
+    /**
+     * Filter, which Admin to fetch.
+     */
+    where: AdminWhereUniqueInput
+  }
+
+  /**
+   * Admin findUniqueOrThrow
+   */
+  export type AdminFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Admin
+     */
+    select?: AdminSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Admin
+     */
+    omit?: AdminOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AdminInclude<ExtArgs> | null
+    /**
+     * Filter, which Admin to fetch.
+     */
+    where: AdminWhereUniqueInput
+  }
+
+  /**
+   * Admin findFirst
+   */
+  export type AdminFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Admin
+     */
+    select?: AdminSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Admin
+     */
+    omit?: AdminOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AdminInclude<ExtArgs> | null
+    /**
+     * Filter, which Admin to fetch.
+     */
+    where?: AdminWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Admins to fetch.
+     */
+    orderBy?: AdminOrderByWithRelationInput | AdminOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for Admins.
+     */
+    cursor?: AdminWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Admins from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Admins.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of Admins.
+     */
+    distinct?: AdminScalarFieldEnum | AdminScalarFieldEnum[]
+  }
+
+  /**
+   * Admin findFirstOrThrow
+   */
+  export type AdminFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Admin
+     */
+    select?: AdminSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Admin
+     */
+    omit?: AdminOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AdminInclude<ExtArgs> | null
+    /**
+     * Filter, which Admin to fetch.
+     */
+    where?: AdminWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Admins to fetch.
+     */
+    orderBy?: AdminOrderByWithRelationInput | AdminOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for Admins.
+     */
+    cursor?: AdminWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Admins from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Admins.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of Admins.
+     */
+    distinct?: AdminScalarFieldEnum | AdminScalarFieldEnum[]
+  }
+
+  /**
+   * Admin findMany
+   */
+  export type AdminFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Admin
+     */
+    select?: AdminSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Admin
+     */
+    omit?: AdminOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AdminInclude<ExtArgs> | null
+    /**
+     * Filter, which Admins to fetch.
+     */
+    where?: AdminWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Admins to fetch.
+     */
+    orderBy?: AdminOrderByWithRelationInput | AdminOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing Admins.
+     */
+    cursor?: AdminWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Admins from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Admins.
+     */
+    skip?: number
+    distinct?: AdminScalarFieldEnum | AdminScalarFieldEnum[]
+  }
+
+  /**
+   * Admin create
+   */
+  export type AdminCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Admin
+     */
+    select?: AdminSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Admin
+     */
+    omit?: AdminOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AdminInclude<ExtArgs> | null
+    /**
+     * The data needed to create a Admin.
+     */
+    data: XOR<AdminCreateInput, AdminUncheckedCreateInput>
+  }
+
+  /**
+   * Admin createMany
+   */
+  export type AdminCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many Admins.
+     */
+    data: AdminCreateManyInput | AdminCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * Admin createManyAndReturn
+   */
+  export type AdminCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Admin
+     */
+    select?: AdminSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the Admin
+     */
+    omit?: AdminOmit<ExtArgs> | null
+    /**
+     * The data used to create many Admins.
+     */
+    data: AdminCreateManyInput | AdminCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * Admin update
+   */
+  export type AdminUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Admin
+     */
+    select?: AdminSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Admin
+     */
+    omit?: AdminOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AdminInclude<ExtArgs> | null
+    /**
+     * The data needed to update a Admin.
+     */
+    data: XOR<AdminUpdateInput, AdminUncheckedUpdateInput>
+    /**
+     * Choose, which Admin to update.
+     */
+    where: AdminWhereUniqueInput
+  }
+
+  /**
+   * Admin updateMany
+   */
+  export type AdminUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update Admins.
+     */
+    data: XOR<AdminUpdateManyMutationInput, AdminUncheckedUpdateManyInput>
+    /**
+     * Filter which Admins to update
+     */
+    where?: AdminWhereInput
+    /**
+     * Limit how many Admins to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * Admin updateManyAndReturn
+   */
+  export type AdminUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Admin
+     */
+    select?: AdminSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the Admin
+     */
+    omit?: AdminOmit<ExtArgs> | null
+    /**
+     * The data used to update Admins.
+     */
+    data: XOR<AdminUpdateManyMutationInput, AdminUncheckedUpdateManyInput>
+    /**
+     * Filter which Admins to update
+     */
+    where?: AdminWhereInput
+    /**
+     * Limit how many Admins to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * Admin upsert
+   */
+  export type AdminUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Admin
+     */
+    select?: AdminSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Admin
+     */
+    omit?: AdminOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AdminInclude<ExtArgs> | null
+    /**
+     * The filter to search for the Admin to update in case it exists.
+     */
+    where: AdminWhereUniqueInput
+    /**
+     * In case the Admin found by the `where` argument doesn't exist, create a new Admin with this data.
+     */
+    create: XOR<AdminCreateInput, AdminUncheckedCreateInput>
+    /**
+     * In case the Admin was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<AdminUpdateInput, AdminUncheckedUpdateInput>
+  }
+
+  /**
+   * Admin delete
+   */
+  export type AdminDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Admin
+     */
+    select?: AdminSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Admin
+     */
+    omit?: AdminOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AdminInclude<ExtArgs> | null
+    /**
+     * Filter which Admin to delete.
+     */
+    where: AdminWhereUniqueInput
+  }
+
+  /**
+   * Admin deleteMany
+   */
+  export type AdminDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which Admins to delete
+     */
+    where?: AdminWhereInput
+    /**
+     * Limit how many Admins to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * Admin.auditLogs
+   */
+  export type Admin$auditLogsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AdminAuditLog
+     */
+    select?: AdminAuditLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AdminAuditLog
+     */
+    omit?: AdminAuditLogOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AdminAuditLogInclude<ExtArgs> | null
+    where?: AdminAuditLogWhereInput
+    orderBy?: AdminAuditLogOrderByWithRelationInput | AdminAuditLogOrderByWithRelationInput[]
+    cursor?: AdminAuditLogWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: AdminAuditLogScalarFieldEnum | AdminAuditLogScalarFieldEnum[]
+  }
+
+  /**
+   * Admin.planHistories
+   */
+  export type Admin$planHistoriesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the UserPlanHistory
+     */
+    select?: UserPlanHistorySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the UserPlanHistory
+     */
+    omit?: UserPlanHistoryOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserPlanHistoryInclude<ExtArgs> | null
+    where?: UserPlanHistoryWhereInput
+    orderBy?: UserPlanHistoryOrderByWithRelationInput | UserPlanHistoryOrderByWithRelationInput[]
+    cursor?: UserPlanHistoryWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: UserPlanHistoryScalarFieldEnum | UserPlanHistoryScalarFieldEnum[]
+  }
+
+  /**
+   * Admin without action
+   */
+  export type AdminDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Admin
+     */
+    select?: AdminSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Admin
+     */
+    omit?: AdminOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AdminInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model UserLoginHistory
+   */
+
+  export type AggregateUserLoginHistory = {
+    _count: UserLoginHistoryCountAggregateOutputType | null
+    _min: UserLoginHistoryMinAggregateOutputType | null
+    _max: UserLoginHistoryMaxAggregateOutputType | null
+  }
+
+  export type UserLoginHistoryMinAggregateOutputType = {
+    historyId: string | null
+    userId: string | null
+    provider: $Enums.AuthProvider | null
+    ipAddress: string | null
+    userAgent: string | null
+    deviceType: string | null
+    osName: string | null
+    loggedInAt: Date | null
+  }
+
+  export type UserLoginHistoryMaxAggregateOutputType = {
+    historyId: string | null
+    userId: string | null
+    provider: $Enums.AuthProvider | null
+    ipAddress: string | null
+    userAgent: string | null
+    deviceType: string | null
+    osName: string | null
+    loggedInAt: Date | null
+  }
+
+  export type UserLoginHistoryCountAggregateOutputType = {
+    historyId: number
+    userId: number
+    provider: number
+    ipAddress: number
+    userAgent: number
+    deviceType: number
+    osName: number
+    loggedInAt: number
+    _all: number
+  }
+
+
+  export type UserLoginHistoryMinAggregateInputType = {
+    historyId?: true
+    userId?: true
+    provider?: true
+    ipAddress?: true
+    userAgent?: true
+    deviceType?: true
+    osName?: true
+    loggedInAt?: true
+  }
+
+  export type UserLoginHistoryMaxAggregateInputType = {
+    historyId?: true
+    userId?: true
+    provider?: true
+    ipAddress?: true
+    userAgent?: true
+    deviceType?: true
+    osName?: true
+    loggedInAt?: true
+  }
+
+  export type UserLoginHistoryCountAggregateInputType = {
+    historyId?: true
+    userId?: true
+    provider?: true
+    ipAddress?: true
+    userAgent?: true
+    deviceType?: true
+    osName?: true
+    loggedInAt?: true
+    _all?: true
+  }
+
+  export type UserLoginHistoryAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which UserLoginHistory to aggregate.
+     */
+    where?: UserLoginHistoryWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of UserLoginHistories to fetch.
+     */
+    orderBy?: UserLoginHistoryOrderByWithRelationInput | UserLoginHistoryOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: UserLoginHistoryWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` UserLoginHistories from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` UserLoginHistories.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned UserLoginHistories
+    **/
+    _count?: true | UserLoginHistoryCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: UserLoginHistoryMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: UserLoginHistoryMaxAggregateInputType
+  }
+
+  export type GetUserLoginHistoryAggregateType<T extends UserLoginHistoryAggregateArgs> = {
+        [P in keyof T & keyof AggregateUserLoginHistory]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateUserLoginHistory[P]>
+      : GetScalarType<T[P], AggregateUserLoginHistory[P]>
+  }
+
+
+
+
+  export type UserLoginHistoryGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: UserLoginHistoryWhereInput
+    orderBy?: UserLoginHistoryOrderByWithAggregationInput | UserLoginHistoryOrderByWithAggregationInput[]
+    by: UserLoginHistoryScalarFieldEnum[] | UserLoginHistoryScalarFieldEnum
+    having?: UserLoginHistoryScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: UserLoginHistoryCountAggregateInputType | true
+    _min?: UserLoginHistoryMinAggregateInputType
+    _max?: UserLoginHistoryMaxAggregateInputType
+  }
+
+  export type UserLoginHistoryGroupByOutputType = {
+    historyId: string
+    userId: string
+    provider: $Enums.AuthProvider
+    ipAddress: string | null
+    userAgent: string | null
+    deviceType: string | null
+    osName: string | null
+    loggedInAt: Date
+    _count: UserLoginHistoryCountAggregateOutputType | null
+    _min: UserLoginHistoryMinAggregateOutputType | null
+    _max: UserLoginHistoryMaxAggregateOutputType | null
+  }
+
+  type GetUserLoginHistoryGroupByPayload<T extends UserLoginHistoryGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<UserLoginHistoryGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof UserLoginHistoryGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], UserLoginHistoryGroupByOutputType[P]>
+            : GetScalarType<T[P], UserLoginHistoryGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type UserLoginHistorySelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    historyId?: boolean
+    userId?: boolean
+    provider?: boolean
+    ipAddress?: boolean
+    userAgent?: boolean
+    deviceType?: boolean
+    osName?: boolean
+    loggedInAt?: boolean
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["userLoginHistory"]>
+
+  export type UserLoginHistorySelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    historyId?: boolean
+    userId?: boolean
+    provider?: boolean
+    ipAddress?: boolean
+    userAgent?: boolean
+    deviceType?: boolean
+    osName?: boolean
+    loggedInAt?: boolean
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["userLoginHistory"]>
+
+  export type UserLoginHistorySelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    historyId?: boolean
+    userId?: boolean
+    provider?: boolean
+    ipAddress?: boolean
+    userAgent?: boolean
+    deviceType?: boolean
+    osName?: boolean
+    loggedInAt?: boolean
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["userLoginHistory"]>
+
+  export type UserLoginHistorySelectScalar = {
+    historyId?: boolean
+    userId?: boolean
+    provider?: boolean
+    ipAddress?: boolean
+    userAgent?: boolean
+    deviceType?: boolean
+    osName?: boolean
+    loggedInAt?: boolean
+  }
+
+  export type UserLoginHistoryOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"historyId" | "userId" | "provider" | "ipAddress" | "userAgent" | "deviceType" | "osName" | "loggedInAt", ExtArgs["result"]["userLoginHistory"]>
+  export type UserLoginHistoryInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }
+  export type UserLoginHistoryIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }
+  export type UserLoginHistoryIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }
+
+  export type $UserLoginHistoryPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "UserLoginHistory"
+    objects: {
+      user: Prisma.$UserPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      historyId: string
+      userId: string
+      provider: $Enums.AuthProvider
+      ipAddress: string | null
+      userAgent: string | null
+      deviceType: string | null
+      osName: string | null
+      loggedInAt: Date
+    }, ExtArgs["result"]["userLoginHistory"]>
+    composites: {}
+  }
+
+  type UserLoginHistoryGetPayload<S extends boolean | null | undefined | UserLoginHistoryDefaultArgs> = $Result.GetResult<Prisma.$UserLoginHistoryPayload, S>
+
+  type UserLoginHistoryCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<UserLoginHistoryFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: UserLoginHistoryCountAggregateInputType | true
+    }
+
+  export interface UserLoginHistoryDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['UserLoginHistory'], meta: { name: 'UserLoginHistory' } }
+    /**
+     * Find zero or one UserLoginHistory that matches the filter.
+     * @param {UserLoginHistoryFindUniqueArgs} args - Arguments to find a UserLoginHistory
+     * @example
+     * // Get one UserLoginHistory
+     * const userLoginHistory = await prisma.userLoginHistory.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends UserLoginHistoryFindUniqueArgs>(args: SelectSubset<T, UserLoginHistoryFindUniqueArgs<ExtArgs>>): Prisma__UserLoginHistoryClient<$Result.GetResult<Prisma.$UserLoginHistoryPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one UserLoginHistory that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {UserLoginHistoryFindUniqueOrThrowArgs} args - Arguments to find a UserLoginHistory
+     * @example
+     * // Get one UserLoginHistory
+     * const userLoginHistory = await prisma.userLoginHistory.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends UserLoginHistoryFindUniqueOrThrowArgs>(args: SelectSubset<T, UserLoginHistoryFindUniqueOrThrowArgs<ExtArgs>>): Prisma__UserLoginHistoryClient<$Result.GetResult<Prisma.$UserLoginHistoryPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first UserLoginHistory that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {UserLoginHistoryFindFirstArgs} args - Arguments to find a UserLoginHistory
+     * @example
+     * // Get one UserLoginHistory
+     * const userLoginHistory = await prisma.userLoginHistory.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends UserLoginHistoryFindFirstArgs>(args?: SelectSubset<T, UserLoginHistoryFindFirstArgs<ExtArgs>>): Prisma__UserLoginHistoryClient<$Result.GetResult<Prisma.$UserLoginHistoryPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first UserLoginHistory that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {UserLoginHistoryFindFirstOrThrowArgs} args - Arguments to find a UserLoginHistory
+     * @example
+     * // Get one UserLoginHistory
+     * const userLoginHistory = await prisma.userLoginHistory.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends UserLoginHistoryFindFirstOrThrowArgs>(args?: SelectSubset<T, UserLoginHistoryFindFirstOrThrowArgs<ExtArgs>>): Prisma__UserLoginHistoryClient<$Result.GetResult<Prisma.$UserLoginHistoryPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more UserLoginHistories that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {UserLoginHistoryFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all UserLoginHistories
+     * const userLoginHistories = await prisma.userLoginHistory.findMany()
+     * 
+     * // Get first 10 UserLoginHistories
+     * const userLoginHistories = await prisma.userLoginHistory.findMany({ take: 10 })
+     * 
+     * // Only select the `historyId`
+     * const userLoginHistoryWithHistoryIdOnly = await prisma.userLoginHistory.findMany({ select: { historyId: true } })
+     * 
+     */
+    findMany<T extends UserLoginHistoryFindManyArgs>(args?: SelectSubset<T, UserLoginHistoryFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$UserLoginHistoryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a UserLoginHistory.
+     * @param {UserLoginHistoryCreateArgs} args - Arguments to create a UserLoginHistory.
+     * @example
+     * // Create one UserLoginHistory
+     * const UserLoginHistory = await prisma.userLoginHistory.create({
+     *   data: {
+     *     // ... data to create a UserLoginHistory
+     *   }
+     * })
+     * 
+     */
+    create<T extends UserLoginHistoryCreateArgs>(args: SelectSubset<T, UserLoginHistoryCreateArgs<ExtArgs>>): Prisma__UserLoginHistoryClient<$Result.GetResult<Prisma.$UserLoginHistoryPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many UserLoginHistories.
+     * @param {UserLoginHistoryCreateManyArgs} args - Arguments to create many UserLoginHistories.
+     * @example
+     * // Create many UserLoginHistories
+     * const userLoginHistory = await prisma.userLoginHistory.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends UserLoginHistoryCreateManyArgs>(args?: SelectSubset<T, UserLoginHistoryCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many UserLoginHistories and returns the data saved in the database.
+     * @param {UserLoginHistoryCreateManyAndReturnArgs} args - Arguments to create many UserLoginHistories.
+     * @example
+     * // Create many UserLoginHistories
+     * const userLoginHistory = await prisma.userLoginHistory.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many UserLoginHistories and only return the `historyId`
+     * const userLoginHistoryWithHistoryIdOnly = await prisma.userLoginHistory.createManyAndReturn({
+     *   select: { historyId: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends UserLoginHistoryCreateManyAndReturnArgs>(args?: SelectSubset<T, UserLoginHistoryCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$UserLoginHistoryPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a UserLoginHistory.
+     * @param {UserLoginHistoryDeleteArgs} args - Arguments to delete one UserLoginHistory.
+     * @example
+     * // Delete one UserLoginHistory
+     * const UserLoginHistory = await prisma.userLoginHistory.delete({
+     *   where: {
+     *     // ... filter to delete one UserLoginHistory
+     *   }
+     * })
+     * 
+     */
+    delete<T extends UserLoginHistoryDeleteArgs>(args: SelectSubset<T, UserLoginHistoryDeleteArgs<ExtArgs>>): Prisma__UserLoginHistoryClient<$Result.GetResult<Prisma.$UserLoginHistoryPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one UserLoginHistory.
+     * @param {UserLoginHistoryUpdateArgs} args - Arguments to update one UserLoginHistory.
+     * @example
+     * // Update one UserLoginHistory
+     * const userLoginHistory = await prisma.userLoginHistory.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends UserLoginHistoryUpdateArgs>(args: SelectSubset<T, UserLoginHistoryUpdateArgs<ExtArgs>>): Prisma__UserLoginHistoryClient<$Result.GetResult<Prisma.$UserLoginHistoryPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more UserLoginHistories.
+     * @param {UserLoginHistoryDeleteManyArgs} args - Arguments to filter UserLoginHistories to delete.
+     * @example
+     * // Delete a few UserLoginHistories
+     * const { count } = await prisma.userLoginHistory.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends UserLoginHistoryDeleteManyArgs>(args?: SelectSubset<T, UserLoginHistoryDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more UserLoginHistories.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {UserLoginHistoryUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many UserLoginHistories
+     * const userLoginHistory = await prisma.userLoginHistory.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends UserLoginHistoryUpdateManyArgs>(args: SelectSubset<T, UserLoginHistoryUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more UserLoginHistories and returns the data updated in the database.
+     * @param {UserLoginHistoryUpdateManyAndReturnArgs} args - Arguments to update many UserLoginHistories.
+     * @example
+     * // Update many UserLoginHistories
+     * const userLoginHistory = await prisma.userLoginHistory.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more UserLoginHistories and only return the `historyId`
+     * const userLoginHistoryWithHistoryIdOnly = await prisma.userLoginHistory.updateManyAndReturn({
+     *   select: { historyId: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends UserLoginHistoryUpdateManyAndReturnArgs>(args: SelectSubset<T, UserLoginHistoryUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$UserLoginHistoryPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one UserLoginHistory.
+     * @param {UserLoginHistoryUpsertArgs} args - Arguments to update or create a UserLoginHistory.
+     * @example
+     * // Update or create a UserLoginHistory
+     * const userLoginHistory = await prisma.userLoginHistory.upsert({
+     *   create: {
+     *     // ... data to create a UserLoginHistory
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the UserLoginHistory we want to update
+     *   }
+     * })
+     */
+    upsert<T extends UserLoginHistoryUpsertArgs>(args: SelectSubset<T, UserLoginHistoryUpsertArgs<ExtArgs>>): Prisma__UserLoginHistoryClient<$Result.GetResult<Prisma.$UserLoginHistoryPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of UserLoginHistories.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {UserLoginHistoryCountArgs} args - Arguments to filter UserLoginHistories to count.
+     * @example
+     * // Count the number of UserLoginHistories
+     * const count = await prisma.userLoginHistory.count({
+     *   where: {
+     *     // ... the filter for the UserLoginHistories we want to count
+     *   }
+     * })
+    **/
+    count<T extends UserLoginHistoryCountArgs>(
+      args?: Subset<T, UserLoginHistoryCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], UserLoginHistoryCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a UserLoginHistory.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {UserLoginHistoryAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends UserLoginHistoryAggregateArgs>(args: Subset<T, UserLoginHistoryAggregateArgs>): Prisma.PrismaPromise<GetUserLoginHistoryAggregateType<T>>
+
+    /**
+     * Group by UserLoginHistory.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {UserLoginHistoryGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends UserLoginHistoryGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: UserLoginHistoryGroupByArgs['orderBy'] }
+        : { orderBy?: UserLoginHistoryGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, UserLoginHistoryGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetUserLoginHistoryGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the UserLoginHistory model
+   */
+  readonly fields: UserLoginHistoryFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for UserLoginHistory.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__UserLoginHistoryClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    user<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the UserLoginHistory model
+   */
+  interface UserLoginHistoryFieldRefs {
+    readonly historyId: FieldRef<"UserLoginHistory", 'String'>
+    readonly userId: FieldRef<"UserLoginHistory", 'String'>
+    readonly provider: FieldRef<"UserLoginHistory", 'AuthProvider'>
+    readonly ipAddress: FieldRef<"UserLoginHistory", 'String'>
+    readonly userAgent: FieldRef<"UserLoginHistory", 'String'>
+    readonly deviceType: FieldRef<"UserLoginHistory", 'String'>
+    readonly osName: FieldRef<"UserLoginHistory", 'String'>
+    readonly loggedInAt: FieldRef<"UserLoginHistory", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * UserLoginHistory findUnique
+   */
+  export type UserLoginHistoryFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the UserLoginHistory
+     */
+    select?: UserLoginHistorySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the UserLoginHistory
+     */
+    omit?: UserLoginHistoryOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserLoginHistoryInclude<ExtArgs> | null
+    /**
+     * Filter, which UserLoginHistory to fetch.
+     */
+    where: UserLoginHistoryWhereUniqueInput
+  }
+
+  /**
+   * UserLoginHistory findUniqueOrThrow
+   */
+  export type UserLoginHistoryFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the UserLoginHistory
+     */
+    select?: UserLoginHistorySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the UserLoginHistory
+     */
+    omit?: UserLoginHistoryOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserLoginHistoryInclude<ExtArgs> | null
+    /**
+     * Filter, which UserLoginHistory to fetch.
+     */
+    where: UserLoginHistoryWhereUniqueInput
+  }
+
+  /**
+   * UserLoginHistory findFirst
+   */
+  export type UserLoginHistoryFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the UserLoginHistory
+     */
+    select?: UserLoginHistorySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the UserLoginHistory
+     */
+    omit?: UserLoginHistoryOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserLoginHistoryInclude<ExtArgs> | null
+    /**
+     * Filter, which UserLoginHistory to fetch.
+     */
+    where?: UserLoginHistoryWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of UserLoginHistories to fetch.
+     */
+    orderBy?: UserLoginHistoryOrderByWithRelationInput | UserLoginHistoryOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for UserLoginHistories.
+     */
+    cursor?: UserLoginHistoryWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` UserLoginHistories from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` UserLoginHistories.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of UserLoginHistories.
+     */
+    distinct?: UserLoginHistoryScalarFieldEnum | UserLoginHistoryScalarFieldEnum[]
+  }
+
+  /**
+   * UserLoginHistory findFirstOrThrow
+   */
+  export type UserLoginHistoryFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the UserLoginHistory
+     */
+    select?: UserLoginHistorySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the UserLoginHistory
+     */
+    omit?: UserLoginHistoryOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserLoginHistoryInclude<ExtArgs> | null
+    /**
+     * Filter, which UserLoginHistory to fetch.
+     */
+    where?: UserLoginHistoryWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of UserLoginHistories to fetch.
+     */
+    orderBy?: UserLoginHistoryOrderByWithRelationInput | UserLoginHistoryOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for UserLoginHistories.
+     */
+    cursor?: UserLoginHistoryWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` UserLoginHistories from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` UserLoginHistories.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of UserLoginHistories.
+     */
+    distinct?: UserLoginHistoryScalarFieldEnum | UserLoginHistoryScalarFieldEnum[]
+  }
+
+  /**
+   * UserLoginHistory findMany
+   */
+  export type UserLoginHistoryFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the UserLoginHistory
+     */
+    select?: UserLoginHistorySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the UserLoginHistory
+     */
+    omit?: UserLoginHistoryOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserLoginHistoryInclude<ExtArgs> | null
+    /**
+     * Filter, which UserLoginHistories to fetch.
+     */
+    where?: UserLoginHistoryWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of UserLoginHistories to fetch.
+     */
+    orderBy?: UserLoginHistoryOrderByWithRelationInput | UserLoginHistoryOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing UserLoginHistories.
+     */
+    cursor?: UserLoginHistoryWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` UserLoginHistories from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` UserLoginHistories.
+     */
+    skip?: number
+    distinct?: UserLoginHistoryScalarFieldEnum | UserLoginHistoryScalarFieldEnum[]
+  }
+
+  /**
+   * UserLoginHistory create
+   */
+  export type UserLoginHistoryCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the UserLoginHistory
+     */
+    select?: UserLoginHistorySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the UserLoginHistory
+     */
+    omit?: UserLoginHistoryOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserLoginHistoryInclude<ExtArgs> | null
+    /**
+     * The data needed to create a UserLoginHistory.
+     */
+    data: XOR<UserLoginHistoryCreateInput, UserLoginHistoryUncheckedCreateInput>
+  }
+
+  /**
+   * UserLoginHistory createMany
+   */
+  export type UserLoginHistoryCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many UserLoginHistories.
+     */
+    data: UserLoginHistoryCreateManyInput | UserLoginHistoryCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * UserLoginHistory createManyAndReturn
+   */
+  export type UserLoginHistoryCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the UserLoginHistory
+     */
+    select?: UserLoginHistorySelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the UserLoginHistory
+     */
+    omit?: UserLoginHistoryOmit<ExtArgs> | null
+    /**
+     * The data used to create many UserLoginHistories.
+     */
+    data: UserLoginHistoryCreateManyInput | UserLoginHistoryCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserLoginHistoryIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * UserLoginHistory update
+   */
+  export type UserLoginHistoryUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the UserLoginHistory
+     */
+    select?: UserLoginHistorySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the UserLoginHistory
+     */
+    omit?: UserLoginHistoryOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserLoginHistoryInclude<ExtArgs> | null
+    /**
+     * The data needed to update a UserLoginHistory.
+     */
+    data: XOR<UserLoginHistoryUpdateInput, UserLoginHistoryUncheckedUpdateInput>
+    /**
+     * Choose, which UserLoginHistory to update.
+     */
+    where: UserLoginHistoryWhereUniqueInput
+  }
+
+  /**
+   * UserLoginHistory updateMany
+   */
+  export type UserLoginHistoryUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update UserLoginHistories.
+     */
+    data: XOR<UserLoginHistoryUpdateManyMutationInput, UserLoginHistoryUncheckedUpdateManyInput>
+    /**
+     * Filter which UserLoginHistories to update
+     */
+    where?: UserLoginHistoryWhereInput
+    /**
+     * Limit how many UserLoginHistories to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * UserLoginHistory updateManyAndReturn
+   */
+  export type UserLoginHistoryUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the UserLoginHistory
+     */
+    select?: UserLoginHistorySelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the UserLoginHistory
+     */
+    omit?: UserLoginHistoryOmit<ExtArgs> | null
+    /**
+     * The data used to update UserLoginHistories.
+     */
+    data: XOR<UserLoginHistoryUpdateManyMutationInput, UserLoginHistoryUncheckedUpdateManyInput>
+    /**
+     * Filter which UserLoginHistories to update
+     */
+    where?: UserLoginHistoryWhereInput
+    /**
+     * Limit how many UserLoginHistories to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserLoginHistoryIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * UserLoginHistory upsert
+   */
+  export type UserLoginHistoryUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the UserLoginHistory
+     */
+    select?: UserLoginHistorySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the UserLoginHistory
+     */
+    omit?: UserLoginHistoryOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserLoginHistoryInclude<ExtArgs> | null
+    /**
+     * The filter to search for the UserLoginHistory to update in case it exists.
+     */
+    where: UserLoginHistoryWhereUniqueInput
+    /**
+     * In case the UserLoginHistory found by the `where` argument doesn't exist, create a new UserLoginHistory with this data.
+     */
+    create: XOR<UserLoginHistoryCreateInput, UserLoginHistoryUncheckedCreateInput>
+    /**
+     * In case the UserLoginHistory was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<UserLoginHistoryUpdateInput, UserLoginHistoryUncheckedUpdateInput>
+  }
+
+  /**
+   * UserLoginHistory delete
+   */
+  export type UserLoginHistoryDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the UserLoginHistory
+     */
+    select?: UserLoginHistorySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the UserLoginHistory
+     */
+    omit?: UserLoginHistoryOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserLoginHistoryInclude<ExtArgs> | null
+    /**
+     * Filter which UserLoginHistory to delete.
+     */
+    where: UserLoginHistoryWhereUniqueInput
+  }
+
+  /**
+   * UserLoginHistory deleteMany
+   */
+  export type UserLoginHistoryDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which UserLoginHistories to delete
+     */
+    where?: UserLoginHistoryWhereInput
+    /**
+     * Limit how many UserLoginHistories to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * UserLoginHistory without action
+   */
+  export type UserLoginHistoryDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the UserLoginHistory
+     */
+    select?: UserLoginHistorySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the UserLoginHistory
+     */
+    omit?: UserLoginHistoryOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserLoginHistoryInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model UserPlanHistory
+   */
+
+  export type AggregateUserPlanHistory = {
+    _count: UserPlanHistoryCountAggregateOutputType | null
+    _min: UserPlanHistoryMinAggregateOutputType | null
+    _max: UserPlanHistoryMaxAggregateOutputType | null
+  }
+
+  export type UserPlanHistoryMinAggregateOutputType = {
+    historyId: string | null
+    userId: string | null
+    fromPlan: $Enums.PlanType | null
+    toPlan: $Enums.PlanType | null
+    reason: string | null
+    changedBy: string | null
+    note: string | null
+    effectiveAt: Date | null
+    expiresAt: Date | null
+    createdAt: Date | null
+  }
+
+  export type UserPlanHistoryMaxAggregateOutputType = {
+    historyId: string | null
+    userId: string | null
+    fromPlan: $Enums.PlanType | null
+    toPlan: $Enums.PlanType | null
+    reason: string | null
+    changedBy: string | null
+    note: string | null
+    effectiveAt: Date | null
+    expiresAt: Date | null
+    createdAt: Date | null
+  }
+
+  export type UserPlanHistoryCountAggregateOutputType = {
+    historyId: number
+    userId: number
+    fromPlan: number
+    toPlan: number
+    reason: number
+    changedBy: number
+    note: number
+    effectiveAt: number
+    expiresAt: number
+    createdAt: number
+    _all: number
+  }
+
+
+  export type UserPlanHistoryMinAggregateInputType = {
+    historyId?: true
+    userId?: true
+    fromPlan?: true
+    toPlan?: true
+    reason?: true
+    changedBy?: true
+    note?: true
+    effectiveAt?: true
+    expiresAt?: true
+    createdAt?: true
+  }
+
+  export type UserPlanHistoryMaxAggregateInputType = {
+    historyId?: true
+    userId?: true
+    fromPlan?: true
+    toPlan?: true
+    reason?: true
+    changedBy?: true
+    note?: true
+    effectiveAt?: true
+    expiresAt?: true
+    createdAt?: true
+  }
+
+  export type UserPlanHistoryCountAggregateInputType = {
+    historyId?: true
+    userId?: true
+    fromPlan?: true
+    toPlan?: true
+    reason?: true
+    changedBy?: true
+    note?: true
+    effectiveAt?: true
+    expiresAt?: true
+    createdAt?: true
+    _all?: true
+  }
+
+  export type UserPlanHistoryAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which UserPlanHistory to aggregate.
+     */
+    where?: UserPlanHistoryWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of UserPlanHistories to fetch.
+     */
+    orderBy?: UserPlanHistoryOrderByWithRelationInput | UserPlanHistoryOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: UserPlanHistoryWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` UserPlanHistories from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` UserPlanHistories.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned UserPlanHistories
+    **/
+    _count?: true | UserPlanHistoryCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: UserPlanHistoryMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: UserPlanHistoryMaxAggregateInputType
+  }
+
+  export type GetUserPlanHistoryAggregateType<T extends UserPlanHistoryAggregateArgs> = {
+        [P in keyof T & keyof AggregateUserPlanHistory]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateUserPlanHistory[P]>
+      : GetScalarType<T[P], AggregateUserPlanHistory[P]>
+  }
+
+
+
+
+  export type UserPlanHistoryGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: UserPlanHistoryWhereInput
+    orderBy?: UserPlanHistoryOrderByWithAggregationInput | UserPlanHistoryOrderByWithAggregationInput[]
+    by: UserPlanHistoryScalarFieldEnum[] | UserPlanHistoryScalarFieldEnum
+    having?: UserPlanHistoryScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: UserPlanHistoryCountAggregateInputType | true
+    _min?: UserPlanHistoryMinAggregateInputType
+    _max?: UserPlanHistoryMaxAggregateInputType
+  }
+
+  export type UserPlanHistoryGroupByOutputType = {
+    historyId: string
+    userId: string
+    fromPlan: $Enums.PlanType | null
+    toPlan: $Enums.PlanType
+    reason: string | null
+    changedBy: string | null
+    note: string | null
+    effectiveAt: Date
+    expiresAt: Date | null
+    createdAt: Date
+    _count: UserPlanHistoryCountAggregateOutputType | null
+    _min: UserPlanHistoryMinAggregateOutputType | null
+    _max: UserPlanHistoryMaxAggregateOutputType | null
+  }
+
+  type GetUserPlanHistoryGroupByPayload<T extends UserPlanHistoryGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<UserPlanHistoryGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof UserPlanHistoryGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], UserPlanHistoryGroupByOutputType[P]>
+            : GetScalarType<T[P], UserPlanHistoryGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type UserPlanHistorySelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    historyId?: boolean
+    userId?: boolean
+    fromPlan?: boolean
+    toPlan?: boolean
+    reason?: boolean
+    changedBy?: boolean
+    note?: boolean
+    effectiveAt?: boolean
+    expiresAt?: boolean
+    createdAt?: boolean
+    user?: boolean | UserDefaultArgs<ExtArgs>
+    admin?: boolean | UserPlanHistory$adminArgs<ExtArgs>
+  }, ExtArgs["result"]["userPlanHistory"]>
+
+  export type UserPlanHistorySelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    historyId?: boolean
+    userId?: boolean
+    fromPlan?: boolean
+    toPlan?: boolean
+    reason?: boolean
+    changedBy?: boolean
+    note?: boolean
+    effectiveAt?: boolean
+    expiresAt?: boolean
+    createdAt?: boolean
+    user?: boolean | UserDefaultArgs<ExtArgs>
+    admin?: boolean | UserPlanHistory$adminArgs<ExtArgs>
+  }, ExtArgs["result"]["userPlanHistory"]>
+
+  export type UserPlanHistorySelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    historyId?: boolean
+    userId?: boolean
+    fromPlan?: boolean
+    toPlan?: boolean
+    reason?: boolean
+    changedBy?: boolean
+    note?: boolean
+    effectiveAt?: boolean
+    expiresAt?: boolean
+    createdAt?: boolean
+    user?: boolean | UserDefaultArgs<ExtArgs>
+    admin?: boolean | UserPlanHistory$adminArgs<ExtArgs>
+  }, ExtArgs["result"]["userPlanHistory"]>
+
+  export type UserPlanHistorySelectScalar = {
+    historyId?: boolean
+    userId?: boolean
+    fromPlan?: boolean
+    toPlan?: boolean
+    reason?: boolean
+    changedBy?: boolean
+    note?: boolean
+    effectiveAt?: boolean
+    expiresAt?: boolean
+    createdAt?: boolean
+  }
+
+  export type UserPlanHistoryOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"historyId" | "userId" | "fromPlan" | "toPlan" | "reason" | "changedBy" | "note" | "effectiveAt" | "expiresAt" | "createdAt", ExtArgs["result"]["userPlanHistory"]>
+  export type UserPlanHistoryInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    user?: boolean | UserDefaultArgs<ExtArgs>
+    admin?: boolean | UserPlanHistory$adminArgs<ExtArgs>
+  }
+  export type UserPlanHistoryIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    user?: boolean | UserDefaultArgs<ExtArgs>
+    admin?: boolean | UserPlanHistory$adminArgs<ExtArgs>
+  }
+  export type UserPlanHistoryIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    user?: boolean | UserDefaultArgs<ExtArgs>
+    admin?: boolean | UserPlanHistory$adminArgs<ExtArgs>
+  }
+
+  export type $UserPlanHistoryPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "UserPlanHistory"
+    objects: {
+      user: Prisma.$UserPayload<ExtArgs>
+      admin: Prisma.$AdminPayload<ExtArgs> | null
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      historyId: string
+      userId: string
+      fromPlan: $Enums.PlanType | null
+      toPlan: $Enums.PlanType
+      reason: string | null
+      changedBy: string | null
+      note: string | null
+      effectiveAt: Date
+      expiresAt: Date | null
+      createdAt: Date
+    }, ExtArgs["result"]["userPlanHistory"]>
+    composites: {}
+  }
+
+  type UserPlanHistoryGetPayload<S extends boolean | null | undefined | UserPlanHistoryDefaultArgs> = $Result.GetResult<Prisma.$UserPlanHistoryPayload, S>
+
+  type UserPlanHistoryCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<UserPlanHistoryFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: UserPlanHistoryCountAggregateInputType | true
+    }
+
+  export interface UserPlanHistoryDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['UserPlanHistory'], meta: { name: 'UserPlanHistory' } }
+    /**
+     * Find zero or one UserPlanHistory that matches the filter.
+     * @param {UserPlanHistoryFindUniqueArgs} args - Arguments to find a UserPlanHistory
+     * @example
+     * // Get one UserPlanHistory
+     * const userPlanHistory = await prisma.userPlanHistory.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends UserPlanHistoryFindUniqueArgs>(args: SelectSubset<T, UserPlanHistoryFindUniqueArgs<ExtArgs>>): Prisma__UserPlanHistoryClient<$Result.GetResult<Prisma.$UserPlanHistoryPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one UserPlanHistory that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {UserPlanHistoryFindUniqueOrThrowArgs} args - Arguments to find a UserPlanHistory
+     * @example
+     * // Get one UserPlanHistory
+     * const userPlanHistory = await prisma.userPlanHistory.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends UserPlanHistoryFindUniqueOrThrowArgs>(args: SelectSubset<T, UserPlanHistoryFindUniqueOrThrowArgs<ExtArgs>>): Prisma__UserPlanHistoryClient<$Result.GetResult<Prisma.$UserPlanHistoryPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first UserPlanHistory that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {UserPlanHistoryFindFirstArgs} args - Arguments to find a UserPlanHistory
+     * @example
+     * // Get one UserPlanHistory
+     * const userPlanHistory = await prisma.userPlanHistory.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends UserPlanHistoryFindFirstArgs>(args?: SelectSubset<T, UserPlanHistoryFindFirstArgs<ExtArgs>>): Prisma__UserPlanHistoryClient<$Result.GetResult<Prisma.$UserPlanHistoryPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first UserPlanHistory that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {UserPlanHistoryFindFirstOrThrowArgs} args - Arguments to find a UserPlanHistory
+     * @example
+     * // Get one UserPlanHistory
+     * const userPlanHistory = await prisma.userPlanHistory.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends UserPlanHistoryFindFirstOrThrowArgs>(args?: SelectSubset<T, UserPlanHistoryFindFirstOrThrowArgs<ExtArgs>>): Prisma__UserPlanHistoryClient<$Result.GetResult<Prisma.$UserPlanHistoryPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more UserPlanHistories that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {UserPlanHistoryFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all UserPlanHistories
+     * const userPlanHistories = await prisma.userPlanHistory.findMany()
+     * 
+     * // Get first 10 UserPlanHistories
+     * const userPlanHistories = await prisma.userPlanHistory.findMany({ take: 10 })
+     * 
+     * // Only select the `historyId`
+     * const userPlanHistoryWithHistoryIdOnly = await prisma.userPlanHistory.findMany({ select: { historyId: true } })
+     * 
+     */
+    findMany<T extends UserPlanHistoryFindManyArgs>(args?: SelectSubset<T, UserPlanHistoryFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$UserPlanHistoryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a UserPlanHistory.
+     * @param {UserPlanHistoryCreateArgs} args - Arguments to create a UserPlanHistory.
+     * @example
+     * // Create one UserPlanHistory
+     * const UserPlanHistory = await prisma.userPlanHistory.create({
+     *   data: {
+     *     // ... data to create a UserPlanHistory
+     *   }
+     * })
+     * 
+     */
+    create<T extends UserPlanHistoryCreateArgs>(args: SelectSubset<T, UserPlanHistoryCreateArgs<ExtArgs>>): Prisma__UserPlanHistoryClient<$Result.GetResult<Prisma.$UserPlanHistoryPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many UserPlanHistories.
+     * @param {UserPlanHistoryCreateManyArgs} args - Arguments to create many UserPlanHistories.
+     * @example
+     * // Create many UserPlanHistories
+     * const userPlanHistory = await prisma.userPlanHistory.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends UserPlanHistoryCreateManyArgs>(args?: SelectSubset<T, UserPlanHistoryCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many UserPlanHistories and returns the data saved in the database.
+     * @param {UserPlanHistoryCreateManyAndReturnArgs} args - Arguments to create many UserPlanHistories.
+     * @example
+     * // Create many UserPlanHistories
+     * const userPlanHistory = await prisma.userPlanHistory.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many UserPlanHistories and only return the `historyId`
+     * const userPlanHistoryWithHistoryIdOnly = await prisma.userPlanHistory.createManyAndReturn({
+     *   select: { historyId: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends UserPlanHistoryCreateManyAndReturnArgs>(args?: SelectSubset<T, UserPlanHistoryCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$UserPlanHistoryPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a UserPlanHistory.
+     * @param {UserPlanHistoryDeleteArgs} args - Arguments to delete one UserPlanHistory.
+     * @example
+     * // Delete one UserPlanHistory
+     * const UserPlanHistory = await prisma.userPlanHistory.delete({
+     *   where: {
+     *     // ... filter to delete one UserPlanHistory
+     *   }
+     * })
+     * 
+     */
+    delete<T extends UserPlanHistoryDeleteArgs>(args: SelectSubset<T, UserPlanHistoryDeleteArgs<ExtArgs>>): Prisma__UserPlanHistoryClient<$Result.GetResult<Prisma.$UserPlanHistoryPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one UserPlanHistory.
+     * @param {UserPlanHistoryUpdateArgs} args - Arguments to update one UserPlanHistory.
+     * @example
+     * // Update one UserPlanHistory
+     * const userPlanHistory = await prisma.userPlanHistory.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends UserPlanHistoryUpdateArgs>(args: SelectSubset<T, UserPlanHistoryUpdateArgs<ExtArgs>>): Prisma__UserPlanHistoryClient<$Result.GetResult<Prisma.$UserPlanHistoryPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more UserPlanHistories.
+     * @param {UserPlanHistoryDeleteManyArgs} args - Arguments to filter UserPlanHistories to delete.
+     * @example
+     * // Delete a few UserPlanHistories
+     * const { count } = await prisma.userPlanHistory.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends UserPlanHistoryDeleteManyArgs>(args?: SelectSubset<T, UserPlanHistoryDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more UserPlanHistories.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {UserPlanHistoryUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many UserPlanHistories
+     * const userPlanHistory = await prisma.userPlanHistory.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends UserPlanHistoryUpdateManyArgs>(args: SelectSubset<T, UserPlanHistoryUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more UserPlanHistories and returns the data updated in the database.
+     * @param {UserPlanHistoryUpdateManyAndReturnArgs} args - Arguments to update many UserPlanHistories.
+     * @example
+     * // Update many UserPlanHistories
+     * const userPlanHistory = await prisma.userPlanHistory.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more UserPlanHistories and only return the `historyId`
+     * const userPlanHistoryWithHistoryIdOnly = await prisma.userPlanHistory.updateManyAndReturn({
+     *   select: { historyId: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends UserPlanHistoryUpdateManyAndReturnArgs>(args: SelectSubset<T, UserPlanHistoryUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$UserPlanHistoryPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one UserPlanHistory.
+     * @param {UserPlanHistoryUpsertArgs} args - Arguments to update or create a UserPlanHistory.
+     * @example
+     * // Update or create a UserPlanHistory
+     * const userPlanHistory = await prisma.userPlanHistory.upsert({
+     *   create: {
+     *     // ... data to create a UserPlanHistory
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the UserPlanHistory we want to update
+     *   }
+     * })
+     */
+    upsert<T extends UserPlanHistoryUpsertArgs>(args: SelectSubset<T, UserPlanHistoryUpsertArgs<ExtArgs>>): Prisma__UserPlanHistoryClient<$Result.GetResult<Prisma.$UserPlanHistoryPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of UserPlanHistories.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {UserPlanHistoryCountArgs} args - Arguments to filter UserPlanHistories to count.
+     * @example
+     * // Count the number of UserPlanHistories
+     * const count = await prisma.userPlanHistory.count({
+     *   where: {
+     *     // ... the filter for the UserPlanHistories we want to count
+     *   }
+     * })
+    **/
+    count<T extends UserPlanHistoryCountArgs>(
+      args?: Subset<T, UserPlanHistoryCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], UserPlanHistoryCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a UserPlanHistory.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {UserPlanHistoryAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends UserPlanHistoryAggregateArgs>(args: Subset<T, UserPlanHistoryAggregateArgs>): Prisma.PrismaPromise<GetUserPlanHistoryAggregateType<T>>
+
+    /**
+     * Group by UserPlanHistory.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {UserPlanHistoryGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends UserPlanHistoryGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: UserPlanHistoryGroupByArgs['orderBy'] }
+        : { orderBy?: UserPlanHistoryGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, UserPlanHistoryGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetUserPlanHistoryGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the UserPlanHistory model
+   */
+  readonly fields: UserPlanHistoryFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for UserPlanHistory.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__UserPlanHistoryClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    user<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    admin<T extends UserPlanHistory$adminArgs<ExtArgs> = {}>(args?: Subset<T, UserPlanHistory$adminArgs<ExtArgs>>): Prisma__AdminClient<$Result.GetResult<Prisma.$AdminPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the UserPlanHistory model
+   */
+  interface UserPlanHistoryFieldRefs {
+    readonly historyId: FieldRef<"UserPlanHistory", 'String'>
+    readonly userId: FieldRef<"UserPlanHistory", 'String'>
+    readonly fromPlan: FieldRef<"UserPlanHistory", 'PlanType'>
+    readonly toPlan: FieldRef<"UserPlanHistory", 'PlanType'>
+    readonly reason: FieldRef<"UserPlanHistory", 'String'>
+    readonly changedBy: FieldRef<"UserPlanHistory", 'String'>
+    readonly note: FieldRef<"UserPlanHistory", 'String'>
+    readonly effectiveAt: FieldRef<"UserPlanHistory", 'DateTime'>
+    readonly expiresAt: FieldRef<"UserPlanHistory", 'DateTime'>
+    readonly createdAt: FieldRef<"UserPlanHistory", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * UserPlanHistory findUnique
+   */
+  export type UserPlanHistoryFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the UserPlanHistory
+     */
+    select?: UserPlanHistorySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the UserPlanHistory
+     */
+    omit?: UserPlanHistoryOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserPlanHistoryInclude<ExtArgs> | null
+    /**
+     * Filter, which UserPlanHistory to fetch.
+     */
+    where: UserPlanHistoryWhereUniqueInput
+  }
+
+  /**
+   * UserPlanHistory findUniqueOrThrow
+   */
+  export type UserPlanHistoryFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the UserPlanHistory
+     */
+    select?: UserPlanHistorySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the UserPlanHistory
+     */
+    omit?: UserPlanHistoryOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserPlanHistoryInclude<ExtArgs> | null
+    /**
+     * Filter, which UserPlanHistory to fetch.
+     */
+    where: UserPlanHistoryWhereUniqueInput
+  }
+
+  /**
+   * UserPlanHistory findFirst
+   */
+  export type UserPlanHistoryFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the UserPlanHistory
+     */
+    select?: UserPlanHistorySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the UserPlanHistory
+     */
+    omit?: UserPlanHistoryOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserPlanHistoryInclude<ExtArgs> | null
+    /**
+     * Filter, which UserPlanHistory to fetch.
+     */
+    where?: UserPlanHistoryWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of UserPlanHistories to fetch.
+     */
+    orderBy?: UserPlanHistoryOrderByWithRelationInput | UserPlanHistoryOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for UserPlanHistories.
+     */
+    cursor?: UserPlanHistoryWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` UserPlanHistories from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` UserPlanHistories.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of UserPlanHistories.
+     */
+    distinct?: UserPlanHistoryScalarFieldEnum | UserPlanHistoryScalarFieldEnum[]
+  }
+
+  /**
+   * UserPlanHistory findFirstOrThrow
+   */
+  export type UserPlanHistoryFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the UserPlanHistory
+     */
+    select?: UserPlanHistorySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the UserPlanHistory
+     */
+    omit?: UserPlanHistoryOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserPlanHistoryInclude<ExtArgs> | null
+    /**
+     * Filter, which UserPlanHistory to fetch.
+     */
+    where?: UserPlanHistoryWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of UserPlanHistories to fetch.
+     */
+    orderBy?: UserPlanHistoryOrderByWithRelationInput | UserPlanHistoryOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for UserPlanHistories.
+     */
+    cursor?: UserPlanHistoryWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` UserPlanHistories from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` UserPlanHistories.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of UserPlanHistories.
+     */
+    distinct?: UserPlanHistoryScalarFieldEnum | UserPlanHistoryScalarFieldEnum[]
+  }
+
+  /**
+   * UserPlanHistory findMany
+   */
+  export type UserPlanHistoryFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the UserPlanHistory
+     */
+    select?: UserPlanHistorySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the UserPlanHistory
+     */
+    omit?: UserPlanHistoryOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserPlanHistoryInclude<ExtArgs> | null
+    /**
+     * Filter, which UserPlanHistories to fetch.
+     */
+    where?: UserPlanHistoryWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of UserPlanHistories to fetch.
+     */
+    orderBy?: UserPlanHistoryOrderByWithRelationInput | UserPlanHistoryOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing UserPlanHistories.
+     */
+    cursor?: UserPlanHistoryWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` UserPlanHistories from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` UserPlanHistories.
+     */
+    skip?: number
+    distinct?: UserPlanHistoryScalarFieldEnum | UserPlanHistoryScalarFieldEnum[]
+  }
+
+  /**
+   * UserPlanHistory create
+   */
+  export type UserPlanHistoryCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the UserPlanHistory
+     */
+    select?: UserPlanHistorySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the UserPlanHistory
+     */
+    omit?: UserPlanHistoryOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserPlanHistoryInclude<ExtArgs> | null
+    /**
+     * The data needed to create a UserPlanHistory.
+     */
+    data: XOR<UserPlanHistoryCreateInput, UserPlanHistoryUncheckedCreateInput>
+  }
+
+  /**
+   * UserPlanHistory createMany
+   */
+  export type UserPlanHistoryCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many UserPlanHistories.
+     */
+    data: UserPlanHistoryCreateManyInput | UserPlanHistoryCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * UserPlanHistory createManyAndReturn
+   */
+  export type UserPlanHistoryCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the UserPlanHistory
+     */
+    select?: UserPlanHistorySelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the UserPlanHistory
+     */
+    omit?: UserPlanHistoryOmit<ExtArgs> | null
+    /**
+     * The data used to create many UserPlanHistories.
+     */
+    data: UserPlanHistoryCreateManyInput | UserPlanHistoryCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserPlanHistoryIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * UserPlanHistory update
+   */
+  export type UserPlanHistoryUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the UserPlanHistory
+     */
+    select?: UserPlanHistorySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the UserPlanHistory
+     */
+    omit?: UserPlanHistoryOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserPlanHistoryInclude<ExtArgs> | null
+    /**
+     * The data needed to update a UserPlanHistory.
+     */
+    data: XOR<UserPlanHistoryUpdateInput, UserPlanHistoryUncheckedUpdateInput>
+    /**
+     * Choose, which UserPlanHistory to update.
+     */
+    where: UserPlanHistoryWhereUniqueInput
+  }
+
+  /**
+   * UserPlanHistory updateMany
+   */
+  export type UserPlanHistoryUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update UserPlanHistories.
+     */
+    data: XOR<UserPlanHistoryUpdateManyMutationInput, UserPlanHistoryUncheckedUpdateManyInput>
+    /**
+     * Filter which UserPlanHistories to update
+     */
+    where?: UserPlanHistoryWhereInput
+    /**
+     * Limit how many UserPlanHistories to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * UserPlanHistory updateManyAndReturn
+   */
+  export type UserPlanHistoryUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the UserPlanHistory
+     */
+    select?: UserPlanHistorySelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the UserPlanHistory
+     */
+    omit?: UserPlanHistoryOmit<ExtArgs> | null
+    /**
+     * The data used to update UserPlanHistories.
+     */
+    data: XOR<UserPlanHistoryUpdateManyMutationInput, UserPlanHistoryUncheckedUpdateManyInput>
+    /**
+     * Filter which UserPlanHistories to update
+     */
+    where?: UserPlanHistoryWhereInput
+    /**
+     * Limit how many UserPlanHistories to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserPlanHistoryIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * UserPlanHistory upsert
+   */
+  export type UserPlanHistoryUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the UserPlanHistory
+     */
+    select?: UserPlanHistorySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the UserPlanHistory
+     */
+    omit?: UserPlanHistoryOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserPlanHistoryInclude<ExtArgs> | null
+    /**
+     * The filter to search for the UserPlanHistory to update in case it exists.
+     */
+    where: UserPlanHistoryWhereUniqueInput
+    /**
+     * In case the UserPlanHistory found by the `where` argument doesn't exist, create a new UserPlanHistory with this data.
+     */
+    create: XOR<UserPlanHistoryCreateInput, UserPlanHistoryUncheckedCreateInput>
+    /**
+     * In case the UserPlanHistory was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<UserPlanHistoryUpdateInput, UserPlanHistoryUncheckedUpdateInput>
+  }
+
+  /**
+   * UserPlanHistory delete
+   */
+  export type UserPlanHistoryDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the UserPlanHistory
+     */
+    select?: UserPlanHistorySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the UserPlanHistory
+     */
+    omit?: UserPlanHistoryOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserPlanHistoryInclude<ExtArgs> | null
+    /**
+     * Filter which UserPlanHistory to delete.
+     */
+    where: UserPlanHistoryWhereUniqueInput
+  }
+
+  /**
+   * UserPlanHistory deleteMany
+   */
+  export type UserPlanHistoryDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which UserPlanHistories to delete
+     */
+    where?: UserPlanHistoryWhereInput
+    /**
+     * Limit how many UserPlanHistories to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * UserPlanHistory.admin
+   */
+  export type UserPlanHistory$adminArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Admin
+     */
+    select?: AdminSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Admin
+     */
+    omit?: AdminOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AdminInclude<ExtArgs> | null
+    where?: AdminWhereInput
+  }
+
+  /**
+   * UserPlanHistory without action
+   */
+  export type UserPlanHistoryDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the UserPlanHistory
+     */
+    select?: UserPlanHistorySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the UserPlanHistory
+     */
+    omit?: UserPlanHistoryOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserPlanHistoryInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model AdminAuditLog
+   */
+
+  export type AggregateAdminAuditLog = {
+    _count: AdminAuditLogCountAggregateOutputType | null
+    _min: AdminAuditLogMinAggregateOutputType | null
+    _max: AdminAuditLogMaxAggregateOutputType | null
+  }
+
+  export type AdminAuditLogMinAggregateOutputType = {
+    logId: string | null
+    adminId: string | null
+    action: $Enums.AdminAuditAction | null
+    targetUserId: string | null
+    targetScope: string | null
+    reason: string | null
+    success: boolean | null
+    failureCode: string | null
+    ipAddress: string | null
+    userAgent: string | null
+    createdAt: Date | null
+  }
+
+  export type AdminAuditLogMaxAggregateOutputType = {
+    logId: string | null
+    adminId: string | null
+    action: $Enums.AdminAuditAction | null
+    targetUserId: string | null
+    targetScope: string | null
+    reason: string | null
+    success: boolean | null
+    failureCode: string | null
+    ipAddress: string | null
+    userAgent: string | null
+    createdAt: Date | null
+  }
+
+  export type AdminAuditLogCountAggregateOutputType = {
+    logId: number
+    adminId: number
+    action: number
+    targetUserId: number
+    targetScope: number
+    beforeValue: number
+    afterValue: number
+    reason: number
+    success: number
+    failureCode: number
+    ipAddress: number
+    userAgent: number
+    createdAt: number
+    _all: number
+  }
+
+
+  export type AdminAuditLogMinAggregateInputType = {
+    logId?: true
+    adminId?: true
+    action?: true
+    targetUserId?: true
+    targetScope?: true
+    reason?: true
+    success?: true
+    failureCode?: true
+    ipAddress?: true
+    userAgent?: true
+    createdAt?: true
+  }
+
+  export type AdminAuditLogMaxAggregateInputType = {
+    logId?: true
+    adminId?: true
+    action?: true
+    targetUserId?: true
+    targetScope?: true
+    reason?: true
+    success?: true
+    failureCode?: true
+    ipAddress?: true
+    userAgent?: true
+    createdAt?: true
+  }
+
+  export type AdminAuditLogCountAggregateInputType = {
+    logId?: true
+    adminId?: true
+    action?: true
+    targetUserId?: true
+    targetScope?: true
+    beforeValue?: true
+    afterValue?: true
+    reason?: true
+    success?: true
+    failureCode?: true
+    ipAddress?: true
+    userAgent?: true
+    createdAt?: true
+    _all?: true
+  }
+
+  export type AdminAuditLogAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which AdminAuditLog to aggregate.
+     */
+    where?: AdminAuditLogWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of AdminAuditLogs to fetch.
+     */
+    orderBy?: AdminAuditLogOrderByWithRelationInput | AdminAuditLogOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: AdminAuditLogWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` AdminAuditLogs from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` AdminAuditLogs.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned AdminAuditLogs
+    **/
+    _count?: true | AdminAuditLogCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: AdminAuditLogMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: AdminAuditLogMaxAggregateInputType
+  }
+
+  export type GetAdminAuditLogAggregateType<T extends AdminAuditLogAggregateArgs> = {
+        [P in keyof T & keyof AggregateAdminAuditLog]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateAdminAuditLog[P]>
+      : GetScalarType<T[P], AggregateAdminAuditLog[P]>
+  }
+
+
+
+
+  export type AdminAuditLogGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: AdminAuditLogWhereInput
+    orderBy?: AdminAuditLogOrderByWithAggregationInput | AdminAuditLogOrderByWithAggregationInput[]
+    by: AdminAuditLogScalarFieldEnum[] | AdminAuditLogScalarFieldEnum
+    having?: AdminAuditLogScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: AdminAuditLogCountAggregateInputType | true
+    _min?: AdminAuditLogMinAggregateInputType
+    _max?: AdminAuditLogMaxAggregateInputType
+  }
+
+  export type AdminAuditLogGroupByOutputType = {
+    logId: string
+    adminId: string
+    action: $Enums.AdminAuditAction
+    targetUserId: string | null
+    targetScope: string | null
+    beforeValue: JsonValue | null
+    afterValue: JsonValue | null
+    reason: string | null
+    success: boolean
+    failureCode: string | null
+    ipAddress: string | null
+    userAgent: string | null
+    createdAt: Date
+    _count: AdminAuditLogCountAggregateOutputType | null
+    _min: AdminAuditLogMinAggregateOutputType | null
+    _max: AdminAuditLogMaxAggregateOutputType | null
+  }
+
+  type GetAdminAuditLogGroupByPayload<T extends AdminAuditLogGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<AdminAuditLogGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof AdminAuditLogGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], AdminAuditLogGroupByOutputType[P]>
+            : GetScalarType<T[P], AdminAuditLogGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type AdminAuditLogSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    logId?: boolean
+    adminId?: boolean
+    action?: boolean
+    targetUserId?: boolean
+    targetScope?: boolean
+    beforeValue?: boolean
+    afterValue?: boolean
+    reason?: boolean
+    success?: boolean
+    failureCode?: boolean
+    ipAddress?: boolean
+    userAgent?: boolean
+    createdAt?: boolean
+    admin?: boolean | AdminDefaultArgs<ExtArgs>
+    targetUser?: boolean | AdminAuditLog$targetUserArgs<ExtArgs>
+  }, ExtArgs["result"]["adminAuditLog"]>
+
+  export type AdminAuditLogSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    logId?: boolean
+    adminId?: boolean
+    action?: boolean
+    targetUserId?: boolean
+    targetScope?: boolean
+    beforeValue?: boolean
+    afterValue?: boolean
+    reason?: boolean
+    success?: boolean
+    failureCode?: boolean
+    ipAddress?: boolean
+    userAgent?: boolean
+    createdAt?: boolean
+    admin?: boolean | AdminDefaultArgs<ExtArgs>
+    targetUser?: boolean | AdminAuditLog$targetUserArgs<ExtArgs>
+  }, ExtArgs["result"]["adminAuditLog"]>
+
+  export type AdminAuditLogSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    logId?: boolean
+    adminId?: boolean
+    action?: boolean
+    targetUserId?: boolean
+    targetScope?: boolean
+    beforeValue?: boolean
+    afterValue?: boolean
+    reason?: boolean
+    success?: boolean
+    failureCode?: boolean
+    ipAddress?: boolean
+    userAgent?: boolean
+    createdAt?: boolean
+    admin?: boolean | AdminDefaultArgs<ExtArgs>
+    targetUser?: boolean | AdminAuditLog$targetUserArgs<ExtArgs>
+  }, ExtArgs["result"]["adminAuditLog"]>
+
+  export type AdminAuditLogSelectScalar = {
+    logId?: boolean
+    adminId?: boolean
+    action?: boolean
+    targetUserId?: boolean
+    targetScope?: boolean
+    beforeValue?: boolean
+    afterValue?: boolean
+    reason?: boolean
+    success?: boolean
+    failureCode?: boolean
+    ipAddress?: boolean
+    userAgent?: boolean
+    createdAt?: boolean
+  }
+
+  export type AdminAuditLogOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"logId" | "adminId" | "action" | "targetUserId" | "targetScope" | "beforeValue" | "afterValue" | "reason" | "success" | "failureCode" | "ipAddress" | "userAgent" | "createdAt", ExtArgs["result"]["adminAuditLog"]>
+  export type AdminAuditLogInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    admin?: boolean | AdminDefaultArgs<ExtArgs>
+    targetUser?: boolean | AdminAuditLog$targetUserArgs<ExtArgs>
+  }
+  export type AdminAuditLogIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    admin?: boolean | AdminDefaultArgs<ExtArgs>
+    targetUser?: boolean | AdminAuditLog$targetUserArgs<ExtArgs>
+  }
+  export type AdminAuditLogIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    admin?: boolean | AdminDefaultArgs<ExtArgs>
+    targetUser?: boolean | AdminAuditLog$targetUserArgs<ExtArgs>
+  }
+
+  export type $AdminAuditLogPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "AdminAuditLog"
+    objects: {
+      admin: Prisma.$AdminPayload<ExtArgs>
+      targetUser: Prisma.$UserPayload<ExtArgs> | null
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      logId: string
+      adminId: string
+      action: $Enums.AdminAuditAction
+      targetUserId: string | null
+      targetScope: string | null
+      beforeValue: Prisma.JsonValue | null
+      afterValue: Prisma.JsonValue | null
+      reason: string | null
+      success: boolean
+      failureCode: string | null
+      ipAddress: string | null
+      userAgent: string | null
+      createdAt: Date
+    }, ExtArgs["result"]["adminAuditLog"]>
+    composites: {}
+  }
+
+  type AdminAuditLogGetPayload<S extends boolean | null | undefined | AdminAuditLogDefaultArgs> = $Result.GetResult<Prisma.$AdminAuditLogPayload, S>
+
+  type AdminAuditLogCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<AdminAuditLogFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: AdminAuditLogCountAggregateInputType | true
+    }
+
+  export interface AdminAuditLogDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['AdminAuditLog'], meta: { name: 'AdminAuditLog' } }
+    /**
+     * Find zero or one AdminAuditLog that matches the filter.
+     * @param {AdminAuditLogFindUniqueArgs} args - Arguments to find a AdminAuditLog
+     * @example
+     * // Get one AdminAuditLog
+     * const adminAuditLog = await prisma.adminAuditLog.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends AdminAuditLogFindUniqueArgs>(args: SelectSubset<T, AdminAuditLogFindUniqueArgs<ExtArgs>>): Prisma__AdminAuditLogClient<$Result.GetResult<Prisma.$AdminAuditLogPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one AdminAuditLog that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {AdminAuditLogFindUniqueOrThrowArgs} args - Arguments to find a AdminAuditLog
+     * @example
+     * // Get one AdminAuditLog
+     * const adminAuditLog = await prisma.adminAuditLog.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends AdminAuditLogFindUniqueOrThrowArgs>(args: SelectSubset<T, AdminAuditLogFindUniqueOrThrowArgs<ExtArgs>>): Prisma__AdminAuditLogClient<$Result.GetResult<Prisma.$AdminAuditLogPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first AdminAuditLog that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AdminAuditLogFindFirstArgs} args - Arguments to find a AdminAuditLog
+     * @example
+     * // Get one AdminAuditLog
+     * const adminAuditLog = await prisma.adminAuditLog.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends AdminAuditLogFindFirstArgs>(args?: SelectSubset<T, AdminAuditLogFindFirstArgs<ExtArgs>>): Prisma__AdminAuditLogClient<$Result.GetResult<Prisma.$AdminAuditLogPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first AdminAuditLog that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AdminAuditLogFindFirstOrThrowArgs} args - Arguments to find a AdminAuditLog
+     * @example
+     * // Get one AdminAuditLog
+     * const adminAuditLog = await prisma.adminAuditLog.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends AdminAuditLogFindFirstOrThrowArgs>(args?: SelectSubset<T, AdminAuditLogFindFirstOrThrowArgs<ExtArgs>>): Prisma__AdminAuditLogClient<$Result.GetResult<Prisma.$AdminAuditLogPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more AdminAuditLogs that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AdminAuditLogFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all AdminAuditLogs
+     * const adminAuditLogs = await prisma.adminAuditLog.findMany()
+     * 
+     * // Get first 10 AdminAuditLogs
+     * const adminAuditLogs = await prisma.adminAuditLog.findMany({ take: 10 })
+     * 
+     * // Only select the `logId`
+     * const adminAuditLogWithLogIdOnly = await prisma.adminAuditLog.findMany({ select: { logId: true } })
+     * 
+     */
+    findMany<T extends AdminAuditLogFindManyArgs>(args?: SelectSubset<T, AdminAuditLogFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AdminAuditLogPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a AdminAuditLog.
+     * @param {AdminAuditLogCreateArgs} args - Arguments to create a AdminAuditLog.
+     * @example
+     * // Create one AdminAuditLog
+     * const AdminAuditLog = await prisma.adminAuditLog.create({
+     *   data: {
+     *     // ... data to create a AdminAuditLog
+     *   }
+     * })
+     * 
+     */
+    create<T extends AdminAuditLogCreateArgs>(args: SelectSubset<T, AdminAuditLogCreateArgs<ExtArgs>>): Prisma__AdminAuditLogClient<$Result.GetResult<Prisma.$AdminAuditLogPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many AdminAuditLogs.
+     * @param {AdminAuditLogCreateManyArgs} args - Arguments to create many AdminAuditLogs.
+     * @example
+     * // Create many AdminAuditLogs
+     * const adminAuditLog = await prisma.adminAuditLog.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends AdminAuditLogCreateManyArgs>(args?: SelectSubset<T, AdminAuditLogCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many AdminAuditLogs and returns the data saved in the database.
+     * @param {AdminAuditLogCreateManyAndReturnArgs} args - Arguments to create many AdminAuditLogs.
+     * @example
+     * // Create many AdminAuditLogs
+     * const adminAuditLog = await prisma.adminAuditLog.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many AdminAuditLogs and only return the `logId`
+     * const adminAuditLogWithLogIdOnly = await prisma.adminAuditLog.createManyAndReturn({
+     *   select: { logId: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends AdminAuditLogCreateManyAndReturnArgs>(args?: SelectSubset<T, AdminAuditLogCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AdminAuditLogPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a AdminAuditLog.
+     * @param {AdminAuditLogDeleteArgs} args - Arguments to delete one AdminAuditLog.
+     * @example
+     * // Delete one AdminAuditLog
+     * const AdminAuditLog = await prisma.adminAuditLog.delete({
+     *   where: {
+     *     // ... filter to delete one AdminAuditLog
+     *   }
+     * })
+     * 
+     */
+    delete<T extends AdminAuditLogDeleteArgs>(args: SelectSubset<T, AdminAuditLogDeleteArgs<ExtArgs>>): Prisma__AdminAuditLogClient<$Result.GetResult<Prisma.$AdminAuditLogPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one AdminAuditLog.
+     * @param {AdminAuditLogUpdateArgs} args - Arguments to update one AdminAuditLog.
+     * @example
+     * // Update one AdminAuditLog
+     * const adminAuditLog = await prisma.adminAuditLog.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends AdminAuditLogUpdateArgs>(args: SelectSubset<T, AdminAuditLogUpdateArgs<ExtArgs>>): Prisma__AdminAuditLogClient<$Result.GetResult<Prisma.$AdminAuditLogPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more AdminAuditLogs.
+     * @param {AdminAuditLogDeleteManyArgs} args - Arguments to filter AdminAuditLogs to delete.
+     * @example
+     * // Delete a few AdminAuditLogs
+     * const { count } = await prisma.adminAuditLog.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends AdminAuditLogDeleteManyArgs>(args?: SelectSubset<T, AdminAuditLogDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more AdminAuditLogs.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AdminAuditLogUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many AdminAuditLogs
+     * const adminAuditLog = await prisma.adminAuditLog.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends AdminAuditLogUpdateManyArgs>(args: SelectSubset<T, AdminAuditLogUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more AdminAuditLogs and returns the data updated in the database.
+     * @param {AdminAuditLogUpdateManyAndReturnArgs} args - Arguments to update many AdminAuditLogs.
+     * @example
+     * // Update many AdminAuditLogs
+     * const adminAuditLog = await prisma.adminAuditLog.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more AdminAuditLogs and only return the `logId`
+     * const adminAuditLogWithLogIdOnly = await prisma.adminAuditLog.updateManyAndReturn({
+     *   select: { logId: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends AdminAuditLogUpdateManyAndReturnArgs>(args: SelectSubset<T, AdminAuditLogUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AdminAuditLogPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one AdminAuditLog.
+     * @param {AdminAuditLogUpsertArgs} args - Arguments to update or create a AdminAuditLog.
+     * @example
+     * // Update or create a AdminAuditLog
+     * const adminAuditLog = await prisma.adminAuditLog.upsert({
+     *   create: {
+     *     // ... data to create a AdminAuditLog
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the AdminAuditLog we want to update
+     *   }
+     * })
+     */
+    upsert<T extends AdminAuditLogUpsertArgs>(args: SelectSubset<T, AdminAuditLogUpsertArgs<ExtArgs>>): Prisma__AdminAuditLogClient<$Result.GetResult<Prisma.$AdminAuditLogPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of AdminAuditLogs.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AdminAuditLogCountArgs} args - Arguments to filter AdminAuditLogs to count.
+     * @example
+     * // Count the number of AdminAuditLogs
+     * const count = await prisma.adminAuditLog.count({
+     *   where: {
+     *     // ... the filter for the AdminAuditLogs we want to count
+     *   }
+     * })
+    **/
+    count<T extends AdminAuditLogCountArgs>(
+      args?: Subset<T, AdminAuditLogCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], AdminAuditLogCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a AdminAuditLog.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AdminAuditLogAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends AdminAuditLogAggregateArgs>(args: Subset<T, AdminAuditLogAggregateArgs>): Prisma.PrismaPromise<GetAdminAuditLogAggregateType<T>>
+
+    /**
+     * Group by AdminAuditLog.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AdminAuditLogGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends AdminAuditLogGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: AdminAuditLogGroupByArgs['orderBy'] }
+        : { orderBy?: AdminAuditLogGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, AdminAuditLogGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetAdminAuditLogGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the AdminAuditLog model
+   */
+  readonly fields: AdminAuditLogFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for AdminAuditLog.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__AdminAuditLogClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    admin<T extends AdminDefaultArgs<ExtArgs> = {}>(args?: Subset<T, AdminDefaultArgs<ExtArgs>>): Prisma__AdminClient<$Result.GetResult<Prisma.$AdminPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    targetUser<T extends AdminAuditLog$targetUserArgs<ExtArgs> = {}>(args?: Subset<T, AdminAuditLog$targetUserArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the AdminAuditLog model
+   */
+  interface AdminAuditLogFieldRefs {
+    readonly logId: FieldRef<"AdminAuditLog", 'String'>
+    readonly adminId: FieldRef<"AdminAuditLog", 'String'>
+    readonly action: FieldRef<"AdminAuditLog", 'AdminAuditAction'>
+    readonly targetUserId: FieldRef<"AdminAuditLog", 'String'>
+    readonly targetScope: FieldRef<"AdminAuditLog", 'String'>
+    readonly beforeValue: FieldRef<"AdminAuditLog", 'Json'>
+    readonly afterValue: FieldRef<"AdminAuditLog", 'Json'>
+    readonly reason: FieldRef<"AdminAuditLog", 'String'>
+    readonly success: FieldRef<"AdminAuditLog", 'Boolean'>
+    readonly failureCode: FieldRef<"AdminAuditLog", 'String'>
+    readonly ipAddress: FieldRef<"AdminAuditLog", 'String'>
+    readonly userAgent: FieldRef<"AdminAuditLog", 'String'>
+    readonly createdAt: FieldRef<"AdminAuditLog", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * AdminAuditLog findUnique
+   */
+  export type AdminAuditLogFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AdminAuditLog
+     */
+    select?: AdminAuditLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AdminAuditLog
+     */
+    omit?: AdminAuditLogOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AdminAuditLogInclude<ExtArgs> | null
+    /**
+     * Filter, which AdminAuditLog to fetch.
+     */
+    where: AdminAuditLogWhereUniqueInput
+  }
+
+  /**
+   * AdminAuditLog findUniqueOrThrow
+   */
+  export type AdminAuditLogFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AdminAuditLog
+     */
+    select?: AdminAuditLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AdminAuditLog
+     */
+    omit?: AdminAuditLogOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AdminAuditLogInclude<ExtArgs> | null
+    /**
+     * Filter, which AdminAuditLog to fetch.
+     */
+    where: AdminAuditLogWhereUniqueInput
+  }
+
+  /**
+   * AdminAuditLog findFirst
+   */
+  export type AdminAuditLogFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AdminAuditLog
+     */
+    select?: AdminAuditLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AdminAuditLog
+     */
+    omit?: AdminAuditLogOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AdminAuditLogInclude<ExtArgs> | null
+    /**
+     * Filter, which AdminAuditLog to fetch.
+     */
+    where?: AdminAuditLogWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of AdminAuditLogs to fetch.
+     */
+    orderBy?: AdminAuditLogOrderByWithRelationInput | AdminAuditLogOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for AdminAuditLogs.
+     */
+    cursor?: AdminAuditLogWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` AdminAuditLogs from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` AdminAuditLogs.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of AdminAuditLogs.
+     */
+    distinct?: AdminAuditLogScalarFieldEnum | AdminAuditLogScalarFieldEnum[]
+  }
+
+  /**
+   * AdminAuditLog findFirstOrThrow
+   */
+  export type AdminAuditLogFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AdminAuditLog
+     */
+    select?: AdminAuditLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AdminAuditLog
+     */
+    omit?: AdminAuditLogOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AdminAuditLogInclude<ExtArgs> | null
+    /**
+     * Filter, which AdminAuditLog to fetch.
+     */
+    where?: AdminAuditLogWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of AdminAuditLogs to fetch.
+     */
+    orderBy?: AdminAuditLogOrderByWithRelationInput | AdminAuditLogOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for AdminAuditLogs.
+     */
+    cursor?: AdminAuditLogWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` AdminAuditLogs from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` AdminAuditLogs.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of AdminAuditLogs.
+     */
+    distinct?: AdminAuditLogScalarFieldEnum | AdminAuditLogScalarFieldEnum[]
+  }
+
+  /**
+   * AdminAuditLog findMany
+   */
+  export type AdminAuditLogFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AdminAuditLog
+     */
+    select?: AdminAuditLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AdminAuditLog
+     */
+    omit?: AdminAuditLogOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AdminAuditLogInclude<ExtArgs> | null
+    /**
+     * Filter, which AdminAuditLogs to fetch.
+     */
+    where?: AdminAuditLogWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of AdminAuditLogs to fetch.
+     */
+    orderBy?: AdminAuditLogOrderByWithRelationInput | AdminAuditLogOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing AdminAuditLogs.
+     */
+    cursor?: AdminAuditLogWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` AdminAuditLogs from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` AdminAuditLogs.
+     */
+    skip?: number
+    distinct?: AdminAuditLogScalarFieldEnum | AdminAuditLogScalarFieldEnum[]
+  }
+
+  /**
+   * AdminAuditLog create
+   */
+  export type AdminAuditLogCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AdminAuditLog
+     */
+    select?: AdminAuditLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AdminAuditLog
+     */
+    omit?: AdminAuditLogOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AdminAuditLogInclude<ExtArgs> | null
+    /**
+     * The data needed to create a AdminAuditLog.
+     */
+    data: XOR<AdminAuditLogCreateInput, AdminAuditLogUncheckedCreateInput>
+  }
+
+  /**
+   * AdminAuditLog createMany
+   */
+  export type AdminAuditLogCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many AdminAuditLogs.
+     */
+    data: AdminAuditLogCreateManyInput | AdminAuditLogCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * AdminAuditLog createManyAndReturn
+   */
+  export type AdminAuditLogCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AdminAuditLog
+     */
+    select?: AdminAuditLogSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the AdminAuditLog
+     */
+    omit?: AdminAuditLogOmit<ExtArgs> | null
+    /**
+     * The data used to create many AdminAuditLogs.
+     */
+    data: AdminAuditLogCreateManyInput | AdminAuditLogCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AdminAuditLogIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * AdminAuditLog update
+   */
+  export type AdminAuditLogUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AdminAuditLog
+     */
+    select?: AdminAuditLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AdminAuditLog
+     */
+    omit?: AdminAuditLogOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AdminAuditLogInclude<ExtArgs> | null
+    /**
+     * The data needed to update a AdminAuditLog.
+     */
+    data: XOR<AdminAuditLogUpdateInput, AdminAuditLogUncheckedUpdateInput>
+    /**
+     * Choose, which AdminAuditLog to update.
+     */
+    where: AdminAuditLogWhereUniqueInput
+  }
+
+  /**
+   * AdminAuditLog updateMany
+   */
+  export type AdminAuditLogUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update AdminAuditLogs.
+     */
+    data: XOR<AdminAuditLogUpdateManyMutationInput, AdminAuditLogUncheckedUpdateManyInput>
+    /**
+     * Filter which AdminAuditLogs to update
+     */
+    where?: AdminAuditLogWhereInput
+    /**
+     * Limit how many AdminAuditLogs to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * AdminAuditLog updateManyAndReturn
+   */
+  export type AdminAuditLogUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AdminAuditLog
+     */
+    select?: AdminAuditLogSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the AdminAuditLog
+     */
+    omit?: AdminAuditLogOmit<ExtArgs> | null
+    /**
+     * The data used to update AdminAuditLogs.
+     */
+    data: XOR<AdminAuditLogUpdateManyMutationInput, AdminAuditLogUncheckedUpdateManyInput>
+    /**
+     * Filter which AdminAuditLogs to update
+     */
+    where?: AdminAuditLogWhereInput
+    /**
+     * Limit how many AdminAuditLogs to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AdminAuditLogIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * AdminAuditLog upsert
+   */
+  export type AdminAuditLogUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AdminAuditLog
+     */
+    select?: AdminAuditLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AdminAuditLog
+     */
+    omit?: AdminAuditLogOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AdminAuditLogInclude<ExtArgs> | null
+    /**
+     * The filter to search for the AdminAuditLog to update in case it exists.
+     */
+    where: AdminAuditLogWhereUniqueInput
+    /**
+     * In case the AdminAuditLog found by the `where` argument doesn't exist, create a new AdminAuditLog with this data.
+     */
+    create: XOR<AdminAuditLogCreateInput, AdminAuditLogUncheckedCreateInput>
+    /**
+     * In case the AdminAuditLog was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<AdminAuditLogUpdateInput, AdminAuditLogUncheckedUpdateInput>
+  }
+
+  /**
+   * AdminAuditLog delete
+   */
+  export type AdminAuditLogDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AdminAuditLog
+     */
+    select?: AdminAuditLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AdminAuditLog
+     */
+    omit?: AdminAuditLogOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AdminAuditLogInclude<ExtArgs> | null
+    /**
+     * Filter which AdminAuditLog to delete.
+     */
+    where: AdminAuditLogWhereUniqueInput
+  }
+
+  /**
+   * AdminAuditLog deleteMany
+   */
+  export type AdminAuditLogDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which AdminAuditLogs to delete
+     */
+    where?: AdminAuditLogWhereInput
+    /**
+     * Limit how many AdminAuditLogs to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * AdminAuditLog.targetUser
+   */
+  export type AdminAuditLog$targetUserArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the User
+     */
+    select?: UserSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the User
+     */
+    omit?: UserOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserInclude<ExtArgs> | null
+    where?: UserWhereInput
+  }
+
+  /**
+   * AdminAuditLog without action
+   */
+  export type AdminAuditLogDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AdminAuditLog
+     */
+    select?: AdminAuditLogSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AdminAuditLog
+     */
+    omit?: AdminAuditLogOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AdminAuditLogInclude<ExtArgs> | null
+  }
+
+
+  /**
    * Enums
    */
 
@@ -39088,6 +44253,7 @@ export namespace Prisma {
     marketingConsent: 'marketingConsent',
     isTempPassword: 'isTempPassword',
     planType: 'planType',
+    status: 'status',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt',
     deletedAt: 'deletedAt'
@@ -39550,6 +44716,71 @@ export namespace Prisma {
   export type PaymentScalarFieldEnum = (typeof PaymentScalarFieldEnum)[keyof typeof PaymentScalarFieldEnum]
 
 
+  export const AdminScalarFieldEnum: {
+    adminId: 'adminId',
+    loginId: 'loginId',
+    password: 'password',
+    name: 'name',
+    role: 'role',
+    isActive: 'isActive',
+    lastLoginAt: 'lastLoginAt',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt',
+    deletedAt: 'deletedAt'
+  };
+
+  export type AdminScalarFieldEnum = (typeof AdminScalarFieldEnum)[keyof typeof AdminScalarFieldEnum]
+
+
+  export const UserLoginHistoryScalarFieldEnum: {
+    historyId: 'historyId',
+    userId: 'userId',
+    provider: 'provider',
+    ipAddress: 'ipAddress',
+    userAgent: 'userAgent',
+    deviceType: 'deviceType',
+    osName: 'osName',
+    loggedInAt: 'loggedInAt'
+  };
+
+  export type UserLoginHistoryScalarFieldEnum = (typeof UserLoginHistoryScalarFieldEnum)[keyof typeof UserLoginHistoryScalarFieldEnum]
+
+
+  export const UserPlanHistoryScalarFieldEnum: {
+    historyId: 'historyId',
+    userId: 'userId',
+    fromPlan: 'fromPlan',
+    toPlan: 'toPlan',
+    reason: 'reason',
+    changedBy: 'changedBy',
+    note: 'note',
+    effectiveAt: 'effectiveAt',
+    expiresAt: 'expiresAt',
+    createdAt: 'createdAt'
+  };
+
+  export type UserPlanHistoryScalarFieldEnum = (typeof UserPlanHistoryScalarFieldEnum)[keyof typeof UserPlanHistoryScalarFieldEnum]
+
+
+  export const AdminAuditLogScalarFieldEnum: {
+    logId: 'logId',
+    adminId: 'adminId',
+    action: 'action',
+    targetUserId: 'targetUserId',
+    targetScope: 'targetScope',
+    beforeValue: 'beforeValue',
+    afterValue: 'afterValue',
+    reason: 'reason',
+    success: 'success',
+    failureCode: 'failureCode',
+    ipAddress: 'ipAddress',
+    userAgent: 'userAgent',
+    createdAt: 'createdAt'
+  };
+
+  export type AdminAuditLogScalarFieldEnum = (typeof AdminAuditLogScalarFieldEnum)[keyof typeof AdminAuditLogScalarFieldEnum]
+
+
   export const SortOrder: {
     asc: 'asc',
     desc: 'desc'
@@ -39677,6 +44908,20 @@ export namespace Prisma {
    * Reference to a field of type 'PlanType[]'
    */
   export type ListEnumPlanTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'PlanType[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'UserStatus'
+   */
+  export type EnumUserStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'UserStatus'>
+    
+
+
+  /**
+   * Reference to a field of type 'UserStatus[]'
+   */
+  export type ListEnumUserStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'UserStatus[]'>
     
 
 
@@ -39817,6 +45062,34 @@ export namespace Prisma {
    * Reference to a field of type 'PaymentStatus[]'
    */
   export type ListEnumPaymentStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'PaymentStatus[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'AdminRole'
+   */
+  export type EnumAdminRoleFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'AdminRole'>
+    
+
+
+  /**
+   * Reference to a field of type 'AdminRole[]'
+   */
+  export type ListEnumAdminRoleFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'AdminRole[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'AdminAuditAction'
+   */
+  export type EnumAdminAuditActionFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'AdminAuditAction'>
+    
+
+
+  /**
+   * Reference to a field of type 'AdminAuditAction[]'
+   */
+  export type ListEnumAdminAuditActionFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'AdminAuditAction[]'>
     
 
 
@@ -40068,6 +45341,7 @@ export namespace Prisma {
     marketingConsent?: BoolFilter<"User"> | boolean
     isTempPassword?: BoolFilter<"User"> | boolean
     planType?: EnumPlanTypeFilter<"User"> | $Enums.PlanType
+    status?: EnumUserStatusFilter<"User"> | $Enums.UserStatus
     createdAt?: DateTimeFilter<"User"> | Date | string
     updatedAt?: DateTimeFilter<"User"> | Date | string
     deletedAt?: DateTimeNullableFilter<"User"> | Date | string | null
@@ -40079,6 +45353,9 @@ export namespace Prisma {
     subscription?: XOR<UserSubscriptionNullableScalarRelationFilter, UserSubscriptionWhereInput> | null
     paymentCards?: PaymentCardListRelationFilter
     payments?: PaymentListRelationFilter
+    loginHistories?: UserLoginHistoryListRelationFilter
+    planHistories?: UserPlanHistoryListRelationFilter
+    auditLogs?: AdminAuditLogListRelationFilter
   }
 
   export type UserOrderByWithRelationInput = {
@@ -40093,6 +45370,7 @@ export namespace Prisma {
     marketingConsent?: SortOrder
     isTempPassword?: SortOrder
     planType?: SortOrder
+    status?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     deletedAt?: SortOrderInput | SortOrder
@@ -40104,6 +45382,9 @@ export namespace Prisma {
     subscription?: UserSubscriptionOrderByWithRelationInput
     paymentCards?: PaymentCardOrderByRelationAggregateInput
     payments?: PaymentOrderByRelationAggregateInput
+    loginHistories?: UserLoginHistoryOrderByRelationAggregateInput
+    planHistories?: UserPlanHistoryOrderByRelationAggregateInput
+    auditLogs?: AdminAuditLogOrderByRelationAggregateInput
   }
 
   export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -40124,6 +45405,7 @@ export namespace Prisma {
     marketingConsent?: BoolFilter<"User"> | boolean
     isTempPassword?: BoolFilter<"User"> | boolean
     planType?: EnumPlanTypeFilter<"User"> | $Enums.PlanType
+    status?: EnumUserStatusFilter<"User"> | $Enums.UserStatus
     createdAt?: DateTimeFilter<"User"> | Date | string
     updatedAt?: DateTimeFilter<"User"> | Date | string
     deletedAt?: DateTimeNullableFilter<"User"> | Date | string | null
@@ -40135,6 +45417,9 @@ export namespace Prisma {
     subscription?: XOR<UserSubscriptionNullableScalarRelationFilter, UserSubscriptionWhereInput> | null
     paymentCards?: PaymentCardListRelationFilter
     payments?: PaymentListRelationFilter
+    loginHistories?: UserLoginHistoryListRelationFilter
+    planHistories?: UserPlanHistoryListRelationFilter
+    auditLogs?: AdminAuditLogListRelationFilter
   }, "userId" | "username_deletedAt" | "email_deletedAt" | "provider_socialId_deletedAt">
 
   export type UserOrderByWithAggregationInput = {
@@ -40149,6 +45434,7 @@ export namespace Prisma {
     marketingConsent?: SortOrder
     isTempPassword?: SortOrder
     planType?: SortOrder
+    status?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     deletedAt?: SortOrderInput | SortOrder
@@ -40172,6 +45458,7 @@ export namespace Prisma {
     marketingConsent?: BoolWithAggregatesFilter<"User"> | boolean
     isTempPassword?: BoolWithAggregatesFilter<"User"> | boolean
     planType?: EnumPlanTypeWithAggregatesFilter<"User"> | $Enums.PlanType
+    status?: EnumUserStatusWithAggregatesFilter<"User"> | $Enums.UserStatus
     createdAt?: DateTimeWithAggregatesFilter<"User"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"User"> | Date | string
     deletedAt?: DateTimeNullableWithAggregatesFilter<"User"> | Date | string | null
@@ -42496,6 +47783,341 @@ export namespace Prisma {
     updatedAt?: DateTimeWithAggregatesFilter<"Payment"> | Date | string
   }
 
+  export type AdminWhereInput = {
+    AND?: AdminWhereInput | AdminWhereInput[]
+    OR?: AdminWhereInput[]
+    NOT?: AdminWhereInput | AdminWhereInput[]
+    adminId?: UuidFilter<"Admin"> | string
+    loginId?: StringFilter<"Admin"> | string
+    password?: StringFilter<"Admin"> | string
+    name?: StringFilter<"Admin"> | string
+    role?: EnumAdminRoleFilter<"Admin"> | $Enums.AdminRole
+    isActive?: BoolFilter<"Admin"> | boolean
+    lastLoginAt?: DateTimeNullableFilter<"Admin"> | Date | string | null
+    createdAt?: DateTimeFilter<"Admin"> | Date | string
+    updatedAt?: DateTimeFilter<"Admin"> | Date | string
+    deletedAt?: DateTimeNullableFilter<"Admin"> | Date | string | null
+    auditLogs?: AdminAuditLogListRelationFilter
+    planHistories?: UserPlanHistoryListRelationFilter
+  }
+
+  export type AdminOrderByWithRelationInput = {
+    adminId?: SortOrder
+    loginId?: SortOrder
+    password?: SortOrder
+    name?: SortOrder
+    role?: SortOrder
+    isActive?: SortOrder
+    lastLoginAt?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    deletedAt?: SortOrderInput | SortOrder
+    auditLogs?: AdminAuditLogOrderByRelationAggregateInput
+    planHistories?: UserPlanHistoryOrderByRelationAggregateInput
+  }
+
+  export type AdminWhereUniqueInput = Prisma.AtLeast<{
+    adminId?: string
+    loginId_deletedAt?: AdminLoginIdDeletedAtCompoundUniqueInput
+    AND?: AdminWhereInput | AdminWhereInput[]
+    OR?: AdminWhereInput[]
+    NOT?: AdminWhereInput | AdminWhereInput[]
+    loginId?: StringFilter<"Admin"> | string
+    password?: StringFilter<"Admin"> | string
+    name?: StringFilter<"Admin"> | string
+    role?: EnumAdminRoleFilter<"Admin"> | $Enums.AdminRole
+    isActive?: BoolFilter<"Admin"> | boolean
+    lastLoginAt?: DateTimeNullableFilter<"Admin"> | Date | string | null
+    createdAt?: DateTimeFilter<"Admin"> | Date | string
+    updatedAt?: DateTimeFilter<"Admin"> | Date | string
+    deletedAt?: DateTimeNullableFilter<"Admin"> | Date | string | null
+    auditLogs?: AdminAuditLogListRelationFilter
+    planHistories?: UserPlanHistoryListRelationFilter
+  }, "adminId" | "loginId_deletedAt">
+
+  export type AdminOrderByWithAggregationInput = {
+    adminId?: SortOrder
+    loginId?: SortOrder
+    password?: SortOrder
+    name?: SortOrder
+    role?: SortOrder
+    isActive?: SortOrder
+    lastLoginAt?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    deletedAt?: SortOrderInput | SortOrder
+    _count?: AdminCountOrderByAggregateInput
+    _max?: AdminMaxOrderByAggregateInput
+    _min?: AdminMinOrderByAggregateInput
+  }
+
+  export type AdminScalarWhereWithAggregatesInput = {
+    AND?: AdminScalarWhereWithAggregatesInput | AdminScalarWhereWithAggregatesInput[]
+    OR?: AdminScalarWhereWithAggregatesInput[]
+    NOT?: AdminScalarWhereWithAggregatesInput | AdminScalarWhereWithAggregatesInput[]
+    adminId?: UuidWithAggregatesFilter<"Admin"> | string
+    loginId?: StringWithAggregatesFilter<"Admin"> | string
+    password?: StringWithAggregatesFilter<"Admin"> | string
+    name?: StringWithAggregatesFilter<"Admin"> | string
+    role?: EnumAdminRoleWithAggregatesFilter<"Admin"> | $Enums.AdminRole
+    isActive?: BoolWithAggregatesFilter<"Admin"> | boolean
+    lastLoginAt?: DateTimeNullableWithAggregatesFilter<"Admin"> | Date | string | null
+    createdAt?: DateTimeWithAggregatesFilter<"Admin"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"Admin"> | Date | string
+    deletedAt?: DateTimeNullableWithAggregatesFilter<"Admin"> | Date | string | null
+  }
+
+  export type UserLoginHistoryWhereInput = {
+    AND?: UserLoginHistoryWhereInput | UserLoginHistoryWhereInput[]
+    OR?: UserLoginHistoryWhereInput[]
+    NOT?: UserLoginHistoryWhereInput | UserLoginHistoryWhereInput[]
+    historyId?: UuidFilter<"UserLoginHistory"> | string
+    userId?: UuidFilter<"UserLoginHistory"> | string
+    provider?: EnumAuthProviderFilter<"UserLoginHistory"> | $Enums.AuthProvider
+    ipAddress?: StringNullableFilter<"UserLoginHistory"> | string | null
+    userAgent?: StringNullableFilter<"UserLoginHistory"> | string | null
+    deviceType?: StringNullableFilter<"UserLoginHistory"> | string | null
+    osName?: StringNullableFilter<"UserLoginHistory"> | string | null
+    loggedInAt?: DateTimeFilter<"UserLoginHistory"> | Date | string
+    user?: XOR<UserScalarRelationFilter, UserWhereInput>
+  }
+
+  export type UserLoginHistoryOrderByWithRelationInput = {
+    historyId?: SortOrder
+    userId?: SortOrder
+    provider?: SortOrder
+    ipAddress?: SortOrderInput | SortOrder
+    userAgent?: SortOrderInput | SortOrder
+    deviceType?: SortOrderInput | SortOrder
+    osName?: SortOrderInput | SortOrder
+    loggedInAt?: SortOrder
+    user?: UserOrderByWithRelationInput
+  }
+
+  export type UserLoginHistoryWhereUniqueInput = Prisma.AtLeast<{
+    historyId?: string
+    AND?: UserLoginHistoryWhereInput | UserLoginHistoryWhereInput[]
+    OR?: UserLoginHistoryWhereInput[]
+    NOT?: UserLoginHistoryWhereInput | UserLoginHistoryWhereInput[]
+    userId?: UuidFilter<"UserLoginHistory"> | string
+    provider?: EnumAuthProviderFilter<"UserLoginHistory"> | $Enums.AuthProvider
+    ipAddress?: StringNullableFilter<"UserLoginHistory"> | string | null
+    userAgent?: StringNullableFilter<"UserLoginHistory"> | string | null
+    deviceType?: StringNullableFilter<"UserLoginHistory"> | string | null
+    osName?: StringNullableFilter<"UserLoginHistory"> | string | null
+    loggedInAt?: DateTimeFilter<"UserLoginHistory"> | Date | string
+    user?: XOR<UserScalarRelationFilter, UserWhereInput>
+  }, "historyId">
+
+  export type UserLoginHistoryOrderByWithAggregationInput = {
+    historyId?: SortOrder
+    userId?: SortOrder
+    provider?: SortOrder
+    ipAddress?: SortOrderInput | SortOrder
+    userAgent?: SortOrderInput | SortOrder
+    deviceType?: SortOrderInput | SortOrder
+    osName?: SortOrderInput | SortOrder
+    loggedInAt?: SortOrder
+    _count?: UserLoginHistoryCountOrderByAggregateInput
+    _max?: UserLoginHistoryMaxOrderByAggregateInput
+    _min?: UserLoginHistoryMinOrderByAggregateInput
+  }
+
+  export type UserLoginHistoryScalarWhereWithAggregatesInput = {
+    AND?: UserLoginHistoryScalarWhereWithAggregatesInput | UserLoginHistoryScalarWhereWithAggregatesInput[]
+    OR?: UserLoginHistoryScalarWhereWithAggregatesInput[]
+    NOT?: UserLoginHistoryScalarWhereWithAggregatesInput | UserLoginHistoryScalarWhereWithAggregatesInput[]
+    historyId?: UuidWithAggregatesFilter<"UserLoginHistory"> | string
+    userId?: UuidWithAggregatesFilter<"UserLoginHistory"> | string
+    provider?: EnumAuthProviderWithAggregatesFilter<"UserLoginHistory"> | $Enums.AuthProvider
+    ipAddress?: StringNullableWithAggregatesFilter<"UserLoginHistory"> | string | null
+    userAgent?: StringNullableWithAggregatesFilter<"UserLoginHistory"> | string | null
+    deviceType?: StringNullableWithAggregatesFilter<"UserLoginHistory"> | string | null
+    osName?: StringNullableWithAggregatesFilter<"UserLoginHistory"> | string | null
+    loggedInAt?: DateTimeWithAggregatesFilter<"UserLoginHistory"> | Date | string
+  }
+
+  export type UserPlanHistoryWhereInput = {
+    AND?: UserPlanHistoryWhereInput | UserPlanHistoryWhereInput[]
+    OR?: UserPlanHistoryWhereInput[]
+    NOT?: UserPlanHistoryWhereInput | UserPlanHistoryWhereInput[]
+    historyId?: UuidFilter<"UserPlanHistory"> | string
+    userId?: UuidFilter<"UserPlanHistory"> | string
+    fromPlan?: EnumPlanTypeNullableFilter<"UserPlanHistory"> | $Enums.PlanType | null
+    toPlan?: EnumPlanTypeFilter<"UserPlanHistory"> | $Enums.PlanType
+    reason?: StringNullableFilter<"UserPlanHistory"> | string | null
+    changedBy?: UuidNullableFilter<"UserPlanHistory"> | string | null
+    note?: StringNullableFilter<"UserPlanHistory"> | string | null
+    effectiveAt?: DateTimeFilter<"UserPlanHistory"> | Date | string
+    expiresAt?: DateTimeNullableFilter<"UserPlanHistory"> | Date | string | null
+    createdAt?: DateTimeFilter<"UserPlanHistory"> | Date | string
+    user?: XOR<UserScalarRelationFilter, UserWhereInput>
+    admin?: XOR<AdminNullableScalarRelationFilter, AdminWhereInput> | null
+  }
+
+  export type UserPlanHistoryOrderByWithRelationInput = {
+    historyId?: SortOrder
+    userId?: SortOrder
+    fromPlan?: SortOrderInput | SortOrder
+    toPlan?: SortOrder
+    reason?: SortOrderInput | SortOrder
+    changedBy?: SortOrderInput | SortOrder
+    note?: SortOrderInput | SortOrder
+    effectiveAt?: SortOrder
+    expiresAt?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    user?: UserOrderByWithRelationInput
+    admin?: AdminOrderByWithRelationInput
+  }
+
+  export type UserPlanHistoryWhereUniqueInput = Prisma.AtLeast<{
+    historyId?: string
+    AND?: UserPlanHistoryWhereInput | UserPlanHistoryWhereInput[]
+    OR?: UserPlanHistoryWhereInput[]
+    NOT?: UserPlanHistoryWhereInput | UserPlanHistoryWhereInput[]
+    userId?: UuidFilter<"UserPlanHistory"> | string
+    fromPlan?: EnumPlanTypeNullableFilter<"UserPlanHistory"> | $Enums.PlanType | null
+    toPlan?: EnumPlanTypeFilter<"UserPlanHistory"> | $Enums.PlanType
+    reason?: StringNullableFilter<"UserPlanHistory"> | string | null
+    changedBy?: UuidNullableFilter<"UserPlanHistory"> | string | null
+    note?: StringNullableFilter<"UserPlanHistory"> | string | null
+    effectiveAt?: DateTimeFilter<"UserPlanHistory"> | Date | string
+    expiresAt?: DateTimeNullableFilter<"UserPlanHistory"> | Date | string | null
+    createdAt?: DateTimeFilter<"UserPlanHistory"> | Date | string
+    user?: XOR<UserScalarRelationFilter, UserWhereInput>
+    admin?: XOR<AdminNullableScalarRelationFilter, AdminWhereInput> | null
+  }, "historyId">
+
+  export type UserPlanHistoryOrderByWithAggregationInput = {
+    historyId?: SortOrder
+    userId?: SortOrder
+    fromPlan?: SortOrderInput | SortOrder
+    toPlan?: SortOrder
+    reason?: SortOrderInput | SortOrder
+    changedBy?: SortOrderInput | SortOrder
+    note?: SortOrderInput | SortOrder
+    effectiveAt?: SortOrder
+    expiresAt?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    _count?: UserPlanHistoryCountOrderByAggregateInput
+    _max?: UserPlanHistoryMaxOrderByAggregateInput
+    _min?: UserPlanHistoryMinOrderByAggregateInput
+  }
+
+  export type UserPlanHistoryScalarWhereWithAggregatesInput = {
+    AND?: UserPlanHistoryScalarWhereWithAggregatesInput | UserPlanHistoryScalarWhereWithAggregatesInput[]
+    OR?: UserPlanHistoryScalarWhereWithAggregatesInput[]
+    NOT?: UserPlanHistoryScalarWhereWithAggregatesInput | UserPlanHistoryScalarWhereWithAggregatesInput[]
+    historyId?: UuidWithAggregatesFilter<"UserPlanHistory"> | string
+    userId?: UuidWithAggregatesFilter<"UserPlanHistory"> | string
+    fromPlan?: EnumPlanTypeNullableWithAggregatesFilter<"UserPlanHistory"> | $Enums.PlanType | null
+    toPlan?: EnumPlanTypeWithAggregatesFilter<"UserPlanHistory"> | $Enums.PlanType
+    reason?: StringNullableWithAggregatesFilter<"UserPlanHistory"> | string | null
+    changedBy?: UuidNullableWithAggregatesFilter<"UserPlanHistory"> | string | null
+    note?: StringNullableWithAggregatesFilter<"UserPlanHistory"> | string | null
+    effectiveAt?: DateTimeWithAggregatesFilter<"UserPlanHistory"> | Date | string
+    expiresAt?: DateTimeNullableWithAggregatesFilter<"UserPlanHistory"> | Date | string | null
+    createdAt?: DateTimeWithAggregatesFilter<"UserPlanHistory"> | Date | string
+  }
+
+  export type AdminAuditLogWhereInput = {
+    AND?: AdminAuditLogWhereInput | AdminAuditLogWhereInput[]
+    OR?: AdminAuditLogWhereInput[]
+    NOT?: AdminAuditLogWhereInput | AdminAuditLogWhereInput[]
+    logId?: UuidFilter<"AdminAuditLog"> | string
+    adminId?: UuidFilter<"AdminAuditLog"> | string
+    action?: EnumAdminAuditActionFilter<"AdminAuditLog"> | $Enums.AdminAuditAction
+    targetUserId?: UuidNullableFilter<"AdminAuditLog"> | string | null
+    targetScope?: StringNullableFilter<"AdminAuditLog"> | string | null
+    beforeValue?: JsonNullableFilter<"AdminAuditLog">
+    afterValue?: JsonNullableFilter<"AdminAuditLog">
+    reason?: StringNullableFilter<"AdminAuditLog"> | string | null
+    success?: BoolFilter<"AdminAuditLog"> | boolean
+    failureCode?: StringNullableFilter<"AdminAuditLog"> | string | null
+    ipAddress?: StringNullableFilter<"AdminAuditLog"> | string | null
+    userAgent?: StringNullableFilter<"AdminAuditLog"> | string | null
+    createdAt?: DateTimeFilter<"AdminAuditLog"> | Date | string
+    admin?: XOR<AdminScalarRelationFilter, AdminWhereInput>
+    targetUser?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
+  }
+
+  export type AdminAuditLogOrderByWithRelationInput = {
+    logId?: SortOrder
+    adminId?: SortOrder
+    action?: SortOrder
+    targetUserId?: SortOrderInput | SortOrder
+    targetScope?: SortOrderInput | SortOrder
+    beforeValue?: SortOrderInput | SortOrder
+    afterValue?: SortOrderInput | SortOrder
+    reason?: SortOrderInput | SortOrder
+    success?: SortOrder
+    failureCode?: SortOrderInput | SortOrder
+    ipAddress?: SortOrderInput | SortOrder
+    userAgent?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    admin?: AdminOrderByWithRelationInput
+    targetUser?: UserOrderByWithRelationInput
+  }
+
+  export type AdminAuditLogWhereUniqueInput = Prisma.AtLeast<{
+    logId?: string
+    AND?: AdminAuditLogWhereInput | AdminAuditLogWhereInput[]
+    OR?: AdminAuditLogWhereInput[]
+    NOT?: AdminAuditLogWhereInput | AdminAuditLogWhereInput[]
+    adminId?: UuidFilter<"AdminAuditLog"> | string
+    action?: EnumAdminAuditActionFilter<"AdminAuditLog"> | $Enums.AdminAuditAction
+    targetUserId?: UuidNullableFilter<"AdminAuditLog"> | string | null
+    targetScope?: StringNullableFilter<"AdminAuditLog"> | string | null
+    beforeValue?: JsonNullableFilter<"AdminAuditLog">
+    afterValue?: JsonNullableFilter<"AdminAuditLog">
+    reason?: StringNullableFilter<"AdminAuditLog"> | string | null
+    success?: BoolFilter<"AdminAuditLog"> | boolean
+    failureCode?: StringNullableFilter<"AdminAuditLog"> | string | null
+    ipAddress?: StringNullableFilter<"AdminAuditLog"> | string | null
+    userAgent?: StringNullableFilter<"AdminAuditLog"> | string | null
+    createdAt?: DateTimeFilter<"AdminAuditLog"> | Date | string
+    admin?: XOR<AdminScalarRelationFilter, AdminWhereInput>
+    targetUser?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
+  }, "logId">
+
+  export type AdminAuditLogOrderByWithAggregationInput = {
+    logId?: SortOrder
+    adminId?: SortOrder
+    action?: SortOrder
+    targetUserId?: SortOrderInput | SortOrder
+    targetScope?: SortOrderInput | SortOrder
+    beforeValue?: SortOrderInput | SortOrder
+    afterValue?: SortOrderInput | SortOrder
+    reason?: SortOrderInput | SortOrder
+    success?: SortOrder
+    failureCode?: SortOrderInput | SortOrder
+    ipAddress?: SortOrderInput | SortOrder
+    userAgent?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    _count?: AdminAuditLogCountOrderByAggregateInput
+    _max?: AdminAuditLogMaxOrderByAggregateInput
+    _min?: AdminAuditLogMinOrderByAggregateInput
+  }
+
+  export type AdminAuditLogScalarWhereWithAggregatesInput = {
+    AND?: AdminAuditLogScalarWhereWithAggregatesInput | AdminAuditLogScalarWhereWithAggregatesInput[]
+    OR?: AdminAuditLogScalarWhereWithAggregatesInput[]
+    NOT?: AdminAuditLogScalarWhereWithAggregatesInput | AdminAuditLogScalarWhereWithAggregatesInput[]
+    logId?: UuidWithAggregatesFilter<"AdminAuditLog"> | string
+    adminId?: UuidWithAggregatesFilter<"AdminAuditLog"> | string
+    action?: EnumAdminAuditActionWithAggregatesFilter<"AdminAuditLog"> | $Enums.AdminAuditAction
+    targetUserId?: UuidNullableWithAggregatesFilter<"AdminAuditLog"> | string | null
+    targetScope?: StringNullableWithAggregatesFilter<"AdminAuditLog"> | string | null
+    beforeValue?: JsonNullableWithAggregatesFilter<"AdminAuditLog">
+    afterValue?: JsonNullableWithAggregatesFilter<"AdminAuditLog">
+    reason?: StringNullableWithAggregatesFilter<"AdminAuditLog"> | string | null
+    success?: BoolWithAggregatesFilter<"AdminAuditLog"> | boolean
+    failureCode?: StringNullableWithAggregatesFilter<"AdminAuditLog"> | string | null
+    ipAddress?: StringNullableWithAggregatesFilter<"AdminAuditLog"> | string | null
+    userAgent?: StringNullableWithAggregatesFilter<"AdminAuditLog"> | string | null
+    createdAt?: DateTimeWithAggregatesFilter<"AdminAuditLog"> | Date | string
+  }
+
   export type ThemeCreateInput = {
     themeCode: number
     themeName: string
@@ -42729,6 +48351,7 @@ export namespace Prisma {
     marketingConsent?: boolean
     isTempPassword?: boolean
     planType?: $Enums.PlanType
+    status?: $Enums.UserStatus
     createdAt?: Date | string
     updatedAt?: Date | string
     deletedAt?: Date | string | null
@@ -42740,6 +48363,9 @@ export namespace Prisma {
     subscription?: UserSubscriptionCreateNestedOneWithoutUserInput
     paymentCards?: PaymentCardCreateNestedManyWithoutUserInput
     payments?: PaymentCreateNestedManyWithoutUserInput
+    loginHistories?: UserLoginHistoryCreateNestedManyWithoutUserInput
+    planHistories?: UserPlanHistoryCreateNestedManyWithoutUserInput
+    auditLogs?: AdminAuditLogCreateNestedManyWithoutTargetUserInput
   }
 
   export type UserUncheckedCreateInput = {
@@ -42754,6 +48380,7 @@ export namespace Prisma {
     marketingConsent?: boolean
     isTempPassword?: boolean
     planType?: $Enums.PlanType
+    status?: $Enums.UserStatus
     createdAt?: Date | string
     updatedAt?: Date | string
     deletedAt?: Date | string | null
@@ -42765,6 +48392,9 @@ export namespace Prisma {
     subscription?: UserSubscriptionUncheckedCreateNestedOneWithoutUserInput
     paymentCards?: PaymentCardUncheckedCreateNestedManyWithoutUserInput
     payments?: PaymentUncheckedCreateNestedManyWithoutUserInput
+    loginHistories?: UserLoginHistoryUncheckedCreateNestedManyWithoutUserInput
+    planHistories?: UserPlanHistoryUncheckedCreateNestedManyWithoutUserInput
+    auditLogs?: AdminAuditLogUncheckedCreateNestedManyWithoutTargetUserInput
   }
 
   export type UserUpdateInput = {
@@ -42779,6 +48409,7 @@ export namespace Prisma {
     marketingConsent?: BoolFieldUpdateOperationsInput | boolean
     isTempPassword?: BoolFieldUpdateOperationsInput | boolean
     planType?: EnumPlanTypeFieldUpdateOperationsInput | $Enums.PlanType
+    status?: EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -42790,6 +48421,9 @@ export namespace Prisma {
     subscription?: UserSubscriptionUpdateOneWithoutUserNestedInput
     paymentCards?: PaymentCardUpdateManyWithoutUserNestedInput
     payments?: PaymentUpdateManyWithoutUserNestedInput
+    loginHistories?: UserLoginHistoryUpdateManyWithoutUserNestedInput
+    planHistories?: UserPlanHistoryUpdateManyWithoutUserNestedInput
+    auditLogs?: AdminAuditLogUpdateManyWithoutTargetUserNestedInput
   }
 
   export type UserUncheckedUpdateInput = {
@@ -42804,6 +48438,7 @@ export namespace Prisma {
     marketingConsent?: BoolFieldUpdateOperationsInput | boolean
     isTempPassword?: BoolFieldUpdateOperationsInput | boolean
     planType?: EnumPlanTypeFieldUpdateOperationsInput | $Enums.PlanType
+    status?: EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -42815,6 +48450,9 @@ export namespace Prisma {
     subscription?: UserSubscriptionUncheckedUpdateOneWithoutUserNestedInput
     paymentCards?: PaymentCardUncheckedUpdateManyWithoutUserNestedInput
     payments?: PaymentUncheckedUpdateManyWithoutUserNestedInput
+    loginHistories?: UserLoginHistoryUncheckedUpdateManyWithoutUserNestedInput
+    planHistories?: UserPlanHistoryUncheckedUpdateManyWithoutUserNestedInput
+    auditLogs?: AdminAuditLogUncheckedUpdateManyWithoutTargetUserNestedInput
   }
 
   export type UserCreateManyInput = {
@@ -42829,6 +48467,7 @@ export namespace Prisma {
     marketingConsent?: boolean
     isTempPassword?: boolean
     planType?: $Enums.PlanType
+    status?: $Enums.UserStatus
     createdAt?: Date | string
     updatedAt?: Date | string
     deletedAt?: Date | string | null
@@ -42846,6 +48485,7 @@ export namespace Prisma {
     marketingConsent?: BoolFieldUpdateOperationsInput | boolean
     isTempPassword?: BoolFieldUpdateOperationsInput | boolean
     planType?: EnumPlanTypeFieldUpdateOperationsInput | $Enums.PlanType
+    status?: EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -42863,6 +48503,7 @@ export namespace Prisma {
     marketingConsent?: BoolFieldUpdateOperationsInput | boolean
     isTempPassword?: BoolFieldUpdateOperationsInput | boolean
     planType?: EnumPlanTypeFieldUpdateOperationsInput | $Enums.PlanType
+    status?: EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -45503,6 +51144,380 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type AdminCreateInput = {
+    adminId?: string
+    loginId: string
+    password: string
+    name: string
+    role?: $Enums.AdminRole
+    isActive?: boolean
+    lastLoginAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    deletedAt?: Date | string | null
+    auditLogs?: AdminAuditLogCreateNestedManyWithoutAdminInput
+    planHistories?: UserPlanHistoryCreateNestedManyWithoutAdminInput
+  }
+
+  export type AdminUncheckedCreateInput = {
+    adminId?: string
+    loginId: string
+    password: string
+    name: string
+    role?: $Enums.AdminRole
+    isActive?: boolean
+    lastLoginAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    deletedAt?: Date | string | null
+    auditLogs?: AdminAuditLogUncheckedCreateNestedManyWithoutAdminInput
+    planHistories?: UserPlanHistoryUncheckedCreateNestedManyWithoutAdminInput
+  }
+
+  export type AdminUpdateInput = {
+    adminId?: StringFieldUpdateOperationsInput | string
+    loginId?: StringFieldUpdateOperationsInput | string
+    password?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    role?: EnumAdminRoleFieldUpdateOperationsInput | $Enums.AdminRole
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    auditLogs?: AdminAuditLogUpdateManyWithoutAdminNestedInput
+    planHistories?: UserPlanHistoryUpdateManyWithoutAdminNestedInput
+  }
+
+  export type AdminUncheckedUpdateInput = {
+    adminId?: StringFieldUpdateOperationsInput | string
+    loginId?: StringFieldUpdateOperationsInput | string
+    password?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    role?: EnumAdminRoleFieldUpdateOperationsInput | $Enums.AdminRole
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    auditLogs?: AdminAuditLogUncheckedUpdateManyWithoutAdminNestedInput
+    planHistories?: UserPlanHistoryUncheckedUpdateManyWithoutAdminNestedInput
+  }
+
+  export type AdminCreateManyInput = {
+    adminId?: string
+    loginId: string
+    password: string
+    name: string
+    role?: $Enums.AdminRole
+    isActive?: boolean
+    lastLoginAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    deletedAt?: Date | string | null
+  }
+
+  export type AdminUpdateManyMutationInput = {
+    adminId?: StringFieldUpdateOperationsInput | string
+    loginId?: StringFieldUpdateOperationsInput | string
+    password?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    role?: EnumAdminRoleFieldUpdateOperationsInput | $Enums.AdminRole
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
+  export type AdminUncheckedUpdateManyInput = {
+    adminId?: StringFieldUpdateOperationsInput | string
+    loginId?: StringFieldUpdateOperationsInput | string
+    password?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    role?: EnumAdminRoleFieldUpdateOperationsInput | $Enums.AdminRole
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
+  export type UserLoginHistoryCreateInput = {
+    historyId?: string
+    provider: $Enums.AuthProvider
+    ipAddress?: string | null
+    userAgent?: string | null
+    deviceType?: string | null
+    osName?: string | null
+    loggedInAt?: Date | string
+    user: UserCreateNestedOneWithoutLoginHistoriesInput
+  }
+
+  export type UserLoginHistoryUncheckedCreateInput = {
+    historyId?: string
+    userId: string
+    provider: $Enums.AuthProvider
+    ipAddress?: string | null
+    userAgent?: string | null
+    deviceType?: string | null
+    osName?: string | null
+    loggedInAt?: Date | string
+  }
+
+  export type UserLoginHistoryUpdateInput = {
+    historyId?: StringFieldUpdateOperationsInput | string
+    provider?: EnumAuthProviderFieldUpdateOperationsInput | $Enums.AuthProvider
+    ipAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    userAgent?: NullableStringFieldUpdateOperationsInput | string | null
+    deviceType?: NullableStringFieldUpdateOperationsInput | string | null
+    osName?: NullableStringFieldUpdateOperationsInput | string | null
+    loggedInAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    user?: UserUpdateOneRequiredWithoutLoginHistoriesNestedInput
+  }
+
+  export type UserLoginHistoryUncheckedUpdateInput = {
+    historyId?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    provider?: EnumAuthProviderFieldUpdateOperationsInput | $Enums.AuthProvider
+    ipAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    userAgent?: NullableStringFieldUpdateOperationsInput | string | null
+    deviceType?: NullableStringFieldUpdateOperationsInput | string | null
+    osName?: NullableStringFieldUpdateOperationsInput | string | null
+    loggedInAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type UserLoginHistoryCreateManyInput = {
+    historyId?: string
+    userId: string
+    provider: $Enums.AuthProvider
+    ipAddress?: string | null
+    userAgent?: string | null
+    deviceType?: string | null
+    osName?: string | null
+    loggedInAt?: Date | string
+  }
+
+  export type UserLoginHistoryUpdateManyMutationInput = {
+    historyId?: StringFieldUpdateOperationsInput | string
+    provider?: EnumAuthProviderFieldUpdateOperationsInput | $Enums.AuthProvider
+    ipAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    userAgent?: NullableStringFieldUpdateOperationsInput | string | null
+    deviceType?: NullableStringFieldUpdateOperationsInput | string | null
+    osName?: NullableStringFieldUpdateOperationsInput | string | null
+    loggedInAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type UserLoginHistoryUncheckedUpdateManyInput = {
+    historyId?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    provider?: EnumAuthProviderFieldUpdateOperationsInput | $Enums.AuthProvider
+    ipAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    userAgent?: NullableStringFieldUpdateOperationsInput | string | null
+    deviceType?: NullableStringFieldUpdateOperationsInput | string | null
+    osName?: NullableStringFieldUpdateOperationsInput | string | null
+    loggedInAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type UserPlanHistoryCreateInput = {
+    historyId?: string
+    fromPlan?: $Enums.PlanType | null
+    toPlan: $Enums.PlanType
+    reason?: string | null
+    note?: string | null
+    effectiveAt: Date | string
+    expiresAt?: Date | string | null
+    createdAt?: Date | string
+    user: UserCreateNestedOneWithoutPlanHistoriesInput
+    admin?: AdminCreateNestedOneWithoutPlanHistoriesInput
+  }
+
+  export type UserPlanHistoryUncheckedCreateInput = {
+    historyId?: string
+    userId: string
+    fromPlan?: $Enums.PlanType | null
+    toPlan: $Enums.PlanType
+    reason?: string | null
+    changedBy?: string | null
+    note?: string | null
+    effectiveAt: Date | string
+    expiresAt?: Date | string | null
+    createdAt?: Date | string
+  }
+
+  export type UserPlanHistoryUpdateInput = {
+    historyId?: StringFieldUpdateOperationsInput | string
+    fromPlan?: NullableEnumPlanTypeFieldUpdateOperationsInput | $Enums.PlanType | null
+    toPlan?: EnumPlanTypeFieldUpdateOperationsInput | $Enums.PlanType
+    reason?: NullableStringFieldUpdateOperationsInput | string | null
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    effectiveAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    user?: UserUpdateOneRequiredWithoutPlanHistoriesNestedInput
+    admin?: AdminUpdateOneWithoutPlanHistoriesNestedInput
+  }
+
+  export type UserPlanHistoryUncheckedUpdateInput = {
+    historyId?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    fromPlan?: NullableEnumPlanTypeFieldUpdateOperationsInput | $Enums.PlanType | null
+    toPlan?: EnumPlanTypeFieldUpdateOperationsInput | $Enums.PlanType
+    reason?: NullableStringFieldUpdateOperationsInput | string | null
+    changedBy?: NullableStringFieldUpdateOperationsInput | string | null
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    effectiveAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type UserPlanHistoryCreateManyInput = {
+    historyId?: string
+    userId: string
+    fromPlan?: $Enums.PlanType | null
+    toPlan: $Enums.PlanType
+    reason?: string | null
+    changedBy?: string | null
+    note?: string | null
+    effectiveAt: Date | string
+    expiresAt?: Date | string | null
+    createdAt?: Date | string
+  }
+
+  export type UserPlanHistoryUpdateManyMutationInput = {
+    historyId?: StringFieldUpdateOperationsInput | string
+    fromPlan?: NullableEnumPlanTypeFieldUpdateOperationsInput | $Enums.PlanType | null
+    toPlan?: EnumPlanTypeFieldUpdateOperationsInput | $Enums.PlanType
+    reason?: NullableStringFieldUpdateOperationsInput | string | null
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    effectiveAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type UserPlanHistoryUncheckedUpdateManyInput = {
+    historyId?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    fromPlan?: NullableEnumPlanTypeFieldUpdateOperationsInput | $Enums.PlanType | null
+    toPlan?: EnumPlanTypeFieldUpdateOperationsInput | $Enums.PlanType
+    reason?: NullableStringFieldUpdateOperationsInput | string | null
+    changedBy?: NullableStringFieldUpdateOperationsInput | string | null
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    effectiveAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type AdminAuditLogCreateInput = {
+    logId?: string
+    action: $Enums.AdminAuditAction
+    targetScope?: string | null
+    beforeValue?: NullableJsonNullValueInput | InputJsonValue
+    afterValue?: NullableJsonNullValueInput | InputJsonValue
+    reason?: string | null
+    success?: boolean
+    failureCode?: string | null
+    ipAddress?: string | null
+    userAgent?: string | null
+    createdAt?: Date | string
+    admin: AdminCreateNestedOneWithoutAuditLogsInput
+    targetUser?: UserCreateNestedOneWithoutAuditLogsInput
+  }
+
+  export type AdminAuditLogUncheckedCreateInput = {
+    logId?: string
+    adminId: string
+    action: $Enums.AdminAuditAction
+    targetUserId?: string | null
+    targetScope?: string | null
+    beforeValue?: NullableJsonNullValueInput | InputJsonValue
+    afterValue?: NullableJsonNullValueInput | InputJsonValue
+    reason?: string | null
+    success?: boolean
+    failureCode?: string | null
+    ipAddress?: string | null
+    userAgent?: string | null
+    createdAt?: Date | string
+  }
+
+  export type AdminAuditLogUpdateInput = {
+    logId?: StringFieldUpdateOperationsInput | string
+    action?: EnumAdminAuditActionFieldUpdateOperationsInput | $Enums.AdminAuditAction
+    targetScope?: NullableStringFieldUpdateOperationsInput | string | null
+    beforeValue?: NullableJsonNullValueInput | InputJsonValue
+    afterValue?: NullableJsonNullValueInput | InputJsonValue
+    reason?: NullableStringFieldUpdateOperationsInput | string | null
+    success?: BoolFieldUpdateOperationsInput | boolean
+    failureCode?: NullableStringFieldUpdateOperationsInput | string | null
+    ipAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    userAgent?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    admin?: AdminUpdateOneRequiredWithoutAuditLogsNestedInput
+    targetUser?: UserUpdateOneWithoutAuditLogsNestedInput
+  }
+
+  export type AdminAuditLogUncheckedUpdateInput = {
+    logId?: StringFieldUpdateOperationsInput | string
+    adminId?: StringFieldUpdateOperationsInput | string
+    action?: EnumAdminAuditActionFieldUpdateOperationsInput | $Enums.AdminAuditAction
+    targetUserId?: NullableStringFieldUpdateOperationsInput | string | null
+    targetScope?: NullableStringFieldUpdateOperationsInput | string | null
+    beforeValue?: NullableJsonNullValueInput | InputJsonValue
+    afterValue?: NullableJsonNullValueInput | InputJsonValue
+    reason?: NullableStringFieldUpdateOperationsInput | string | null
+    success?: BoolFieldUpdateOperationsInput | boolean
+    failureCode?: NullableStringFieldUpdateOperationsInput | string | null
+    ipAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    userAgent?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type AdminAuditLogCreateManyInput = {
+    logId?: string
+    adminId: string
+    action: $Enums.AdminAuditAction
+    targetUserId?: string | null
+    targetScope?: string | null
+    beforeValue?: NullableJsonNullValueInput | InputJsonValue
+    afterValue?: NullableJsonNullValueInput | InputJsonValue
+    reason?: string | null
+    success?: boolean
+    failureCode?: string | null
+    ipAddress?: string | null
+    userAgent?: string | null
+    createdAt?: Date | string
+  }
+
+  export type AdminAuditLogUpdateManyMutationInput = {
+    logId?: StringFieldUpdateOperationsInput | string
+    action?: EnumAdminAuditActionFieldUpdateOperationsInput | $Enums.AdminAuditAction
+    targetScope?: NullableStringFieldUpdateOperationsInput | string | null
+    beforeValue?: NullableJsonNullValueInput | InputJsonValue
+    afterValue?: NullableJsonNullValueInput | InputJsonValue
+    reason?: NullableStringFieldUpdateOperationsInput | string | null
+    success?: BoolFieldUpdateOperationsInput | boolean
+    failureCode?: NullableStringFieldUpdateOperationsInput | string | null
+    ipAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    userAgent?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type AdminAuditLogUncheckedUpdateManyInput = {
+    logId?: StringFieldUpdateOperationsInput | string
+    adminId?: StringFieldUpdateOperationsInput | string
+    action?: EnumAdminAuditActionFieldUpdateOperationsInput | $Enums.AdminAuditAction
+    targetUserId?: NullableStringFieldUpdateOperationsInput | string | null
+    targetScope?: NullableStringFieldUpdateOperationsInput | string | null
+    beforeValue?: NullableJsonNullValueInput | InputJsonValue
+    afterValue?: NullableJsonNullValueInput | InputJsonValue
+    reason?: NullableStringFieldUpdateOperationsInput | string | null
+    success?: BoolFieldUpdateOperationsInput | boolean
+    failureCode?: NullableStringFieldUpdateOperationsInput | string | null
+    ipAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    userAgent?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type IntFilter<$PrismaModel = never> = {
     equals?: number | IntFieldRefInput<$PrismaModel>
     in?: number[] | ListIntFieldRefInput<$PrismaModel>
@@ -45877,6 +51892,13 @@ export namespace Prisma {
     not?: NestedEnumPlanTypeFilter<$PrismaModel> | $Enums.PlanType
   }
 
+  export type EnumUserStatusFilter<$PrismaModel = never> = {
+    equals?: $Enums.UserStatus | EnumUserStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.UserStatus[] | ListEnumUserStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.UserStatus[] | ListEnumUserStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumUserStatusFilter<$PrismaModel> | $Enums.UserStatus
+  }
+
   export type UserWatchlistListRelationFilter = {
     every?: UserWatchlistWhereInput
     some?: UserWatchlistWhereInput
@@ -45918,6 +51940,24 @@ export namespace Prisma {
     none?: PaymentWhereInput
   }
 
+  export type UserLoginHistoryListRelationFilter = {
+    every?: UserLoginHistoryWhereInput
+    some?: UserLoginHistoryWhereInput
+    none?: UserLoginHistoryWhereInput
+  }
+
+  export type UserPlanHistoryListRelationFilter = {
+    every?: UserPlanHistoryWhereInput
+    some?: UserPlanHistoryWhereInput
+    none?: UserPlanHistoryWhereInput
+  }
+
+  export type AdminAuditLogListRelationFilter = {
+    every?: AdminAuditLogWhereInput
+    some?: AdminAuditLogWhereInput
+    none?: AdminAuditLogWhereInput
+  }
+
   export type UserWatchlistOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
@@ -45939,6 +51979,18 @@ export namespace Prisma {
   }
 
   export type PaymentOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type UserLoginHistoryOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type UserPlanHistoryOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type AdminAuditLogOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
@@ -45970,6 +52022,7 @@ export namespace Prisma {
     marketingConsent?: SortOrder
     isTempPassword?: SortOrder
     planType?: SortOrder
+    status?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     deletedAt?: SortOrder
@@ -45987,6 +52040,7 @@ export namespace Prisma {
     marketingConsent?: SortOrder
     isTempPassword?: SortOrder
     planType?: SortOrder
+    status?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     deletedAt?: SortOrder
@@ -46004,6 +52058,7 @@ export namespace Prisma {
     marketingConsent?: SortOrder
     isTempPassword?: SortOrder
     planType?: SortOrder
+    status?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     deletedAt?: SortOrder
@@ -46050,6 +52105,16 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedEnumPlanTypeFilter<$PrismaModel>
     _max?: NestedEnumPlanTypeFilter<$PrismaModel>
+  }
+
+  export type EnumUserStatusWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.UserStatus | EnumUserStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.UserStatus[] | ListEnumUserStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.UserStatus[] | ListEnumUserStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumUserStatusWithAggregatesFilter<$PrismaModel> | $Enums.UserStatus
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumUserStatusFilter<$PrismaModel>
+    _max?: NestedEnumUserStatusFilter<$PrismaModel>
   }
 
   export type EnumMarketTypeFilter<$PrismaModel = never> = {
@@ -48071,6 +54136,210 @@ export namespace Prisma {
     _max?: NestedEnumPaymentStatusFilter<$PrismaModel>
   }
 
+  export type EnumAdminRoleFilter<$PrismaModel = never> = {
+    equals?: $Enums.AdminRole | EnumAdminRoleFieldRefInput<$PrismaModel>
+    in?: $Enums.AdminRole[] | ListEnumAdminRoleFieldRefInput<$PrismaModel>
+    notIn?: $Enums.AdminRole[] | ListEnumAdminRoleFieldRefInput<$PrismaModel>
+    not?: NestedEnumAdminRoleFilter<$PrismaModel> | $Enums.AdminRole
+  }
+
+  export type AdminLoginIdDeletedAtCompoundUniqueInput = {
+    loginId: string
+    deletedAt: Date | string
+  }
+
+  export type AdminCountOrderByAggregateInput = {
+    adminId?: SortOrder
+    loginId?: SortOrder
+    password?: SortOrder
+    name?: SortOrder
+    role?: SortOrder
+    isActive?: SortOrder
+    lastLoginAt?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    deletedAt?: SortOrder
+  }
+
+  export type AdminMaxOrderByAggregateInput = {
+    adminId?: SortOrder
+    loginId?: SortOrder
+    password?: SortOrder
+    name?: SortOrder
+    role?: SortOrder
+    isActive?: SortOrder
+    lastLoginAt?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    deletedAt?: SortOrder
+  }
+
+  export type AdminMinOrderByAggregateInput = {
+    adminId?: SortOrder
+    loginId?: SortOrder
+    password?: SortOrder
+    name?: SortOrder
+    role?: SortOrder
+    isActive?: SortOrder
+    lastLoginAt?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    deletedAt?: SortOrder
+  }
+
+  export type EnumAdminRoleWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.AdminRole | EnumAdminRoleFieldRefInput<$PrismaModel>
+    in?: $Enums.AdminRole[] | ListEnumAdminRoleFieldRefInput<$PrismaModel>
+    notIn?: $Enums.AdminRole[] | ListEnumAdminRoleFieldRefInput<$PrismaModel>
+    not?: NestedEnumAdminRoleWithAggregatesFilter<$PrismaModel> | $Enums.AdminRole
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumAdminRoleFilter<$PrismaModel>
+    _max?: NestedEnumAdminRoleFilter<$PrismaModel>
+  }
+
+  export type UserLoginHistoryCountOrderByAggregateInput = {
+    historyId?: SortOrder
+    userId?: SortOrder
+    provider?: SortOrder
+    ipAddress?: SortOrder
+    userAgent?: SortOrder
+    deviceType?: SortOrder
+    osName?: SortOrder
+    loggedInAt?: SortOrder
+  }
+
+  export type UserLoginHistoryMaxOrderByAggregateInput = {
+    historyId?: SortOrder
+    userId?: SortOrder
+    provider?: SortOrder
+    ipAddress?: SortOrder
+    userAgent?: SortOrder
+    deviceType?: SortOrder
+    osName?: SortOrder
+    loggedInAt?: SortOrder
+  }
+
+  export type UserLoginHistoryMinOrderByAggregateInput = {
+    historyId?: SortOrder
+    userId?: SortOrder
+    provider?: SortOrder
+    ipAddress?: SortOrder
+    userAgent?: SortOrder
+    deviceType?: SortOrder
+    osName?: SortOrder
+    loggedInAt?: SortOrder
+  }
+
+  export type AdminNullableScalarRelationFilter = {
+    is?: AdminWhereInput | null
+    isNot?: AdminWhereInput | null
+  }
+
+  export type UserPlanHistoryCountOrderByAggregateInput = {
+    historyId?: SortOrder
+    userId?: SortOrder
+    fromPlan?: SortOrder
+    toPlan?: SortOrder
+    reason?: SortOrder
+    changedBy?: SortOrder
+    note?: SortOrder
+    effectiveAt?: SortOrder
+    expiresAt?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type UserPlanHistoryMaxOrderByAggregateInput = {
+    historyId?: SortOrder
+    userId?: SortOrder
+    fromPlan?: SortOrder
+    toPlan?: SortOrder
+    reason?: SortOrder
+    changedBy?: SortOrder
+    note?: SortOrder
+    effectiveAt?: SortOrder
+    expiresAt?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type UserPlanHistoryMinOrderByAggregateInput = {
+    historyId?: SortOrder
+    userId?: SortOrder
+    fromPlan?: SortOrder
+    toPlan?: SortOrder
+    reason?: SortOrder
+    changedBy?: SortOrder
+    note?: SortOrder
+    effectiveAt?: SortOrder
+    expiresAt?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type EnumAdminAuditActionFilter<$PrismaModel = never> = {
+    equals?: $Enums.AdminAuditAction | EnumAdminAuditActionFieldRefInput<$PrismaModel>
+    in?: $Enums.AdminAuditAction[] | ListEnumAdminAuditActionFieldRefInput<$PrismaModel>
+    notIn?: $Enums.AdminAuditAction[] | ListEnumAdminAuditActionFieldRefInput<$PrismaModel>
+    not?: NestedEnumAdminAuditActionFilter<$PrismaModel> | $Enums.AdminAuditAction
+  }
+
+  export type AdminScalarRelationFilter = {
+    is?: AdminWhereInput
+    isNot?: AdminWhereInput
+  }
+
+  export type AdminAuditLogCountOrderByAggregateInput = {
+    logId?: SortOrder
+    adminId?: SortOrder
+    action?: SortOrder
+    targetUserId?: SortOrder
+    targetScope?: SortOrder
+    beforeValue?: SortOrder
+    afterValue?: SortOrder
+    reason?: SortOrder
+    success?: SortOrder
+    failureCode?: SortOrder
+    ipAddress?: SortOrder
+    userAgent?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type AdminAuditLogMaxOrderByAggregateInput = {
+    logId?: SortOrder
+    adminId?: SortOrder
+    action?: SortOrder
+    targetUserId?: SortOrder
+    targetScope?: SortOrder
+    reason?: SortOrder
+    success?: SortOrder
+    failureCode?: SortOrder
+    ipAddress?: SortOrder
+    userAgent?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type AdminAuditLogMinOrderByAggregateInput = {
+    logId?: SortOrder
+    adminId?: SortOrder
+    action?: SortOrder
+    targetUserId?: SortOrder
+    targetScope?: SortOrder
+    reason?: SortOrder
+    success?: SortOrder
+    failureCode?: SortOrder
+    ipAddress?: SortOrder
+    userAgent?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type EnumAdminAuditActionWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.AdminAuditAction | EnumAdminAuditActionFieldRefInput<$PrismaModel>
+    in?: $Enums.AdminAuditAction[] | ListEnumAdminAuditActionFieldRefInput<$PrismaModel>
+    notIn?: $Enums.AdminAuditAction[] | ListEnumAdminAuditActionFieldRefInput<$PrismaModel>
+    not?: NestedEnumAdminAuditActionWithAggregatesFilter<$PrismaModel> | $Enums.AdminAuditAction
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumAdminAuditActionFilter<$PrismaModel>
+    _max?: NestedEnumAdminAuditActionFilter<$PrismaModel>
+  }
+
   export type CompanyCreateNestedManyWithoutThemeInput = {
     create?: XOR<CompanyCreateWithoutThemeInput, CompanyUncheckedCreateWithoutThemeInput> | CompanyCreateWithoutThemeInput[] | CompanyUncheckedCreateWithoutThemeInput[]
     connectOrCreate?: CompanyCreateOrConnectWithoutThemeInput | CompanyCreateOrConnectWithoutThemeInput[]
@@ -48486,6 +54755,27 @@ export namespace Prisma {
     connect?: PaymentWhereUniqueInput | PaymentWhereUniqueInput[]
   }
 
+  export type UserLoginHistoryCreateNestedManyWithoutUserInput = {
+    create?: XOR<UserLoginHistoryCreateWithoutUserInput, UserLoginHistoryUncheckedCreateWithoutUserInput> | UserLoginHistoryCreateWithoutUserInput[] | UserLoginHistoryUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: UserLoginHistoryCreateOrConnectWithoutUserInput | UserLoginHistoryCreateOrConnectWithoutUserInput[]
+    createMany?: UserLoginHistoryCreateManyUserInputEnvelope
+    connect?: UserLoginHistoryWhereUniqueInput | UserLoginHistoryWhereUniqueInput[]
+  }
+
+  export type UserPlanHistoryCreateNestedManyWithoutUserInput = {
+    create?: XOR<UserPlanHistoryCreateWithoutUserInput, UserPlanHistoryUncheckedCreateWithoutUserInput> | UserPlanHistoryCreateWithoutUserInput[] | UserPlanHistoryUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: UserPlanHistoryCreateOrConnectWithoutUserInput | UserPlanHistoryCreateOrConnectWithoutUserInput[]
+    createMany?: UserPlanHistoryCreateManyUserInputEnvelope
+    connect?: UserPlanHistoryWhereUniqueInput | UserPlanHistoryWhereUniqueInput[]
+  }
+
+  export type AdminAuditLogCreateNestedManyWithoutTargetUserInput = {
+    create?: XOR<AdminAuditLogCreateWithoutTargetUserInput, AdminAuditLogUncheckedCreateWithoutTargetUserInput> | AdminAuditLogCreateWithoutTargetUserInput[] | AdminAuditLogUncheckedCreateWithoutTargetUserInput[]
+    connectOrCreate?: AdminAuditLogCreateOrConnectWithoutTargetUserInput | AdminAuditLogCreateOrConnectWithoutTargetUserInput[]
+    createMany?: AdminAuditLogCreateManyTargetUserInputEnvelope
+    connect?: AdminAuditLogWhereUniqueInput | AdminAuditLogWhereUniqueInput[]
+  }
+
   export type UserWatchlistUncheckedCreateNestedManyWithoutUserInput = {
     create?: XOR<UserWatchlistCreateWithoutUserInput, UserWatchlistUncheckedCreateWithoutUserInput> | UserWatchlistCreateWithoutUserInput[] | UserWatchlistUncheckedCreateWithoutUserInput[]
     connectOrCreate?: UserWatchlistCreateOrConnectWithoutUserInput | UserWatchlistCreateOrConnectWithoutUserInput[]
@@ -48541,6 +54831,27 @@ export namespace Prisma {
     connect?: PaymentWhereUniqueInput | PaymentWhereUniqueInput[]
   }
 
+  export type UserLoginHistoryUncheckedCreateNestedManyWithoutUserInput = {
+    create?: XOR<UserLoginHistoryCreateWithoutUserInput, UserLoginHistoryUncheckedCreateWithoutUserInput> | UserLoginHistoryCreateWithoutUserInput[] | UserLoginHistoryUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: UserLoginHistoryCreateOrConnectWithoutUserInput | UserLoginHistoryCreateOrConnectWithoutUserInput[]
+    createMany?: UserLoginHistoryCreateManyUserInputEnvelope
+    connect?: UserLoginHistoryWhereUniqueInput | UserLoginHistoryWhereUniqueInput[]
+  }
+
+  export type UserPlanHistoryUncheckedCreateNestedManyWithoutUserInput = {
+    create?: XOR<UserPlanHistoryCreateWithoutUserInput, UserPlanHistoryUncheckedCreateWithoutUserInput> | UserPlanHistoryCreateWithoutUserInput[] | UserPlanHistoryUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: UserPlanHistoryCreateOrConnectWithoutUserInput | UserPlanHistoryCreateOrConnectWithoutUserInput[]
+    createMany?: UserPlanHistoryCreateManyUserInputEnvelope
+    connect?: UserPlanHistoryWhereUniqueInput | UserPlanHistoryWhereUniqueInput[]
+  }
+
+  export type AdminAuditLogUncheckedCreateNestedManyWithoutTargetUserInput = {
+    create?: XOR<AdminAuditLogCreateWithoutTargetUserInput, AdminAuditLogUncheckedCreateWithoutTargetUserInput> | AdminAuditLogCreateWithoutTargetUserInput[] | AdminAuditLogUncheckedCreateWithoutTargetUserInput[]
+    connectOrCreate?: AdminAuditLogCreateOrConnectWithoutTargetUserInput | AdminAuditLogCreateOrConnectWithoutTargetUserInput[]
+    createMany?: AdminAuditLogCreateManyTargetUserInputEnvelope
+    connect?: AdminAuditLogWhereUniqueInput | AdminAuditLogWhereUniqueInput[]
+  }
+
   export type EnumAuthProviderFieldUpdateOperationsInput = {
     set?: $Enums.AuthProvider
   }
@@ -48551,6 +54862,10 @@ export namespace Prisma {
 
   export type EnumPlanTypeFieldUpdateOperationsInput = {
     set?: $Enums.PlanType
+  }
+
+  export type EnumUserStatusFieldUpdateOperationsInput = {
+    set?: $Enums.UserStatus
   }
 
   export type UserWatchlistUpdateManyWithoutUserNestedInput = {
@@ -48661,6 +54976,48 @@ export namespace Prisma {
     deleteMany?: PaymentScalarWhereInput | PaymentScalarWhereInput[]
   }
 
+  export type UserLoginHistoryUpdateManyWithoutUserNestedInput = {
+    create?: XOR<UserLoginHistoryCreateWithoutUserInput, UserLoginHistoryUncheckedCreateWithoutUserInput> | UserLoginHistoryCreateWithoutUserInput[] | UserLoginHistoryUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: UserLoginHistoryCreateOrConnectWithoutUserInput | UserLoginHistoryCreateOrConnectWithoutUserInput[]
+    upsert?: UserLoginHistoryUpsertWithWhereUniqueWithoutUserInput | UserLoginHistoryUpsertWithWhereUniqueWithoutUserInput[]
+    createMany?: UserLoginHistoryCreateManyUserInputEnvelope
+    set?: UserLoginHistoryWhereUniqueInput | UserLoginHistoryWhereUniqueInput[]
+    disconnect?: UserLoginHistoryWhereUniqueInput | UserLoginHistoryWhereUniqueInput[]
+    delete?: UserLoginHistoryWhereUniqueInput | UserLoginHistoryWhereUniqueInput[]
+    connect?: UserLoginHistoryWhereUniqueInput | UserLoginHistoryWhereUniqueInput[]
+    update?: UserLoginHistoryUpdateWithWhereUniqueWithoutUserInput | UserLoginHistoryUpdateWithWhereUniqueWithoutUserInput[]
+    updateMany?: UserLoginHistoryUpdateManyWithWhereWithoutUserInput | UserLoginHistoryUpdateManyWithWhereWithoutUserInput[]
+    deleteMany?: UserLoginHistoryScalarWhereInput | UserLoginHistoryScalarWhereInput[]
+  }
+
+  export type UserPlanHistoryUpdateManyWithoutUserNestedInput = {
+    create?: XOR<UserPlanHistoryCreateWithoutUserInput, UserPlanHistoryUncheckedCreateWithoutUserInput> | UserPlanHistoryCreateWithoutUserInput[] | UserPlanHistoryUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: UserPlanHistoryCreateOrConnectWithoutUserInput | UserPlanHistoryCreateOrConnectWithoutUserInput[]
+    upsert?: UserPlanHistoryUpsertWithWhereUniqueWithoutUserInput | UserPlanHistoryUpsertWithWhereUniqueWithoutUserInput[]
+    createMany?: UserPlanHistoryCreateManyUserInputEnvelope
+    set?: UserPlanHistoryWhereUniqueInput | UserPlanHistoryWhereUniqueInput[]
+    disconnect?: UserPlanHistoryWhereUniqueInput | UserPlanHistoryWhereUniqueInput[]
+    delete?: UserPlanHistoryWhereUniqueInput | UserPlanHistoryWhereUniqueInput[]
+    connect?: UserPlanHistoryWhereUniqueInput | UserPlanHistoryWhereUniqueInput[]
+    update?: UserPlanHistoryUpdateWithWhereUniqueWithoutUserInput | UserPlanHistoryUpdateWithWhereUniqueWithoutUserInput[]
+    updateMany?: UserPlanHistoryUpdateManyWithWhereWithoutUserInput | UserPlanHistoryUpdateManyWithWhereWithoutUserInput[]
+    deleteMany?: UserPlanHistoryScalarWhereInput | UserPlanHistoryScalarWhereInput[]
+  }
+
+  export type AdminAuditLogUpdateManyWithoutTargetUserNestedInput = {
+    create?: XOR<AdminAuditLogCreateWithoutTargetUserInput, AdminAuditLogUncheckedCreateWithoutTargetUserInput> | AdminAuditLogCreateWithoutTargetUserInput[] | AdminAuditLogUncheckedCreateWithoutTargetUserInput[]
+    connectOrCreate?: AdminAuditLogCreateOrConnectWithoutTargetUserInput | AdminAuditLogCreateOrConnectWithoutTargetUserInput[]
+    upsert?: AdminAuditLogUpsertWithWhereUniqueWithoutTargetUserInput | AdminAuditLogUpsertWithWhereUniqueWithoutTargetUserInput[]
+    createMany?: AdminAuditLogCreateManyTargetUserInputEnvelope
+    set?: AdminAuditLogWhereUniqueInput | AdminAuditLogWhereUniqueInput[]
+    disconnect?: AdminAuditLogWhereUniqueInput | AdminAuditLogWhereUniqueInput[]
+    delete?: AdminAuditLogWhereUniqueInput | AdminAuditLogWhereUniqueInput[]
+    connect?: AdminAuditLogWhereUniqueInput | AdminAuditLogWhereUniqueInput[]
+    update?: AdminAuditLogUpdateWithWhereUniqueWithoutTargetUserInput | AdminAuditLogUpdateWithWhereUniqueWithoutTargetUserInput[]
+    updateMany?: AdminAuditLogUpdateManyWithWhereWithoutTargetUserInput | AdminAuditLogUpdateManyWithWhereWithoutTargetUserInput[]
+    deleteMany?: AdminAuditLogScalarWhereInput | AdminAuditLogScalarWhereInput[]
+  }
+
   export type UserWatchlistUncheckedUpdateManyWithoutUserNestedInput = {
     create?: XOR<UserWatchlistCreateWithoutUserInput, UserWatchlistUncheckedCreateWithoutUserInput> | UserWatchlistCreateWithoutUserInput[] | UserWatchlistUncheckedCreateWithoutUserInput[]
     connectOrCreate?: UserWatchlistCreateOrConnectWithoutUserInput | UserWatchlistCreateOrConnectWithoutUserInput[]
@@ -48767,6 +55124,48 @@ export namespace Prisma {
     update?: PaymentUpdateWithWhereUniqueWithoutUserInput | PaymentUpdateWithWhereUniqueWithoutUserInput[]
     updateMany?: PaymentUpdateManyWithWhereWithoutUserInput | PaymentUpdateManyWithWhereWithoutUserInput[]
     deleteMany?: PaymentScalarWhereInput | PaymentScalarWhereInput[]
+  }
+
+  export type UserLoginHistoryUncheckedUpdateManyWithoutUserNestedInput = {
+    create?: XOR<UserLoginHistoryCreateWithoutUserInput, UserLoginHistoryUncheckedCreateWithoutUserInput> | UserLoginHistoryCreateWithoutUserInput[] | UserLoginHistoryUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: UserLoginHistoryCreateOrConnectWithoutUserInput | UserLoginHistoryCreateOrConnectWithoutUserInput[]
+    upsert?: UserLoginHistoryUpsertWithWhereUniqueWithoutUserInput | UserLoginHistoryUpsertWithWhereUniqueWithoutUserInput[]
+    createMany?: UserLoginHistoryCreateManyUserInputEnvelope
+    set?: UserLoginHistoryWhereUniqueInput | UserLoginHistoryWhereUniqueInput[]
+    disconnect?: UserLoginHistoryWhereUniqueInput | UserLoginHistoryWhereUniqueInput[]
+    delete?: UserLoginHistoryWhereUniqueInput | UserLoginHistoryWhereUniqueInput[]
+    connect?: UserLoginHistoryWhereUniqueInput | UserLoginHistoryWhereUniqueInput[]
+    update?: UserLoginHistoryUpdateWithWhereUniqueWithoutUserInput | UserLoginHistoryUpdateWithWhereUniqueWithoutUserInput[]
+    updateMany?: UserLoginHistoryUpdateManyWithWhereWithoutUserInput | UserLoginHistoryUpdateManyWithWhereWithoutUserInput[]
+    deleteMany?: UserLoginHistoryScalarWhereInput | UserLoginHistoryScalarWhereInput[]
+  }
+
+  export type UserPlanHistoryUncheckedUpdateManyWithoutUserNestedInput = {
+    create?: XOR<UserPlanHistoryCreateWithoutUserInput, UserPlanHistoryUncheckedCreateWithoutUserInput> | UserPlanHistoryCreateWithoutUserInput[] | UserPlanHistoryUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: UserPlanHistoryCreateOrConnectWithoutUserInput | UserPlanHistoryCreateOrConnectWithoutUserInput[]
+    upsert?: UserPlanHistoryUpsertWithWhereUniqueWithoutUserInput | UserPlanHistoryUpsertWithWhereUniqueWithoutUserInput[]
+    createMany?: UserPlanHistoryCreateManyUserInputEnvelope
+    set?: UserPlanHistoryWhereUniqueInput | UserPlanHistoryWhereUniqueInput[]
+    disconnect?: UserPlanHistoryWhereUniqueInput | UserPlanHistoryWhereUniqueInput[]
+    delete?: UserPlanHistoryWhereUniqueInput | UserPlanHistoryWhereUniqueInput[]
+    connect?: UserPlanHistoryWhereUniqueInput | UserPlanHistoryWhereUniqueInput[]
+    update?: UserPlanHistoryUpdateWithWhereUniqueWithoutUserInput | UserPlanHistoryUpdateWithWhereUniqueWithoutUserInput[]
+    updateMany?: UserPlanHistoryUpdateManyWithWhereWithoutUserInput | UserPlanHistoryUpdateManyWithWhereWithoutUserInput[]
+    deleteMany?: UserPlanHistoryScalarWhereInput | UserPlanHistoryScalarWhereInput[]
+  }
+
+  export type AdminAuditLogUncheckedUpdateManyWithoutTargetUserNestedInput = {
+    create?: XOR<AdminAuditLogCreateWithoutTargetUserInput, AdminAuditLogUncheckedCreateWithoutTargetUserInput> | AdminAuditLogCreateWithoutTargetUserInput[] | AdminAuditLogUncheckedCreateWithoutTargetUserInput[]
+    connectOrCreate?: AdminAuditLogCreateOrConnectWithoutTargetUserInput | AdminAuditLogCreateOrConnectWithoutTargetUserInput[]
+    upsert?: AdminAuditLogUpsertWithWhereUniqueWithoutTargetUserInput | AdminAuditLogUpsertWithWhereUniqueWithoutTargetUserInput[]
+    createMany?: AdminAuditLogCreateManyTargetUserInputEnvelope
+    set?: AdminAuditLogWhereUniqueInput | AdminAuditLogWhereUniqueInput[]
+    disconnect?: AdminAuditLogWhereUniqueInput | AdminAuditLogWhereUniqueInput[]
+    delete?: AdminAuditLogWhereUniqueInput | AdminAuditLogWhereUniqueInput[]
+    connect?: AdminAuditLogWhereUniqueInput | AdminAuditLogWhereUniqueInput[]
+    update?: AdminAuditLogUpdateWithWhereUniqueWithoutTargetUserInput | AdminAuditLogUpdateWithWhereUniqueWithoutTargetUserInput[]
+    updateMany?: AdminAuditLogUpdateManyWithWhereWithoutTargetUserInput | AdminAuditLogUpdateManyWithWhereWithoutTargetUserInput[]
+    deleteMany?: AdminAuditLogScalarWhereInput | AdminAuditLogScalarWhereInput[]
   }
 
   export type ThemeCreateNestedOneWithoutCompaniesInput = {
@@ -49359,6 +55758,172 @@ export namespace Prisma {
     update?: XOR<XOR<UserSubscriptionUpdateToOneWithWhereWithoutPaymentsInput, UserSubscriptionUpdateWithoutPaymentsInput>, UserSubscriptionUncheckedUpdateWithoutPaymentsInput>
   }
 
+  export type AdminAuditLogCreateNestedManyWithoutAdminInput = {
+    create?: XOR<AdminAuditLogCreateWithoutAdminInput, AdminAuditLogUncheckedCreateWithoutAdminInput> | AdminAuditLogCreateWithoutAdminInput[] | AdminAuditLogUncheckedCreateWithoutAdminInput[]
+    connectOrCreate?: AdminAuditLogCreateOrConnectWithoutAdminInput | AdminAuditLogCreateOrConnectWithoutAdminInput[]
+    createMany?: AdminAuditLogCreateManyAdminInputEnvelope
+    connect?: AdminAuditLogWhereUniqueInput | AdminAuditLogWhereUniqueInput[]
+  }
+
+  export type UserPlanHistoryCreateNestedManyWithoutAdminInput = {
+    create?: XOR<UserPlanHistoryCreateWithoutAdminInput, UserPlanHistoryUncheckedCreateWithoutAdminInput> | UserPlanHistoryCreateWithoutAdminInput[] | UserPlanHistoryUncheckedCreateWithoutAdminInput[]
+    connectOrCreate?: UserPlanHistoryCreateOrConnectWithoutAdminInput | UserPlanHistoryCreateOrConnectWithoutAdminInput[]
+    createMany?: UserPlanHistoryCreateManyAdminInputEnvelope
+    connect?: UserPlanHistoryWhereUniqueInput | UserPlanHistoryWhereUniqueInput[]
+  }
+
+  export type AdminAuditLogUncheckedCreateNestedManyWithoutAdminInput = {
+    create?: XOR<AdminAuditLogCreateWithoutAdminInput, AdminAuditLogUncheckedCreateWithoutAdminInput> | AdminAuditLogCreateWithoutAdminInput[] | AdminAuditLogUncheckedCreateWithoutAdminInput[]
+    connectOrCreate?: AdminAuditLogCreateOrConnectWithoutAdminInput | AdminAuditLogCreateOrConnectWithoutAdminInput[]
+    createMany?: AdminAuditLogCreateManyAdminInputEnvelope
+    connect?: AdminAuditLogWhereUniqueInput | AdminAuditLogWhereUniqueInput[]
+  }
+
+  export type UserPlanHistoryUncheckedCreateNestedManyWithoutAdminInput = {
+    create?: XOR<UserPlanHistoryCreateWithoutAdminInput, UserPlanHistoryUncheckedCreateWithoutAdminInput> | UserPlanHistoryCreateWithoutAdminInput[] | UserPlanHistoryUncheckedCreateWithoutAdminInput[]
+    connectOrCreate?: UserPlanHistoryCreateOrConnectWithoutAdminInput | UserPlanHistoryCreateOrConnectWithoutAdminInput[]
+    createMany?: UserPlanHistoryCreateManyAdminInputEnvelope
+    connect?: UserPlanHistoryWhereUniqueInput | UserPlanHistoryWhereUniqueInput[]
+  }
+
+  export type EnumAdminRoleFieldUpdateOperationsInput = {
+    set?: $Enums.AdminRole
+  }
+
+  export type AdminAuditLogUpdateManyWithoutAdminNestedInput = {
+    create?: XOR<AdminAuditLogCreateWithoutAdminInput, AdminAuditLogUncheckedCreateWithoutAdminInput> | AdminAuditLogCreateWithoutAdminInput[] | AdminAuditLogUncheckedCreateWithoutAdminInput[]
+    connectOrCreate?: AdminAuditLogCreateOrConnectWithoutAdminInput | AdminAuditLogCreateOrConnectWithoutAdminInput[]
+    upsert?: AdminAuditLogUpsertWithWhereUniqueWithoutAdminInput | AdminAuditLogUpsertWithWhereUniqueWithoutAdminInput[]
+    createMany?: AdminAuditLogCreateManyAdminInputEnvelope
+    set?: AdminAuditLogWhereUniqueInput | AdminAuditLogWhereUniqueInput[]
+    disconnect?: AdminAuditLogWhereUniqueInput | AdminAuditLogWhereUniqueInput[]
+    delete?: AdminAuditLogWhereUniqueInput | AdminAuditLogWhereUniqueInput[]
+    connect?: AdminAuditLogWhereUniqueInput | AdminAuditLogWhereUniqueInput[]
+    update?: AdminAuditLogUpdateWithWhereUniqueWithoutAdminInput | AdminAuditLogUpdateWithWhereUniqueWithoutAdminInput[]
+    updateMany?: AdminAuditLogUpdateManyWithWhereWithoutAdminInput | AdminAuditLogUpdateManyWithWhereWithoutAdminInput[]
+    deleteMany?: AdminAuditLogScalarWhereInput | AdminAuditLogScalarWhereInput[]
+  }
+
+  export type UserPlanHistoryUpdateManyWithoutAdminNestedInput = {
+    create?: XOR<UserPlanHistoryCreateWithoutAdminInput, UserPlanHistoryUncheckedCreateWithoutAdminInput> | UserPlanHistoryCreateWithoutAdminInput[] | UserPlanHistoryUncheckedCreateWithoutAdminInput[]
+    connectOrCreate?: UserPlanHistoryCreateOrConnectWithoutAdminInput | UserPlanHistoryCreateOrConnectWithoutAdminInput[]
+    upsert?: UserPlanHistoryUpsertWithWhereUniqueWithoutAdminInput | UserPlanHistoryUpsertWithWhereUniqueWithoutAdminInput[]
+    createMany?: UserPlanHistoryCreateManyAdminInputEnvelope
+    set?: UserPlanHistoryWhereUniqueInput | UserPlanHistoryWhereUniqueInput[]
+    disconnect?: UserPlanHistoryWhereUniqueInput | UserPlanHistoryWhereUniqueInput[]
+    delete?: UserPlanHistoryWhereUniqueInput | UserPlanHistoryWhereUniqueInput[]
+    connect?: UserPlanHistoryWhereUniqueInput | UserPlanHistoryWhereUniqueInput[]
+    update?: UserPlanHistoryUpdateWithWhereUniqueWithoutAdminInput | UserPlanHistoryUpdateWithWhereUniqueWithoutAdminInput[]
+    updateMany?: UserPlanHistoryUpdateManyWithWhereWithoutAdminInput | UserPlanHistoryUpdateManyWithWhereWithoutAdminInput[]
+    deleteMany?: UserPlanHistoryScalarWhereInput | UserPlanHistoryScalarWhereInput[]
+  }
+
+  export type AdminAuditLogUncheckedUpdateManyWithoutAdminNestedInput = {
+    create?: XOR<AdminAuditLogCreateWithoutAdminInput, AdminAuditLogUncheckedCreateWithoutAdminInput> | AdminAuditLogCreateWithoutAdminInput[] | AdminAuditLogUncheckedCreateWithoutAdminInput[]
+    connectOrCreate?: AdminAuditLogCreateOrConnectWithoutAdminInput | AdminAuditLogCreateOrConnectWithoutAdminInput[]
+    upsert?: AdminAuditLogUpsertWithWhereUniqueWithoutAdminInput | AdminAuditLogUpsertWithWhereUniqueWithoutAdminInput[]
+    createMany?: AdminAuditLogCreateManyAdminInputEnvelope
+    set?: AdminAuditLogWhereUniqueInput | AdminAuditLogWhereUniqueInput[]
+    disconnect?: AdminAuditLogWhereUniqueInput | AdminAuditLogWhereUniqueInput[]
+    delete?: AdminAuditLogWhereUniqueInput | AdminAuditLogWhereUniqueInput[]
+    connect?: AdminAuditLogWhereUniqueInput | AdminAuditLogWhereUniqueInput[]
+    update?: AdminAuditLogUpdateWithWhereUniqueWithoutAdminInput | AdminAuditLogUpdateWithWhereUniqueWithoutAdminInput[]
+    updateMany?: AdminAuditLogUpdateManyWithWhereWithoutAdminInput | AdminAuditLogUpdateManyWithWhereWithoutAdminInput[]
+    deleteMany?: AdminAuditLogScalarWhereInput | AdminAuditLogScalarWhereInput[]
+  }
+
+  export type UserPlanHistoryUncheckedUpdateManyWithoutAdminNestedInput = {
+    create?: XOR<UserPlanHistoryCreateWithoutAdminInput, UserPlanHistoryUncheckedCreateWithoutAdminInput> | UserPlanHistoryCreateWithoutAdminInput[] | UserPlanHistoryUncheckedCreateWithoutAdminInput[]
+    connectOrCreate?: UserPlanHistoryCreateOrConnectWithoutAdminInput | UserPlanHistoryCreateOrConnectWithoutAdminInput[]
+    upsert?: UserPlanHistoryUpsertWithWhereUniqueWithoutAdminInput | UserPlanHistoryUpsertWithWhereUniqueWithoutAdminInput[]
+    createMany?: UserPlanHistoryCreateManyAdminInputEnvelope
+    set?: UserPlanHistoryWhereUniqueInput | UserPlanHistoryWhereUniqueInput[]
+    disconnect?: UserPlanHistoryWhereUniqueInput | UserPlanHistoryWhereUniqueInput[]
+    delete?: UserPlanHistoryWhereUniqueInput | UserPlanHistoryWhereUniqueInput[]
+    connect?: UserPlanHistoryWhereUniqueInput | UserPlanHistoryWhereUniqueInput[]
+    update?: UserPlanHistoryUpdateWithWhereUniqueWithoutAdminInput | UserPlanHistoryUpdateWithWhereUniqueWithoutAdminInput[]
+    updateMany?: UserPlanHistoryUpdateManyWithWhereWithoutAdminInput | UserPlanHistoryUpdateManyWithWhereWithoutAdminInput[]
+    deleteMany?: UserPlanHistoryScalarWhereInput | UserPlanHistoryScalarWhereInput[]
+  }
+
+  export type UserCreateNestedOneWithoutLoginHistoriesInput = {
+    create?: XOR<UserCreateWithoutLoginHistoriesInput, UserUncheckedCreateWithoutLoginHistoriesInput>
+    connectOrCreate?: UserCreateOrConnectWithoutLoginHistoriesInput
+    connect?: UserWhereUniqueInput
+  }
+
+  export type UserUpdateOneRequiredWithoutLoginHistoriesNestedInput = {
+    create?: XOR<UserCreateWithoutLoginHistoriesInput, UserUncheckedCreateWithoutLoginHistoriesInput>
+    connectOrCreate?: UserCreateOrConnectWithoutLoginHistoriesInput
+    upsert?: UserUpsertWithoutLoginHistoriesInput
+    connect?: UserWhereUniqueInput
+    update?: XOR<XOR<UserUpdateToOneWithWhereWithoutLoginHistoriesInput, UserUpdateWithoutLoginHistoriesInput>, UserUncheckedUpdateWithoutLoginHistoriesInput>
+  }
+
+  export type UserCreateNestedOneWithoutPlanHistoriesInput = {
+    create?: XOR<UserCreateWithoutPlanHistoriesInput, UserUncheckedCreateWithoutPlanHistoriesInput>
+    connectOrCreate?: UserCreateOrConnectWithoutPlanHistoriesInput
+    connect?: UserWhereUniqueInput
+  }
+
+  export type AdminCreateNestedOneWithoutPlanHistoriesInput = {
+    create?: XOR<AdminCreateWithoutPlanHistoriesInput, AdminUncheckedCreateWithoutPlanHistoriesInput>
+    connectOrCreate?: AdminCreateOrConnectWithoutPlanHistoriesInput
+    connect?: AdminWhereUniqueInput
+  }
+
+  export type UserUpdateOneRequiredWithoutPlanHistoriesNestedInput = {
+    create?: XOR<UserCreateWithoutPlanHistoriesInput, UserUncheckedCreateWithoutPlanHistoriesInput>
+    connectOrCreate?: UserCreateOrConnectWithoutPlanHistoriesInput
+    upsert?: UserUpsertWithoutPlanHistoriesInput
+    connect?: UserWhereUniqueInput
+    update?: XOR<XOR<UserUpdateToOneWithWhereWithoutPlanHistoriesInput, UserUpdateWithoutPlanHistoriesInput>, UserUncheckedUpdateWithoutPlanHistoriesInput>
+  }
+
+  export type AdminUpdateOneWithoutPlanHistoriesNestedInput = {
+    create?: XOR<AdminCreateWithoutPlanHistoriesInput, AdminUncheckedCreateWithoutPlanHistoriesInput>
+    connectOrCreate?: AdminCreateOrConnectWithoutPlanHistoriesInput
+    upsert?: AdminUpsertWithoutPlanHistoriesInput
+    disconnect?: AdminWhereInput | boolean
+    delete?: AdminWhereInput | boolean
+    connect?: AdminWhereUniqueInput
+    update?: XOR<XOR<AdminUpdateToOneWithWhereWithoutPlanHistoriesInput, AdminUpdateWithoutPlanHistoriesInput>, AdminUncheckedUpdateWithoutPlanHistoriesInput>
+  }
+
+  export type AdminCreateNestedOneWithoutAuditLogsInput = {
+    create?: XOR<AdminCreateWithoutAuditLogsInput, AdminUncheckedCreateWithoutAuditLogsInput>
+    connectOrCreate?: AdminCreateOrConnectWithoutAuditLogsInput
+    connect?: AdminWhereUniqueInput
+  }
+
+  export type UserCreateNestedOneWithoutAuditLogsInput = {
+    create?: XOR<UserCreateWithoutAuditLogsInput, UserUncheckedCreateWithoutAuditLogsInput>
+    connectOrCreate?: UserCreateOrConnectWithoutAuditLogsInput
+    connect?: UserWhereUniqueInput
+  }
+
+  export type EnumAdminAuditActionFieldUpdateOperationsInput = {
+    set?: $Enums.AdminAuditAction
+  }
+
+  export type AdminUpdateOneRequiredWithoutAuditLogsNestedInput = {
+    create?: XOR<AdminCreateWithoutAuditLogsInput, AdminUncheckedCreateWithoutAuditLogsInput>
+    connectOrCreate?: AdminCreateOrConnectWithoutAuditLogsInput
+    upsert?: AdminUpsertWithoutAuditLogsInput
+    connect?: AdminWhereUniqueInput
+    update?: XOR<XOR<AdminUpdateToOneWithWhereWithoutAuditLogsInput, AdminUpdateWithoutAuditLogsInput>, AdminUncheckedUpdateWithoutAuditLogsInput>
+  }
+
+  export type UserUpdateOneWithoutAuditLogsNestedInput = {
+    create?: XOR<UserCreateWithoutAuditLogsInput, UserUncheckedCreateWithoutAuditLogsInput>
+    connectOrCreate?: UserCreateOrConnectWithoutAuditLogsInput
+    upsert?: UserUpsertWithoutAuditLogsInput
+    disconnect?: UserWhereInput | boolean
+    delete?: UserWhereInput | boolean
+    connect?: UserWhereUniqueInput
+    update?: XOR<XOR<UserUpdateToOneWithWhereWithoutAuditLogsInput, UserUpdateWithoutAuditLogsInput>, UserUncheckedUpdateWithoutAuditLogsInput>
+  }
+
   export type NestedIntFilter<$PrismaModel = never> = {
     equals?: number | IntFieldRefInput<$PrismaModel>
     in?: number[] | ListIntFieldRefInput<$PrismaModel>
@@ -49550,6 +56115,13 @@ export namespace Prisma {
     not?: NestedEnumPlanTypeFilter<$PrismaModel> | $Enums.PlanType
   }
 
+  export type NestedEnumUserStatusFilter<$PrismaModel = never> = {
+    equals?: $Enums.UserStatus | EnumUserStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.UserStatus[] | ListEnumUserStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.UserStatus[] | ListEnumUserStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumUserStatusFilter<$PrismaModel> | $Enums.UserStatus
+  }
+
   export type NestedUuidWithAggregatesFilter<$PrismaModel = never> = {
     equals?: string | StringFieldRefInput<$PrismaModel>
     in?: string[] | ListStringFieldRefInput<$PrismaModel>
@@ -49590,6 +56162,16 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedEnumPlanTypeFilter<$PrismaModel>
     _max?: NestedEnumPlanTypeFilter<$PrismaModel>
+  }
+
+  export type NestedEnumUserStatusWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.UserStatus | EnumUserStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.UserStatus[] | ListEnumUserStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.UserStatus[] | ListEnumUserStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumUserStatusWithAggregatesFilter<$PrismaModel> | $Enums.UserStatus
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumUserStatusFilter<$PrismaModel>
+    _max?: NestedEnumUserStatusFilter<$PrismaModel>
   }
 
   export type NestedEnumMarketTypeFilter<$PrismaModel = never> = {
@@ -49962,6 +56544,40 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedEnumPaymentStatusFilter<$PrismaModel>
     _max?: NestedEnumPaymentStatusFilter<$PrismaModel>
+  }
+
+  export type NestedEnumAdminRoleFilter<$PrismaModel = never> = {
+    equals?: $Enums.AdminRole | EnumAdminRoleFieldRefInput<$PrismaModel>
+    in?: $Enums.AdminRole[] | ListEnumAdminRoleFieldRefInput<$PrismaModel>
+    notIn?: $Enums.AdminRole[] | ListEnumAdminRoleFieldRefInput<$PrismaModel>
+    not?: NestedEnumAdminRoleFilter<$PrismaModel> | $Enums.AdminRole
+  }
+
+  export type NestedEnumAdminRoleWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.AdminRole | EnumAdminRoleFieldRefInput<$PrismaModel>
+    in?: $Enums.AdminRole[] | ListEnumAdminRoleFieldRefInput<$PrismaModel>
+    notIn?: $Enums.AdminRole[] | ListEnumAdminRoleFieldRefInput<$PrismaModel>
+    not?: NestedEnumAdminRoleWithAggregatesFilter<$PrismaModel> | $Enums.AdminRole
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumAdminRoleFilter<$PrismaModel>
+    _max?: NestedEnumAdminRoleFilter<$PrismaModel>
+  }
+
+  export type NestedEnumAdminAuditActionFilter<$PrismaModel = never> = {
+    equals?: $Enums.AdminAuditAction | EnumAdminAuditActionFieldRefInput<$PrismaModel>
+    in?: $Enums.AdminAuditAction[] | ListEnumAdminAuditActionFieldRefInput<$PrismaModel>
+    notIn?: $Enums.AdminAuditAction[] | ListEnumAdminAuditActionFieldRefInput<$PrismaModel>
+    not?: NestedEnumAdminAuditActionFilter<$PrismaModel> | $Enums.AdminAuditAction
+  }
+
+  export type NestedEnumAdminAuditActionWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.AdminAuditAction | EnumAdminAuditActionFieldRefInput<$PrismaModel>
+    in?: $Enums.AdminAuditAction[] | ListEnumAdminAuditActionFieldRefInput<$PrismaModel>
+    notIn?: $Enums.AdminAuditAction[] | ListEnumAdminAuditActionFieldRefInput<$PrismaModel>
+    not?: NestedEnumAdminAuditActionWithAggregatesFilter<$PrismaModel> | $Enums.AdminAuditAction
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumAdminAuditActionFilter<$PrismaModel>
+    _max?: NestedEnumAdminAuditActionFilter<$PrismaModel>
   }
 
   export type CompanyCreateWithoutThemeInput = {
@@ -50909,6 +57525,110 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  export type UserLoginHistoryCreateWithoutUserInput = {
+    historyId?: string
+    provider: $Enums.AuthProvider
+    ipAddress?: string | null
+    userAgent?: string | null
+    deviceType?: string | null
+    osName?: string | null
+    loggedInAt?: Date | string
+  }
+
+  export type UserLoginHistoryUncheckedCreateWithoutUserInput = {
+    historyId?: string
+    provider: $Enums.AuthProvider
+    ipAddress?: string | null
+    userAgent?: string | null
+    deviceType?: string | null
+    osName?: string | null
+    loggedInAt?: Date | string
+  }
+
+  export type UserLoginHistoryCreateOrConnectWithoutUserInput = {
+    where: UserLoginHistoryWhereUniqueInput
+    create: XOR<UserLoginHistoryCreateWithoutUserInput, UserLoginHistoryUncheckedCreateWithoutUserInput>
+  }
+
+  export type UserLoginHistoryCreateManyUserInputEnvelope = {
+    data: UserLoginHistoryCreateManyUserInput | UserLoginHistoryCreateManyUserInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type UserPlanHistoryCreateWithoutUserInput = {
+    historyId?: string
+    fromPlan?: $Enums.PlanType | null
+    toPlan: $Enums.PlanType
+    reason?: string | null
+    note?: string | null
+    effectiveAt: Date | string
+    expiresAt?: Date | string | null
+    createdAt?: Date | string
+    admin?: AdminCreateNestedOneWithoutPlanHistoriesInput
+  }
+
+  export type UserPlanHistoryUncheckedCreateWithoutUserInput = {
+    historyId?: string
+    fromPlan?: $Enums.PlanType | null
+    toPlan: $Enums.PlanType
+    reason?: string | null
+    changedBy?: string | null
+    note?: string | null
+    effectiveAt: Date | string
+    expiresAt?: Date | string | null
+    createdAt?: Date | string
+  }
+
+  export type UserPlanHistoryCreateOrConnectWithoutUserInput = {
+    where: UserPlanHistoryWhereUniqueInput
+    create: XOR<UserPlanHistoryCreateWithoutUserInput, UserPlanHistoryUncheckedCreateWithoutUserInput>
+  }
+
+  export type UserPlanHistoryCreateManyUserInputEnvelope = {
+    data: UserPlanHistoryCreateManyUserInput | UserPlanHistoryCreateManyUserInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type AdminAuditLogCreateWithoutTargetUserInput = {
+    logId?: string
+    action: $Enums.AdminAuditAction
+    targetScope?: string | null
+    beforeValue?: NullableJsonNullValueInput | InputJsonValue
+    afterValue?: NullableJsonNullValueInput | InputJsonValue
+    reason?: string | null
+    success?: boolean
+    failureCode?: string | null
+    ipAddress?: string | null
+    userAgent?: string | null
+    createdAt?: Date | string
+    admin: AdminCreateNestedOneWithoutAuditLogsInput
+  }
+
+  export type AdminAuditLogUncheckedCreateWithoutTargetUserInput = {
+    logId?: string
+    adminId: string
+    action: $Enums.AdminAuditAction
+    targetScope?: string | null
+    beforeValue?: NullableJsonNullValueInput | InputJsonValue
+    afterValue?: NullableJsonNullValueInput | InputJsonValue
+    reason?: string | null
+    success?: boolean
+    failureCode?: string | null
+    ipAddress?: string | null
+    userAgent?: string | null
+    createdAt?: Date | string
+  }
+
+  export type AdminAuditLogCreateOrConnectWithoutTargetUserInput = {
+    where: AdminAuditLogWhereUniqueInput
+    create: XOR<AdminAuditLogCreateWithoutTargetUserInput, AdminAuditLogUncheckedCreateWithoutTargetUserInput>
+  }
+
+  export type AdminAuditLogCreateManyTargetUserInputEnvelope = {
+    data: AdminAuditLogCreateManyTargetUserInput | AdminAuditLogCreateManyTargetUserInput[]
+    skipDuplicates?: boolean
+  }
+
   export type UserWatchlistUpsertWithWhereUniqueWithoutUserInput = {
     where: UserWatchlistWhereUniqueInput
     update: XOR<UserWatchlistUpdateWithoutUserInput, UserWatchlistUncheckedUpdateWithoutUserInput>
@@ -51155,6 +57875,103 @@ export namespace Prisma {
     updatedAt?: DateTimeFilter<"Payment"> | Date | string
   }
 
+  export type UserLoginHistoryUpsertWithWhereUniqueWithoutUserInput = {
+    where: UserLoginHistoryWhereUniqueInput
+    update: XOR<UserLoginHistoryUpdateWithoutUserInput, UserLoginHistoryUncheckedUpdateWithoutUserInput>
+    create: XOR<UserLoginHistoryCreateWithoutUserInput, UserLoginHistoryUncheckedCreateWithoutUserInput>
+  }
+
+  export type UserLoginHistoryUpdateWithWhereUniqueWithoutUserInput = {
+    where: UserLoginHistoryWhereUniqueInput
+    data: XOR<UserLoginHistoryUpdateWithoutUserInput, UserLoginHistoryUncheckedUpdateWithoutUserInput>
+  }
+
+  export type UserLoginHistoryUpdateManyWithWhereWithoutUserInput = {
+    where: UserLoginHistoryScalarWhereInput
+    data: XOR<UserLoginHistoryUpdateManyMutationInput, UserLoginHistoryUncheckedUpdateManyWithoutUserInput>
+  }
+
+  export type UserLoginHistoryScalarWhereInput = {
+    AND?: UserLoginHistoryScalarWhereInput | UserLoginHistoryScalarWhereInput[]
+    OR?: UserLoginHistoryScalarWhereInput[]
+    NOT?: UserLoginHistoryScalarWhereInput | UserLoginHistoryScalarWhereInput[]
+    historyId?: UuidFilter<"UserLoginHistory"> | string
+    userId?: UuidFilter<"UserLoginHistory"> | string
+    provider?: EnumAuthProviderFilter<"UserLoginHistory"> | $Enums.AuthProvider
+    ipAddress?: StringNullableFilter<"UserLoginHistory"> | string | null
+    userAgent?: StringNullableFilter<"UserLoginHistory"> | string | null
+    deviceType?: StringNullableFilter<"UserLoginHistory"> | string | null
+    osName?: StringNullableFilter<"UserLoginHistory"> | string | null
+    loggedInAt?: DateTimeFilter<"UserLoginHistory"> | Date | string
+  }
+
+  export type UserPlanHistoryUpsertWithWhereUniqueWithoutUserInput = {
+    where: UserPlanHistoryWhereUniqueInput
+    update: XOR<UserPlanHistoryUpdateWithoutUserInput, UserPlanHistoryUncheckedUpdateWithoutUserInput>
+    create: XOR<UserPlanHistoryCreateWithoutUserInput, UserPlanHistoryUncheckedCreateWithoutUserInput>
+  }
+
+  export type UserPlanHistoryUpdateWithWhereUniqueWithoutUserInput = {
+    where: UserPlanHistoryWhereUniqueInput
+    data: XOR<UserPlanHistoryUpdateWithoutUserInput, UserPlanHistoryUncheckedUpdateWithoutUserInput>
+  }
+
+  export type UserPlanHistoryUpdateManyWithWhereWithoutUserInput = {
+    where: UserPlanHistoryScalarWhereInput
+    data: XOR<UserPlanHistoryUpdateManyMutationInput, UserPlanHistoryUncheckedUpdateManyWithoutUserInput>
+  }
+
+  export type UserPlanHistoryScalarWhereInput = {
+    AND?: UserPlanHistoryScalarWhereInput | UserPlanHistoryScalarWhereInput[]
+    OR?: UserPlanHistoryScalarWhereInput[]
+    NOT?: UserPlanHistoryScalarWhereInput | UserPlanHistoryScalarWhereInput[]
+    historyId?: UuidFilter<"UserPlanHistory"> | string
+    userId?: UuidFilter<"UserPlanHistory"> | string
+    fromPlan?: EnumPlanTypeNullableFilter<"UserPlanHistory"> | $Enums.PlanType | null
+    toPlan?: EnumPlanTypeFilter<"UserPlanHistory"> | $Enums.PlanType
+    reason?: StringNullableFilter<"UserPlanHistory"> | string | null
+    changedBy?: UuidNullableFilter<"UserPlanHistory"> | string | null
+    note?: StringNullableFilter<"UserPlanHistory"> | string | null
+    effectiveAt?: DateTimeFilter<"UserPlanHistory"> | Date | string
+    expiresAt?: DateTimeNullableFilter<"UserPlanHistory"> | Date | string | null
+    createdAt?: DateTimeFilter<"UserPlanHistory"> | Date | string
+  }
+
+  export type AdminAuditLogUpsertWithWhereUniqueWithoutTargetUserInput = {
+    where: AdminAuditLogWhereUniqueInput
+    update: XOR<AdminAuditLogUpdateWithoutTargetUserInput, AdminAuditLogUncheckedUpdateWithoutTargetUserInput>
+    create: XOR<AdminAuditLogCreateWithoutTargetUserInput, AdminAuditLogUncheckedCreateWithoutTargetUserInput>
+  }
+
+  export type AdminAuditLogUpdateWithWhereUniqueWithoutTargetUserInput = {
+    where: AdminAuditLogWhereUniqueInput
+    data: XOR<AdminAuditLogUpdateWithoutTargetUserInput, AdminAuditLogUncheckedUpdateWithoutTargetUserInput>
+  }
+
+  export type AdminAuditLogUpdateManyWithWhereWithoutTargetUserInput = {
+    where: AdminAuditLogScalarWhereInput
+    data: XOR<AdminAuditLogUpdateManyMutationInput, AdminAuditLogUncheckedUpdateManyWithoutTargetUserInput>
+  }
+
+  export type AdminAuditLogScalarWhereInput = {
+    AND?: AdminAuditLogScalarWhereInput | AdminAuditLogScalarWhereInput[]
+    OR?: AdminAuditLogScalarWhereInput[]
+    NOT?: AdminAuditLogScalarWhereInput | AdminAuditLogScalarWhereInput[]
+    logId?: UuidFilter<"AdminAuditLog"> | string
+    adminId?: UuidFilter<"AdminAuditLog"> | string
+    action?: EnumAdminAuditActionFilter<"AdminAuditLog"> | $Enums.AdminAuditAction
+    targetUserId?: UuidNullableFilter<"AdminAuditLog"> | string | null
+    targetScope?: StringNullableFilter<"AdminAuditLog"> | string | null
+    beforeValue?: JsonNullableFilter<"AdminAuditLog">
+    afterValue?: JsonNullableFilter<"AdminAuditLog">
+    reason?: StringNullableFilter<"AdminAuditLog"> | string | null
+    success?: BoolFilter<"AdminAuditLog"> | boolean
+    failureCode?: StringNullableFilter<"AdminAuditLog"> | string | null
+    ipAddress?: StringNullableFilter<"AdminAuditLog"> | string | null
+    userAgent?: StringNullableFilter<"AdminAuditLog"> | string | null
+    createdAt?: DateTimeFilter<"AdminAuditLog"> | Date | string
+  }
+
   export type ThemeCreateWithoutCompaniesInput = {
     themeCode: number
     themeName: string
@@ -51359,6 +58176,7 @@ export namespace Prisma {
     marketingConsent?: boolean
     isTempPassword?: boolean
     planType?: $Enums.PlanType
+    status?: $Enums.UserStatus
     createdAt?: Date | string
     updatedAt?: Date | string
     deletedAt?: Date | string | null
@@ -51369,6 +58187,9 @@ export namespace Prisma {
     subscription?: UserSubscriptionCreateNestedOneWithoutUserInput
     paymentCards?: PaymentCardCreateNestedManyWithoutUserInput
     payments?: PaymentCreateNestedManyWithoutUserInput
+    loginHistories?: UserLoginHistoryCreateNestedManyWithoutUserInput
+    planHistories?: UserPlanHistoryCreateNestedManyWithoutUserInput
+    auditLogs?: AdminAuditLogCreateNestedManyWithoutTargetUserInput
   }
 
   export type UserUncheckedCreateWithoutWatchlistInput = {
@@ -51383,6 +58204,7 @@ export namespace Prisma {
     marketingConsent?: boolean
     isTempPassword?: boolean
     planType?: $Enums.PlanType
+    status?: $Enums.UserStatus
     createdAt?: Date | string
     updatedAt?: Date | string
     deletedAt?: Date | string | null
@@ -51393,6 +58215,9 @@ export namespace Prisma {
     subscription?: UserSubscriptionUncheckedCreateNestedOneWithoutUserInput
     paymentCards?: PaymentCardUncheckedCreateNestedManyWithoutUserInput
     payments?: PaymentUncheckedCreateNestedManyWithoutUserInput
+    loginHistories?: UserLoginHistoryUncheckedCreateNestedManyWithoutUserInput
+    planHistories?: UserPlanHistoryUncheckedCreateNestedManyWithoutUserInput
+    auditLogs?: AdminAuditLogUncheckedCreateNestedManyWithoutTargetUserInput
   }
 
   export type UserCreateOrConnectWithoutWatchlistInput = {
@@ -51482,6 +58307,7 @@ export namespace Prisma {
     marketingConsent?: BoolFieldUpdateOperationsInput | boolean
     isTempPassword?: BoolFieldUpdateOperationsInput | boolean
     planType?: EnumPlanTypeFieldUpdateOperationsInput | $Enums.PlanType
+    status?: EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -51492,6 +58318,9 @@ export namespace Prisma {
     subscription?: UserSubscriptionUpdateOneWithoutUserNestedInput
     paymentCards?: PaymentCardUpdateManyWithoutUserNestedInput
     payments?: PaymentUpdateManyWithoutUserNestedInput
+    loginHistories?: UserLoginHistoryUpdateManyWithoutUserNestedInput
+    planHistories?: UserPlanHistoryUpdateManyWithoutUserNestedInput
+    auditLogs?: AdminAuditLogUpdateManyWithoutTargetUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutWatchlistInput = {
@@ -51506,6 +58335,7 @@ export namespace Prisma {
     marketingConsent?: BoolFieldUpdateOperationsInput | boolean
     isTempPassword?: BoolFieldUpdateOperationsInput | boolean
     planType?: EnumPlanTypeFieldUpdateOperationsInput | $Enums.PlanType
+    status?: EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -51516,6 +58346,9 @@ export namespace Prisma {
     subscription?: UserSubscriptionUncheckedUpdateOneWithoutUserNestedInput
     paymentCards?: PaymentCardUncheckedUpdateManyWithoutUserNestedInput
     payments?: PaymentUncheckedUpdateManyWithoutUserNestedInput
+    loginHistories?: UserLoginHistoryUncheckedUpdateManyWithoutUserNestedInput
+    planHistories?: UserPlanHistoryUncheckedUpdateManyWithoutUserNestedInput
+    auditLogs?: AdminAuditLogUncheckedUpdateManyWithoutTargetUserNestedInput
   }
 
   export type CompanyUpsertWithoutWatchlistInput = {
@@ -51600,6 +58433,7 @@ export namespace Prisma {
     marketingConsent?: boolean
     isTempPassword?: boolean
     planType?: $Enums.PlanType
+    status?: $Enums.UserStatus
     createdAt?: Date | string
     updatedAt?: Date | string
     deletedAt?: Date | string | null
@@ -51610,6 +58444,9 @@ export namespace Prisma {
     subscription?: UserSubscriptionCreateNestedOneWithoutUserInput
     paymentCards?: PaymentCardCreateNestedManyWithoutUserInput
     payments?: PaymentCreateNestedManyWithoutUserInput
+    loginHistories?: UserLoginHistoryCreateNestedManyWithoutUserInput
+    planHistories?: UserPlanHistoryCreateNestedManyWithoutUserInput
+    auditLogs?: AdminAuditLogCreateNestedManyWithoutTargetUserInput
   }
 
   export type UserUncheckedCreateWithoutWatchlistThemesInput = {
@@ -51624,6 +58461,7 @@ export namespace Prisma {
     marketingConsent?: boolean
     isTempPassword?: boolean
     planType?: $Enums.PlanType
+    status?: $Enums.UserStatus
     createdAt?: Date | string
     updatedAt?: Date | string
     deletedAt?: Date | string | null
@@ -51634,6 +58472,9 @@ export namespace Prisma {
     subscription?: UserSubscriptionUncheckedCreateNestedOneWithoutUserInput
     paymentCards?: PaymentCardUncheckedCreateNestedManyWithoutUserInput
     payments?: PaymentUncheckedCreateNestedManyWithoutUserInput
+    loginHistories?: UserLoginHistoryUncheckedCreateNestedManyWithoutUserInput
+    planHistories?: UserPlanHistoryUncheckedCreateNestedManyWithoutUserInput
+    auditLogs?: AdminAuditLogUncheckedCreateNestedManyWithoutTargetUserInput
   }
 
   export type UserCreateOrConnectWithoutWatchlistThemesInput = {
@@ -51703,6 +58544,7 @@ export namespace Prisma {
     marketingConsent?: BoolFieldUpdateOperationsInput | boolean
     isTempPassword?: BoolFieldUpdateOperationsInput | boolean
     planType?: EnumPlanTypeFieldUpdateOperationsInput | $Enums.PlanType
+    status?: EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -51713,6 +58555,9 @@ export namespace Prisma {
     subscription?: UserSubscriptionUpdateOneWithoutUserNestedInput
     paymentCards?: PaymentCardUpdateManyWithoutUserNestedInput
     payments?: PaymentUpdateManyWithoutUserNestedInput
+    loginHistories?: UserLoginHistoryUpdateManyWithoutUserNestedInput
+    planHistories?: UserPlanHistoryUpdateManyWithoutUserNestedInput
+    auditLogs?: AdminAuditLogUpdateManyWithoutTargetUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutWatchlistThemesInput = {
@@ -51727,6 +58572,7 @@ export namespace Prisma {
     marketingConsent?: BoolFieldUpdateOperationsInput | boolean
     isTempPassword?: BoolFieldUpdateOperationsInput | boolean
     planType?: EnumPlanTypeFieldUpdateOperationsInput | $Enums.PlanType
+    status?: EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -51737,6 +58583,9 @@ export namespace Prisma {
     subscription?: UserSubscriptionUncheckedUpdateOneWithoutUserNestedInput
     paymentCards?: PaymentCardUncheckedUpdateManyWithoutUserNestedInput
     payments?: PaymentUncheckedUpdateManyWithoutUserNestedInput
+    loginHistories?: UserLoginHistoryUncheckedUpdateManyWithoutUserNestedInput
+    planHistories?: UserPlanHistoryUncheckedUpdateManyWithoutUserNestedInput
+    auditLogs?: AdminAuditLogUncheckedUpdateManyWithoutTargetUserNestedInput
   }
 
   export type ThemeUpsertWithoutWatchlistUsersInput = {
@@ -51927,6 +58776,7 @@ export namespace Prisma {
     marketingConsent?: boolean
     isTempPassword?: boolean
     planType?: $Enums.PlanType
+    status?: $Enums.UserStatus
     createdAt?: Date | string
     updatedAt?: Date | string
     deletedAt?: Date | string | null
@@ -51937,6 +58787,9 @@ export namespace Prisma {
     subscription?: UserSubscriptionCreateNestedOneWithoutUserInput
     paymentCards?: PaymentCardCreateNestedManyWithoutUserInput
     payments?: PaymentCreateNestedManyWithoutUserInput
+    loginHistories?: UserLoginHistoryCreateNestedManyWithoutUserInput
+    planHistories?: UserPlanHistoryCreateNestedManyWithoutUserInput
+    auditLogs?: AdminAuditLogCreateNestedManyWithoutTargetUserInput
   }
 
   export type UserUncheckedCreateWithoutRsFilterPresetsInput = {
@@ -51951,6 +58804,7 @@ export namespace Prisma {
     marketingConsent?: boolean
     isTempPassword?: boolean
     planType?: $Enums.PlanType
+    status?: $Enums.UserStatus
     createdAt?: Date | string
     updatedAt?: Date | string
     deletedAt?: Date | string | null
@@ -51961,6 +58815,9 @@ export namespace Prisma {
     subscription?: UserSubscriptionUncheckedCreateNestedOneWithoutUserInput
     paymentCards?: PaymentCardUncheckedCreateNestedManyWithoutUserInput
     payments?: PaymentUncheckedCreateNestedManyWithoutUserInput
+    loginHistories?: UserLoginHistoryUncheckedCreateNestedManyWithoutUserInput
+    planHistories?: UserPlanHistoryUncheckedCreateNestedManyWithoutUserInput
+    auditLogs?: AdminAuditLogUncheckedCreateNestedManyWithoutTargetUserInput
   }
 
   export type UserCreateOrConnectWithoutRsFilterPresetsInput = {
@@ -52019,6 +58876,7 @@ export namespace Prisma {
     marketingConsent?: BoolFieldUpdateOperationsInput | boolean
     isTempPassword?: BoolFieldUpdateOperationsInput | boolean
     planType?: EnumPlanTypeFieldUpdateOperationsInput | $Enums.PlanType
+    status?: EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -52029,6 +58887,9 @@ export namespace Prisma {
     subscription?: UserSubscriptionUpdateOneWithoutUserNestedInput
     paymentCards?: PaymentCardUpdateManyWithoutUserNestedInput
     payments?: PaymentUpdateManyWithoutUserNestedInput
+    loginHistories?: UserLoginHistoryUpdateManyWithoutUserNestedInput
+    planHistories?: UserPlanHistoryUpdateManyWithoutUserNestedInput
+    auditLogs?: AdminAuditLogUpdateManyWithoutTargetUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutRsFilterPresetsInput = {
@@ -52043,6 +58904,7 @@ export namespace Prisma {
     marketingConsent?: BoolFieldUpdateOperationsInput | boolean
     isTempPassword?: BoolFieldUpdateOperationsInput | boolean
     planType?: EnumPlanTypeFieldUpdateOperationsInput | $Enums.PlanType
+    status?: EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -52053,6 +58915,9 @@ export namespace Prisma {
     subscription?: UserSubscriptionUncheckedUpdateOneWithoutUserNestedInput
     paymentCards?: PaymentCardUncheckedUpdateManyWithoutUserNestedInput
     payments?: PaymentUncheckedUpdateManyWithoutUserNestedInput
+    loginHistories?: UserLoginHistoryUncheckedUpdateManyWithoutUserNestedInput
+    planHistories?: UserPlanHistoryUncheckedUpdateManyWithoutUserNestedInput
+    auditLogs?: AdminAuditLogUncheckedUpdateManyWithoutTargetUserNestedInput
   }
 
   export type RsFilterPeriodUpsertWithWhereUniqueWithoutPresetInput = {
@@ -52144,6 +59009,7 @@ export namespace Prisma {
     marketingConsent?: boolean
     isTempPassword?: boolean
     planType?: $Enums.PlanType
+    status?: $Enums.UserStatus
     createdAt?: Date | string
     updatedAt?: Date | string
     deletedAt?: Date | string | null
@@ -52154,6 +59020,9 @@ export namespace Prisma {
     subscription?: UserSubscriptionCreateNestedOneWithoutUserInput
     paymentCards?: PaymentCardCreateNestedManyWithoutUserInput
     payments?: PaymentCreateNestedManyWithoutUserInput
+    loginHistories?: UserLoginHistoryCreateNestedManyWithoutUserInput
+    planHistories?: UserPlanHistoryCreateNestedManyWithoutUserInput
+    auditLogs?: AdminAuditLogCreateNestedManyWithoutTargetUserInput
   }
 
   export type UserUncheckedCreateWithoutSearchFilterPresetsInput = {
@@ -52168,6 +59037,7 @@ export namespace Prisma {
     marketingConsent?: boolean
     isTempPassword?: boolean
     planType?: $Enums.PlanType
+    status?: $Enums.UserStatus
     createdAt?: Date | string
     updatedAt?: Date | string
     deletedAt?: Date | string | null
@@ -52178,6 +59048,9 @@ export namespace Prisma {
     subscription?: UserSubscriptionUncheckedCreateNestedOneWithoutUserInput
     paymentCards?: PaymentCardUncheckedCreateNestedManyWithoutUserInput
     payments?: PaymentUncheckedCreateNestedManyWithoutUserInput
+    loginHistories?: UserLoginHistoryUncheckedCreateNestedManyWithoutUserInput
+    planHistories?: UserPlanHistoryUncheckedCreateNestedManyWithoutUserInput
+    auditLogs?: AdminAuditLogUncheckedCreateNestedManyWithoutTargetUserInput
   }
 
   export type UserCreateOrConnectWithoutSearchFilterPresetsInput = {
@@ -52208,6 +59081,7 @@ export namespace Prisma {
     marketingConsent?: BoolFieldUpdateOperationsInput | boolean
     isTempPassword?: BoolFieldUpdateOperationsInput | boolean
     planType?: EnumPlanTypeFieldUpdateOperationsInput | $Enums.PlanType
+    status?: EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -52218,6 +59092,9 @@ export namespace Prisma {
     subscription?: UserSubscriptionUpdateOneWithoutUserNestedInput
     paymentCards?: PaymentCardUpdateManyWithoutUserNestedInput
     payments?: PaymentUpdateManyWithoutUserNestedInput
+    loginHistories?: UserLoginHistoryUpdateManyWithoutUserNestedInput
+    planHistories?: UserPlanHistoryUpdateManyWithoutUserNestedInput
+    auditLogs?: AdminAuditLogUpdateManyWithoutTargetUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutSearchFilterPresetsInput = {
@@ -52232,6 +59109,7 @@ export namespace Prisma {
     marketingConsent?: BoolFieldUpdateOperationsInput | boolean
     isTempPassword?: BoolFieldUpdateOperationsInput | boolean
     planType?: EnumPlanTypeFieldUpdateOperationsInput | $Enums.PlanType
+    status?: EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -52242,6 +59120,9 @@ export namespace Prisma {
     subscription?: UserSubscriptionUncheckedUpdateOneWithoutUserNestedInput
     paymentCards?: PaymentCardUncheckedUpdateManyWithoutUserNestedInput
     payments?: PaymentUncheckedUpdateManyWithoutUserNestedInput
+    loginHistories?: UserLoginHistoryUncheckedUpdateManyWithoutUserNestedInput
+    planHistories?: UserPlanHistoryUncheckedUpdateManyWithoutUserNestedInput
+    auditLogs?: AdminAuditLogUncheckedUpdateManyWithoutTargetUserNestedInput
   }
 
   export type CompanyCreateWithoutPriceHistoryInput = {
@@ -52336,6 +59217,7 @@ export namespace Prisma {
     marketingConsent?: boolean
     isTempPassword?: boolean
     planType?: $Enums.PlanType
+    status?: $Enums.UserStatus
     createdAt?: Date | string
     updatedAt?: Date | string
     deletedAt?: Date | string | null
@@ -52346,6 +59228,9 @@ export namespace Prisma {
     subscription?: UserSubscriptionCreateNestedOneWithoutUserInput
     paymentCards?: PaymentCardCreateNestedManyWithoutUserInput
     payments?: PaymentCreateNestedManyWithoutUserInput
+    loginHistories?: UserLoginHistoryCreateNestedManyWithoutUserInput
+    planHistories?: UserPlanHistoryCreateNestedManyWithoutUserInput
+    auditLogs?: AdminAuditLogCreateNestedManyWithoutTargetUserInput
   }
 
   export type UserUncheckedCreateWithoutApiCallLogsInput = {
@@ -52360,6 +59245,7 @@ export namespace Prisma {
     marketingConsent?: boolean
     isTempPassword?: boolean
     planType?: $Enums.PlanType
+    status?: $Enums.UserStatus
     createdAt?: Date | string
     updatedAt?: Date | string
     deletedAt?: Date | string | null
@@ -52370,6 +59256,9 @@ export namespace Prisma {
     subscription?: UserSubscriptionUncheckedCreateNestedOneWithoutUserInput
     paymentCards?: PaymentCardUncheckedCreateNestedManyWithoutUserInput
     payments?: PaymentUncheckedCreateNestedManyWithoutUserInput
+    loginHistories?: UserLoginHistoryUncheckedCreateNestedManyWithoutUserInput
+    planHistories?: UserPlanHistoryUncheckedCreateNestedManyWithoutUserInput
+    auditLogs?: AdminAuditLogUncheckedCreateNestedManyWithoutTargetUserInput
   }
 
   export type UserCreateOrConnectWithoutApiCallLogsInput = {
@@ -52400,6 +59289,7 @@ export namespace Prisma {
     marketingConsent?: BoolFieldUpdateOperationsInput | boolean
     isTempPassword?: BoolFieldUpdateOperationsInput | boolean
     planType?: EnumPlanTypeFieldUpdateOperationsInput | $Enums.PlanType
+    status?: EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -52410,6 +59300,9 @@ export namespace Prisma {
     subscription?: UserSubscriptionUpdateOneWithoutUserNestedInput
     paymentCards?: PaymentCardUpdateManyWithoutUserNestedInput
     payments?: PaymentUpdateManyWithoutUserNestedInput
+    loginHistories?: UserLoginHistoryUpdateManyWithoutUserNestedInput
+    planHistories?: UserPlanHistoryUpdateManyWithoutUserNestedInput
+    auditLogs?: AdminAuditLogUpdateManyWithoutTargetUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutApiCallLogsInput = {
@@ -52424,6 +59317,7 @@ export namespace Prisma {
     marketingConsent?: BoolFieldUpdateOperationsInput | boolean
     isTempPassword?: BoolFieldUpdateOperationsInput | boolean
     planType?: EnumPlanTypeFieldUpdateOperationsInput | $Enums.PlanType
+    status?: EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -52434,6 +59328,9 @@ export namespace Prisma {
     subscription?: UserSubscriptionUncheckedUpdateOneWithoutUserNestedInput
     paymentCards?: PaymentCardUncheckedUpdateManyWithoutUserNestedInput
     payments?: PaymentUncheckedUpdateManyWithoutUserNestedInput
+    loginHistories?: UserLoginHistoryUncheckedUpdateManyWithoutUserNestedInput
+    planHistories?: UserPlanHistoryUncheckedUpdateManyWithoutUserNestedInput
+    auditLogs?: AdminAuditLogUncheckedUpdateManyWithoutTargetUserNestedInput
   }
 
   export type ThemeCreateWithoutDailySnapshotsInput = {
@@ -52616,6 +59513,7 @@ export namespace Prisma {
     marketingConsent?: boolean
     isTempPassword?: boolean
     planType?: $Enums.PlanType
+    status?: $Enums.UserStatus
     createdAt?: Date | string
     updatedAt?: Date | string
     deletedAt?: Date | string | null
@@ -52626,6 +59524,9 @@ export namespace Prisma {
     apiCallLogs?: KiwoomApiCallLogCreateNestedManyWithoutUserInput
     paymentCards?: PaymentCardCreateNestedManyWithoutUserInput
     payments?: PaymentCreateNestedManyWithoutUserInput
+    loginHistories?: UserLoginHistoryCreateNestedManyWithoutUserInput
+    planHistories?: UserPlanHistoryCreateNestedManyWithoutUserInput
+    auditLogs?: AdminAuditLogCreateNestedManyWithoutTargetUserInput
   }
 
   export type UserUncheckedCreateWithoutSubscriptionInput = {
@@ -52640,6 +59541,7 @@ export namespace Prisma {
     marketingConsent?: boolean
     isTempPassword?: boolean
     planType?: $Enums.PlanType
+    status?: $Enums.UserStatus
     createdAt?: Date | string
     updatedAt?: Date | string
     deletedAt?: Date | string | null
@@ -52650,6 +59552,9 @@ export namespace Prisma {
     apiCallLogs?: KiwoomApiCallLogUncheckedCreateNestedManyWithoutUserInput
     paymentCards?: PaymentCardUncheckedCreateNestedManyWithoutUserInput
     payments?: PaymentUncheckedCreateNestedManyWithoutUserInput
+    loginHistories?: UserLoginHistoryUncheckedCreateNestedManyWithoutUserInput
+    planHistories?: UserPlanHistoryUncheckedCreateNestedManyWithoutUserInput
+    auditLogs?: AdminAuditLogUncheckedCreateNestedManyWithoutTargetUserInput
   }
 
   export type UserCreateOrConnectWithoutSubscriptionInput = {
@@ -52726,6 +59631,7 @@ export namespace Prisma {
     marketingConsent?: BoolFieldUpdateOperationsInput | boolean
     isTempPassword?: BoolFieldUpdateOperationsInput | boolean
     planType?: EnumPlanTypeFieldUpdateOperationsInput | $Enums.PlanType
+    status?: EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -52736,6 +59642,9 @@ export namespace Prisma {
     apiCallLogs?: KiwoomApiCallLogUpdateManyWithoutUserNestedInput
     paymentCards?: PaymentCardUpdateManyWithoutUserNestedInput
     payments?: PaymentUpdateManyWithoutUserNestedInput
+    loginHistories?: UserLoginHistoryUpdateManyWithoutUserNestedInput
+    planHistories?: UserPlanHistoryUpdateManyWithoutUserNestedInput
+    auditLogs?: AdminAuditLogUpdateManyWithoutTargetUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutSubscriptionInput = {
@@ -52750,6 +59659,7 @@ export namespace Prisma {
     marketingConsent?: BoolFieldUpdateOperationsInput | boolean
     isTempPassword?: BoolFieldUpdateOperationsInput | boolean
     planType?: EnumPlanTypeFieldUpdateOperationsInput | $Enums.PlanType
+    status?: EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -52760,6 +59670,9 @@ export namespace Prisma {
     apiCallLogs?: KiwoomApiCallLogUncheckedUpdateManyWithoutUserNestedInput
     paymentCards?: PaymentCardUncheckedUpdateManyWithoutUserNestedInput
     payments?: PaymentUncheckedUpdateManyWithoutUserNestedInput
+    loginHistories?: UserLoginHistoryUncheckedUpdateManyWithoutUserNestedInput
+    planHistories?: UserPlanHistoryUncheckedUpdateManyWithoutUserNestedInput
+    auditLogs?: AdminAuditLogUncheckedUpdateManyWithoutTargetUserNestedInput
   }
 
   export type PaymentUpsertWithWhereUniqueWithoutSubscriptionInput = {
@@ -52790,6 +59703,7 @@ export namespace Prisma {
     marketingConsent?: boolean
     isTempPassword?: boolean
     planType?: $Enums.PlanType
+    status?: $Enums.UserStatus
     createdAt?: Date | string
     updatedAt?: Date | string
     deletedAt?: Date | string | null
@@ -52800,6 +59714,9 @@ export namespace Prisma {
     apiCallLogs?: KiwoomApiCallLogCreateNestedManyWithoutUserInput
     subscription?: UserSubscriptionCreateNestedOneWithoutUserInput
     payments?: PaymentCreateNestedManyWithoutUserInput
+    loginHistories?: UserLoginHistoryCreateNestedManyWithoutUserInput
+    planHistories?: UserPlanHistoryCreateNestedManyWithoutUserInput
+    auditLogs?: AdminAuditLogCreateNestedManyWithoutTargetUserInput
   }
 
   export type UserUncheckedCreateWithoutPaymentCardsInput = {
@@ -52814,6 +59731,7 @@ export namespace Prisma {
     marketingConsent?: boolean
     isTempPassword?: boolean
     planType?: $Enums.PlanType
+    status?: $Enums.UserStatus
     createdAt?: Date | string
     updatedAt?: Date | string
     deletedAt?: Date | string | null
@@ -52824,6 +59742,9 @@ export namespace Prisma {
     apiCallLogs?: KiwoomApiCallLogUncheckedCreateNestedManyWithoutUserInput
     subscription?: UserSubscriptionUncheckedCreateNestedOneWithoutUserInput
     payments?: PaymentUncheckedCreateNestedManyWithoutUserInput
+    loginHistories?: UserLoginHistoryUncheckedCreateNestedManyWithoutUserInput
+    planHistories?: UserPlanHistoryUncheckedCreateNestedManyWithoutUserInput
+    auditLogs?: AdminAuditLogUncheckedCreateNestedManyWithoutTargetUserInput
   }
 
   export type UserCreateOrConnectWithoutPaymentCardsInput = {
@@ -52854,6 +59775,7 @@ export namespace Prisma {
     marketingConsent?: BoolFieldUpdateOperationsInput | boolean
     isTempPassword?: BoolFieldUpdateOperationsInput | boolean
     planType?: EnumPlanTypeFieldUpdateOperationsInput | $Enums.PlanType
+    status?: EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -52864,6 +59786,9 @@ export namespace Prisma {
     apiCallLogs?: KiwoomApiCallLogUpdateManyWithoutUserNestedInput
     subscription?: UserSubscriptionUpdateOneWithoutUserNestedInput
     payments?: PaymentUpdateManyWithoutUserNestedInput
+    loginHistories?: UserLoginHistoryUpdateManyWithoutUserNestedInput
+    planHistories?: UserPlanHistoryUpdateManyWithoutUserNestedInput
+    auditLogs?: AdminAuditLogUpdateManyWithoutTargetUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutPaymentCardsInput = {
@@ -52878,6 +59803,7 @@ export namespace Prisma {
     marketingConsent?: BoolFieldUpdateOperationsInput | boolean
     isTempPassword?: BoolFieldUpdateOperationsInput | boolean
     planType?: EnumPlanTypeFieldUpdateOperationsInput | $Enums.PlanType
+    status?: EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -52888,6 +59814,9 @@ export namespace Prisma {
     apiCallLogs?: KiwoomApiCallLogUncheckedUpdateManyWithoutUserNestedInput
     subscription?: UserSubscriptionUncheckedUpdateOneWithoutUserNestedInput
     payments?: PaymentUncheckedUpdateManyWithoutUserNestedInput
+    loginHistories?: UserLoginHistoryUncheckedUpdateManyWithoutUserNestedInput
+    planHistories?: UserPlanHistoryUncheckedUpdateManyWithoutUserNestedInput
+    auditLogs?: AdminAuditLogUncheckedUpdateManyWithoutTargetUserNestedInput
   }
 
   export type UserCreateWithoutPaymentsInput = {
@@ -52902,6 +59831,7 @@ export namespace Prisma {
     marketingConsent?: boolean
     isTempPassword?: boolean
     planType?: $Enums.PlanType
+    status?: $Enums.UserStatus
     createdAt?: Date | string
     updatedAt?: Date | string
     deletedAt?: Date | string | null
@@ -52912,6 +59842,9 @@ export namespace Prisma {
     apiCallLogs?: KiwoomApiCallLogCreateNestedManyWithoutUserInput
     subscription?: UserSubscriptionCreateNestedOneWithoutUserInput
     paymentCards?: PaymentCardCreateNestedManyWithoutUserInput
+    loginHistories?: UserLoginHistoryCreateNestedManyWithoutUserInput
+    planHistories?: UserPlanHistoryCreateNestedManyWithoutUserInput
+    auditLogs?: AdminAuditLogCreateNestedManyWithoutTargetUserInput
   }
 
   export type UserUncheckedCreateWithoutPaymentsInput = {
@@ -52926,6 +59859,7 @@ export namespace Prisma {
     marketingConsent?: boolean
     isTempPassword?: boolean
     planType?: $Enums.PlanType
+    status?: $Enums.UserStatus
     createdAt?: Date | string
     updatedAt?: Date | string
     deletedAt?: Date | string | null
@@ -52936,6 +59870,9 @@ export namespace Prisma {
     apiCallLogs?: KiwoomApiCallLogUncheckedCreateNestedManyWithoutUserInput
     subscription?: UserSubscriptionUncheckedCreateNestedOneWithoutUserInput
     paymentCards?: PaymentCardUncheckedCreateNestedManyWithoutUserInput
+    loginHistories?: UserLoginHistoryUncheckedCreateNestedManyWithoutUserInput
+    planHistories?: UserPlanHistoryUncheckedCreateNestedManyWithoutUserInput
+    auditLogs?: AdminAuditLogUncheckedCreateNestedManyWithoutTargetUserInput
   }
 
   export type UserCreateOrConnectWithoutPaymentsInput = {
@@ -53005,6 +59942,7 @@ export namespace Prisma {
     marketingConsent?: BoolFieldUpdateOperationsInput | boolean
     isTempPassword?: BoolFieldUpdateOperationsInput | boolean
     planType?: EnumPlanTypeFieldUpdateOperationsInput | $Enums.PlanType
+    status?: EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -53015,6 +59953,9 @@ export namespace Prisma {
     apiCallLogs?: KiwoomApiCallLogUpdateManyWithoutUserNestedInput
     subscription?: UserSubscriptionUpdateOneWithoutUserNestedInput
     paymentCards?: PaymentCardUpdateManyWithoutUserNestedInput
+    loginHistories?: UserLoginHistoryUpdateManyWithoutUserNestedInput
+    planHistories?: UserPlanHistoryUpdateManyWithoutUserNestedInput
+    auditLogs?: AdminAuditLogUpdateManyWithoutTargetUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutPaymentsInput = {
@@ -53029,6 +59970,7 @@ export namespace Prisma {
     marketingConsent?: BoolFieldUpdateOperationsInput | boolean
     isTempPassword?: BoolFieldUpdateOperationsInput | boolean
     planType?: EnumPlanTypeFieldUpdateOperationsInput | $Enums.PlanType
+    status?: EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -53039,6 +59981,9 @@ export namespace Prisma {
     apiCallLogs?: KiwoomApiCallLogUncheckedUpdateManyWithoutUserNestedInput
     subscription?: UserSubscriptionUncheckedUpdateOneWithoutUserNestedInput
     paymentCards?: PaymentCardUncheckedUpdateManyWithoutUserNestedInput
+    loginHistories?: UserLoginHistoryUncheckedUpdateManyWithoutUserNestedInput
+    planHistories?: UserPlanHistoryUncheckedUpdateManyWithoutUserNestedInput
+    auditLogs?: AdminAuditLogUncheckedUpdateManyWithoutTargetUserNestedInput
   }
 
   export type UserSubscriptionUpsertWithoutPaymentsInput = {
@@ -53084,6 +60029,640 @@ export namespace Prisma {
     pendingBillingCycle?: NullableEnumBillingCycleFieldUpdateOperationsInput | $Enums.BillingCycle | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type AdminAuditLogCreateWithoutAdminInput = {
+    logId?: string
+    action: $Enums.AdminAuditAction
+    targetScope?: string | null
+    beforeValue?: NullableJsonNullValueInput | InputJsonValue
+    afterValue?: NullableJsonNullValueInput | InputJsonValue
+    reason?: string | null
+    success?: boolean
+    failureCode?: string | null
+    ipAddress?: string | null
+    userAgent?: string | null
+    createdAt?: Date | string
+    targetUser?: UserCreateNestedOneWithoutAuditLogsInput
+  }
+
+  export type AdminAuditLogUncheckedCreateWithoutAdminInput = {
+    logId?: string
+    action: $Enums.AdminAuditAction
+    targetUserId?: string | null
+    targetScope?: string | null
+    beforeValue?: NullableJsonNullValueInput | InputJsonValue
+    afterValue?: NullableJsonNullValueInput | InputJsonValue
+    reason?: string | null
+    success?: boolean
+    failureCode?: string | null
+    ipAddress?: string | null
+    userAgent?: string | null
+    createdAt?: Date | string
+  }
+
+  export type AdminAuditLogCreateOrConnectWithoutAdminInput = {
+    where: AdminAuditLogWhereUniqueInput
+    create: XOR<AdminAuditLogCreateWithoutAdminInput, AdminAuditLogUncheckedCreateWithoutAdminInput>
+  }
+
+  export type AdminAuditLogCreateManyAdminInputEnvelope = {
+    data: AdminAuditLogCreateManyAdminInput | AdminAuditLogCreateManyAdminInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type UserPlanHistoryCreateWithoutAdminInput = {
+    historyId?: string
+    fromPlan?: $Enums.PlanType | null
+    toPlan: $Enums.PlanType
+    reason?: string | null
+    note?: string | null
+    effectiveAt: Date | string
+    expiresAt?: Date | string | null
+    createdAt?: Date | string
+    user: UserCreateNestedOneWithoutPlanHistoriesInput
+  }
+
+  export type UserPlanHistoryUncheckedCreateWithoutAdminInput = {
+    historyId?: string
+    userId: string
+    fromPlan?: $Enums.PlanType | null
+    toPlan: $Enums.PlanType
+    reason?: string | null
+    note?: string | null
+    effectiveAt: Date | string
+    expiresAt?: Date | string | null
+    createdAt?: Date | string
+  }
+
+  export type UserPlanHistoryCreateOrConnectWithoutAdminInput = {
+    where: UserPlanHistoryWhereUniqueInput
+    create: XOR<UserPlanHistoryCreateWithoutAdminInput, UserPlanHistoryUncheckedCreateWithoutAdminInput>
+  }
+
+  export type UserPlanHistoryCreateManyAdminInputEnvelope = {
+    data: UserPlanHistoryCreateManyAdminInput | UserPlanHistoryCreateManyAdminInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type AdminAuditLogUpsertWithWhereUniqueWithoutAdminInput = {
+    where: AdminAuditLogWhereUniqueInput
+    update: XOR<AdminAuditLogUpdateWithoutAdminInput, AdminAuditLogUncheckedUpdateWithoutAdminInput>
+    create: XOR<AdminAuditLogCreateWithoutAdminInput, AdminAuditLogUncheckedCreateWithoutAdminInput>
+  }
+
+  export type AdminAuditLogUpdateWithWhereUniqueWithoutAdminInput = {
+    where: AdminAuditLogWhereUniqueInput
+    data: XOR<AdminAuditLogUpdateWithoutAdminInput, AdminAuditLogUncheckedUpdateWithoutAdminInput>
+  }
+
+  export type AdminAuditLogUpdateManyWithWhereWithoutAdminInput = {
+    where: AdminAuditLogScalarWhereInput
+    data: XOR<AdminAuditLogUpdateManyMutationInput, AdminAuditLogUncheckedUpdateManyWithoutAdminInput>
+  }
+
+  export type UserPlanHistoryUpsertWithWhereUniqueWithoutAdminInput = {
+    where: UserPlanHistoryWhereUniqueInput
+    update: XOR<UserPlanHistoryUpdateWithoutAdminInput, UserPlanHistoryUncheckedUpdateWithoutAdminInput>
+    create: XOR<UserPlanHistoryCreateWithoutAdminInput, UserPlanHistoryUncheckedCreateWithoutAdminInput>
+  }
+
+  export type UserPlanHistoryUpdateWithWhereUniqueWithoutAdminInput = {
+    where: UserPlanHistoryWhereUniqueInput
+    data: XOR<UserPlanHistoryUpdateWithoutAdminInput, UserPlanHistoryUncheckedUpdateWithoutAdminInput>
+  }
+
+  export type UserPlanHistoryUpdateManyWithWhereWithoutAdminInput = {
+    where: UserPlanHistoryScalarWhereInput
+    data: XOR<UserPlanHistoryUpdateManyMutationInput, UserPlanHistoryUncheckedUpdateManyWithoutAdminInput>
+  }
+
+  export type UserCreateWithoutLoginHistoriesInput = {
+    userId?: string
+    username: string
+    email: string
+    password?: string | null
+    provider?: $Enums.AuthProvider
+    socialId?: string | null
+    name?: string | null
+    phone?: string | null
+    marketingConsent?: boolean
+    isTempPassword?: boolean
+    planType?: $Enums.PlanType
+    status?: $Enums.UserStatus
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    deletedAt?: Date | string | null
+    watchlist?: UserWatchlistCreateNestedManyWithoutUserInput
+    watchlistThemes?: UserWatchlistThemeCreateNestedManyWithoutUserInput
+    rsFilterPresets?: RsFilterPresetCreateNestedManyWithoutUserInput
+    searchFilterPresets?: SearchFilterPresetCreateNestedManyWithoutUserInput
+    apiCallLogs?: KiwoomApiCallLogCreateNestedManyWithoutUserInput
+    subscription?: UserSubscriptionCreateNestedOneWithoutUserInput
+    paymentCards?: PaymentCardCreateNestedManyWithoutUserInput
+    payments?: PaymentCreateNestedManyWithoutUserInput
+    planHistories?: UserPlanHistoryCreateNestedManyWithoutUserInput
+    auditLogs?: AdminAuditLogCreateNestedManyWithoutTargetUserInput
+  }
+
+  export type UserUncheckedCreateWithoutLoginHistoriesInput = {
+    userId?: string
+    username: string
+    email: string
+    password?: string | null
+    provider?: $Enums.AuthProvider
+    socialId?: string | null
+    name?: string | null
+    phone?: string | null
+    marketingConsent?: boolean
+    isTempPassword?: boolean
+    planType?: $Enums.PlanType
+    status?: $Enums.UserStatus
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    deletedAt?: Date | string | null
+    watchlist?: UserWatchlistUncheckedCreateNestedManyWithoutUserInput
+    watchlistThemes?: UserWatchlistThemeUncheckedCreateNestedManyWithoutUserInput
+    rsFilterPresets?: RsFilterPresetUncheckedCreateNestedManyWithoutUserInput
+    searchFilterPresets?: SearchFilterPresetUncheckedCreateNestedManyWithoutUserInput
+    apiCallLogs?: KiwoomApiCallLogUncheckedCreateNestedManyWithoutUserInput
+    subscription?: UserSubscriptionUncheckedCreateNestedOneWithoutUserInput
+    paymentCards?: PaymentCardUncheckedCreateNestedManyWithoutUserInput
+    payments?: PaymentUncheckedCreateNestedManyWithoutUserInput
+    planHistories?: UserPlanHistoryUncheckedCreateNestedManyWithoutUserInput
+    auditLogs?: AdminAuditLogUncheckedCreateNestedManyWithoutTargetUserInput
+  }
+
+  export type UserCreateOrConnectWithoutLoginHistoriesInput = {
+    where: UserWhereUniqueInput
+    create: XOR<UserCreateWithoutLoginHistoriesInput, UserUncheckedCreateWithoutLoginHistoriesInput>
+  }
+
+  export type UserUpsertWithoutLoginHistoriesInput = {
+    update: XOR<UserUpdateWithoutLoginHistoriesInput, UserUncheckedUpdateWithoutLoginHistoriesInput>
+    create: XOR<UserCreateWithoutLoginHistoriesInput, UserUncheckedCreateWithoutLoginHistoriesInput>
+    where?: UserWhereInput
+  }
+
+  export type UserUpdateToOneWithWhereWithoutLoginHistoriesInput = {
+    where?: UserWhereInput
+    data: XOR<UserUpdateWithoutLoginHistoriesInput, UserUncheckedUpdateWithoutLoginHistoriesInput>
+  }
+
+  export type UserUpdateWithoutLoginHistoriesInput = {
+    userId?: StringFieldUpdateOperationsInput | string
+    username?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    password?: NullableStringFieldUpdateOperationsInput | string | null
+    provider?: EnumAuthProviderFieldUpdateOperationsInput | $Enums.AuthProvider
+    socialId?: NullableStringFieldUpdateOperationsInput | string | null
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    marketingConsent?: BoolFieldUpdateOperationsInput | boolean
+    isTempPassword?: BoolFieldUpdateOperationsInput | boolean
+    planType?: EnumPlanTypeFieldUpdateOperationsInput | $Enums.PlanType
+    status?: EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    watchlist?: UserWatchlistUpdateManyWithoutUserNestedInput
+    watchlistThemes?: UserWatchlistThemeUpdateManyWithoutUserNestedInput
+    rsFilterPresets?: RsFilterPresetUpdateManyWithoutUserNestedInput
+    searchFilterPresets?: SearchFilterPresetUpdateManyWithoutUserNestedInput
+    apiCallLogs?: KiwoomApiCallLogUpdateManyWithoutUserNestedInput
+    subscription?: UserSubscriptionUpdateOneWithoutUserNestedInput
+    paymentCards?: PaymentCardUpdateManyWithoutUserNestedInput
+    payments?: PaymentUpdateManyWithoutUserNestedInput
+    planHistories?: UserPlanHistoryUpdateManyWithoutUserNestedInput
+    auditLogs?: AdminAuditLogUpdateManyWithoutTargetUserNestedInput
+  }
+
+  export type UserUncheckedUpdateWithoutLoginHistoriesInput = {
+    userId?: StringFieldUpdateOperationsInput | string
+    username?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    password?: NullableStringFieldUpdateOperationsInput | string | null
+    provider?: EnumAuthProviderFieldUpdateOperationsInput | $Enums.AuthProvider
+    socialId?: NullableStringFieldUpdateOperationsInput | string | null
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    marketingConsent?: BoolFieldUpdateOperationsInput | boolean
+    isTempPassword?: BoolFieldUpdateOperationsInput | boolean
+    planType?: EnumPlanTypeFieldUpdateOperationsInput | $Enums.PlanType
+    status?: EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    watchlist?: UserWatchlistUncheckedUpdateManyWithoutUserNestedInput
+    watchlistThemes?: UserWatchlistThemeUncheckedUpdateManyWithoutUserNestedInput
+    rsFilterPresets?: RsFilterPresetUncheckedUpdateManyWithoutUserNestedInput
+    searchFilterPresets?: SearchFilterPresetUncheckedUpdateManyWithoutUserNestedInput
+    apiCallLogs?: KiwoomApiCallLogUncheckedUpdateManyWithoutUserNestedInput
+    subscription?: UserSubscriptionUncheckedUpdateOneWithoutUserNestedInput
+    paymentCards?: PaymentCardUncheckedUpdateManyWithoutUserNestedInput
+    payments?: PaymentUncheckedUpdateManyWithoutUserNestedInput
+    planHistories?: UserPlanHistoryUncheckedUpdateManyWithoutUserNestedInput
+    auditLogs?: AdminAuditLogUncheckedUpdateManyWithoutTargetUserNestedInput
+  }
+
+  export type UserCreateWithoutPlanHistoriesInput = {
+    userId?: string
+    username: string
+    email: string
+    password?: string | null
+    provider?: $Enums.AuthProvider
+    socialId?: string | null
+    name?: string | null
+    phone?: string | null
+    marketingConsent?: boolean
+    isTempPassword?: boolean
+    planType?: $Enums.PlanType
+    status?: $Enums.UserStatus
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    deletedAt?: Date | string | null
+    watchlist?: UserWatchlistCreateNestedManyWithoutUserInput
+    watchlistThemes?: UserWatchlistThemeCreateNestedManyWithoutUserInput
+    rsFilterPresets?: RsFilterPresetCreateNestedManyWithoutUserInput
+    searchFilterPresets?: SearchFilterPresetCreateNestedManyWithoutUserInput
+    apiCallLogs?: KiwoomApiCallLogCreateNestedManyWithoutUserInput
+    subscription?: UserSubscriptionCreateNestedOneWithoutUserInput
+    paymentCards?: PaymentCardCreateNestedManyWithoutUserInput
+    payments?: PaymentCreateNestedManyWithoutUserInput
+    loginHistories?: UserLoginHistoryCreateNestedManyWithoutUserInput
+    auditLogs?: AdminAuditLogCreateNestedManyWithoutTargetUserInput
+  }
+
+  export type UserUncheckedCreateWithoutPlanHistoriesInput = {
+    userId?: string
+    username: string
+    email: string
+    password?: string | null
+    provider?: $Enums.AuthProvider
+    socialId?: string | null
+    name?: string | null
+    phone?: string | null
+    marketingConsent?: boolean
+    isTempPassword?: boolean
+    planType?: $Enums.PlanType
+    status?: $Enums.UserStatus
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    deletedAt?: Date | string | null
+    watchlist?: UserWatchlistUncheckedCreateNestedManyWithoutUserInput
+    watchlistThemes?: UserWatchlistThemeUncheckedCreateNestedManyWithoutUserInput
+    rsFilterPresets?: RsFilterPresetUncheckedCreateNestedManyWithoutUserInput
+    searchFilterPresets?: SearchFilterPresetUncheckedCreateNestedManyWithoutUserInput
+    apiCallLogs?: KiwoomApiCallLogUncheckedCreateNestedManyWithoutUserInput
+    subscription?: UserSubscriptionUncheckedCreateNestedOneWithoutUserInput
+    paymentCards?: PaymentCardUncheckedCreateNestedManyWithoutUserInput
+    payments?: PaymentUncheckedCreateNestedManyWithoutUserInput
+    loginHistories?: UserLoginHistoryUncheckedCreateNestedManyWithoutUserInput
+    auditLogs?: AdminAuditLogUncheckedCreateNestedManyWithoutTargetUserInput
+  }
+
+  export type UserCreateOrConnectWithoutPlanHistoriesInput = {
+    where: UserWhereUniqueInput
+    create: XOR<UserCreateWithoutPlanHistoriesInput, UserUncheckedCreateWithoutPlanHistoriesInput>
+  }
+
+  export type AdminCreateWithoutPlanHistoriesInput = {
+    adminId?: string
+    loginId: string
+    password: string
+    name: string
+    role?: $Enums.AdminRole
+    isActive?: boolean
+    lastLoginAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    deletedAt?: Date | string | null
+    auditLogs?: AdminAuditLogCreateNestedManyWithoutAdminInput
+  }
+
+  export type AdminUncheckedCreateWithoutPlanHistoriesInput = {
+    adminId?: string
+    loginId: string
+    password: string
+    name: string
+    role?: $Enums.AdminRole
+    isActive?: boolean
+    lastLoginAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    deletedAt?: Date | string | null
+    auditLogs?: AdminAuditLogUncheckedCreateNestedManyWithoutAdminInput
+  }
+
+  export type AdminCreateOrConnectWithoutPlanHistoriesInput = {
+    where: AdminWhereUniqueInput
+    create: XOR<AdminCreateWithoutPlanHistoriesInput, AdminUncheckedCreateWithoutPlanHistoriesInput>
+  }
+
+  export type UserUpsertWithoutPlanHistoriesInput = {
+    update: XOR<UserUpdateWithoutPlanHistoriesInput, UserUncheckedUpdateWithoutPlanHistoriesInput>
+    create: XOR<UserCreateWithoutPlanHistoriesInput, UserUncheckedCreateWithoutPlanHistoriesInput>
+    where?: UserWhereInput
+  }
+
+  export type UserUpdateToOneWithWhereWithoutPlanHistoriesInput = {
+    where?: UserWhereInput
+    data: XOR<UserUpdateWithoutPlanHistoriesInput, UserUncheckedUpdateWithoutPlanHistoriesInput>
+  }
+
+  export type UserUpdateWithoutPlanHistoriesInput = {
+    userId?: StringFieldUpdateOperationsInput | string
+    username?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    password?: NullableStringFieldUpdateOperationsInput | string | null
+    provider?: EnumAuthProviderFieldUpdateOperationsInput | $Enums.AuthProvider
+    socialId?: NullableStringFieldUpdateOperationsInput | string | null
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    marketingConsent?: BoolFieldUpdateOperationsInput | boolean
+    isTempPassword?: BoolFieldUpdateOperationsInput | boolean
+    planType?: EnumPlanTypeFieldUpdateOperationsInput | $Enums.PlanType
+    status?: EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    watchlist?: UserWatchlistUpdateManyWithoutUserNestedInput
+    watchlistThemes?: UserWatchlistThemeUpdateManyWithoutUserNestedInput
+    rsFilterPresets?: RsFilterPresetUpdateManyWithoutUserNestedInput
+    searchFilterPresets?: SearchFilterPresetUpdateManyWithoutUserNestedInput
+    apiCallLogs?: KiwoomApiCallLogUpdateManyWithoutUserNestedInput
+    subscription?: UserSubscriptionUpdateOneWithoutUserNestedInput
+    paymentCards?: PaymentCardUpdateManyWithoutUserNestedInput
+    payments?: PaymentUpdateManyWithoutUserNestedInput
+    loginHistories?: UserLoginHistoryUpdateManyWithoutUserNestedInput
+    auditLogs?: AdminAuditLogUpdateManyWithoutTargetUserNestedInput
+  }
+
+  export type UserUncheckedUpdateWithoutPlanHistoriesInput = {
+    userId?: StringFieldUpdateOperationsInput | string
+    username?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    password?: NullableStringFieldUpdateOperationsInput | string | null
+    provider?: EnumAuthProviderFieldUpdateOperationsInput | $Enums.AuthProvider
+    socialId?: NullableStringFieldUpdateOperationsInput | string | null
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    marketingConsent?: BoolFieldUpdateOperationsInput | boolean
+    isTempPassword?: BoolFieldUpdateOperationsInput | boolean
+    planType?: EnumPlanTypeFieldUpdateOperationsInput | $Enums.PlanType
+    status?: EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    watchlist?: UserWatchlistUncheckedUpdateManyWithoutUserNestedInput
+    watchlistThemes?: UserWatchlistThemeUncheckedUpdateManyWithoutUserNestedInput
+    rsFilterPresets?: RsFilterPresetUncheckedUpdateManyWithoutUserNestedInput
+    searchFilterPresets?: SearchFilterPresetUncheckedUpdateManyWithoutUserNestedInput
+    apiCallLogs?: KiwoomApiCallLogUncheckedUpdateManyWithoutUserNestedInput
+    subscription?: UserSubscriptionUncheckedUpdateOneWithoutUserNestedInput
+    paymentCards?: PaymentCardUncheckedUpdateManyWithoutUserNestedInput
+    payments?: PaymentUncheckedUpdateManyWithoutUserNestedInput
+    loginHistories?: UserLoginHistoryUncheckedUpdateManyWithoutUserNestedInput
+    auditLogs?: AdminAuditLogUncheckedUpdateManyWithoutTargetUserNestedInput
+  }
+
+  export type AdminUpsertWithoutPlanHistoriesInput = {
+    update: XOR<AdminUpdateWithoutPlanHistoriesInput, AdminUncheckedUpdateWithoutPlanHistoriesInput>
+    create: XOR<AdminCreateWithoutPlanHistoriesInput, AdminUncheckedCreateWithoutPlanHistoriesInput>
+    where?: AdminWhereInput
+  }
+
+  export type AdminUpdateToOneWithWhereWithoutPlanHistoriesInput = {
+    where?: AdminWhereInput
+    data: XOR<AdminUpdateWithoutPlanHistoriesInput, AdminUncheckedUpdateWithoutPlanHistoriesInput>
+  }
+
+  export type AdminUpdateWithoutPlanHistoriesInput = {
+    adminId?: StringFieldUpdateOperationsInput | string
+    loginId?: StringFieldUpdateOperationsInput | string
+    password?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    role?: EnumAdminRoleFieldUpdateOperationsInput | $Enums.AdminRole
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    auditLogs?: AdminAuditLogUpdateManyWithoutAdminNestedInput
+  }
+
+  export type AdminUncheckedUpdateWithoutPlanHistoriesInput = {
+    adminId?: StringFieldUpdateOperationsInput | string
+    loginId?: StringFieldUpdateOperationsInput | string
+    password?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    role?: EnumAdminRoleFieldUpdateOperationsInput | $Enums.AdminRole
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    auditLogs?: AdminAuditLogUncheckedUpdateManyWithoutAdminNestedInput
+  }
+
+  export type AdminCreateWithoutAuditLogsInput = {
+    adminId?: string
+    loginId: string
+    password: string
+    name: string
+    role?: $Enums.AdminRole
+    isActive?: boolean
+    lastLoginAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    deletedAt?: Date | string | null
+    planHistories?: UserPlanHistoryCreateNestedManyWithoutAdminInput
+  }
+
+  export type AdminUncheckedCreateWithoutAuditLogsInput = {
+    adminId?: string
+    loginId: string
+    password: string
+    name: string
+    role?: $Enums.AdminRole
+    isActive?: boolean
+    lastLoginAt?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    deletedAt?: Date | string | null
+    planHistories?: UserPlanHistoryUncheckedCreateNestedManyWithoutAdminInput
+  }
+
+  export type AdminCreateOrConnectWithoutAuditLogsInput = {
+    where: AdminWhereUniqueInput
+    create: XOR<AdminCreateWithoutAuditLogsInput, AdminUncheckedCreateWithoutAuditLogsInput>
+  }
+
+  export type UserCreateWithoutAuditLogsInput = {
+    userId?: string
+    username: string
+    email: string
+    password?: string | null
+    provider?: $Enums.AuthProvider
+    socialId?: string | null
+    name?: string | null
+    phone?: string | null
+    marketingConsent?: boolean
+    isTempPassword?: boolean
+    planType?: $Enums.PlanType
+    status?: $Enums.UserStatus
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    deletedAt?: Date | string | null
+    watchlist?: UserWatchlistCreateNestedManyWithoutUserInput
+    watchlistThemes?: UserWatchlistThemeCreateNestedManyWithoutUserInput
+    rsFilterPresets?: RsFilterPresetCreateNestedManyWithoutUserInput
+    searchFilterPresets?: SearchFilterPresetCreateNestedManyWithoutUserInput
+    apiCallLogs?: KiwoomApiCallLogCreateNestedManyWithoutUserInput
+    subscription?: UserSubscriptionCreateNestedOneWithoutUserInput
+    paymentCards?: PaymentCardCreateNestedManyWithoutUserInput
+    payments?: PaymentCreateNestedManyWithoutUserInput
+    loginHistories?: UserLoginHistoryCreateNestedManyWithoutUserInput
+    planHistories?: UserPlanHistoryCreateNestedManyWithoutUserInput
+  }
+
+  export type UserUncheckedCreateWithoutAuditLogsInput = {
+    userId?: string
+    username: string
+    email: string
+    password?: string | null
+    provider?: $Enums.AuthProvider
+    socialId?: string | null
+    name?: string | null
+    phone?: string | null
+    marketingConsent?: boolean
+    isTempPassword?: boolean
+    planType?: $Enums.PlanType
+    status?: $Enums.UserStatus
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    deletedAt?: Date | string | null
+    watchlist?: UserWatchlistUncheckedCreateNestedManyWithoutUserInput
+    watchlistThemes?: UserWatchlistThemeUncheckedCreateNestedManyWithoutUserInput
+    rsFilterPresets?: RsFilterPresetUncheckedCreateNestedManyWithoutUserInput
+    searchFilterPresets?: SearchFilterPresetUncheckedCreateNestedManyWithoutUserInput
+    apiCallLogs?: KiwoomApiCallLogUncheckedCreateNestedManyWithoutUserInput
+    subscription?: UserSubscriptionUncheckedCreateNestedOneWithoutUserInput
+    paymentCards?: PaymentCardUncheckedCreateNestedManyWithoutUserInput
+    payments?: PaymentUncheckedCreateNestedManyWithoutUserInput
+    loginHistories?: UserLoginHistoryUncheckedCreateNestedManyWithoutUserInput
+    planHistories?: UserPlanHistoryUncheckedCreateNestedManyWithoutUserInput
+  }
+
+  export type UserCreateOrConnectWithoutAuditLogsInput = {
+    where: UserWhereUniqueInput
+    create: XOR<UserCreateWithoutAuditLogsInput, UserUncheckedCreateWithoutAuditLogsInput>
+  }
+
+  export type AdminUpsertWithoutAuditLogsInput = {
+    update: XOR<AdminUpdateWithoutAuditLogsInput, AdminUncheckedUpdateWithoutAuditLogsInput>
+    create: XOR<AdminCreateWithoutAuditLogsInput, AdminUncheckedCreateWithoutAuditLogsInput>
+    where?: AdminWhereInput
+  }
+
+  export type AdminUpdateToOneWithWhereWithoutAuditLogsInput = {
+    where?: AdminWhereInput
+    data: XOR<AdminUpdateWithoutAuditLogsInput, AdminUncheckedUpdateWithoutAuditLogsInput>
+  }
+
+  export type AdminUpdateWithoutAuditLogsInput = {
+    adminId?: StringFieldUpdateOperationsInput | string
+    loginId?: StringFieldUpdateOperationsInput | string
+    password?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    role?: EnumAdminRoleFieldUpdateOperationsInput | $Enums.AdminRole
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    planHistories?: UserPlanHistoryUpdateManyWithoutAdminNestedInput
+  }
+
+  export type AdminUncheckedUpdateWithoutAuditLogsInput = {
+    adminId?: StringFieldUpdateOperationsInput | string
+    loginId?: StringFieldUpdateOperationsInput | string
+    password?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    role?: EnumAdminRoleFieldUpdateOperationsInput | $Enums.AdminRole
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    lastLoginAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    planHistories?: UserPlanHistoryUncheckedUpdateManyWithoutAdminNestedInput
+  }
+
+  export type UserUpsertWithoutAuditLogsInput = {
+    update: XOR<UserUpdateWithoutAuditLogsInput, UserUncheckedUpdateWithoutAuditLogsInput>
+    create: XOR<UserCreateWithoutAuditLogsInput, UserUncheckedCreateWithoutAuditLogsInput>
+    where?: UserWhereInput
+  }
+
+  export type UserUpdateToOneWithWhereWithoutAuditLogsInput = {
+    where?: UserWhereInput
+    data: XOR<UserUpdateWithoutAuditLogsInput, UserUncheckedUpdateWithoutAuditLogsInput>
+  }
+
+  export type UserUpdateWithoutAuditLogsInput = {
+    userId?: StringFieldUpdateOperationsInput | string
+    username?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    password?: NullableStringFieldUpdateOperationsInput | string | null
+    provider?: EnumAuthProviderFieldUpdateOperationsInput | $Enums.AuthProvider
+    socialId?: NullableStringFieldUpdateOperationsInput | string | null
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    marketingConsent?: BoolFieldUpdateOperationsInput | boolean
+    isTempPassword?: BoolFieldUpdateOperationsInput | boolean
+    planType?: EnumPlanTypeFieldUpdateOperationsInput | $Enums.PlanType
+    status?: EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    watchlist?: UserWatchlistUpdateManyWithoutUserNestedInput
+    watchlistThemes?: UserWatchlistThemeUpdateManyWithoutUserNestedInput
+    rsFilterPresets?: RsFilterPresetUpdateManyWithoutUserNestedInput
+    searchFilterPresets?: SearchFilterPresetUpdateManyWithoutUserNestedInput
+    apiCallLogs?: KiwoomApiCallLogUpdateManyWithoutUserNestedInput
+    subscription?: UserSubscriptionUpdateOneWithoutUserNestedInput
+    paymentCards?: PaymentCardUpdateManyWithoutUserNestedInput
+    payments?: PaymentUpdateManyWithoutUserNestedInput
+    loginHistories?: UserLoginHistoryUpdateManyWithoutUserNestedInput
+    planHistories?: UserPlanHistoryUpdateManyWithoutUserNestedInput
+  }
+
+  export type UserUncheckedUpdateWithoutAuditLogsInput = {
+    userId?: StringFieldUpdateOperationsInput | string
+    username?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    password?: NullableStringFieldUpdateOperationsInput | string | null
+    provider?: EnumAuthProviderFieldUpdateOperationsInput | $Enums.AuthProvider
+    socialId?: NullableStringFieldUpdateOperationsInput | string | null
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    marketingConsent?: BoolFieldUpdateOperationsInput | boolean
+    isTempPassword?: BoolFieldUpdateOperationsInput | boolean
+    planType?: EnumPlanTypeFieldUpdateOperationsInput | $Enums.PlanType
+    status?: EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    deletedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    watchlist?: UserWatchlistUncheckedUpdateManyWithoutUserNestedInput
+    watchlistThemes?: UserWatchlistThemeUncheckedUpdateManyWithoutUserNestedInput
+    rsFilterPresets?: RsFilterPresetUncheckedUpdateManyWithoutUserNestedInput
+    searchFilterPresets?: SearchFilterPresetUncheckedUpdateManyWithoutUserNestedInput
+    apiCallLogs?: KiwoomApiCallLogUncheckedUpdateManyWithoutUserNestedInput
+    subscription?: UserSubscriptionUncheckedUpdateOneWithoutUserNestedInput
+    paymentCards?: PaymentCardUncheckedUpdateManyWithoutUserNestedInput
+    payments?: PaymentUncheckedUpdateManyWithoutUserNestedInput
+    loginHistories?: UserLoginHistoryUncheckedUpdateManyWithoutUserNestedInput
+    planHistories?: UserPlanHistoryUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type CompanyCreateManyThemeInput = {
@@ -53473,6 +61052,43 @@ export namespace Prisma {
     updatedAt?: Date | string
   }
 
+  export type UserLoginHistoryCreateManyUserInput = {
+    historyId?: string
+    provider: $Enums.AuthProvider
+    ipAddress?: string | null
+    userAgent?: string | null
+    deviceType?: string | null
+    osName?: string | null
+    loggedInAt?: Date | string
+  }
+
+  export type UserPlanHistoryCreateManyUserInput = {
+    historyId?: string
+    fromPlan?: $Enums.PlanType | null
+    toPlan: $Enums.PlanType
+    reason?: string | null
+    changedBy?: string | null
+    note?: string | null
+    effectiveAt: Date | string
+    expiresAt?: Date | string | null
+    createdAt?: Date | string
+  }
+
+  export type AdminAuditLogCreateManyTargetUserInput = {
+    logId?: string
+    adminId: string
+    action: $Enums.AdminAuditAction
+    targetScope?: string | null
+    beforeValue?: NullableJsonNullValueInput | InputJsonValue
+    afterValue?: NullableJsonNullValueInput | InputJsonValue
+    reason?: string | null
+    success?: boolean
+    failureCode?: string | null
+    ipAddress?: string | null
+    userAgent?: string | null
+    createdAt?: Date | string
+  }
+
   export type UserWatchlistUpdateWithoutUserInput = {
     addedDate?: DateTimeFieldUpdateOperationsInput | Date | string
     memo?: NullableStringFieldUpdateOperationsInput | string | null
@@ -53688,6 +61304,117 @@ export namespace Prisma {
     paidAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type UserLoginHistoryUpdateWithoutUserInput = {
+    historyId?: StringFieldUpdateOperationsInput | string
+    provider?: EnumAuthProviderFieldUpdateOperationsInput | $Enums.AuthProvider
+    ipAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    userAgent?: NullableStringFieldUpdateOperationsInput | string | null
+    deviceType?: NullableStringFieldUpdateOperationsInput | string | null
+    osName?: NullableStringFieldUpdateOperationsInput | string | null
+    loggedInAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type UserLoginHistoryUncheckedUpdateWithoutUserInput = {
+    historyId?: StringFieldUpdateOperationsInput | string
+    provider?: EnumAuthProviderFieldUpdateOperationsInput | $Enums.AuthProvider
+    ipAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    userAgent?: NullableStringFieldUpdateOperationsInput | string | null
+    deviceType?: NullableStringFieldUpdateOperationsInput | string | null
+    osName?: NullableStringFieldUpdateOperationsInput | string | null
+    loggedInAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type UserLoginHistoryUncheckedUpdateManyWithoutUserInput = {
+    historyId?: StringFieldUpdateOperationsInput | string
+    provider?: EnumAuthProviderFieldUpdateOperationsInput | $Enums.AuthProvider
+    ipAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    userAgent?: NullableStringFieldUpdateOperationsInput | string | null
+    deviceType?: NullableStringFieldUpdateOperationsInput | string | null
+    osName?: NullableStringFieldUpdateOperationsInput | string | null
+    loggedInAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type UserPlanHistoryUpdateWithoutUserInput = {
+    historyId?: StringFieldUpdateOperationsInput | string
+    fromPlan?: NullableEnumPlanTypeFieldUpdateOperationsInput | $Enums.PlanType | null
+    toPlan?: EnumPlanTypeFieldUpdateOperationsInput | $Enums.PlanType
+    reason?: NullableStringFieldUpdateOperationsInput | string | null
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    effectiveAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    admin?: AdminUpdateOneWithoutPlanHistoriesNestedInput
+  }
+
+  export type UserPlanHistoryUncheckedUpdateWithoutUserInput = {
+    historyId?: StringFieldUpdateOperationsInput | string
+    fromPlan?: NullableEnumPlanTypeFieldUpdateOperationsInput | $Enums.PlanType | null
+    toPlan?: EnumPlanTypeFieldUpdateOperationsInput | $Enums.PlanType
+    reason?: NullableStringFieldUpdateOperationsInput | string | null
+    changedBy?: NullableStringFieldUpdateOperationsInput | string | null
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    effectiveAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type UserPlanHistoryUncheckedUpdateManyWithoutUserInput = {
+    historyId?: StringFieldUpdateOperationsInput | string
+    fromPlan?: NullableEnumPlanTypeFieldUpdateOperationsInput | $Enums.PlanType | null
+    toPlan?: EnumPlanTypeFieldUpdateOperationsInput | $Enums.PlanType
+    reason?: NullableStringFieldUpdateOperationsInput | string | null
+    changedBy?: NullableStringFieldUpdateOperationsInput | string | null
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    effectiveAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type AdminAuditLogUpdateWithoutTargetUserInput = {
+    logId?: StringFieldUpdateOperationsInput | string
+    action?: EnumAdminAuditActionFieldUpdateOperationsInput | $Enums.AdminAuditAction
+    targetScope?: NullableStringFieldUpdateOperationsInput | string | null
+    beforeValue?: NullableJsonNullValueInput | InputJsonValue
+    afterValue?: NullableJsonNullValueInput | InputJsonValue
+    reason?: NullableStringFieldUpdateOperationsInput | string | null
+    success?: BoolFieldUpdateOperationsInput | boolean
+    failureCode?: NullableStringFieldUpdateOperationsInput | string | null
+    ipAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    userAgent?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    admin?: AdminUpdateOneRequiredWithoutAuditLogsNestedInput
+  }
+
+  export type AdminAuditLogUncheckedUpdateWithoutTargetUserInput = {
+    logId?: StringFieldUpdateOperationsInput | string
+    adminId?: StringFieldUpdateOperationsInput | string
+    action?: EnumAdminAuditActionFieldUpdateOperationsInput | $Enums.AdminAuditAction
+    targetScope?: NullableStringFieldUpdateOperationsInput | string | null
+    beforeValue?: NullableJsonNullValueInput | InputJsonValue
+    afterValue?: NullableJsonNullValueInput | InputJsonValue
+    reason?: NullableStringFieldUpdateOperationsInput | string | null
+    success?: BoolFieldUpdateOperationsInput | boolean
+    failureCode?: NullableStringFieldUpdateOperationsInput | string | null
+    ipAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    userAgent?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type AdminAuditLogUncheckedUpdateManyWithoutTargetUserInput = {
+    logId?: StringFieldUpdateOperationsInput | string
+    adminId?: StringFieldUpdateOperationsInput | string
+    action?: EnumAdminAuditActionFieldUpdateOperationsInput | $Enums.AdminAuditAction
+    targetScope?: NullableStringFieldUpdateOperationsInput | string | null
+    beforeValue?: NullableJsonNullValueInput | InputJsonValue
+    afterValue?: NullableJsonNullValueInput | InputJsonValue
+    reason?: NullableStringFieldUpdateOperationsInput | string | null
+    success?: BoolFieldUpdateOperationsInput | boolean
+    failureCode?: NullableStringFieldUpdateOperationsInput | string | null
+    ipAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    userAgent?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type UserWatchlistCreateManyCompanyInput = {
@@ -53925,6 +61652,114 @@ export namespace Prisma {
     paidAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type AdminAuditLogCreateManyAdminInput = {
+    logId?: string
+    action: $Enums.AdminAuditAction
+    targetUserId?: string | null
+    targetScope?: string | null
+    beforeValue?: NullableJsonNullValueInput | InputJsonValue
+    afterValue?: NullableJsonNullValueInput | InputJsonValue
+    reason?: string | null
+    success?: boolean
+    failureCode?: string | null
+    ipAddress?: string | null
+    userAgent?: string | null
+    createdAt?: Date | string
+  }
+
+  export type UserPlanHistoryCreateManyAdminInput = {
+    historyId?: string
+    userId: string
+    fromPlan?: $Enums.PlanType | null
+    toPlan: $Enums.PlanType
+    reason?: string | null
+    note?: string | null
+    effectiveAt: Date | string
+    expiresAt?: Date | string | null
+    createdAt?: Date | string
+  }
+
+  export type AdminAuditLogUpdateWithoutAdminInput = {
+    logId?: StringFieldUpdateOperationsInput | string
+    action?: EnumAdminAuditActionFieldUpdateOperationsInput | $Enums.AdminAuditAction
+    targetScope?: NullableStringFieldUpdateOperationsInput | string | null
+    beforeValue?: NullableJsonNullValueInput | InputJsonValue
+    afterValue?: NullableJsonNullValueInput | InputJsonValue
+    reason?: NullableStringFieldUpdateOperationsInput | string | null
+    success?: BoolFieldUpdateOperationsInput | boolean
+    failureCode?: NullableStringFieldUpdateOperationsInput | string | null
+    ipAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    userAgent?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    targetUser?: UserUpdateOneWithoutAuditLogsNestedInput
+  }
+
+  export type AdminAuditLogUncheckedUpdateWithoutAdminInput = {
+    logId?: StringFieldUpdateOperationsInput | string
+    action?: EnumAdminAuditActionFieldUpdateOperationsInput | $Enums.AdminAuditAction
+    targetUserId?: NullableStringFieldUpdateOperationsInput | string | null
+    targetScope?: NullableStringFieldUpdateOperationsInput | string | null
+    beforeValue?: NullableJsonNullValueInput | InputJsonValue
+    afterValue?: NullableJsonNullValueInput | InputJsonValue
+    reason?: NullableStringFieldUpdateOperationsInput | string | null
+    success?: BoolFieldUpdateOperationsInput | boolean
+    failureCode?: NullableStringFieldUpdateOperationsInput | string | null
+    ipAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    userAgent?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type AdminAuditLogUncheckedUpdateManyWithoutAdminInput = {
+    logId?: StringFieldUpdateOperationsInput | string
+    action?: EnumAdminAuditActionFieldUpdateOperationsInput | $Enums.AdminAuditAction
+    targetUserId?: NullableStringFieldUpdateOperationsInput | string | null
+    targetScope?: NullableStringFieldUpdateOperationsInput | string | null
+    beforeValue?: NullableJsonNullValueInput | InputJsonValue
+    afterValue?: NullableJsonNullValueInput | InputJsonValue
+    reason?: NullableStringFieldUpdateOperationsInput | string | null
+    success?: BoolFieldUpdateOperationsInput | boolean
+    failureCode?: NullableStringFieldUpdateOperationsInput | string | null
+    ipAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    userAgent?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type UserPlanHistoryUpdateWithoutAdminInput = {
+    historyId?: StringFieldUpdateOperationsInput | string
+    fromPlan?: NullableEnumPlanTypeFieldUpdateOperationsInput | $Enums.PlanType | null
+    toPlan?: EnumPlanTypeFieldUpdateOperationsInput | $Enums.PlanType
+    reason?: NullableStringFieldUpdateOperationsInput | string | null
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    effectiveAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    user?: UserUpdateOneRequiredWithoutPlanHistoriesNestedInput
+  }
+
+  export type UserPlanHistoryUncheckedUpdateWithoutAdminInput = {
+    historyId?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    fromPlan?: NullableEnumPlanTypeFieldUpdateOperationsInput | $Enums.PlanType | null
+    toPlan?: EnumPlanTypeFieldUpdateOperationsInput | $Enums.PlanType
+    reason?: NullableStringFieldUpdateOperationsInput | string | null
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    effectiveAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type UserPlanHistoryUncheckedUpdateManyWithoutAdminInput = {
+    historyId?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    fromPlan?: NullableEnumPlanTypeFieldUpdateOperationsInput | $Enums.PlanType | null
+    toPlan?: EnumPlanTypeFieldUpdateOperationsInput | $Enums.PlanType
+    reason?: NullableStringFieldUpdateOperationsInput | string | null
+    note?: NullableStringFieldUpdateOperationsInput | string | null
+    effectiveAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
 

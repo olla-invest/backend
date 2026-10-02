@@ -34,8 +34,8 @@ export class AuthController {
     @Post( 'login' )
     @ApiOperation( { summary: '로그인', description: 'username/password로 로그인 후 JWT 토큰 반환' } )
     @ApiResponse( { status: 200, description: '로그인 성공, accessToken 반환' } )
-    login( @Body() dto: LoginDto ) {
-        return this.authService.login( dto );
+    login( @Body() dto: LoginDto, @Req() req: Request ) {
+        return this.authService.login( dto, req );
     }
 
     @Public()
@@ -65,7 +65,7 @@ export class AuthController {
     @UseGuards( AuthGuard( 'naver' ) )
     @ApiOperation( { summary: '네이버 OAuth 콜백' } )
     async naverCallback( @Req() req: Request, @Res() res: Response ) {
-        const { accessToken } = await this.authService.socialLogin( req.user as SocialProfile );
+        const { accessToken } = await this.authService.socialLogin( req.user as SocialProfile, req );
         const frontendUrl = this.configService.get<string>( 'FRONTEND_URL' );
         return res.redirect( `${frontendUrl}/auth/callback?token=${accessToken}` );
     }
@@ -83,7 +83,7 @@ export class AuthController {
     @UseGuards( AuthGuard( 'kakao' ) )
     @ApiOperation( { summary: '카카오 OAuth 콜백' } )
     async kakaoCallback( @Req() req: Request, @Res() res: Response ) {
-        const { accessToken } = await this.authService.socialLogin( req.user as SocialProfile );
+        const { accessToken } = await this.authService.socialLogin( req.user as SocialProfile, req );
         const frontendUrl = this.configService.get<string>( 'FRONTEND_URL' );
         return res.redirect( `${frontendUrl}/auth/callback?token=${accessToken}` );
     }

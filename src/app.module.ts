@@ -19,6 +19,7 @@ import { IssueThemeModule } from './features/issue-theme/issue-theme.module';
 import { SubscriptionModule } from './features/subscription/subscription.module';
 import { PaymentModule } from './features/payment/payment.module';
 import { MarketViewModule } from './features/market-view/market-view.module';
+import { AdminModule } from './features/admin/admin.module';
 
 @Module( {
     imports: [
@@ -43,6 +44,7 @@ import { MarketViewModule } from './features/market-view/market-view.module';
         SubscriptionModule,
         PaymentModule,
         MarketViewModule,
+        AdminModule,
     ],
     providers: [
         {

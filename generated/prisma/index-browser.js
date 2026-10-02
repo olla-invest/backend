@@ -160,6 +160,7 @@ exports.Prisma.UserScalarFieldEnum = {
   marketingConsent: 'marketingConsent',
   isTempPassword: 'isTempPassword',
   planType: 'planType',
+  status: 'status',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   deletedAt: 'deletedAt'
@@ -541,6 +542,59 @@ exports.Prisma.PaymentScalarFieldEnum = {
   updatedAt: 'updatedAt'
 };
 
+exports.Prisma.AdminScalarFieldEnum = {
+  adminId: 'adminId',
+  loginId: 'loginId',
+  password: 'password',
+  name: 'name',
+  role: 'role',
+  isActive: 'isActive',
+  lastLoginAt: 'lastLoginAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  deletedAt: 'deletedAt'
+};
+
+exports.Prisma.UserLoginHistoryScalarFieldEnum = {
+  historyId: 'historyId',
+  userId: 'userId',
+  provider: 'provider',
+  ipAddress: 'ipAddress',
+  userAgent: 'userAgent',
+  deviceType: 'deviceType',
+  osName: 'osName',
+  loggedInAt: 'loggedInAt'
+};
+
+exports.Prisma.UserPlanHistoryScalarFieldEnum = {
+  historyId: 'historyId',
+  userId: 'userId',
+  fromPlan: 'fromPlan',
+  toPlan: 'toPlan',
+  reason: 'reason',
+  changedBy: 'changedBy',
+  note: 'note',
+  effectiveAt: 'effectiveAt',
+  expiresAt: 'expiresAt',
+  createdAt: 'createdAt'
+};
+
+exports.Prisma.AdminAuditLogScalarFieldEnum = {
+  logId: 'logId',
+  adminId: 'adminId',
+  action: 'action',
+  targetUserId: 'targetUserId',
+  targetScope: 'targetScope',
+  beforeValue: 'beforeValue',
+  afterValue: 'afterValue',
+  reason: 'reason',
+  success: 'success',
+  failureCode: 'failureCode',
+  ipAddress: 'ipAddress',
+  userAgent: 'userAgent',
+  createdAt: 'createdAt'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -581,6 +635,13 @@ exports.PlanType = exports.$Enums.PlanType = {
   BASIC: 'BASIC',
   PRO: 'PRO',
   PREMIUM: 'PREMIUM'
+};
+
+exports.UserStatus = exports.$Enums.UserStatus = {
+  ACTIVE: 'ACTIVE',
+  INACTIVE: 'INACTIVE',
+  DORMANT: 'DORMANT',
+  DELETED: 'DELETED'
 };
 
 exports.MarketType = exports.$Enums.MarketType = {
@@ -627,6 +688,24 @@ exports.PaymentStatus = exports.$Enums.PaymentStatus = {
   REFUNDED: 'REFUNDED'
 };
 
+exports.AdminRole = exports.$Enums.AdminRole = {
+  SUPER_ADMIN: 'SUPER_ADMIN',
+  OPERATOR: 'OPERATOR',
+  VIEWER: 'VIEWER'
+};
+
+exports.AdminAuditAction = exports.$Enums.AdminAuditAction = {
+  LOGIN: 'LOGIN',
+  USER_DETAIL_VIEW: 'USER_DETAIL_VIEW',
+  USER_LIST_EXPORT: 'USER_LIST_EXPORT',
+  USER_UNMASK: 'USER_UNMASK',
+  USER_PLAN_CHANGE: 'USER_PLAN_CHANGE',
+  USER_STATUS_CHANGE: 'USER_STATUS_CHANGE',
+  USER_PASSWORD_RESET: 'USER_PASSWORD_RESET',
+  USER_PROFILE_UPDATE: 'USER_PROFILE_UPDATE',
+  DASHBOARD_EXPORT: 'DASHBOARD_EXPORT'
+};
+
 exports.Prisma.ModelName = {
   Theme: 'Theme',
   ThemeGroupTheme: 'ThemeGroupTheme',
@@ -657,7 +736,11 @@ exports.Prisma.ModelName = {
   CronRunLog: 'CronRunLog',
   UserSubscription: 'UserSubscription',
   PaymentCard: 'PaymentCard',
-  Payment: 'Payment'
+  Payment: 'Payment',
+  Admin: 'Admin',
+  UserLoginHistory: 'UserLoginHistory',
+  UserPlanHistory: 'UserPlanHistory',
+  AdminAuditLog: 'AdminAuditLog'
 };
 
 /**

@@ -36,6 +36,7 @@ describe('IssueThemeController optional authentication', () => {
                 userId: 'user-1',
                 username: 'tester',
                 email: 'tester@example.com',
+                status: 'ACTIVE',
               }),
             },
           },

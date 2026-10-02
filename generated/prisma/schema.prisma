@@ -167,6 +167,7 @@ model User {
   marketingConsent Boolean      @default(false) @map("marketing_consent")
   isTempPassword   Boolean      @default(false) @map("is_temp_password")
   planType         PlanType     @default(FREE) @map("plan_type")
+  status           UserStatus   @default(ACTIVE) @map("status")
   createdAt        DateTime     @default(now()) @map("created_at")
   updatedAt        DateTime     @default(now()) @updatedAt @map("updated_at")
   deletedAt        DateTime?    @map("deleted_at")
@@ -180,6 +181,9 @@ model User {
   subscription        UserSubscription?
   paymentCards        PaymentCard[]
   payments            Payment[]
+  loginHistories      UserLoginHistory[]
+  planHistories       UserPlanHistory[]
+  auditLogs           AdminAuditLog[]
 
   @@unique([username, deletedAt], map: "uk_users_username")
   @@unique([email, deletedAt], map: "uk_users_email")
@@ -188,6 +192,7 @@ model User {
   @@index([email], map: "idx_users_email")
   @@index([provider, socialId], map: "idx_users_provider_social")
   @@index([deletedAt], map: "idx_users_deleted_at")
+  @@index([status], map: "idx_users_status")
   @@map("users")
 }
 
@@ -583,6 +588,7 @@ model ThemeDailySnapshot {
   @@unique([themeCode, snapshotDate], map: "uk_theme_snapshot_code_date")
   @@index([snapshotDate, rank], map: "idx_theme_snapshot_date_rank")
   @@index([themeCode, snapshotDate(sort: Desc)], map: "idx_theme_snapshot_code_date")
+  @@index([snapshotDate, stockSnapshotTime], map: "idx_theme_snapshot_stock_source")
   @@map("theme_daily_snapshots")
 }
 
@@ -783,4 +789,126 @@ model Payment {
   @@index([status], map: "idx_payment_status")
   @@index([paidAt(sort: Desc)], map: "idx_payment_paid_at")
   @@map("payments")
+}
+
+// =============================================
+// Backoffice v1
+// =============================================
+
+enum AdminRole {
+  SUPER_ADMIN // 전체 권한 (관리자 관리 포함)
+  OPERATOR // 회원 조회 + 운영 액션
+  VIEWER // 조회 전용 (마스킹 해제 불가)
+
+  @@map("admin_role_enum")
+}
+
+enum UserStatus {
+  ACTIVE // 정상
+  INACTIVE // 비활성 (로그인 차단)
+  DORMANT // 휴면
+  DELETED // 탈퇴 (deletedAt 과 함께 세팅)
+
+  @@map("user_status_enum")
+}
+
+enum AdminAuditAction {
+  LOGIN // 관리자 로그인
+  USER_DETAIL_VIEW // 회원 상세 조회
+  USER_LIST_EXPORT // 회원 목록 CSV 다운로드
+  USER_UNMASK // 개인정보 마스킹 해제
+  USER_PLAN_CHANGE // 플랜 변경
+  USER_STATUS_CHANGE // 상태 변경
+  USER_PASSWORD_RESET // 비밀번호 재설정 발송
+  USER_PROFILE_UPDATE // 회원정보 수정
+  DASHBOARD_EXPORT // 서비스 현황 CSV 다운로드
+
+  @@map("admin_audit_action_enum")
+}
+
+// 23. 백오피스 관리자 계정
+model Admin {
+  adminId     String    @id @default(uuid()) @map("admin_id") @db.Uuid
+  loginId     String    @map("login_id") @db.VarChar(50)
+  password    String    @db.VarChar(255)
+  name        String    @db.VarChar(50)
+  role        AdminRole @default(VIEWER)
+  isActive    Boolean   @default(true) @map("is_active")
+  lastLoginAt DateTime? @map("last_login_at")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @default(now()) @updatedAt @map("updated_at")
+  deletedAt   DateTime? @map("deleted_at")
+
+  // Relations
+  auditLogs     AdminAuditLog[]
+  planHistories UserPlanHistory[]
+
+  @@unique([loginId, deletedAt], map: "uk_admins_login_id")
+  @@index([deletedAt], map: "idx_admins_deleted_at")
+  @@map("admins")
+}
+
+// 24. 회원 로그인 이력 (회원 상세 - 최근 5건 노출)
+model UserLoginHistory {
+  historyId  String       @id @default(uuid()) @map("history_id") @db.Uuid
+  userId     String       @map("user_id") @db.Uuid
+  provider   AuthProvider
+  ipAddress  String?      @map("ip_address") @db.VarChar(45)
+  userAgent  String?      @map("user_agent") @db.Text
+  deviceType String?      @map("device_type") @db.VarChar(20) // mobile / desktop / tablet
+  osName     String?      @map("os_name") @db.VarChar(30) // ios18 / macOS / Windows
+  loggedInAt DateTime     @default(now()) @map("logged_in_at")
+
+  // Relations
+  user User @relation(fields: [userId], references: [userId])
+
+  @@index([userId, loggedInAt(sort: Desc)], map: "idx_login_history_user")
+  @@map("user_login_histories")
+}
+
+// 25. 회원 플랜 변경 이력 (회원 상세 - 플랜 이력)
+model UserPlanHistory {
+  historyId   String    @id @default(uuid()) @map("history_id") @db.Uuid
+  userId      String    @map("user_id") @db.Uuid
+  fromPlan    PlanType? @map("from_plan") // null = 가입 시 최초 부여
+  toPlan      PlanType  @map("to_plan")
+  reason      String?   @db.Text
+  changedBy   String?   @map("changed_by_admin_id") @db.Uuid // null = 회원 본인 또는 시스템
+  note        String?   @db.VarChar(100) // "가입 시 기본 부여" 등 표기 문구
+  effectiveAt DateTime  @map("effective_at")
+  expiresAt   DateTime? @map("expires_at")
+  createdAt   DateTime  @default(now()) @map("created_at")
+
+  // Relations
+  user  User   @relation(fields: [userId], references: [userId])
+  admin Admin? @relation(fields: [changedBy], references: [adminId])
+
+  @@index([userId, effectiveAt(sort: Desc)], map: "idx_plan_history_user")
+  @@map("user_plan_histories")
+}
+
+// 26. 운영 감사 로그
+model AdminAuditLog {
+  logId        String           @id @default(uuid()) @map("log_id") @db.Uuid
+  adminId      String           @map("admin_id") @db.Uuid
+  action       AdminAuditAction
+  targetUserId String?          @map("target_user_id") @db.Uuid
+  targetScope  String?          @map("target_scope") @db.VarChar(300) // CSV 등 범위형 대상
+  beforeValue  Json?            @map("before_value") @db.JsonB
+  afterValue   Json?            @map("after_value") @db.JsonB
+  reason       String?          @db.Text
+  success      Boolean          @default(true)
+  failureCode  String?          @map("failure_code") @db.VarChar(50)
+  ipAddress    String?          @map("ip_address") @db.VarChar(45)
+  userAgent    String?          @map("user_agent") @db.Text
+  createdAt    DateTime         @default(now()) @map("created_at")
+
+  // Relations
+  admin      Admin @relation(fields: [adminId], references: [adminId])
+  targetUser User? @relation(fields: [targetUserId], references: [userId])
+
+  @@index([targetUserId, createdAt(sort: Desc)], map: "idx_audit_target_user")
+  @@index([adminId, createdAt(sort: Desc)], map: "idx_audit_admin")
+  @@index([action], map: "idx_audit_action")
+  @@map("admin_audit_logs")
 }
