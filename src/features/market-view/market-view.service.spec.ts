@@ -115,6 +115,9 @@ describe( 'MarketViewService rules', () => {
                         },
                     ] ),
                 },
+                marketViewDailySnapshot: {
+                    findFirst: jest.fn().mockResolvedValue( { indexClose: 865.03 } ),
+                },
             };
             const chartService = new MarketViewService( prisma as any, {} as any, {} as any ) as any;
             const tradeDate = new Date( '2026-07-03T00:00:00.000Z' );
@@ -125,15 +128,37 @@ describe( 'MarketViewService rules', () => {
                 where: { marketType: 'KOSDAQ', tradeDate },
                 orderBy: { tradeTime: 'asc' },
             } );
+            expect( prisma.marketViewDailySnapshot.findFirst ).toHaveBeenCalledWith( {
+                where: { marketType: 'KOSDAQ', tradeDate: { lt: tradeDate } },
+                orderBy: { tradeDate: 'desc' },
+            } );
             expect( result ).toEqual( {
                 marketType: 'KOSDAQ',
                 tradeDate: '2026-07-03',
                 period: 'intraday',
+                previousClose: 865.03,
                 items: [
                     { tradeTime: '09:00', indexPrice: 866.72 },
                     { tradeTime: '09:03', indexPrice: 868.41 },
                 ],
             } );
+        } );
+
+        it( 'returns a null previous close when no earlier snapshot exists', async () => {
+            const prisma = {
+                marketViewIndexChartPoint: {
+                    findMany: jest.fn().mockResolvedValue( [] ),
+                },
+                marketViewDailySnapshot: {
+                    findFirst: jest.fn().mockResolvedValue( null ),
+                },
+            };
+            const chartService = new MarketViewService( prisma as any, {} as any, {} as any ) as any;
+
+            const result = await chartService.getIndexCandles( 'KOSDAQ', new Date( '2026-07-03T00:00:00.000Z' ) );
+
+            expect( result.previousClose ).toBeNull();
+            expect( result.items ).toEqual( [] );
         } );
 
         it( 'returns both index chart series for the market view response', async () => {

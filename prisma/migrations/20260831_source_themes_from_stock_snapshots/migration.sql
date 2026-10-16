@@ -6,7 +6,7 @@ ALTER TABLE "stock_current_rank_snapshots"
   ADD COLUMN "short_term_rs" DECIMAL(5, 2);
 
 ALTER TABLE "theme_daily_snapshots"
-  ADD COLUMN "stock_snapshot_time" TIMESTAMP;
+  ADD COLUMN "stock_snapshot_time" TIMESTAMP(3);
 
 CREATE INDEX "idx_theme_snapshot_stock_source"
   ON "theme_daily_snapshots"("snapshot_date", "stock_snapshot_time");
