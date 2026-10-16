@@ -3,6 +3,7 @@ import { randomUUID } from 'crypto';
 import { PrismaService } from '../../common/prisma/prisma.service';
 import { RealtimePriceCacheService } from './realtime-price-cache.service';
 import { CurrentPriceResolver } from './current-price-resolver.service';
+import { normalizeTradingValueToWon } from './trading-value.util';
 
 type MetricRow = {
   stock_code: string;
@@ -45,6 +46,8 @@ type CurrentRankRow = {
 export class CurrentRankService {
   private readonly logger = new Logger(CurrentRankService.name);
   private static readonly SNAPSHOT_SAVE_BATCH = 500;
+  // previous_trading_value_ratio DECIMAL(12,4) 의 정수부 최대 8자리 (소수 4자리 반올림 여유를 둔다)
+  private static readonly MAX_TRADING_VALUE_RATIO = 99_999_999;
 
   constructor(
     private readonly prisma: PrismaService,
@@ -302,7 +305,8 @@ export class CurrentRankService {
       this.toDateOnly(tradeDate),
       this.timeOfDay(snapshotTime),
     );
-    return new Map(rows.map((row) => [row.stock_code, row.trading_value]));
+    // 정규화 이전에 저장된 장중 행은 백만원 단위라 원 단위로 맞춰 비교한다.
+    return new Map(rows.map((row) => [row.stock_code, normalizeTradingValueToWon(row.trading_value)]));
   }
 
   private timeOfDay(date: Date): string {
@@ -334,13 +338,21 @@ export class CurrentRankService {
       const priceChange1d = realtimePrice
         ? realtimePrice.changeAmount
         : metric.price_change_1d == null ? null : Number(metric.price_change_1d);
+      // 실시간 누적거래대금은 백만원 단위, metric 거래대금은 원 단위라 원으로 맞춘다.
       const tradingValue = realtimePrice?.accAmount && realtimePrice.accAmount > 0
-        ? BigInt(Math.trunc(realtimePrice.accAmount))
+        ? normalizeTradingValueToWon(realtimePrice.accAmount)
         : metric.trading_value;
       const previousTradingValue = previousTradingValues.get(metric.stock_code);
-      const previousTradingValueRatio =
+      const rawPreviousTradingValueRatio =
         tradingValue != null && previousTradingValue != null && previousTradingValue > 0n
           ? Number(tradingValue) / Number(previousTradingValue)
+          : null;
+      // 한 종목이라도 컬럼 범위를 넘으면 배치 INSERT 전체가 실패하므로 범위 밖 값은 버린다.
+      const previousTradingValueRatio =
+        rawPreviousTradingValueRatio != null &&
+        Number.isFinite(rawPreviousTradingValueRatio) &&
+        rawPreviousTradingValueRatio < CurrentRankService.MAX_TRADING_VALUE_RATIO
+          ? rawPreviousTradingValueRatio
           : null;
       const passedDynamicFilters =
         lowPrice52w != null &&

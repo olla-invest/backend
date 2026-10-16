@@ -5,6 +5,7 @@ import { readFile } from 'fs/promises';
 import { PrismaService } from '../../common/prisma/prisma.service';
 import { RealtimePriceCacheService } from '../real-time-chart/realtime-price-cache.service';
 import { CurrentPriceResolver } from '../real-time-chart/current-price-resolver.service';
+import { normalizeTradingValueToWon } from '../real-time-chart/trading-value.util';
 import { KiwoomRestService } from '../../integrations/kiwoom/rest/kiwoom-rest.service';
 import { ThemeMetricsService } from './theme-metrics.service';
 import {
@@ -404,15 +405,19 @@ export class IssueThemeService {
         : stock.currentPrice;
       const changeRate = realtimePrice ? realtimePrice.changeRate : stock.priceChangeRate;
       const priceChange1d = realtimePrice ? realtimePrice.changeAmount : stock.priceChange1d ?? null;
+      // 실시간 누적거래대금(백만원)과 정규화 이전 스냅샷 값(백만원)을 원 단위로 맞춘다.
+      const snapshotTradingValue = stock.tradingValue == null
+        ? null
+        : normalizeTradingValueToWon(stock.tradingValue);
       const tradingValue = realtimePrice?.accAmount && realtimePrice.accAmount > 0
-        ? BigInt(Math.trunc(realtimePrice.accAmount))
-        : stock.tradingValue;
+        ? normalizeTradingValueToWon(realtimePrice.accAmount)
+        : snapshotTradingValue;
 
       // 전일비는 "당일 누적 ÷ 전일 같은 시각 누적" 이다. 스냅샷 비율에서 역산한
       // 전일 기준값을 그대로 두고, 분자만 실시간 누적으로 갈아끼운다.
       const snapshotRatio = stock.previousTradingValueRatio;
-      const prevSameTimeAcc = snapshotRatio != null && snapshotRatio > 0 && stock.tradingValue != null
-        ? Number(stock.tradingValue) / snapshotRatio
+      const prevSameTimeAcc = snapshotRatio != null && snapshotRatio > 0 && snapshotTradingValue != null
+        ? Number(snapshotTradingValue) / snapshotRatio
         : null;
       const ratio = prevSameTimeAcc != null && prevSameTimeAcc > 0 && tradingValue != null
         ? Number(tradingValue) / prevSameTimeAcc

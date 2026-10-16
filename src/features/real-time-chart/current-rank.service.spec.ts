@@ -117,6 +117,82 @@ describe('CurrentRankService price selection', () => {
     });
   });
 
+  it('normalizes the live million-KRW trading value to KRW before comparing', () => {
+    jest.useFakeTimers().setSystemTime(new Date('2026-10-15T00:10:01.000Z'));
+    const realtimeCache = {
+      getPrice: jest.fn().mockReturnValue({
+        stockCode: '033780', currentPrice: 31_500, changeAmount: 700,
+        changeRate: 2.27, volume: 1, accVolume: 1, accAmount: 5_684,
+        openPrice: 31_000, highPrice: 31_700, lowPrice: 30_800,
+        timestamp: new Date('2026-10-15T00:10:00.000Z'),
+      }),
+    };
+    const service = new CurrentRankService(
+      {} as any,
+      realtimeCache as any,
+      new CurrentPriceResolver(),
+    ) as any;
+
+    const rows = service.buildRankRows([
+      {
+        stock_code: '033780', trade_date: new Date('2026-10-14'), close_price: '30800',
+        relative_strength_score: '90', rank: 1, high_price_52w: '35000',
+        low_price_52w: '20000', ma_50: '25000', price_change_rate_1d: '2.5',
+        price_change_1d: '750', trading_value: 65_895_000_000n, is_new_high: false,
+        short_term_rs: '88.67',
+      },
+    ], new Date('2026-10-15'), new Date('2026-10-15T00:10:00.000Z'), new Map([
+      ['033780', 141_000_000n],
+    ]));
+
+    expect(rows[0].tradingValue).toBe(5_684_000_000n);
+    expect(rows[0].previousTradingValueRatio).toBeCloseTo(40.31, 2);
+  });
+
+  it('drops a trading value ratio that would overflow the snapshot column', () => {
+    const service = new CurrentRankService(
+      {} as any,
+      { getPrice: jest.fn().mockReturnValue(undefined) } as any,
+      new CurrentPriceResolver(),
+    ) as any;
+
+    const rows = service.buildRankRows([
+      {
+        stock_code: '001820', trade_date: new Date('2026-10-14'), close_price: '30800',
+        relative_strength_score: '90', rank: 1, high_price_52w: '35000',
+        low_price_52w: '20000', ma_50: '25000', price_change_rate_1d: '2.5',
+        price_change_1d: '750', trading_value: 65_895_000_000n, is_new_high: false,
+        short_term_rs: '88.67',
+      },
+    ], new Date('2026-10-15'), new Date('2026-10-15T00:00:00.000Z'), new Map([
+      ['001820', 2n],
+    ]));
+
+    expect(rows[0].previousTradingValueRatio).toBeNull();
+  });
+
+  it('normalizes legacy million-KRW previous trading values read from snapshots', async () => {
+    const prisma = {
+      $queryRawUnsafe: jest.fn().mockResolvedValue([
+        { stock_code: '033780', trading_value: 141n },
+        { stock_code: '001820', trading_value: 65_895_000_000n },
+      ]),
+    };
+    const service = new CurrentRankService(
+      prisma as any,
+      { getPrice: jest.fn() } as any,
+      new CurrentPriceResolver(),
+    ) as any;
+
+    const values = await service.getPreviousTradingValues(
+      new Date('2026-10-15'),
+      new Date('2026-10-15T00:00:00.000Z'),
+    );
+
+    expect(values.get('033780')).toBe(141_000_000n);
+    expect(values.get('001820')).toBe(65_895_000_000n);
+  });
+
   it('compares trading value against the previous day at the same time of day', async () => {
     const prisma = { $queryRawUnsafe: jest.fn().mockResolvedValue([]) };
     const service = new CurrentRankService(

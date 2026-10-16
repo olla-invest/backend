@@ -14,6 +14,7 @@ import { PrismaService } from '../../common/prisma/prisma.service';
 import { mapUpNameToThemeCode } from '../../common/constants/theme-codes';
 import { getKrxTradingDateByOffset, isKrxTradingDay } from '../../common/utils/market-calendar.util';
 import { buildRankChangePoints, computeCumulativeRankChange, sortWithNullsLast } from './rank-change.util';
+import { normalizeTradingValueToWon, toNonNegativeBigInt } from './trading-value.util';
 
 type HigherTimeframeCandleType = 'week' | 'month' | 'year';
 
@@ -3589,20 +3590,11 @@ export class RealTimeChartService implements OnModuleInit {
   }
 
   private toNonNegativeBigInt(value: string | number | bigint | null | undefined): bigint {
-    if (value == null) return 0n;
-    if (typeof value === 'bigint') return value > 0n ? value : 0n;
-    const parsed = Number(String(value).replace(/,/g, ''));
-    if (!Number.isFinite(parsed) || parsed <= 0) return 0n;
-    return BigInt(Math.trunc(parsed));
+    return toNonNegativeBigInt(value);
   }
 
   private normalizeTradingValueToWon(value: string | number | bigint | null | undefined): bigint {
-    const raw = this.toNonNegativeBigInt(value);
-    if (raw === 0n) return 0n;
-
-    // Kiwoom daily/realtime trading value is often delivered in million KRW units.
-    // Stored candles use KRW, so normalize small values to the same scale.
-    return raw < 10_000_000n ? raw * 1_000_000n : raw;
+    return normalizeTradingValueToWon(value);
   }
 
   private parseDateInput(dateStr: string | undefined, fallback: Date): Date {
