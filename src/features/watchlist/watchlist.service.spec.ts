@@ -173,3 +173,12 @@ describe('WatchlistService theme recommendations', () => {
     expect(prisma.themeDailySnapshot.findFirst).not.toHaveBeenCalled();
   });
 });
+
+describe('WatchlistService new-high flag', () => {
+  const isAtNewHigh = (WatchlistService.prototype as any).isAtNewHigh;
+
+  it('drops the previous day new-high flag once the current price is below the 52-week high', () => {
+    expect(isAtNewHigh(31_000, { highPrice52w: '32000.00', isNewHigh: true })).toBe(false);
+    expect(isAtNewHigh(32_000, { highPrice52w: '32000.00', isNewHigh: false })).toBe(true);
+  });
+});

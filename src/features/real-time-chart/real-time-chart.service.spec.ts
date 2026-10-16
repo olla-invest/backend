@@ -194,3 +194,21 @@ describe('rank history window', () => {
     expect(metricsService.getCurrentRankTotals).toHaveBeenCalledWith(3, latestTradeDate, true);
   });
 });
+
+describe('RealTimeChartService new-high flag', () => {
+  const isAtNewHigh = (RealTimeChartService.prototype as any).isAtNewHigh;
+
+  it('drops the previous day new-high flag once the current price is below the 52-week high', () => {
+    expect(isAtNewHigh(31_000, { highPrice52w: 32_000, isNewHigh: true })).toBe(false);
+  });
+
+  it('flags a new high when the current price reaches the 52-week high', () => {
+    expect(isAtNewHigh(32_500, { highPrice52w: 32_000, isNewHigh: false })).toBe(true);
+  });
+
+  it('falls back to the stored flag without a 52-week high or price', () => {
+    expect(isAtNewHigh(0, { highPrice52w: 32_000, isNewHigh: true })).toBe(true);
+    expect(isAtNewHigh(31_000, { highPrice52w: null, isNewHigh: true })).toBe(true);
+    expect(isAtNewHigh(31_000, undefined)).toBe(false);
+  });
+});

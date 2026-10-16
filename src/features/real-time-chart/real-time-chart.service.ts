@@ -1076,7 +1076,7 @@ export class RealTimeChartService implements OnModuleInit {
 
         // 신고가 필터
         if (filters?.isHighPrice !== undefined) {
-          if (item.metrics?.isNewHigh !== filters.isHighPrice) return false;
+          if (this.isAtNewHigh(currentPrice, item.metrics) !== filters.isHighPrice) return false;
         }
 
         // 최소 거래대금 필터
@@ -1194,7 +1194,7 @@ export class RealTimeChartService implements OnModuleInit {
           currentPrice: realtimePrice?.currentPrice || dbPrice,
           exchange: this.isKospiStock(s) ? '코스피' : this.isKosdaqStock(s) ? '코스닥' : '-',
           relativeStrengthScore: Number((metrics?.relativeStrengthScore || 0).toFixed(4)),
-          isHighPrice: metrics?.isNewHigh || false,
+          isHighPrice: this.isAtNewHigh(realtimePrice?.currentPrice || dbPrice, metrics),
           priceChangeRateText,
           investmentIndicators: priceChangeRateText,
           investmentIndicatorItems: investmentIndicators,
@@ -1306,7 +1306,7 @@ export class RealTimeChartService implements OnModuleInit {
 
         // 신고가 필터
         if (filters?.isHighPrice !== undefined) {
-          if (item.metrics?.isNewHigh !== filters.isHighPrice) return false;
+          if (this.isAtNewHigh(currentPrice, item.metrics) !== filters.isHighPrice) return false;
         }
 
         // 최소 거래대금 필터
@@ -1422,7 +1422,7 @@ export class RealTimeChartService implements OnModuleInit {
           currentPrice: realtimePrice?.currentPrice || dbPrice,
           exchange: this.isKospiStock(s) ? '코스피' : this.isKosdaqStock(s) ? '코스닥' : '-',
           relativeStrengthScore: Number(item.rsScore.toFixed(4)),
-          isHighPrice: metrics?.isNewHigh || false,
+          isHighPrice: this.isAtNewHigh(realtimePrice?.currentPrice || dbPrice, metrics),
           priceChangeRateText,
           investmentIndicators: priceChangeRateText,
           investmentIndicatorItems: investmentIndicators,
@@ -1575,7 +1575,9 @@ export class RealTimeChartService implements OnModuleInit {
         if (item.rsScore <= 0) return false;
 
         if (filters?.isHighPrice !== undefined) {
-          if (item.metrics?.isNewHigh !== filters.isHighPrice) return false;
+          const realtimePrice = this.currentPriceResolver.getUsableRealtimePrice(allRealtimePrices.get(item.stock.code));
+          const currentPrice = realtimePrice?.currentPrice || item.metrics?.closePrice || 0;
+          if (this.isAtNewHigh(currentPrice, item.metrics) !== filters.isHighPrice) return false;
         }
 
         if (filters?.minTradingValue !== undefined) {
@@ -1673,7 +1675,7 @@ export class RealTimeChartService implements OnModuleInit {
           currentPrice: realtimePrice?.currentPrice || dbPrice,
           exchange: this.isKospiStock(s) ? '코스피' : this.isKosdaqStock(s) ? '코스닥' : '-',
           relativeStrengthScore: Number(item.rsScore.toFixed(4)),
-          isHighPrice: metrics?.isNewHigh || false,
+          isHighPrice: this.isAtNewHigh(realtimePrice?.currentPrice || dbPrice, metrics),
           priceChangeRateText,
           investmentIndicators: priceChangeRateText,
           investmentIndicatorItems: investmentIndicators,
@@ -3595,6 +3597,17 @@ export class RealTimeChartService implements OnModuleInit {
 
   private normalizeTradingValueToWon(value: string | number | bigint | null | undefined): bigint {
     return normalizeTradingValueToWon(value);
+  }
+
+  // 신고가는 화면에 표시하는 현재가가 52주 고가 이상인지로 판단한다 (현재가 순위 스냅샷과 같은 기준).
+  // 저장된 isNewHigh 는 지표 기준일(전일)의 고가 기준이라, 그대로 쓰면 오늘 신고가가 아니어도 하루 종일 표시된다.
+  private isAtNewHigh(
+    currentPrice: number,
+    metrics?: { highPrice52w?: number | null; isNewHigh?: boolean | null } | null,
+  ): boolean {
+    if (!metrics) return false;
+    if (metrics.highPrice52w == null || !(currentPrice > 0)) return metrics.isNewHigh ?? false;
+    return currentPrice >= metrics.highPrice52w;
   }
 
   private parseDateInput(dateStr: string | undefined, fallback: Date): Date {

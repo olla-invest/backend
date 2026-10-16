@@ -114,7 +114,7 @@ export class WatchlistService {
     const rankChange = rank != null && prevRank != null ? prevRank - rank : null;
     const events: string[] = [];
     if (today) {
-      if (today.isNewHigh) events.push('NEW_HIGH');
+      if (this.isAtNewHigh(realtimePrice?.currentPrice ?? Number(today.closePrice), today)) events.push('NEW_HIGH');
       if (today.isVolatilityContraction) events.push('VOLATILITY_CONTRACTION');
       if (today.isPriceCompression) events.push('PRICE_COMPRESSION');
       if (today.isTrendTemplate) events.push('TREND_TEMPLATE');
@@ -139,7 +139,7 @@ export class WatchlistService {
       storedRank: today?.rank ?? null,
       currentRankSnapshotTime: currentRankContext?.snapshotTime ?? null,
       relativeStrengthScore: today ? Number(today.relativeStrengthScore) : null,
-      isNewHigh: today?.isNewHigh ?? false,
+      isNewHigh: this.isAtNewHigh(realtimePrice?.currentPrice ?? (today ? Number(today.closePrice) : null), today),
       events,
     };
   }
@@ -561,7 +561,7 @@ export class WatchlistService {
     const prevRank = this.normalizeStockRank(displayPrevRank ?? prevMetric?.currentRank ?? prevMetric?.rank ?? null);
     const rankChange = rank != null && prevRank != null ? prevRank - rank : null;
 
-    if (metric.isNewHigh) events.push('NEW_HIGH');
+    if (this.isAtNewHigh(this.realtimePriceCache.getPrice(metric.stockCode)?.currentPrice ?? Number(metric.closePrice), metric)) events.push('NEW_HIGH');
     if (metric.isVolatilityContraction) events.push('VOLATILITY_CONTRACTION');
     if (metric.isPriceCompression) events.push('PRICE_COMPRESSION');
     if (metric.isTrendTemplate) events.push('TREND_TEMPLATE');
@@ -822,6 +822,18 @@ export class WatchlistService {
     if (rankA == null) return 1;
     if (rankB == null) return -1;
     return rankA - rankB;
+  }
+
+  // 신고가는 표시하는 현재가가 52주 고가 이상인지로 판단한다 (실시간 차트·테마 상세와 같은 기준).
+  // 저장된 isNewHigh 는 지표 기준일(전일)의 고가 기준이라, 그대로 쓰면 오늘 신고가가 아니어도 하루 종일 표시된다.
+  private isAtNewHigh(
+    currentPrice: number | null | undefined,
+    metric?: { highPrice52w?: unknown; isNewHigh?: boolean | null } | null,
+  ): boolean {
+    if (!metric) return false;
+    const high52w = metric.highPrice52w == null ? null : Number(metric.highPrice52w);
+    if (high52w == null || currentPrice == null || !(currentPrice > 0)) return metric.isNewHigh ?? false;
+    return currentPrice >= high52w;
   }
 
   // rank 0(정적 필터 탈락)과 null(집계 제외)은 모두 RS 순위권 이탈로 간주
