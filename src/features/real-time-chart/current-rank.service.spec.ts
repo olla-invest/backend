@@ -211,6 +211,64 @@ describe('CurrentRankService price selection', () => {
     expect(params).toEqual(['2026-08-10', '01:20:00']);
   });
 
+  it('finalizes daily ranks from the last snapshot at or before the 15:40 KST close', async () => {
+    const prisma = {
+      $queryRawUnsafe: jest.fn()
+        .mockResolvedValueOnce([{ snapshot_time: new Date('2026-10-15T06:30:00.000Z') }])
+        .mockResolvedValueOnce([{ updated: 33 }]),
+    };
+    const service = new CurrentRankService(
+      prisma as any,
+      { getPrice: jest.fn() } as any,
+      new CurrentPriceResolver(),
+    ) as any;
+
+    const result = await service.finalizeDailyCurrentRank(new Date('2026-10-15'));
+
+    const [lookupSql, ...lookupParams] = prisma.$queryRawUnsafe.mock.calls[0];
+    expect(lookupSql).toContain('snapshot_time <= $2::timestamp');
+    expect(lookupParams).toEqual(['2026-10-15', '2026-10-15T06:40:00.000Z']);
+    expect(prisma.$queryRawUnsafe.mock.calls[1].slice(1)).toEqual(['2026-10-15', '2026-10-15T06:30:00.000Z']);
+    expect(result).toMatchObject({ success: true, updated: 33, snapshotTime: '2026-10-15T06:30:00.000Z' });
+  });
+
+  it('skips finalization instead of ranking with same-day metrics when no closing snapshot exists', async () => {
+    const prisma = { $queryRawUnsafe: jest.fn().mockResolvedValueOnce([]) };
+    const service = new CurrentRankService(
+      prisma as any,
+      { getPrice: jest.fn() } as any,
+      new CurrentPriceResolver(),
+    ) as any;
+    const create = jest.spyOn(service, 'createCurrentRankSnapshot');
+
+    const result = await service.finalizeDailyCurrentRank(new Date('2026-10-15'));
+
+    expect(result).toMatchObject({ success: false, updated: 0 });
+    expect(prisma.$queryRawUnsafe).toHaveBeenCalledTimes(1);
+    expect(create).not.toHaveBeenCalled();
+  });
+
+  it('pins the closing snapshot to 15:40 KST while metrics are still from the previous day', async () => {
+    const service = new CurrentRankService({} as any, { getPrice: jest.fn() } as any, new CurrentPriceResolver()) as any;
+    jest.spyOn(service, 'getLatestMetricTradeDate').mockResolvedValue(new Date('2026-10-14'));
+    const create = jest.spyOn(service, 'createCurrentRankSnapshot').mockResolvedValue({ success: true });
+
+    await service.createClosingSnapshot(new Date('2026-10-15'));
+
+    expect(create).toHaveBeenCalledWith(new Date('2026-10-15T06:40:00.000Z'), new Date('2026-10-15T00:00:00.000Z'));
+  });
+
+  it('does not overwrite the closing snapshot once same-day metrics exist', async () => {
+    const service = new CurrentRankService({} as any, { getPrice: jest.fn() } as any, new CurrentPriceResolver()) as any;
+    jest.spyOn(service, 'getLatestMetricTradeDate').mockResolvedValue(new Date('2026-10-15'));
+    const create = jest.spyOn(service, 'createCurrentRankSnapshot');
+
+    const result = await service.createClosingSnapshot(new Date('2026-10-15'));
+
+    expect(result).toMatchObject({ success: false });
+    expect(create).not.toHaveBeenCalled();
+  });
+
   it('rebuilds a historical closing snapshot without using the realtime cache', async () => {
     const realtimeCache = { getPrice: jest.fn(() => { throw new Error('realtime must not be read'); }) };
     const service = new CurrentRankService(

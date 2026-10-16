@@ -144,6 +144,10 @@ export class DataSchedulerService implements OnApplicationBootstrap {
 
     const tradeDate = this.todayKstDateOnly();
     await this.cronRunLog.run('collectEndOfDayData', tradeDate, async () => {
+      // 당일 지표가 계산되기 전 장 마감 순위를 먼저 남긴다. 다음 거래일의 D-1 순위가 이 값이다.
+      await this.currentRankService.createClosingSnapshot(tradeDate).catch((e) =>
+        this.logger.warn(`[current-rank] closing snapshot failed: ${(e as Error).message}`),
+      );
       this.logger.log('Syncing trading states (거래정지 여부)...');
       await this.realTimeChartService.syncTradingStates().catch((e) =>
         this.logger.warn(`syncTradingStates failed: ${(e as Error).message}`),
@@ -161,7 +165,10 @@ export class DataSchedulerService implements OnApplicationBootstrap {
       const result = await this.redisLock.withLock(lockKey, DataSchedulerService.LOCK_TTL_MS, async () => {
         await this.runCatchUp();
         await this.runMetricsFor(tradeDate);
-        await this.currentRankService.createCurrentRankSnapshot(new Date(), tradeDate);
+        // 당일 지표 기준 스냅샷은 테마 스냅샷의 원천이다. 장 마감 스냅샷을 덮어쓰지 않도록 그 뒤 시각에 남긴다.
+        const closingTime = this.currentRankService.closingSnapshotTime(tradeDate);
+        const afterClose = new Date(Math.max(Date.now(), closingTime.getTime() + 10 * 60 * 1000));
+        await this.currentRankService.createCurrentRankSnapshot(afterClose, tradeDate);
         await this.currentRankService.finalizeDailyCurrentRank(tradeDate);
         await this.eventEmitter.emitAsync('stock-ranks.finalized', {
           tradeDate: tradeDate.toISOString().slice(0, 10),
@@ -214,6 +221,7 @@ export class DataSchedulerService implements OnApplicationBootstrap {
         return;
       }
       await this.runMetricsFor(targetDate, true);
+      await this.finalizeClosingRank(targetDate);
       await this.runMarketViewFor(targetDate, this.isTodayKst(targetDate));
     });
 
@@ -304,11 +312,20 @@ export class DataSchedulerService implements OnApplicationBootstrap {
       this.logger.warn(`[catch-up] Re-running metrics for ${iso}`);
       try {
         await this.runMetricsFor(d, metricsMissing);
+        await this.finalizeClosingRank(d);
         await this.runMarketViewFor(d, false);
       } catch (err) {
         this.logger.error(`[catch-up] Failed for ${iso}`, err);
       }
     }
+  }
+
+  // 장마감 수집이 실패해 안전망·catch-up 으로 지표를 다시 계산한 날도 같은 기준(장 마감 순위)으로 확정한다.
+  // 지표 계산이 확정 순위를 당일 RS 순위로 채우므로, 이 단계가 없으면 D-1 순위의 기준이 날마다 달라진다.
+  private async finalizeClosingRank(tradeDate: Date): Promise<void> {
+    await this.currentRankService.finalizeDailyCurrentRank(tradeDate).catch((err) =>
+      this.logger.warn(`[current-rank] finalize failed for ${tradeDate.toISOString().slice(0, 10)}: ${(err as Error).message}`),
+    );
   }
 
   /**

@@ -3,6 +3,7 @@ import { ApiTags, ApiOperation, ApiParam, ApiQuery, ApiBody, ApiOkResponse, ApiE
 import { RealTimeChartService, StockListSortBy } from './real-time-chart.service';
 import { InitialSetupService } from './initial-setup.service';
 import { StockMetricsService } from './stock-metrics.service';
+import { CurrentRankService } from './current-rank.service';
 import { Public } from '../../common/auth/decorators/public.decorator';
 import { AdminApiKeyGuard } from '../../common/auth/guards/admin-api-key.guard';
 import { RealTimeChartResultDto, StockSuggestResultDto } from './dto/real-time-chart-result.dto';
@@ -30,6 +31,7 @@ export class RealTimeChartController {
     private readonly chartService: RealTimeChartService,
     private readonly setupService: InitialSetupService,
     private readonly metricsService: StockMetricsService,
+    private readonly currentRankService: CurrentRankService,
   ) {}
 
   @Get('candles/minute/:stockCode')
@@ -486,6 +488,20 @@ export class RealTimeChartController {
     @Body('writeLogFile') writeLogFile: boolean = false,
   ) {
     return await this.chartService.calculateDailyMetrics(marketType, tradeDate, writeLogFile);
+  }
+
+  @Post('admin/current-rank/finalize')
+  @UseGuards(AdminApiKeyGuard)
+  @ApiOperation( {
+    summary: '[관리자] 일별 확정 순위 재확정',
+    description: '해당 거래일 15:40 KST 이전 마지막 순위 스냅샷(장 마감 순위)으로 stock_daily_metrics.current_rank 를 다시 채운다. 다음 거래일의 D-1 순위가 이 값이다.',
+  } )
+  @ApiBody( { schema: { example: { tradeDate: '20261015' } } } )
+  async finalizeCurrentRank(
+    @Body('tradeDate', new RegexPipe(/^\d{8}$/, 'tradeDate')) tradeDate: string,
+  ) {
+    const date = new Date(`${tradeDate.slice(0, 4)}-${tradeDate.slice(4, 6)}-${tradeDate.slice(6, 8)}T00:00:00.000Z`);
+    return await this.currentRankService.finalizeDailyCurrentRank(date);
   }
 
   @Get('status')

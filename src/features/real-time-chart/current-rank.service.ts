@@ -48,6 +48,10 @@ export class CurrentRankService {
   private static readonly SNAPSHOT_SAVE_BATCH = 500;
   // previous_trading_value_ratio DECIMAL(12,4) 의 정수부 최대 8자리 (소수 4자리 반올림 여유를 둔다)
   private static readonly MAX_TRADING_VALUE_RATIO = 99_999_999;
+  // 장 마감 순위 스냅샷 시각 (15:40 KST). 당일 지표가 계산되기 전 마지막으로 화면에 보이던 순위이며,
+  // 다음 거래일의 D-1 순위가 이 값이다. 지표 계산 뒤 스냅샷(테마용, 15:50 재생성 등)은 이보다 늦다.
+  private static readonly CLOSING_SNAPSHOT_UTC_HOUR = 6;
+  private static readonly CLOSING_SNAPSHOT_UTC_MINUTE = 40;
 
   constructor(
     private readonly prisma: PrismaService,
@@ -99,6 +103,29 @@ export class CurrentRankService {
     };
   }
 
+  /**
+   * 당일 지표가 계산되기 전, 장 마감 시점의 순위를 15:40 KST 스냅샷으로 남긴다.
+   * 이미 당일 지표가 있으면(재실행 등) 당일 RS 로 매긴 순위가 되므로 남기지 않는다.
+   */
+  async createClosingSnapshot(tradeDate: Date) {
+    const targetTradeDate = this.dateOnly(tradeDate);
+    const metricTradeDate = await this.getLatestMetricTradeDate();
+    if (metricTradeDate && metricTradeDate.getTime() >= targetTradeDate.getTime()) {
+      this.logger.warn(
+        `[current-rank] closing snapshot skipped tradeDate=${this.toDateOnly(targetTradeDate)}: same-day metrics already exist`,
+      );
+      return {
+        success: false, count: 0, rankedCount: 0,
+        tradeDate: this.toDateOnly(targetTradeDate), snapshotTime: null,
+      };
+    }
+    return this.createCurrentRankSnapshot(this.closingSnapshotTime(targetTradeDate), targetTradeDate);
+  }
+
+  /**
+   * 일별 확정 순위(stock_daily_metrics.current_rank)를 장 마감 순위 스냅샷으로 채운다.
+   * 당일 지표로 매긴 스냅샷을 쓰면 다음 날 장중 순위와 RS 기준이 같아져 D-1 순위가 의미를 잃는다.
+   */
   async finalizeDailyCurrentRank(tradeDate?: Date) {
     const targetTradeDate = tradeDate ? this.dateOnly(tradeDate) : await this.getLatestMetricTradeDate();
     if (!targetTradeDate) {
@@ -106,13 +133,10 @@ export class CurrentRankService {
       return { success: false, updated: 0, tradeDate: null, snapshotTime: null };
     }
 
-    let snapshotTime = await this.getLatestSnapshotTime(targetTradeDate);
+    const snapshotTime = await this.getClosingSnapshotTime(targetTradeDate);
     if (!snapshotTime) {
-      const snapshot = await this.createCurrentRankSnapshot(new Date(), targetTradeDate);
-      if (!snapshot.success) {
-        return { success: false, updated: 0, tradeDate: this.toDateOnly(targetTradeDate), snapshotTime: null };
-      }
-      snapshotTime = new Date(snapshot.snapshotTime!);
+      this.logger.warn(`[current-rank] no closing snapshot for ${this.toDateOnly(targetTradeDate)}; finalization skipped`);
+      return { success: false, updated: 0, tradeDate: this.toDateOnly(targetTradeDate), snapshotTime: null };
     }
 
     const updatedRows = await this.prisma.$queryRawUnsafe<Array<{ updated: number }>>(
@@ -257,18 +281,27 @@ export class CurrentRankService {
     );
   }
 
-  private async getLatestSnapshotTime(tradeDate: Date): Promise<Date | null> {
+  // 장 마감 시각까지의 마지막 스냅샷. 장마감 수집이 실패한 날은 마지막 장중 스냅샷이 된다.
+  private async getClosingSnapshotTime(tradeDate: Date): Promise<Date | null> {
     const rows = await this.prisma.$queryRawUnsafe<Array<{ snapshot_time: Date }>>(
       `
         SELECT snapshot_time
         FROM stock_current_rank_snapshots
         WHERE trade_date = $1::date
+          AND snapshot_time <= $2::timestamp
         ORDER BY snapshot_time DESC
         LIMIT 1
       `,
       this.toDateOnly(tradeDate),
+      this.closingSnapshotTime(tradeDate).toISOString(),
     );
     return rows[0]?.snapshot_time ?? null;
+  }
+
+  closingSnapshotTime(tradeDate: Date): Date {
+    const out = this.dateOnly(tradeDate);
+    out.setUTCHours(CurrentRankService.CLOSING_SNAPSHOT_UTC_HOUR, CurrentRankService.CLOSING_SNAPSHOT_UTC_MINUTE, 0, 0);
+    return out;
   }
 
   // 누적 거래대금은 장중에 계속 늘어나므로 전일 종가 스냅샷과 비교하면 비율이 항상 낮게 나온다.
