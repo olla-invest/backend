@@ -75,6 +75,8 @@ export interface KiwoomDayCandleData {
   pred_pre: string;
   pred_pre_sig: string;
   trde_tern_rt: string; // 거래회전율
+  upd_stkpc_tp?: string; // 수정주가구분 (수정 이벤트일에만 값)
+  upd_rt?: string; // 수정비율 (예: -50.00, 연말 배당락 표시는 0.00)
 }
 
 export interface KiwoomDayCandleResponse {

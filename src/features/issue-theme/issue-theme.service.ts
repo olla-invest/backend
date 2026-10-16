@@ -1,3 +1,4 @@
+import { isKrxTradingDay } from '../../common/utils/market-calendar.util';
 import { BadRequestException, Injectable, Logger, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { Cron } from '@nestjs/schedule';
 import { readFile } from 'fs/promises';
@@ -34,13 +35,6 @@ interface GroupingThemeItem {
   themes: string[];
 }
 
-interface GroupedThemeDefinition {
-  groupId: number;
-  themeCode: number;
-  groupName: string;
-  themeNames: Set<string>;
-}
-
 @Injectable()
 export class IssueThemeService {
   private readonly logger = new Logger(IssueThemeService.name);
@@ -48,7 +42,6 @@ export class IssueThemeService {
   private readonly groupedThemeSource = 'GROUP';
   private readonly naverThemeCodeOffset = 100000;
   private readonly groupThemeCodeOffset = 200000;
-  private groupedThemeCache: Promise<GroupedThemeDefinition[]> | null = null;
 
   private round2(value: number): number {
     return Math.round(value * 100) / 100;
@@ -58,36 +51,12 @@ export class IssueThemeService {
     return this.groupThemeCodeOffset + groupId;
   }
 
-  private getGroupIdFromThemeCode(themeCode: number): number {
-    return themeCode - this.groupThemeCodeOffset;
-  }
-
   private isGroupedThemeCode(themeCode: number): boolean {
     return themeCode >= this.groupThemeCodeOffset;
   }
 
   private getGroupingThemePath(filePath?: string): string {
     return filePath || process.env.GROUPING_THEME_PATH || 'C:\\Users\\user\\Downloads\\theme_crawler\\grouping_theme.json';
-  }
-
-  private async getGroupedThemeDefinitions(): Promise<GroupedThemeDefinition[]> {
-    if (!this.groupedThemeCache) {
-      this.groupedThemeCache = (async () => {
-        const resolvedPath = this.getGroupingThemePath();
-        const parsed = JSON.parse(await readFile(resolvedPath, 'utf8')) as GroupingThemeItem[];
-        if (!Array.isArray(parsed)) throw new Error('Grouping theme file must be a JSON array');
-
-        return parsed
-          .filter((item) => Number.isFinite(item.group_id) && item.group_name && Array.isArray(item.themes))
-          .map((item) => ({
-            groupId: item.group_id,
-            themeCode: this.getGroupThemeCode(item.group_id),
-            groupName: item.group_name,
-            themeNames: new Set(item.themes),
-          }));
-      })();
-    }
-    return this.groupedThemeCache;
   }
 
   private async getGroupedThemeStockCounts(themeCodes: number[]): Promise<Map<number, number>> {
@@ -103,63 +72,29 @@ export class IssueThemeService {
       select: { groupThemeCode: true, themeCode: true },
     });
 
-    if (mappingRows.length > 0) {
-      const childThemeCodes = [...new Set(mappingRows.map((row) => row.themeCode))];
-      const stockThemeRows = await this.prisma.stockTheme.findMany({
-        where: {
-          source: this.naverThemeSource,
-          themeCode: { in: childThemeCodes },
-        },
-        select: { themeCode: true, stockCode: true },
-      });
-      const childThemeCodeToGroupCodes = new Map<number, number[]>();
-      for (const row of mappingRows) {
-        const groupCodes = childThemeCodeToGroupCodes.get(row.themeCode) ?? [];
-        groupCodes.push(row.groupThemeCode);
-        childThemeCodeToGroupCodes.set(row.themeCode, groupCodes);
-      }
-      const stocksByGroup = new Map<number, Set<string>>();
-      for (const row of stockThemeRows) {
-        const groupCodes = childThemeCodeToGroupCodes.get(row.themeCode) ?? [];
-        for (const groupCode of groupCodes) {
-          if (!stocksByGroup.has(groupCode)) stocksByGroup.set(groupCode, new Set<string>());
-          stocksByGroup.get(groupCode)!.add(row.stockCode);
-        }
-      }
-      for (const themeCode of groupedCodes) result.set(themeCode, stocksByGroup.get(themeCode)?.size ?? 0);
-      return result;
-    }
-
-    const groupedThemes = await this.getGroupedThemeDefinitions();
-    const groupsByCode = new Map(groupedThemes.map((group) => [group.themeCode, group]));
-    const themeNames = new Set<string>();
-    for (const themeCode of groupedCodes) {
-      const group = groupsByCode.get(themeCode);
-      if (!group) continue;
-      for (const themeName of group.themeNames) themeNames.add(themeName);
-    }
-    if (themeNames.size === 0) return result;
-
-    const childThemes = await this.prisma.theme.findMany({
-      where: { source: this.naverThemeSource, themeName: { in: Array.from(themeNames) }, deletedAt: null },
-      select: { themeCode: true, themeName: true },
-    });
-    const childThemeNameByCode = new Map(childThemes.map((theme) => [theme.themeCode, theme.themeName]));
-    const stockThemeRows = await this.prisma.stockTheme.findMany({
-      where: { source: this.naverThemeSource, themeCode: { in: childThemes.map((theme) => theme.themeCode) } },
+    const childThemeCodes = [...new Set(mappingRows.map((row) => row.themeCode))];
+    const stockThemeRows = childThemeCodes.length === 0 ? [] : await this.prisma.stockTheme.findMany({
+      where: {
+        source: this.naverThemeSource,
+        themeCode: { in: childThemeCodes },
+      },
       select: { themeCode: true, stockCode: true },
     });
-
-    for (const themeCode of groupedCodes) {
-      const group = groupsByCode.get(themeCode);
-      if (!group) continue;
-      const stockCodes = new Set<string>();
-      for (const row of stockThemeRows) {
-        const themeName = childThemeNameByCode.get(row.themeCode);
-        if (themeName && group.themeNames.has(themeName)) stockCodes.add(row.stockCode);
-      }
-      result.set(themeCode, stockCodes.size);
+    const childThemeCodeToGroupCodes = new Map<number, number[]>();
+    for (const row of mappingRows) {
+      const groupCodes = childThemeCodeToGroupCodes.get(row.themeCode) ?? [];
+      groupCodes.push(row.groupThemeCode);
+      childThemeCodeToGroupCodes.set(row.themeCode, groupCodes);
     }
+    const stocksByGroup = new Map<number, Set<string>>();
+    for (const row of stockThemeRows) {
+      const groupCodes = childThemeCodeToGroupCodes.get(row.themeCode) ?? [];
+      for (const groupCode of groupCodes) {
+        if (!stocksByGroup.has(groupCode)) stocksByGroup.set(groupCode, new Set<string>());
+        stocksByGroup.get(groupCode)!.add(row.stockCode);
+      }
+    }
+    for (const themeCode of groupedCodes) result.set(themeCode, stocksByGroup.get(themeCode)?.size ?? 0);
     return result;
   }
 
@@ -402,28 +337,21 @@ export class IssueThemeService {
     let stockThemes: { stockCode: string; stockName: string | null; inclusionReason: string | null }[] = [];
 
     if (isGroupedTheme) {
-      const groupId = this.getGroupIdFromThemeCode(themeCode);
-      const group = (await this.getGroupedThemeDefinitions()).find((item) => item.groupId === groupId);
-      if (!group) throw new NotFoundException(`Theme group ${themeCode} not found`);
-
-      const storedGroup = await this.prisma.theme.findFirst({
+      // Groups live in the DB (synced from grouping_theme.json by the admin sync); request paths
+      // must not depend on that file, which does not exist on the servers.
+      theme = await this.prisma.theme.findFirst({
         where: { themeCode, source: this.groupedThemeSource, deletedAt: null },
         select: { themeName: true, imageUrl: true },
       });
-      theme = storedGroup ?? { themeName: group.groupName, imageUrl: null };
-      let childThemeCodes = (await this.prisma.themeGroupTheme.findMany({
+      if (!theme) throw new NotFoundException(`Theme group ${themeCode} not found`);
+
+      const childThemeCodes = (await this.prisma.themeGroupTheme.findMany({
         where: {
           groupThemeCode: themeCode,
           theme: { source: this.naverThemeSource, deletedAt: null },
         },
         select: { themeCode: true },
       })).map((item) => item.themeCode);
-      if (childThemeCodes.length === 0) {
-        childThemeCodes = (await this.prisma.theme.findMany({
-          where: { source: this.naverThemeSource, themeName: { in: Array.from(group.themeNames) }, deletedAt: null },
-          select: { themeCode: true },
-        })).map((item) => item.themeCode);
-      }
       stockThemes = await this.prisma.stockTheme.findMany({
         where: { themeCode: { in: childThemeCodes }, source: this.naverThemeSource },
         select: { stockCode: true, stockName: true, inclusionReason: true },
@@ -659,7 +587,9 @@ export class IssueThemeService {
   /** 거래대금 스냅샷 저장 (10분 단위 호출) */
   @Cron('*/10 9-15 * * 1-5', { timeZone: 'Asia/Seoul' })
   async saveTradingValueSnapshot() {
+    if (!isKrxTradingDay(new Date())) return { saved: 0, time: this.getCurrentSnapshotTime() };
     const snapshotTime = this.getCurrentSnapshotTime();
+    if (snapshotTime < '0900' || snapshotTime > '1530') return { saved: 0, time: snapshotTime };
     const kstNow = this.getKstNow();
     const snapshotDate = new Date(Date.UTC(
       kstNow.getUTCFullYear(),
@@ -671,7 +601,7 @@ export class IssueThemeService {
     const snapshots: any[] = [];
 
     for (const [stockCode, price] of allPrices) {
-      if (price.accAmount > 0) {
+      if (price.accAmount > 0 && this.currentPriceResolver.getUsableRealtimePrice(price)) {
         snapshots.push({
           stockCode,
           snapshotDate,
@@ -797,7 +727,6 @@ export class IssueThemeService {
       return { groupsDeleted: deleted.count, mappingsUpserted, missingThemeNames };
     });
 
-    this.groupedThemeCache = null;
     this.logger.log(
       `Grouped themes synced: ${validGroups.length} groups, ${result.mappingsUpserted} mappings, ${result.groupsDeleted} deleted from ${resolvedPath}`,
     );

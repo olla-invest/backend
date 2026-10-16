@@ -63,3 +63,47 @@ describe('RealtimeSubscriptionManager', () => {
     expect(realtimeSource.subscribeBatch).not.toHaveBeenCalled();
   });
 });
+
+describe('reconnect subscription restoration', () => {
+  it('does not duplicate subscriptions already being restored by the websocket', async () => {
+    const source = {isConnected: () => true, subscribeBatch: jest.fn()};
+    const manager = new RealtimeSubscriptionManager(source as any, {getSubscribedStocks: () => []} as any, {getFilteredStockCodes: async () => ['020120']} as any);
+    await manager.subscribeFilteredStocks({stockCodes: ['020120']});
+    expect(source.subscribeBatch).not.toHaveBeenCalled();
+  });
+});
+
+describe('server-managed realtime subscriptions', () => {
+  const makeManager = (subscribed: string[]) => {
+    const source = {
+      isConnected: () => true,
+      subscribe: jest.fn().mockResolvedValue(undefined),
+      subscribeBatch: jest.fn().mockResolvedValue(undefined),
+    };
+    const cache = { getSubscribedStocks: jest.fn(() => subscribed) };
+    const metrics = { getFilteredStockCodes: async () => ['000001', '000002'] };
+    const manager = new RealtimeSubscriptionManager(source as any, cache as any, metrics as any);
+    return { manager, source, cache };
+  };
+
+  it('marks realtime-chart stocks as managed but not detail-page auto-subscriptions', async () => {
+    const { manager } = makeManager([]);
+    await manager.subscribeFilteredStocks();
+    await manager.ensureSubscribed(['000003']);
+    await manager.ensureSubscribed(['000009'], { manage: false });
+
+    expect(['000001', '000002', '000003'].every((code) => manager.isManaged(code))).toBe(true);
+    expect(manager.isManaged('000009')).toBe(false);
+  });
+
+  it('re-subscribes a managed stock once it is no longer in the subscribed ledger', async () => {
+    const { manager, source, cache } = makeManager(['000001', '000002']);
+    await manager.ensureSubscribed(['000001', '000002']);
+    expect(source.subscribeBatch).not.toHaveBeenCalled();
+
+    // Kiwoom confirmed a REMOVE for 000002, so the ledger no longer lists it.
+    cache.getSubscribedStocks.mockReturnValue(['000001']);
+    await manager.ensureSubscribed(['000001', '000002']);
+    expect(source.subscribeBatch).toHaveBeenCalledWith(['000002'], ['0B', '0D']);
+  });
+});

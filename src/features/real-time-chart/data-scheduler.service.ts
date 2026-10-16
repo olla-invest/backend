@@ -17,13 +17,13 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
  *  08:50 (월~금, 거래일)             prepareMarketOpenData
  *  09:00~15:30 (3분 / 30초)         실시간 연결 유지 / heartbeat
  *  15:40 (월~금, 거래일)             collectEndOfDayData   (원주가+수정주가 수집 후 메트릭스 계산)
+ *                                      ├─ 수정비율(upd_rt)이 찍힌 종목만 저장 이력 전체 재수집
  *                                      └─ 완료 직후 마켓뷰 일별 집계
- *  23:30 (매일, 거래일)              dailyAdjustedPriceBackfill (★ 메트릭스 계산 전에 실행)
  *  00:10 (매일)                     dailyMaintenance
  *  서버 시작 시                      onApplicationBootstrap → 누락된 메트릭스 catch-up
  *
  * 변경 핵심
- *  1) backfill 을 00:30 → 23:30 으로 옮겨 메트릭스 계산이 항상 최신 수정주가 위에서 돌도록 함.
+ *  1) 수정주가 이벤트 종목만 15:40 수집에서 재수집한다 (2026-10-06, 23:30 전 종목 90일 백필 제거).
  *  2) 한국 증시 휴장일에는 시장 관련 잡 전부 스킵.
  *  3) 메트릭스 잡은 Redis 분산락 + CronRunLog 로 보호되어 재시도/캐치업 가능.
  *  4) 메트릭스 종료 시 rsScore 로그파일을 항상 생성한다 (writeLogFile=true).
@@ -53,10 +53,10 @@ export class DataSchedulerService implements OnApplicationBootstrap {
   // ─────────────────────────────────────────────────────────────
 
   /**
-   * 장중 실시간 연결 유지 (랭킹 재계산 제거 — 메트릭스는 자정 00:05에만 갱신)
+   * 장중 실시간 연결 유지 (랭킹 재계산 제거 — 메트릭스는 15:40 장 마감 수집 후에만 갱신)
    * 월~금 09:00 ~ 15:30, 3분마다
    */
-  @Cron('*/3 9-15 * * 1-5', { timeZone: 'Asia/Seoul' })
+  @Cron('*/3 9-15 * * 1-5', { timeZone: 'Asia/Seoul', name: 'realtime:reconnect' })
   async recalculateMetricsDuringMarket() {
     if (!isKrxTradingDay(new Date())) return;
     const { kstHours, kstMinutes } = this.getKstParts();
@@ -70,7 +70,7 @@ export class DataSchedulerService implements OnApplicationBootstrap {
   /**
    * 30초마다 실시간 연결 상태 확인 (장중 09:00~15:30)
    */
-  @Cron('*/30 * * * * *', { timeZone: 'Asia/Seoul' })
+  @Cron('*/30 * * * * *', { timeZone: 'Asia/Seoul', name: 'realtime:heartbeat' })
   async checkRealtimeConnection() {
     if (!isKrxTradingDay(new Date())) return;
     const { kstHours, kstMinutes } = this.getKstParts();
@@ -115,7 +115,7 @@ export class DataSchedulerService implements OnApplicationBootstrap {
   /**
    * 매일 장 시작 전 실시간 연결 준비. 월~금 08:50.
    */
-  @Cron('50 8 * * 1-5', { timeZone: 'Asia/Seoul' })
+  @Cron('50 8 * * 1-5', { timeZone: 'Asia/Seoul', name: 'realtime:prepare' })
   async prepareMarketOpenData() {
     if (!isKrxTradingDay(new Date())) {
       this.logger.log('[08:50] non-trading day, skip prepareMarketOpenData');
@@ -173,32 +173,6 @@ export class DataSchedulerService implements OnApplicationBootstrap {
         this.logger.warn('[15:40] Metrics calc skipped - another instance holds the lock.');
       }
     }).catch((err) => this.logger.error('End-of-Day Data Collection failed', err));
-  }
-
-  // ─────────────────────────────────────────────────────────────
-  // 자정 전 수정주가 backfill (★ 순서 핵심)
-  // ─────────────────────────────────────────────────────────────
-
-  /**
-   * 매일 23:30 — 최근 90일 일봉 재수집 (수정주가 이벤트 반영)
-   * 메트릭스 계산(00:05)보다 35분 먼저 실행되어 RS·필터가 항상 최신 수정주가 위에서 계산되도록 함.
-   */
-  @Cron('30 23 * * *', { timeZone: 'Asia/Seoul' })
-  async dailyAdjustedPriceBackfill() {
-    if (!isKrxTradingDay(new Date())) {
-      this.logger.log('[23:30] non-trading day, skip dailyAdjustedPriceBackfill');
-      return;
-    }
-    this.logger.log('=== Starting Daily Adjusted Price Backfill (90 days) ===');
-
-    const tradeDate = this.todayKstDateOnly();
-    await this.cronRunLog.run('dailyAdjustedPriceBackfill', tradeDate, async () => {
-      this.logger.log('Backfilling market index candles for KOSPI/KOSDAQ...');
-      await this.realTimeChartService.collectIndexCandles();
-      await this.realTimeChartService.backfillDayCandles('0', 90);
-      await this.realTimeChartService.backfillDayCandles('10', 90);
-      this.logger.log('=== Daily Adjusted Price Backfill Completed ===');
-    }).catch((err) => this.logger.error('Daily adjusted price backfill failed', err));
   }
 
   // ─────────────────────────────────────────────────────────────

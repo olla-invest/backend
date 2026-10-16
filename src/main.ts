@@ -1,3 +1,4 @@
+import { applySchedulerPolicy } from './common/cron/scheduler-policy';
 import { NestFactory } from '@nestjs/core';
 import { Logger, ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app.module';
@@ -86,17 +87,8 @@ async function bootstrap() {
     // 그 전에 크론을 정지시켜야 하므로 여기서 명시적으로 초기화한다 (listen 은 재초기화하지 않는다).
     await app.init();
 
-    // 보조 환경(develop 등)이 운영과 같은 크론을 이중 실행하는 것을 막는다.
-    // 방치하면 키움 API를 두 배로 호출하고, 분산락이 걸린 잡은 develop이 락을 선점해
-    // 운영 크론이 조용히 스킵된다.
-    if ( configService.get( 'SCHEDULER_ENABLED', 'true' ) === 'false' ) {
-        const schedulerRegistry = app.get( SchedulerRegistry );
-        const cronJobs = schedulerRegistry.getCronJobs();
-        cronJobs.forEach( ( job ) => job.stop() );
-        schedulerRegistry.getIntervals().forEach( ( name ) => schedulerRegistry.deleteInterval( name ) );
-        schedulerRegistry.getTimeouts().forEach( ( name ) => schedulerRegistry.deleteTimeout( name ) );
-        new Logger( 'Bootstrap' ).warn( `SCHEDULER_ENABLED=false: 크론 ${cronJobs.size}개 정지됨` );
-    }
+    const stoppedJobs = applySchedulerPolicy(app.get(SchedulerRegistry), configService);
+    if (stoppedJobs) new Logger('Bootstrap').warn(`Scheduler policy: stopped ${stoppedJobs} batch/realtime jobs`);
 
     // Get port from environment or use default
     const port = configService.get( 'PORT', 3000 );

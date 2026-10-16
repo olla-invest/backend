@@ -1,3 +1,4 @@
+import { isKrxTradingDay } from '../../../common/utils/market-calendar.util';
 import { Injectable, Logger, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { EventEmitter2 } from '@nestjs/event-emitter';
@@ -15,6 +16,7 @@ export class KiwoomWebSocketService implements IRealtimeSource, OnModuleInit, On
   private ws: WebSocket | null = null;
   private readonly wsUrl: string;
   private reconnectTimer: NodeJS.Timeout | null = null;
+  private loginTimer: NodeJS.Timeout | null = null;
   private pingTimer: NodeJS.Timeout | null = null;
   private isConnecting = false;
   private isLoggedIn = false;
@@ -39,6 +41,7 @@ export class KiwoomWebSocketService implements IRealtimeSource, OnModuleInit, On
   }
 
   async onModuleInit() {
+    if (this.configService.get('REALTIME_ENABLED', 'true') === 'false') return;
     const realtimeSource = this.configService.get('REALTIME_SOURCE', 'websocket');
     if (realtimeSource === 'redis') {
       this.logger.log('REALTIME_SOURCE=redis, skipping Kiwoom WebSocket connection');
@@ -64,6 +67,7 @@ export class KiwoomWebSocketService implements IRealtimeSource, OnModuleInit, On
    * WebSocket 연결
    */
   private async connect(): Promise<void> {
+    if (this.configService.get('REALTIME_ENABLED', 'true') === 'false') return;
     if (this.isConnecting || (this.ws && this.ws.readyState === WebSocket.OPEN)) {
       return;
     }
@@ -97,6 +101,14 @@ export class KiwoomWebSocketService implements IRealtimeSource, OnModuleInit, On
     this.logger.log('Kiwoom WebSocket connected, sending LOGIN message...');
     this.startPing();
     this.isLoggedIn = false;
+    if (this.loginTimer) clearTimeout(this.loginTimer);
+    this.loginTimer = setTimeout(() => {
+      this.loginTimer = null;
+      if (!this.isLoggedIn) {
+        this.logger.warn('Kiwoom LOGIN timeout; closing socket for recovery');
+        this.ws?.terminate();
+      }
+    }, 10000);
     this.pendingSubscriptions = true;
     this.subscriptionQueue = []; // 새 연결 시 큐 초기화
 
@@ -139,18 +151,22 @@ export class KiwoomWebSocketService implements IRealtimeSource, OnModuleInit, On
           return;
         }
 
-        // return_code가 0이 아니면 에러
-        if (message.return_code !== undefined && message.return_code !== 0) {
+        if (message.trnm !== 'LOGIN') return;
+        if (message.return_code !== 0) {
           this.logger.error(`Login failed: ${message.return_msg || 'Unknown error'}`);
+          this.ws?.terminate();
           return;
         }
 
         this.logger.log('Login confirmed, ready to subscribe');
         this.isLoggedIn = true;
+        if (this.loginTimer) clearTimeout(this.loginTimer);
+        this.loginTimer = null;
 
+        const loginSocket = this.ws;
         // 대기 중인 구독이 있으면 처리 (다음 이벤트 루프에서 실행)
-        setImmediate(() => {
-          if (this.ws?.readyState !== WebSocket.OPEN) {
+        setImmediate(() => { void (async () => {
+          if (this.ws !== loginSocket || !this.isConnected()) {
             this.logger.warn(`Cannot process subscriptions - WebSocket not open (readyState: ${this.ws?.readyState})`);
             return;
           }
@@ -160,7 +176,7 @@ export class KiwoomWebSocketService implements IRealtimeSource, OnModuleInit, On
           // 기존 구독 재등록
           if (this.pendingSubscriptions) {
             this.pendingSubscriptions = false;
-            this.resubscribeAll();
+            await this.resubscribeAll(loginSocket);
           }
 
           // 큐에 쌓인 구독 요청 처리 (action/type 조합별로 묶어 배치 전송 — 종목별 개별 REG는
@@ -177,22 +193,25 @@ export class KiwoomWebSocketService implements IRealtimeSource, OnModuleInit, On
               groups.get(key)!.stockCodes.push(req.stockCode);
             }
 
-            (async () => {
               for (const { action, types, stockCodes } of groups.values()) {
                 const CHUNK_SIZE = 100;
                 for (let i = 0; i < stockCodes.length; i += CHUNK_SIZE) {
                   const chunk = stockCodes.slice(i, i + CHUNK_SIZE);
+                  if (this.ws !== loginSocket || !this.isConnected()) throw new Error('Socket changed during subscription restoration');
                   await this.sendBatchSubscription(chunk, types, action);
                   if (i + CHUNK_SIZE < stockCodes.length) {
                     await new Promise((resolve) => setTimeout(resolve, 500));
                   }
                 }
               }
-            })().catch((error) => {
-              this.logger.error(`Failed to flush queued subscriptions: ${(error as Error).message}`);
-            });
+
           }
-        });
+          if (this.ws !== loginSocket || !this.isConnected()) return;
+          this.eventEmitter.emit('kiwoom.connection.ready', { stockCodes: [...this.subscriptions.keys()] });
+        })().catch((error) => {
+          this.logger.error(`Subscription restoration failed: ${(error as Error).message}`);
+          if (this.ws === loginSocket) loginSocket?.terminate();
+        }); });
       }
 
       if (message.trnm === 'REAL' && message.data) {
@@ -223,6 +242,13 @@ export class KiwoomWebSocketService implements IRealtimeSource, OnModuleInit, On
           this.logger.log(`Subscription ${message.trnm} successful`);
           if (pending && message.trnm === 'REG') {
             this.eventEmitter.emit('kiwoom.subscription.confirmed', { stockCodes: pending.stockCodes });
+          }
+          if (pending && message.trnm === 'REMOVE') {
+            // Only fully released stocks; a partial (type-only) REMOVE keeps the stock registered.
+            const released = pending.stockCodes.filter((stockCode) => !this.subscriptions.has(stockCode));
+            if (released.length) {
+              this.eventEmitter.emit('kiwoom.subscription.removed', { stockCodes: released });
+            }
           }
         } else {
           this.logger.error(`Subscription ${message.trnm} failed: ${message.return_msg}`);
@@ -300,6 +326,7 @@ export class KiwoomWebSocketService implements IRealtimeSource, OnModuleInit, On
    */
   private isMarketHours(): boolean {
     const now = new Date();
+    if (!isKrxTradingDay(now)) return false;
     const koreaTime = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Seoul' }));
 
     const day = koreaTime.getDay(); // 0: Sunday, 1: Monday, ..., 6: Saturday
@@ -339,6 +366,8 @@ export class KiwoomWebSocketService implements IRealtimeSource, OnModuleInit, On
    * Ping 중지
    */
   private stopPing(): void {
+    if (this.loginTimer) clearTimeout(this.loginTimer);
+    this.loginTimer = null;
     if (this.pingTimer) {
       clearInterval(this.pingTimer);
       this.pingTimer = null;
@@ -518,7 +547,7 @@ export class KiwoomWebSocketService implements IRealtimeSource, OnModuleInit, On
   /**
    * 모든 구독 재등록 (재연결 시) - 타입별로 묶어 배치 전송
    */
-  private async resubscribeAll(): Promise<void> {
+  private async resubscribeAll(socket = this.ws): Promise<void> {
     if (this.subscriptions.size === 0) return;
 
     // 타입 조합별로 종목 그룹핑
@@ -535,6 +564,7 @@ export class KiwoomWebSocketService implements IRealtimeSource, OnModuleInit, On
       for (let i = 0; i < stockCodes.length; i += CHUNK_SIZE) {
         const chunk = stockCodes.slice(i, i + CHUNK_SIZE);
         const grpNo = String(Math.floor(i / CHUNK_SIZE) + 1);
+        if (this.ws !== socket || !this.isConnected()) throw new Error('Socket changed during subscription restoration');
         await this.sendBatchSubscription(chunk, types, 'REG', grpNo);
         this.logger.log(`Re-subscribe batch: ${chunk.length} stocks (${i + chunk.length}/${stockCodes.length}) grp_no=${grpNo}`);
         if (i + CHUNK_SIZE < stockCodes.length) {
@@ -548,6 +578,6 @@ export class KiwoomWebSocketService implements IRealtimeSource, OnModuleInit, On
    * 연결 상태 확인
    */
   isConnected(): boolean {
-    return this.ws !== null && this.ws.readyState === WebSocket.OPEN;
+    return this.isLoggedIn && this.ws !== null && this.ws.readyState === WebSocket.OPEN;
   }
 }

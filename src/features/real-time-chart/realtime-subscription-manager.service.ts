@@ -12,6 +12,9 @@ export class RealtimeSubscriptionManager {
   private readonly logger = new Logger(RealtimeSubscriptionManager.name);
   private readonly retryCounts = new Map<string, number>();
   private static readonly MAX_RETRIES = 3;
+  // Stocks the server keeps subscribed for the realtime chart. The Kiwoom session is shared, so a
+  // detail-page viewer leaving must not REMOVE these (that silently stopped their ticks).
+  private readonly managedStocks = new Set<string>();
 
   constructor(
     @Inject(REALTIME_SOURCE_TOKEN)
@@ -20,7 +23,18 @@ export class RealtimeSubscriptionManager {
     private readonly metricsService: StockMetricsService,
   ) {}
 
-  async ensureSubscribed(stockCodes: string[]): Promise<void> {
+  isManaged(stockCode: string): boolean {
+    return this.managedStocks.has(stockCode);
+  }
+
+  /** `manage: false` for one-off detail-page subscriptions that viewers may release. */
+  async ensureSubscribed(
+    stockCodes: string[],
+    options: { manage?: boolean } = {},
+  ): Promise<void> {
+    if (options.manage ?? true) {
+      stockCodes.forEach((stockCode) => stockCode && this.managedStocks.add(stockCode));
+    }
     if (!this.realtimeSource.isConnected()) {
       this.logger.warn('Realtime source disconnected; subscription sync skipped');
       return;
@@ -36,9 +50,12 @@ export class RealtimeSubscriptionManager {
     this.logger.log(`Submitted ${missing.length} missing realtime subscriptions`);
   }
 
-  async subscribeFilteredStocks(): Promise<void> {
+  @OnEvent('kiwoom.connection.ready')
+  async subscribeFilteredStocks(restored?: { stockCodes: string[] }): Promise<void> {
     const stockCodes = await this.metricsService.getFilteredStockCodes();
-    await this.ensureSubscribed(stockCodes);
+    stockCodes.forEach((stockCode) => this.managedStocks.add(stockCode));
+    const restoring = new Set(restored?.stockCodes ?? []);
+    await this.ensureSubscribed(stockCodes.filter((code) => !restoring.has(code)));
   }
 
   @OnEvent('kiwoom.subscription.confirmed')

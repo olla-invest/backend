@@ -91,3 +91,106 @@ describe('RealTimeChartService stock list RS ordering', () => {
     expect(result.stocks.find((stock: any) => stock.stockCode === 'LOW').currentPrice).toBe(100);
   });
 });
+
+describe('secondary environment startup', () => {
+  it('skips candle backfill but prepares realtime subscriptions when batches are disabled', async () => {
+    const service = new RealTimeChartService({} as any, {} as any, {} as any, {} as any, {} as any, new CurrentPriceResolver(), {} as any, {} as any, {} as any, {get: (key: string, fallback: string) => key === 'SCHEDULER_ENABLED' ? 'false' : fallback} as any);
+    const initialize = jest.spyOn(service, 'initializeData').mockResolvedValue({} as any);
+    const subscribe = jest.spyOn(service, 'subscribeFilteredStocks').mockResolvedValue(undefined);
+    await service.onModuleInit();
+    expect(initialize).not.toHaveBeenCalled(); expect(subscribe).toHaveBeenCalled();
+  });
+});
+
+describe('empty broker candle responses', () => {
+  it('ignores empty placeholder rows without saving invalid dates or prices', async () => {
+    const placeholder = {dt: '', cur_prc: '', trde_qty: '', open_pric: '', high_pric: '', low_pric: ''};
+    const broker = {getDayCandlesWithHistory: jest.fn().mockResolvedValue({stk_dt_pole_chart_qry: [placeholder]})};
+    const storage = {saveCandle: jest.fn().mockResolvedValue(undefined)};
+    const service = new RealTimeChartService(broker as any, {} as any, storage as any, {} as any, {} as any, new CurrentPriceResolver(), {} as any, {} as any, {} as any) as any;
+    expect(await service.collectStockDayCandlesWithAdjusted('084180', '20261006', 10)).toEqual({saved: 0, adjustmentEventDates: []});
+    expect(storage.saveCandle).not.toHaveBeenCalled();
+  });
+});
+
+describe('adjusted-price history refetch', () => {
+  it('refetches stored history only for stocks Kiwoom flags with a non-zero adjustment ratio', async () => {
+    const row = (dt: string, extra = {}) => ({dt, cur_prc: '1000', trde_qty: '1', open_pric: '1000', high_pric: '1000', low_pric: '1000', ...extra});
+    const rows: Record<string, unknown[]> = {
+      '000010': [row('20261006'), row('20260929', {upd_rt: '+21.87'})],
+      '000020': [row('20261006'), row('20251229', {upd_stkpc_tp: '4', upd_rt: '0.00'})],
+      '000030': [row('20261006')],
+    };
+    const broker = {
+      getStockList: jest.fn().mockResolvedValue({list: Object.keys(rows).map((code) => ({code, marketCode: '0'}))}),
+      getDayCandlesWithHistory: jest.fn((...args: any[]) => Promise.resolve({stk_dt_pole_chart_qry: rows[args[0]]})),
+    };
+    const storage = {saveCandle: jest.fn().mockResolvedValue(undefined)};
+    const service = new RealTimeChartService(broker as any, {} as any, storage as any, {} as any, {} as any, new CurrentPriceResolver(), {} as any, {} as any, {} as any);
+
+    const result = await service.collectAllDayCandles('0', 10);
+
+    const historyCalls = broker.getDayCandlesWithHistory.mock.calls.filter((args) => args[2] === 750);
+    expect(historyCalls.map((args) => `${args[0]}:${args[3]}`)).toEqual(['000010:0', '000010:1']);
+    expect(result.adjustmentRefetch).toEqual([{code: '000010', count: 2, status: 'ok'}]);
+    expect(result.success).toBe(3);
+  });
+});
+
+describe('realtime day candle persistence', () => {
+  afterEach(() => jest.useRealTimers());
+  it('does not let after-hours ticks overwrite the regular-session close', async () => {
+    const storage = {saveCandle: jest.fn().mockResolvedValue(undefined)};
+    const service = new RealTimeChartService({} as any, {} as any, storage as any, {} as any, {} as any, new CurrentPriceResolver(), {} as any, {} as any, {} as any) as any;
+    service.upsertRealtimeCandles = jest.fn().mockResolvedValue(undefined);
+    const tick = {stockCode: '036930', type: '0B', values: {'10': '283000'}};
+    jest.useFakeTimers().setSystemTime(new Date('2026-10-06T07:30:00Z')); // 16:30 KST
+    await service.handleRealtimeCandlePersistence(tick);
+    expect(service.upsertRealtimeCandles).not.toHaveBeenCalled();
+    jest.setSystemTime(new Date('2026-10-06T06:29:00Z')); // 15:29 KST
+    await service.handleRealtimeCandlePersistence(tick);
+    expect(service.upsertRealtimeCandles).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('rank history window', () => {
+  afterEach(() => jest.useRealTimers());
+
+  // 10/6 is the latest aggregated day. D-1 must be 10/6 both during 10/7's session and after it,
+  // until the 10/7 aggregation lands (formerly mornings skipped back to 10/2).
+  it.each([
+    ['10:00 KST during the session', '2026-10-07T01:00:00Z'],
+    ['21:00 KST after the close', '2026-10-07T12:00:00Z'],
+  ])('includes the latest aggregated day at %s', async (_label, now) => {
+    jest.useFakeTimers().setSystemTime(new Date(now));
+    const latestTradeDate = new Date('2026-10-06T00:00:00.000Z');
+    const metricsService = {
+      getLatestMetrics: jest.fn().mockResolvedValue(new Map([
+        ['000001', { relativeStrengthScore: 90, currentRank: 1, rank: 1, passedStaticFilters: true, closePrice: 100 }],
+      ])),
+      getLatestTradeDate: jest.fn().mockResolvedValue(latestTradeDate),
+      getCurrentRankTotals: jest.fn().mockResolvedValue([]),
+      getCurrentRankHistory: jest.fn().mockResolvedValue(new Map()),
+    };
+    const service = new RealTimeChartService(
+      {} as any,
+      {} as any,
+      { getLatestClosingPrices: jest.fn().mockResolvedValue(new Map()) } as any,
+      metricsService as any,
+      { getPrices: jest.fn().mockReturnValue(new Map()) } as any,
+      new CurrentPriceResolver(),
+      { ensureSubscribed: jest.fn().mockResolvedValue(undefined) } as any,
+      {} as any,
+      {} as any,
+    ) as any;
+    service.fetchStockList = jest.fn().mockResolvedValue([{ code: '000001', name: '종목', marketCode: '0' }]);
+    service.getThemeFilteredStockCodes = jest.fn().mockResolvedValue(undefined);
+    service.getNaverThemesByStockCodes = jest.fn().mockResolvedValue(new Map());
+    service.getNaverThemeList = jest.fn().mockResolvedValue([]);
+
+    await service.getStockList('all', 1, 10);
+
+    expect(metricsService.getCurrentRankHistory).toHaveBeenCalledWith(['000001'], 3, latestTradeDate, true);
+    expect(metricsService.getCurrentRankTotals).toHaveBeenCalledWith(3, latestTradeDate, true);
+  });
+});

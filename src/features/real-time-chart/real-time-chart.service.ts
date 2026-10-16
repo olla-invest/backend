@@ -1,11 +1,13 @@
+import { ConfigService } from '@nestjs/config';
 import { Injectable, Logger, OnModuleInit, Inject } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
 import { KiwoomRestService } from '../../integrations/kiwoom/rest/kiwoom-rest.service';
+import type { KiwoomDayCandleData } from '../../integrations/kiwoom/types/kiwoom.types';
 import { IRealtimeSource, REALTIME_SOURCE_TOKEN } from '../../integrations/kiwoom/websocket/realtime-source.interface';
 import { ChartStorageService } from './chart-storage.service';
 import { StockMetricsService } from './stock-metrics.service';
 import { RealtimePriceCacheService } from './realtime-price-cache.service';
-import { CurrentPriceResolver } from './current-price-resolver.service';
+import { CurrentPriceResolver, isRegularSessionTick } from './current-price-resolver.service';
 import { RealtimeSubscriptionManager } from './realtime-subscription-manager.service';
 import { StockListCacheService, RangeRsRankingCache, CustomRsHistoryCache } from './stock-list-cache.service';
 import { PrismaService } from '../../common/prisma/prisma.service';
@@ -63,6 +65,11 @@ export interface StockDetailSnapshot {
 export class RealTimeChartService implements OnModuleInit {
   private readonly logger = new Logger(RealTimeChartService.name);
   private readonly REALTIME_CANDLE_SAVE_THROTTLE_MS = 30 * 1000;
+  // Covers the stored daily history (up to ~700 rows per stock) so a corporate action re-bases all of it.
+  private static readonly ADJUSTMENT_REFETCH_DAYS = 750;
+  // D-1..D-3 always start at the latest aggregated trading day, so the window shifts exactly when the
+  // close aggregation lands. A 15:40 clock check used to drop that day from midnight until 15:40.
+  private static readonly RANK_HISTORY_INCLUDES_LATEST_DAY = true;
   private readonly realtimeCandleSavedAt = new Map<string, number>();
   private initializationComplete = false;
   private lastDataUpdate: Date | null = null;
@@ -78,6 +85,7 @@ export class RealTimeChartService implements OnModuleInit {
     private readonly subscriptionManager: RealtimeSubscriptionManager,
     private readonly stockListCache: StockListCacheService,
     private readonly prisma: PrismaService,
+    private readonly configService: ConfigService = new ConfigService(),
   ) {}
 
   /**
@@ -86,6 +94,11 @@ export class RealTimeChartService implements OnModuleInit {
    * - 데이터 있음: 마지막 데이터~최신 거래일까지 수집
    */
   async onModuleInit() {
+    if (this.configService.get('SCHEDULER_ENABLED', 'true') === 'false') {
+      this.logger.log('Secondary environment: skipping startup candle backfill; keeping realtime subscriptions');
+      await this.subscribeFilteredStocks().catch((error) => this.logger.warn(`Startup subscription failed: ${error.message}`));
+      return;
+    }
     this.logger.log('Starting data initialization on server startup...');
 
     // 비동기적으로 백그라운드에서 초기화 실행 (서버 시작을 블로킹하지 않음)
@@ -102,6 +115,8 @@ export class RealTimeChartService implements OnModuleInit {
   }): Promise<void> {
     const { stockCode, values } = payload;
     const nowMs = Date.now();
+    // After-hours trades must not overwrite today's regular-session close candle.
+    if (!isRegularSessionTick(new Date(nowMs))) return;
     const lastSavedAt = this.realtimeCandleSavedAt.get(stockCode) ?? 0;
     if (nowMs - lastSavedAt < this.REALTIME_CANDLE_SAVE_THROTTLE_MS) return;
     this.realtimeCandleSavedAt.set(stockCode, nowMs);
@@ -1096,7 +1111,7 @@ export class RealTimeChartService implements OnModuleInit {
 
     // 최신 거래일 조회 (메타 데이터 및 순위 이력용)
     const latestTradeDate = await this.metricsService.getLatestTradeDate();
-    const rankTotals = await this.metricsService.getCurrentRankTotals(3, latestTradeDate, this.isAfterAggregation());
+    const rankTotals = await this.metricsService.getCurrentRankTotals(3, latestTradeDate, RealTimeChartService.RANK_HISTORY_INCLUDES_LATEST_DAY);
 
     // 정렬기준 적용 (순위변동 정렬 시 전체 대상의 누적값 선계산)
     let rankChangeMap: Map<string, number | null> | undefined;
@@ -1138,7 +1153,7 @@ export class RealTimeChartService implements OnModuleInit {
     // 실시간 현재가 (이미 allRealtimePrices로 있음)
     const realtimePrices = allRealtimePrices;
 
-    const currentRankHistoryMap = await this.metricsService.getCurrentRankHistory(pageStockCodes, 3, latestTradeDate, this.isAfterAggregation());
+    const currentRankHistoryMap = await this.metricsService.getCurrentRankHistory(pageStockCodes, 3, latestTradeDate, RealTimeChartService.RANK_HISTORY_INCLUDES_LATEST_DAY);
     const themeList = await this.getNaverThemeList();
     return {
       marketType,
@@ -1313,7 +1328,7 @@ export class RealTimeChartService implements OnModuleInit {
     const rankedStocks = stocksWithRS.map((item, index) => ({ ...item, baseRank: index + 1 }));
     const baseTotal = rankedStocks.length;
 
-    const rankTotals = await this.metricsService.getCurrentRankTotals(3, latestTradeDate, this.isAfterAggregation());
+    const rankTotals = await this.metricsService.getCurrentRankTotals(3, latestTradeDate, RealTimeChartService.RANK_HISTORY_INCLUDES_LATEST_DAY);
 
     // 정렬기준 적용 (전체 대상) → 표시 순위 확정 → 종목명 검색 (순위 유지)
     let rankChangeMap: Map<string, number | null> | undefined;
@@ -1351,7 +1366,7 @@ export class RealTimeChartService implements OnModuleInit {
     // 실시간 현재가 (이미 allRealtimePrices로 있음)
     const realtimePrices = allRealtimePrices;
 
-    const currentRankHistoryMap = await this.metricsService.getCurrentRankHistory(pageStockCodes, 3, latestTradeDate, this.isAfterAggregation());
+    const currentRankHistoryMap = await this.metricsService.getCurrentRankHistory(pageStockCodes, 3, latestTradeDate, RealTimeChartService.RANK_HISTORY_INCLUDES_LATEST_DAY);
     const shouldWriteCustomRsLog =
       !(periods.length === 1 && periods[0] === 63 && weights.length === 1 && weights[0] === 100);
     if (shouldWriteCustomRsLog) {
@@ -1581,7 +1596,7 @@ export class RealTimeChartService implements OnModuleInit {
     const rankedStocks = stocksWithRS.map((item, index) => ({ ...item, baseRank: index + 1 }));
     const baseTotal = rankedStocks.length;
 
-    const rankTotals = await this.metricsService.getCurrentRankTotals(3, latestTradeDate, this.isAfterAggregation());
+    const rankTotals = await this.metricsService.getCurrentRankTotals(3, latestTradeDate, RealTimeChartService.RANK_HISTORY_INCLUDES_LATEST_DAY);
 
     // 정렬기준 적용 (전체 대상) → 표시 순위 확정 → 종목명 검색 (순위 유지)
     let rankChangeMap: Map<string, number | null> | undefined;
@@ -1617,7 +1632,7 @@ export class RealTimeChartService implements OnModuleInit {
 
     const realtimePrices = allRealtimePrices;
     const themeList = await this.getNaverThemeList();
-    const currentRankHistoryMap = await this.metricsService.getCurrentRankHistory(pageStockCodes, 3, latestTradeDate, this.isAfterAggregation());
+    const currentRankHistoryMap = await this.metricsService.getCurrentRankHistory(pageStockCodes, 3, latestTradeDate, RealTimeChartService.RANK_HISTORY_INCLUDES_LATEST_DAY);
 
     return {
       marketType,
@@ -1990,7 +2005,7 @@ export class RealTimeChartService implements OnModuleInit {
       stockCodes,
       3,
       latestTradeDate,
-      this.isAfterAggregation(),
+      RealTimeChartService.RANK_HISTORY_INCLUDES_LATEST_DAY,
     );
 
     const rankChangeMap = new Map<string, number | null>();
@@ -2217,13 +2232,6 @@ export class RealTimeChartService implements OnModuleInit {
           upName: company?.theme?.themeName ?? '',
         };
       });
-  }
-
-  private isAfterAggregation(): boolean {
-    const kst = new Date(Date.now() + 9 * 60 * 60 * 1000);
-    const hours = kst.getUTCHours();
-    const minutes = kst.getUTCMinutes();
-    return hours > 15 || (hours === 15 && minutes >= 40);
   }
 
   private isHaltedState(state?: string): boolean {
@@ -2644,6 +2652,11 @@ export class RealTimeChartService implements OnModuleInit {
     let success = 0;
     let failed = 0;
     const errors: { code: string; error: string }[] = [];
+    const adjustedStockCodes = new Set<string>();
+    const collect = async (stockCode: string) => {
+      const { adjustmentEventDates } = await this.collectStockDayCandlesWithAdjusted(stockCode, today, days);
+      if (adjustmentEventDates.length) adjustedStockCodes.add(stockCode);
+    };
 
     // 배치 단위로 반복
     for (let i = 0; i < stocks.length; i += BATCH_SIZE) {
@@ -2653,9 +2666,7 @@ export class RealTimeChartService implements OnModuleInit {
       // 비수정가/수정주가를 함께 수집해 stockCandle 두 필드를 백필하도록 collectStockDayCandlesWithAdjusted를 사용.
       // - openPrice/closePrice : 비수정가 (upd_stkpc_tp='0')
       // - adjOpenPrice/adjClosePrice : 수정주가 (upd_stkpc_tp='1')
-      const results = await Promise.allSettled(
-        batch.map((stock) => this.collectStockDayCandlesWithAdjusted(stock.code, today, days)),
-      );
+      const results = await Promise.allSettled(batch.map((stock) => collect(stock.code)));
 
       // 결과 처리 (정속 페이싱으로 429는 원칙적으로 발생하지 않아야 하며, 아래 재시도는 안전망)
       const retryStocks: typeof batch = [];
@@ -2682,7 +2693,7 @@ export class RealTimeChartService implements OnModuleInit {
 
         for (const stock of retryStocks) {
           try {
-            await this.collectStockDayCandlesWithAdjusted(stock.code, today, days);
+            await collect(stock.code);
             success++;
           } catch (retryError) {
             failed++;
@@ -2702,6 +2713,20 @@ export class RealTimeChartService implements OnModuleInit {
 
     this.logger.log(`Bulk collection completed: ${success} success, ${failed} failed out of ${stocks.length}`);
 
+    // A corporate action (split, rights issue, ...) re-bases every earlier adjusted price, but only the
+    // recent window was fetched above. Kiwoom flags the event date with a non-zero upd_rt, so only those
+    // stocks need their stored history refetched (replaces the former nightly all-stock 90-day backfill).
+    const adjustmentRefetch = await this.backfillSpecificStocks(
+      [...adjustedStockCodes],
+      RealTimeChartService.ADJUSTMENT_REFETCH_DAYS,
+    );
+    if (adjustmentRefetch.length) {
+      const ok = adjustmentRefetch.filter((r) => r.status === 'ok').length;
+      this.logger.log(
+        `Adjusted-price history refetch: ${ok}/${adjustmentRefetch.length} stocks (${adjustmentRefetch.map((r) => r.code).join(', ')})`,
+      );
+    }
+
     return {
       marketType,
       days,
@@ -2709,6 +2734,7 @@ export class RealTimeChartService implements OnModuleInit {
       success,
       failed,
       errors: errors.slice(0, 10),
+      adjustmentRefetch,
     };
   }
 
@@ -2754,7 +2780,7 @@ export class RealTimeChartService implements OnModuleInit {
     const results: { code: string; count?: number; status: string; error?: string }[] = [];
     for (const code of stockCodes) {
       try {
-        const count = await this.collectStockDayCandlesWithAdjusted(code, today, days);
+        const { saved: count } = await this.collectStockDayCandlesWithAdjusted(code, today, days);
         this.logger.log(`Backfill done: ${code} ??${count} candles`);
         results.push({ code, count, status: 'ok' });
       } catch (e) {
@@ -2769,14 +2795,18 @@ export class RealTimeChartService implements OnModuleInit {
     stockCode: string,
     baseDate: string,
     days: number,
-  ): Promise<number> {
+  ): Promise<{ saved: number; adjustmentEventDates: string[] }> {
     // getDayCandlesWithHistory는 maxCandles만큼 페이지네이션, 5~10배 크면 1페이지로 분리.
     const rawData = await this.kiwoomRest.getDayCandlesWithHistory(stockCode, baseDate, days, '0');
     const adjData = await this.kiwoomRest.getDayCandlesWithHistory(stockCode, baseDate, days, '1');
 
     const adjMap = new Map(adjData.stk_dt_pole_chart_qry.map((item) => [item.dt, item]));
 
-    const candlesToSave = rawData.stk_dt_pole_chart_qry.slice(0, days).map((item) => {
+    // Kiwoom returns a single empty placeholder when this stock has no chart data.
+    // Do not turn that placeholder into an Invalid Date / NaN candle.
+    const rows = rawData.stk_dt_pole_chart_qry.filter((item) => item.dt).slice(0, days);
+    if (!rows.length) this.logger.warn(`No dated broker candles available for ${stockCode}`);
+    const candlesToSave = rows.map((item) => {
       const adj = adjMap.get(item.dt);
       return {
         stockCode,
@@ -2796,7 +2826,16 @@ export class RealTimeChartService implements OnModuleInit {
     });
 
     await Promise.all(candlesToSave.map((c) => this.chartStorage.saveCandle(c)));
-    return candlesToSave.length;
+    const adjustmentEventDates = rows
+      .filter((item) => this.hasAdjustmentRatio(item) || this.hasAdjustmentRatio(adjMap.get(item.dt)))
+      .map((item) => item.dt);
+    return { saved: candlesToSave.length, adjustmentEventDates };
+  }
+
+  /** Kiwoom sets 수정비율(upd_rt) on a corporate-action date; year-end dividend markers carry 0.00. */
+  private hasAdjustmentRatio(item?: KiwoomDayCandleData): boolean {
+    const rate = Number.parseFloat(item?.upd_rt ?? '');
+    return Number.isFinite(rate) && rate !== 0;
   }
 
   /**
@@ -3187,7 +3226,7 @@ export class RealTimeChartService implements OnModuleInit {
     ]);
     const realtimePrice = this.currentPriceResolver.getUsableRealtimePrice(this.realtimeCache.getPrice(stockCode));
     if (!realtimePrice && ['day', 'week', 'month', 'year'].includes(candleType)) {
-      this.subscriptionManager.ensureSubscribed([stockCode]).catch((error) => {
+      this.subscriptionManager.ensureSubscribed([stockCode], { manage: false }).catch((error) => {
         this.logger.warn(`Detail chart auto-subscribe failed: ${error.message}`);
       });
     }

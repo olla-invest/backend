@@ -37,13 +37,32 @@ describe('CurrentPriceResolver', () => {
     expect(result).toBeUndefined();
   });
 
-  it('rejects a tick outside the market session', () => {
+  it('rejects an intraday tick that is not from the latest trading day', () => {
     const result = resolver.getUsableRealtimePrice(
       tick(),
-      new Date('2026-08-05T06:31:00.000Z'),
+      new Date('2026-08-06T06:31:00.000Z'),
     );
 
     expect(result).toBeUndefined();
+  });
+
+  it.each(['2026-10-02T07:00:00Z', '2026-10-03T03:00:00Z', '2026-10-05T03:00:00Z', '2026-10-06T23:50:00Z'])('keeps the latest trading day price at %s', (time) => {
+    const lastTick = tick({ timestamp: new Date(time === '2026-10-06T23:50:00Z' ? '2026-10-06T06:30:00Z' : '2026-10-02T06:30:00Z') });
+    expect(resolver.getUsableRealtimePrice(lastTick, new Date(time))).toBe(lastTick);
+  });
+
+  it('rejects future timestamps and holiday ticks', () => {
+    expect(resolver.getUsableRealtimePrice(tick({ timestamp: new Date('2026-10-06T03:01:00Z') }), new Date('2026-10-06T03:00:00Z'))).toBeUndefined();
+    expect(resolver.getUsableRealtimePrice(tick({ timestamp: new Date('2026-10-05T03:00:00Z') }), new Date('2026-10-05T03:01:00Z'))).toBeUndefined();
+  });
+
+  it('keeps the closing-auction print but rejects after-hours ticks after close', () => {
+    const now = new Date('2026-10-06T10:40:00Z');
+    const closing = tick({ timestamp: new Date('2026-10-06T06:30:30Z') });
+    expect(resolver.getUsableRealtimePrice(closing, now)).toBe(closing);
+    // 16:28 and 18:00 KST: after-hours single-price trades, not the official close.
+    expect(resolver.getUsableRealtimePrice(tick({ timestamp: new Date('2026-10-06T07:28:00Z') }), now)).toBeUndefined();
+    expect(resolver.getUsableRealtimePrice(tick({ timestamp: new Date('2026-10-06T09:00:00Z') }), now)).toBeUndefined();
   });
 
   it('rejects zero and non-finite current prices', () => {

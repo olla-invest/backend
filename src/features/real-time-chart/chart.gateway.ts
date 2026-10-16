@@ -13,6 +13,7 @@ import { OnEvent } from '@nestjs/event-emitter';
 import { Server, Socket } from 'socket.io';
 import { IRealtimeSource, REALTIME_SOURCE_TOKEN } from '../../integrations/kiwoom/websocket/realtime-source.interface';
 import { RealtimePriceCacheService } from './realtime-price-cache.service';
+import { RealtimeSubscriptionManager } from './realtime-subscription-manager.service';
 
 @WebSocketGateway({
   cors: {
@@ -33,7 +34,16 @@ export class ChartGateway
     @Inject(REALTIME_SOURCE_TOKEN)
     private readonly realtimeSource: IRealtimeSource,
     private readonly realtimeCache: RealtimePriceCacheService,
+    private readonly subscriptionManager: RealtimeSubscriptionManager,
   ) {}
+
+  /** The Kiwoom session is shared with the server's realtime-chart subscriptions. */
+  private shouldRelease(stockCode: string, leavingClientId: string): boolean {
+    const hasOtherSubscribers = Array.from(this.clientSubscriptions.entries()).some(
+      ([id, codes]) => id !== leavingClientId && codes.has(stockCode),
+    );
+    return !hasOtherSubscribers && !this.subscriptionManager.isManaged(stockCode);
+  }
 
   afterInit(server: Server) {
     this.logger.log('Chart WebSocket Gateway initialized');
@@ -51,13 +61,8 @@ export class ChartGateway
     const stockCodes = this.clientSubscriptions.get(client.id);
     if (stockCodes) {
       stockCodes.forEach((stockCode) => {
-        // 다른 클라이언트도 구독 중인지 확인
-        const hasOtherSubscribers = Array.from(this.clientSubscriptions.entries()).some(
-          ([id, codes]) => id !== client.id && codes.has(stockCode),
-        );
-
-        if (!hasOtherSubscribers) {
-          // 마지막 구독자인 경우에만 실시간 소스 구독 해제
+        // 마지막 구독자이고 서버의 실시간 차트 대상이 아닐 때만 실시간 소스 구독 해제
+        if (this.shouldRelease(stockCode, client.id)) {
           this.realtimeSource.unsubscribe(stockCode);
         }
       });
@@ -119,13 +124,8 @@ export class ChartGateway
       stockCodes.delete(stockCode);
     }
 
-    // 다른 클라이언트도 구독 중인지 확인
-    const hasOtherSubscribers = Array.from(this.clientSubscriptions.entries()).some(
-      ([id, codes]) => id !== client.id && codes.has(stockCode),
-    );
-
-    if (!hasOtherSubscribers) {
-      // 마지막 구독자인 경우에만 실시간 소스 구독 해제
+    // 마지막 구독자이고 서버의 실시간 차트 대상이 아닐 때만 실시간 소스 구독 해제
+    if (this.shouldRelease(stockCode, client.id)) {
       await this.realtimeSource.unsubscribe(stockCode);
     }
 
