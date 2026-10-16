@@ -6,6 +6,9 @@
  * role: SUPER_ADMIN | OPERATOR | VIEWER (기본 SUPER_ADMIN)
  */
 import * as bcrypt from 'bcrypt';
+import 'dotenv/config';
+import { PrismaPg } from '@prisma/adapter-pg';
+import { Pool } from 'pg';
 import { PrismaClient, AdminRole } from '../generated/prisma';
 
 async function main() {
@@ -22,7 +25,19 @@ async function main() {
         process.exit( 1 );
     }
 
-    const prisma = new PrismaClient();
+    const databaseUrl = process.env.DATABASE_URL;
+    if ( !databaseUrl ) {
+        console.error( 'DATABASE_URL 환경변수가 필요합니다.' );
+        process.exit( 1 );
+    }
+    console.log( `대상 : ${ databaseUrl.replace( /\/\/([^:]+):[^@]*@/, '//$1:***@' ) }` );
+
+    // Prisma 7 은 driver adapter 없이 PrismaClient 를 만들 수 없다 (PrismaService 와 같은 연결 방식)
+    const pool = new Pool( {
+        connectionString: databaseUrl,
+        ssl: process.env.DB_SSL === 'false' ? false : { rejectUnauthorized: false },
+    } );
+    const prisma = new PrismaClient( { adapter: new PrismaPg( pool ) } );
     const hashed = await bcrypt.hash( password, 10 );
 
     try {
@@ -43,6 +58,7 @@ async function main() {
         console.log( `관리자 계정 생성: ${ created.loginId } (${ created.role }) / ${ created.adminId }` );
     } finally {
         await prisma.$disconnect();
+        await pool.end();
     }
 }
 
