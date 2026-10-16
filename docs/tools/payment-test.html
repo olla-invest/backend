@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>결제 API 테스트</title>
+<script src="https://js.tosspayments.com/v1/payment"></script>
+<style>
+  :root { --line:#e5e7eb; --muted:#6b7280; --ok:#059669; --bad:#dc2626; }
+  * { box-sizing: border-box; }
+  body { margin:0; padding:24px; font:14px/1.6 -apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo",sans-serif; color:#111827; background:#f9fafb; }
+  .wrap { max-width:860px; margin:0 auto; }
+  h1 { font-size:20px; margin:0 0 4px; }
+  .sub { color:var(--muted); margin:0 0 20px; }
+  section { background:#fff; border:1px solid var(--line); border-radius:8px; padding:16px; margin-bottom:12px; }
+  h2 { font-size:14px; margin:0 0 12px; }
+  label { display:block; font-size:12px; color:var(--muted); margin:8px 0 2px; }
+  input, select { width:100%; padding:7px 9px; border:1px solid var(--line); border-radius:6px; font:inherit; }
+  .row { display:flex; gap:8px; flex-wrap:wrap; }
+  .row > * { flex:1; min-width:180px; }
+  button { padding:8px 14px; border:1px solid var(--line); background:#fff; border-radius:6px; cursor:pointer; font:inherit; }
+  button:hover { background:#f3f4f6; }
+  button.primary { background:#111827; color:#fff; border-color:#111827; }
+  button.primary:hover { background:#374151; }
+  .btns { display:flex; gap:8px; flex-wrap:wrap; margin-top:12px; }
+  pre { background:#0b1020; color:#d1d5db; padding:12px; border-radius:6px; overflow:auto; max-height:340px; font-size:12px; margin:12px 0 0; }
+  .badge { display:inline-block; padding:2px 8px; border-radius:99px; font-size:12px; }
+  .badge.on { background:#d1fae5; color:var(--ok); }
+  .badge.off { background:#fee2e2; color:var(--bad); }
+  .note { font-size:12px; color:var(--muted); margin-top:8px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>결제 API 테스트</h1>
+  <p class="sub">dev 백엔드 전용. <code>npx serve -l 5174</code> 로 띄워 <code>http://localhost:5174</code> 에서 여세요 (CORS 허용 오리진).</p>
+
+  <section>
+    <h2>설정</h2>
+    <div class="row">
+      <div>
+        <label>API Base</label>
+        <input id="apiBase" value="https://api-dev.ollainvest.com" />
+      </div>
+      <div>
+        <label>토스 클라이언트 키 (test_ck_…)</label>
+        <input id="clientKey" placeholder="test_ck_..." />
+      </div>
+    </div>
+    <label>customerKey (자동 생성 · 사용자별 고정)</label>
+    <input id="customerKey" readonly />
+    <div class="btns">
+      <button onclick="resetCustomerKey()">customerKey 새로 만들기</button>
+    </div>
+    <p class="note">클라이언트 키는 공개용이라 노출돼도 됩니다. 시크릿 키(<code>test_sk_</code>)는 절대 넣지 마세요.</p>
+  </section>
+
+  <section>
+    <h2>1. 로그인 <span id="authState" class="badge off">토큰 없음</span></h2>
+    <p class="note">dev 는 <code>DEV_AUTH_BYPASS</code> 가 켜져 있어 아무 값이나 넣어도 <code>devtest</code> 로 로그인됩니다.</p>
+    <div class="btns">
+      <button class="primary" onclick="login()">로그인</button>
+      <button onclick="call('GET','/subscription/me')">구독 조회</button>
+    </div>
+  </section>
+
+  <section>
+    <h2>2. 카드 등록 + 첫 결제</h2>
+    <div class="row">
+      <div>
+        <label>planType</label>
+        <select id="planType"><option>PRO</option><option>BASIC</option></select>
+      </div>
+      <div>
+        <label>billingCycle</label>
+        <select id="billingCycle"><option>MONTHLY</option><option>YEARLY</option></select>
+      </div>
+    </div>
+    <div class="btns">
+      <button class="primary" onclick="requestBillingAuth()">토스 카드 등록창 열기</button>
+      <button onclick="submitBillingAuth()">authKey 로 결제 요청</button>
+    </div>
+    <p class="note">카드 등록창에서 인증하면 이 페이지로 <code>authKey</code> 를 달고 돌아옵니다. 그다음 두 번째 버튼을 누르세요. 테스트 키라 실제 결제는 일어나지 않습니다.</p>
+  </section>
+
+  <section>
+    <h2>3. 조회 / 카드 변경</h2>
+    <div class="btns">
+      <button onclick="call('GET','/payment/card')">등록 카드</button>
+      <button onclick="call('GET','/payment/history?limit=10')">결제 내역</button>
+      <button onclick="changeCard()">카드 변경 (authKey 재사용)</button>
+    </div>
+  </section>
+
+  <section>
+    <h2>결과</h2>
+    <pre id="out">대기 중…</pre>
+  </section>
+</div>
+
+<script>
+const $ = (id) => document.getElementById(id);
+let token = sessionStorage.getItem('token') || '';
+
+function log(label, data) {
+  const body = typeof data === 'string' ? data : JSON.stringify(data, null, 2);
+  $('out').textContent = `[${new Date().toLocaleTimeString()}] ${label}\n\n${body}`;
+}
+function setAuth(on) {
+  $('authState').className = 'badge ' + (on ? 'on' : 'off');
+  $('authState').textContent = on ? '로그인됨' : '토큰 없음';
+}
+
+// customerKey 는 사용자별 고정이어야 한다. 매번 새로 만들면 토스가 다른 고객으로 본다.
+if (!localStorage.getItem('customerKey')) {
+  localStorage.setItem('customerKey', crypto.randomUUID());
+}
+$('customerKey').value = localStorage.getItem('customerKey');
+$('clientKey').value = localStorage.getItem('clientKey') || '';
+$('clientKey').addEventListener('change', (e) => localStorage.setItem('clientKey', e.target.value.trim()));
+
+function resetCustomerKey() {
+  localStorage.setItem('customerKey', crypto.randomUUID());
+  $('customerKey').value = localStorage.getItem('customerKey');
+  log('customerKey 재생성', $('customerKey').value);
+}
+
+async function call(method, path, body) {
+  const url = $('apiBase').value.replace(/\/$/, '') + path;
+  try {
+    const res = await fetch(url, {
+      method,
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: 'Bearer ' + token } : {}),
+      },
+      body: body ? JSON.stringify(body) : undefined,
+    });
+    const text = await res.text();
+    let parsed; try { parsed = JSON.parse(text); } catch { parsed = text; }
+    log(`${method} ${path} → ${res.status}`, parsed);
+    return { status: res.status, data: parsed };
+  } catch (err) {
+    log(`${method} ${path} → 실패`, String(err));
+    return { status: 0, data: null };
+  }
+}
+
+async function login() {
+  const r = await call('POST', '/auth/login', { username: 'test', password: 'test' });
+  if (r.data && r.data.accessToken) {
+    token = r.data.accessToken;
+    sessionStorage.setItem('token', token);
+    setAuth(true);
+  }
+}
+
+async function requestBillingAuth() {
+  const clientKey = $('clientKey').value.trim();
+  if (!clientKey) return log('오류', '토스 클라이언트 키를 입력하세요.');
+  // 플랜 선택값은 리다이렉트 후에도 필요하므로 보관한다.
+  sessionStorage.setItem('planType', $('planType').value);
+  sessionStorage.setItem('billingCycle', $('billingCycle').value);
+  const here = location.origin + location.pathname;
+  try {
+    const toss = TossPayments(clientKey);
+    await toss.requestBillingAuth('카드', {
+      customerKey: $('customerKey').value,
+      successUrl: here,
+      failUrl: here + '?failed=1',
+    });
+  } catch (err) {
+    log('토스 호출 실패', String(err && err.message || err));
+  }
+}
+
+async function submitBillingAuth() {
+  const authKey = new URLSearchParams(location.search).get('authKey');
+  if (!authKey) return log('오류', 'authKey 가 없습니다. 먼저 카드 등록창을 완료하세요.');
+  if (!token) return log('오류', '먼저 로그인하세요.');
+  await call('POST', '/payment/billing-auth', {
+    authKey,
+    customerKey: $('customerKey').value,
+    planType: sessionStorage.getItem('planType') || $('planType').value,
+    billingCycle: sessionStorage.getItem('billingCycle') || $('billingCycle').value,
+  });
+}
+
+async function changeCard() {
+  const authKey = new URLSearchParams(location.search).get('authKey');
+  if (!authKey) return log('오류', 'authKey 가 없습니다. 먼저 카드 등록창을 완료하세요.');
+  await call('PATCH', '/payment/card', { authKey, customerKey: $('customerKey').value });
+}
+
+// 리다이렉트 복귀 처리
+setAuth(!!token);
+const q = new URLSearchParams(location.search);
+if (q.get('authKey')) {
+  log('토스 인증 완료', { authKey: q.get('authKey'), customerKey: q.get('customerKey') || $('customerKey').value, 다음: '"authKey 로 결제 요청" 버튼을 누르세요.' });
+} else if (q.get('failed') || q.get('code')) {
+  log('토스 인증 실패', Object.fromEntries(q.entries()));
+}
+</script>
+</body>
+</html>
