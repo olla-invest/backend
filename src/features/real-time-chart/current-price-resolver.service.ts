@@ -19,29 +19,31 @@ export function isRegularSessionTick(timestamp: Date): boolean {
   return minutes >= 9 * 60 && minutes < REGULAR_SESSION_END_MINUTES;
 }
 
-export interface MetricPriceFallback {
-  closePrice: unknown;
-  priceChange1d?: unknown;
-  priceChangeRate1d?: unknown;
-}
-
-export interface ResolvedMetricPrice {
-  currentPrice: number;
-  closePrice: number;
-  changeRate: number;
-  priceChange1d: number | null;
-  priceChangeRate1d: number | null;
-  usedRealtime: boolean;
-}
-
 @Injectable()
 export class CurrentPriceResolver {
   private static readonly KST_OFFSET_MS = 9 * 60 * 60 * 1000;
-  private static readonly MAX_REALTIME_AGE_MS = 10 * 60 * 1000;
 
+  /**
+   * 지금 화면에 보여야 하는 가격의 거래일 (YYYY-MM-DD).
+   * 거래일 09:00 이후는 오늘, 그 전·주말·휴장일은 직전 거래일.
+   */
+  getPriceDateKey(now = new Date()): string {
+    const nowKst = this.toKst(now);
+    const minutes = nowKst.getUTCHours() * 60 + nowKst.getUTCMinutes();
+    if (isKrxTradingDay(now) && minutes < 9 * 60) {
+      return this.toKstDateKey(previousTradingDay(now));
+    }
+    return getKrxTradingDateByOffset(this.toKstDateKey(now), 0);
+  }
+
+  /**
+   * 가격 기준 거래일의 정규장 tick 이면 그대로 쓴다.
+   * 체결이 뜸해 오래된 tick 도 그날의 마지막 체결가라서 버리지 않는다 (당일 일봉도 같은 tick 으로 만든다).
+   */
   getUsableRealtimePrice(
     realtimePrice: RealtimePrice | undefined,
     now = new Date(),
+    priceDateKey = this.getPriceDateKey(now),
   ): RealtimePrice | undefined {
     if (!realtimePrice) return undefined;
     if (
@@ -56,63 +58,9 @@ export class CurrentPriceResolver {
     if (!Number.isFinite(age) || age < 0 || !isRegularSessionTick(timestamp))
       return undefined;
 
-    const nowKst = this.toKst(now);
-    const minutes = nowKst.getUTCHours() * 60 + nowKst.getUTCMinutes();
-    const tradingDay = isKrxTradingDay(now);
-    const marketSession =
-      tradingDay && minutes >= 9 * 60 && minutes <= 15 * 60 + 30;
-    if (marketSession) {
-      return this.toKstDateKey(now) === this.toKstDateKey(timestamp) &&
-        age <= CurrentPriceResolver.MAX_REALTIME_AGE_MS
-        ? realtimePrice
-        : undefined;
-    }
-
-    // A last-trade quote remains useful after close and through weekends/holidays.
-    // It is not labelled a finalized closing price; the EOD candle remains authoritative.
-    const expectedDate =
-      tradingDay && minutes < 9 * 60
-        ? this.toKstDateKey(previousTradingDay(now))
-        : getKrxTradingDateByOffset(this.toKstDateKey(now), 0);
-    return this.toKstDateKey(timestamp) === expectedDate
+    return this.toKstDateKey(timestamp) === priceDateKey
       ? realtimePrice
       : undefined;
-  }
-
-  resolveMetricSnapshot(
-    metric: MetricPriceFallback,
-    realtimePrice?: RealtimePrice,
-    now = new Date(),
-  ): ResolvedMetricPrice {
-    const usableRealtimePrice = this.getUsableRealtimePrice(realtimePrice, now);
-    const currentPrice = usableRealtimePrice
-      ? usableRealtimePrice.currentPrice
-      : Number(metric.closePrice);
-    const realtimeOpenPrice =
-      usableRealtimePrice && usableRealtimePrice.openPrice > 0
-        ? usableRealtimePrice.openPrice
-        : null;
-    const changeRate =
-      realtimeOpenPrice != null
-        ? ((currentPrice - realtimeOpenPrice) / realtimeOpenPrice) * 100
-        : metric.priceChangeRate1d != null
-          ? Number(metric.priceChangeRate1d)
-          : null;
-    const priceChange1d =
-      realtimeOpenPrice != null
-        ? currentPrice - realtimeOpenPrice
-        : metric.priceChange1d != null
-          ? Number(metric.priceChange1d)
-          : null;
-
-    return {
-      currentPrice,
-      closePrice: currentPrice,
-      changeRate: changeRate ?? 0,
-      priceChange1d,
-      priceChangeRate1d: changeRate,
-      usedRealtime: usableRealtimePrice != null,
-    };
   }
 
   private toKst(date: Date): Date {

@@ -22,6 +22,7 @@ export interface RealtimePrice {
   openPrice: number; // 시가
   highPrice: number; // 고가
   lowPrice: number; // 저가
+  changeSign?: string; // 전일대비기호 (1 상한, 2 상승, 3 보합, 4 하한, 5 하락)
   timestamp: Date; // 수신 시각
 }
 
@@ -229,6 +230,7 @@ export class RealtimePriceCacheService
         openPrice: this.parseAbsolute(values['16']), // 시가
         highPrice: this.parseAbsolute(values['17']), // 고가
         lowPrice: this.parseAbsolute(values['18']), // 저가
+        changeSign: values['25'] || undefined, // 전일대비기호
         timestamp: new Date(),
       };
 

@@ -43,6 +43,7 @@ describe('IssueThemeService grouped theme detail', () => {
             priceChangeRate: -2.37, tradingValue: null, previousTradingValueRatio: null, isNewHigh: false, shortTermRs: null },
         ]),
       } as any,
+      { getCurrentPrices: jest.fn().mockResolvedValue(new Map()) } as any,
     );
     jest.spyOn(service, 'getCurrentThemeRankMap').mockResolvedValue(new Map([[200051, {
       rank: 14, previousRank: null, rankChange: null, risingCount: 0, totalCount: 1,

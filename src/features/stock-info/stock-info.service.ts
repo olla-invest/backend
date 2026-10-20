@@ -3,7 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../../common/prisma/prisma.service';
 import { DartRestService } from '../../integrations/dart/dart-rest.service';
 import { KiwoomRestService } from '../../integrations/kiwoom/rest/kiwoom-rest.service';
-import { RealtimePriceCacheService } from '../real-time-chart/realtime-price-cache.service';
+import { CurrentPriceService } from '../real-time-chart/current-price.service';
 import axios from 'axios';
 import AdmZip = require('adm-zip');
 import * as cheerio from 'cheerio';
@@ -112,7 +112,7 @@ export class StockInfoService {
     private readonly dart: DartRestService,
     private readonly config: ConfigService,
     private readonly kiwoomRest: KiwoomRestService,
-    private readonly realtimePriceCache: RealtimePriceCacheService,
+    private readonly currentPriceService: CurrentPriceService,
   ) {}
 
   /**
@@ -161,17 +161,13 @@ export class StockInfoService {
   async getCompanyOverview(stockCode: string) {
     const corpCode = await this.getCorpCode(stockCode);
 
-    const [dartData, company, latestCandle, kiwoomBasicInfo, naverThemes] = await Promise.all([
+    const [dartData, company, currentPrice, kiwoomBasicInfo, naverThemes] = await Promise.all([
       this.dart.getCompanyInfo(corpCode),
       this.prisma.company.findFirst({
         where: { stockCode, deletedAt: null },
         select: { listedShares: true, businessInfo: true, themeCode: true, theme: { select: { themeName: true } } },
       }),
-      this.prisma.stockCandle.findFirst({
-        where: { stockCode, candleType: 'day' },
-        orderBy: { candleTime: 'desc' },
-        select: { closePrice: true },
-      }),
+      this.currentPriceService.getCurrentPrice(stockCode),
       this.kiwoomRest.getStockBasicInfo(stockCode).catch((error) => {
         this.logger.warn(`Kiwoom market cap unavailable for ${stockCode}: ${error.message}`);
         return null;
@@ -190,10 +186,8 @@ export class StockInfoService {
     if (dartData.status !== '000') throw new Error(`DART 기업개황 오류: ${dartData.message}`);
 
     const listedShares = company?.listedShares ?? null;
-    // 장중에는 실시간 현재가 우선, 없으면 DB 일봉 종가 (watchlist와 동일 패턴)
-    const realtimePrice = this.realtimePriceCache.getPrice(stockCode);
-    const closePrice =
-      realtimePrice?.currentPrice ?? (latestCandle ? Number(latestCandle.closePrice) : null);
+    // 다른 화면과 같은 현재가 (tick → 당일 일봉 → 기준가)
+    const closePrice = currentPrice?.currentPrice ?? null;
     const calculatedMarketCap = listedShares && closePrice
       ? Number(listedShares) * closePrice
       : null;

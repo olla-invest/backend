@@ -24,6 +24,7 @@ describe('trading value snapshots', () => {
         {} as any,
         {} as any,
         {} as any,
+        { getCurrentPrices: jest.fn().mockResolvedValue(new Map()) } as any,
       );
       await service.saveTradingValueSnapshot();
       expect(

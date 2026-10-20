@@ -1,45 +1,55 @@
-import { CurrentPriceResolver } from './current-price-resolver.service';
+import { CurrentPrice } from './current-price.service';
 import { CurrentRankService } from './current-rank.service';
+
+const metricRow = (overrides: Record<string, unknown> = {}) => ({
+  stock_code: '041830', trade_date: new Date('2026-08-04'), close_price: '30800',
+  relative_strength_score: '90', rank: 1, high_price_52w: '35000',
+  low_price_52w: '20000', ma_50: '25000', price_change_rate_1d: '2.5',
+  price_change_1d: '750', trading_value: 12_000n, is_new_high: false,
+  short_term_rs: '88.67',
+  ...overrides,
+});
+
+const currentPrice = (overrides: Partial<CurrentPrice> = {}): CurrentPrice => ({
+  stockCode: '041830',
+  priceDate: '2026-08-05',
+  source: 'REALTIME',
+  currentPrice: 31_500,
+  changeAmount: 700,
+  changeRate: 2.27,
+  changeSign: '2',
+  openPrice: 31_000,
+  highPrice: 31_700,
+  lowPrice: 30_800,
+  accVolume: 1n,
+  tradingValue: 24_000n,
+  ...overrides,
+});
 
 describe('CurrentRankService price selection', () => {
   afterEach(() => {
     jest.useRealTimers();
   });
 
-  it('uses the metric close when a cached tick is stale', () => {
-    jest.useFakeTimers().setSystemTime(new Date('2026-08-05T01:20:01.000Z'));
-    const realtimeCache = {
-      getPrice: jest.fn().mockReturnValue({
-        stockCode: '041830', currentPrice: 31_500, changeAmount: 500,
-        changeRate: 1.61, volume: 1, accVolume: 1, accAmount: 1,
-        openPrice: 31_000, highPrice: 31_700, lowPrice: 30_800,
-        timestamp: new Date('2026-08-05T01:00:00.000Z'),
-      }),
-    };
-    const service = new CurrentRankService(
-      {} as any,
-      realtimeCache as any,
-      new CurrentPriceResolver(),
-    ) as any;
+  it('uses the same-day day candle instead of the previous-day metric close', () => {
+    const service = new CurrentRankService({} as any, {} as any) as any;
 
-    const rows = service.buildRankRows([
-      {
-        stock_code: '041830', trade_date: new Date('2026-08-04'), close_price: '30800',
-        relative_strength_score: '90', rank: 1, high_price_52w: '35000',
-        low_price_52w: '20000', ma_50: '25000', price_change_rate_1d: '2.5',
-        price_change_1d: '750', trading_value: 12_000n, is_new_high: false,
-        short_term_rs: '88.67',
-      },
-    ], new Date('2026-08-05'), new Date('2026-08-05T01:20:00.000Z'), new Map([
-      ['041830', 4_800n],
-    ]));
+    const rows = service.buildRankRows(
+      [metricRow()],
+      new Date('2026-08-05'),
+      new Date('2026-08-05T01:20:00.000Z'),
+      new Map([['041830', 4_800n]]),
+      new Map([['041830', currentPrice({
+        source: 'DAY_CANDLE', currentPrice: 31_200, changeAmount: 400, changeRate: 1.3, tradingValue: 12_000n,
+      })]]),
+    );
 
     expect(rows[0]).toMatchObject({
-      currentPrice: 30_800,
+      currentPrice: 31_200,
       closePrice: 30_800,
-      priceSource: 'close',
-      priceChangeRate: 2.5,
-      priceChange1d: 750,
+      priceSource: 'day_candle',
+      priceChangeRate: 1.3,
+      priceChange1d: 400,
       tradingValue: 12_000n,
       previousTradingValueRatio: 2.5,
       isNewHigh: false,
@@ -47,12 +57,39 @@ describe('CurrentRankService price selection', () => {
     });
   });
 
+  it('falls back to the metric of the same date only when no current price is given', () => {
+    const service = new CurrentRankService({} as any, {} as any) as any;
+
+    const rows = service.buildRankRows([metricRow()], new Date('2026-08-04'), new Date('2026-08-04T06:50:00.000Z'));
+
+    expect(rows[0]).toMatchObject({
+      currentPrice: 30_800,
+      priceSource: 'close',
+      priceChangeRate: 2.5,
+      priceChange1d: 750,
+      tradingValue: 12_000n,
+    });
+  });
+
+  it('asks for prices of the snapshot trade date, not the previous-day metric date', async () => {
+    const getCurrentPrices = jest.fn().mockResolvedValue(new Map([['041830', currentPrice({ priceDate: '2026-10-15' })]]));
+    const service = new CurrentRankService({} as any, { getCurrentPrices } as any) as any;
+    jest.spyOn(service, 'getLatestMetricTradeDate').mockResolvedValue(new Date('2026-10-14'));
+    jest.spyOn(service, 'getStaticFilteredMetrics').mockResolvedValue([metricRow({ trade_date: new Date('2026-10-14') })]);
+    jest.spyOn(service, 'getPreviousTradingValues').mockResolvedValue(new Map());
+    const save = jest.spyOn(service, 'saveSnapshotRows').mockResolvedValue(undefined);
+
+    await service.createCurrentRankSnapshot(new Date('2026-10-15T01:20:00.000Z'), new Date('2026-10-15'));
+
+    expect(getCurrentPrices).toHaveBeenCalledWith(['041830'], { priceDate: '2026-10-15' });
+    expect(save.mock.calls[0][0][0]).toMatchObject({ currentPrice: 31_500, priceSource: 'realtime', tradeDate: '2026-10-15' });
+  });
+
   it('persists every theme aggregation fact in the stock snapshot row', async () => {
     const prisma = { $executeRawUnsafe: jest.fn().mockResolvedValue(1) };
     const service = new CurrentRankService(
       prisma as any,
-      { getPrice: jest.fn() } as any,
-      new CurrentPriceResolver(),
+      {} as any,
     ) as any;
 
     await service.saveSnapshotRows([{
@@ -84,67 +121,18 @@ describe('CurrentRankService price selection', () => {
     expect(params).toEqual(expect.arrayContaining([2.5, 750, 12_000n, false]));
   });
 
-  it('uses the live tick change amount when a fresh tick is usable', () => {
-    jest.useFakeTimers().setSystemTime(new Date('2026-08-05T01:20:01.000Z'));
-    const realtimeCache = {
-      getPrice: jest.fn().mockReturnValue({
-        stockCode: '041830', currentPrice: 31_500, changeAmount: 700,
-        changeRate: 2.27, volume: 1, accVolume: 1, accAmount: 24_000,
-        openPrice: 31_000, highPrice: 31_700, lowPrice: 30_800,
-        timestamp: new Date('2026-08-05T01:20:00.000Z'),
-      }),
-    };
-    const service = new CurrentRankService(
-      {} as any,
-      realtimeCache as any,
-      new CurrentPriceResolver(),
-    ) as any;
+  it('uses the current price change amount and KRW trading value', () => {
+    const service = new CurrentRankService({} as any, {} as any) as any;
 
-    const rows = service.buildRankRows([
-      {
-        stock_code: '041830', trade_date: new Date('2026-08-05'), close_price: '30800',
-        relative_strength_score: '90', rank: 1, high_price_52w: '35000',
-        low_price_52w: '20000', ma_50: '25000', price_change_rate_1d: '2.5',
-        price_change_1d: '750', trading_value: 12_000n, is_new_high: false,
-        short_term_rs: '88.67',
-      },
-    ], new Date('2026-08-05'), new Date('2026-08-05T01:20:00.000Z'), new Map());
+    const rows = service.buildRankRows(
+      [metricRow({ stock_code: '033780', trading_value: 65_895_000_000n })],
+      new Date('2026-10-15'),
+      new Date('2026-10-15T00:10:00.000Z'),
+      new Map([['033780', 141_000_000n]]),
+      new Map([['033780', currentPrice({ stockCode: '033780', tradingValue: 5_684_000_000n })]]),
+    );
 
-    expect(rows[0]).toMatchObject({
-      priceSource: 'realtime',
-      priceChangeRate: 2.27,
-      priceChange1d: 700,
-    });
-  });
-
-  it('normalizes the live million-KRW trading value to KRW before comparing', () => {
-    jest.useFakeTimers().setSystemTime(new Date('2026-10-15T00:10:01.000Z'));
-    const realtimeCache = {
-      getPrice: jest.fn().mockReturnValue({
-        stockCode: '033780', currentPrice: 31_500, changeAmount: 700,
-        changeRate: 2.27, volume: 1, accVolume: 1, accAmount: 5_684,
-        openPrice: 31_000, highPrice: 31_700, lowPrice: 30_800,
-        timestamp: new Date('2026-10-15T00:10:00.000Z'),
-      }),
-    };
-    const service = new CurrentRankService(
-      {} as any,
-      realtimeCache as any,
-      new CurrentPriceResolver(),
-    ) as any;
-
-    const rows = service.buildRankRows([
-      {
-        stock_code: '033780', trade_date: new Date('2026-10-14'), close_price: '30800',
-        relative_strength_score: '90', rank: 1, high_price_52w: '35000',
-        low_price_52w: '20000', ma_50: '25000', price_change_rate_1d: '2.5',
-        price_change_1d: '750', trading_value: 65_895_000_000n, is_new_high: false,
-        short_term_rs: '88.67',
-      },
-    ], new Date('2026-10-15'), new Date('2026-10-15T00:10:00.000Z'), new Map([
-      ['033780', 141_000_000n],
-    ]));
-
+    expect(rows[0]).toMatchObject({ priceSource: 'realtime', priceChangeRate: 2.27, priceChange1d: 700 });
     expect(rows[0].tradingValue).toBe(5_684_000_000n);
     expect(rows[0].previousTradingValueRatio).toBeCloseTo(40.31, 2);
   });
@@ -152,8 +140,7 @@ describe('CurrentRankService price selection', () => {
   it('drops a trading value ratio that would overflow the snapshot column', () => {
     const service = new CurrentRankService(
       {} as any,
-      { getPrice: jest.fn().mockReturnValue(undefined) } as any,
-      new CurrentPriceResolver(),
+      {} as any,
     ) as any;
 
     const rows = service.buildRankRows([
@@ -180,8 +167,7 @@ describe('CurrentRankService price selection', () => {
     };
     const service = new CurrentRankService(
       prisma as any,
-      { getPrice: jest.fn() } as any,
-      new CurrentPriceResolver(),
+      {} as any,
     ) as any;
 
     const values = await service.getPreviousTradingValues(
@@ -197,8 +183,7 @@ describe('CurrentRankService price selection', () => {
     const prisma = { $queryRawUnsafe: jest.fn().mockResolvedValue([]) };
     const service = new CurrentRankService(
       prisma as any,
-      { getPrice: jest.fn() } as any,
-      new CurrentPriceResolver(),
+      {} as any,
     ) as any;
 
     await service.getPreviousTradingValues(
@@ -219,8 +204,7 @@ describe('CurrentRankService price selection', () => {
     };
     const service = new CurrentRankService(
       prisma as any,
-      { getPrice: jest.fn() } as any,
-      new CurrentPriceResolver(),
+      {} as any,
     ) as any;
 
     const result = await service.finalizeDailyCurrentRank(new Date('2026-10-15'));
@@ -236,8 +220,7 @@ describe('CurrentRankService price selection', () => {
     const prisma = { $queryRawUnsafe: jest.fn().mockResolvedValueOnce([]) };
     const service = new CurrentRankService(
       prisma as any,
-      { getPrice: jest.fn() } as any,
-      new CurrentPriceResolver(),
+      {} as any,
     ) as any;
     const create = jest.spyOn(service, 'createCurrentRankSnapshot');
 
@@ -249,7 +232,7 @@ describe('CurrentRankService price selection', () => {
   });
 
   it('pins the closing snapshot to 15:40 KST while metrics are still from the previous day', async () => {
-    const service = new CurrentRankService({} as any, { getPrice: jest.fn() } as any, new CurrentPriceResolver()) as any;
+    const service = new CurrentRankService({} as any, {} as any) as any;
     jest.spyOn(service, 'getLatestMetricTradeDate').mockResolvedValue(new Date('2026-10-14'));
     const create = jest.spyOn(service, 'createCurrentRankSnapshot').mockResolvedValue({ success: true });
 
@@ -259,7 +242,7 @@ describe('CurrentRankService price selection', () => {
   });
 
   it('does not overwrite the closing snapshot once same-day metrics exist', async () => {
-    const service = new CurrentRankService({} as any, { getPrice: jest.fn() } as any, new CurrentPriceResolver()) as any;
+    const service = new CurrentRankService({} as any, {} as any) as any;
     jest.spyOn(service, 'getLatestMetricTradeDate').mockResolvedValue(new Date('2026-10-15'));
     const create = jest.spyOn(service, 'createCurrentRankSnapshot');
 
@@ -269,12 +252,11 @@ describe('CurrentRankService price selection', () => {
     expect(create).not.toHaveBeenCalled();
   });
 
-  it('rebuilds a historical closing snapshot without using the realtime cache', async () => {
-    const realtimeCache = { getPrice: jest.fn(() => { throw new Error('realtime must not be read'); }) };
+  it('rebuilds a historical closing snapshot from the metric close of that date, not current prices', async () => {
+    const currentPriceService = { getCurrentPrices: jest.fn(() => { throw new Error('current prices must not be read'); }) };
     const service = new CurrentRankService(
       {} as any,
-      realtimeCache as any,
-      new CurrentPriceResolver(),
+      currentPriceService as any,
     ) as any;
     jest.spyOn(service, 'getStaticFilteredMetrics').mockResolvedValue([{
       stock_code: '041830', trade_date: new Date('2026-08-10'), close_price: '30800',
@@ -297,6 +279,6 @@ describe('CurrentRankService price selection', () => {
       currentPrice: 30_800,
       priceSource: 'close',
     });
-    expect(realtimeCache.getPrice).not.toHaveBeenCalled();
+    expect(currentPriceService.getCurrentPrices).not.toHaveBeenCalled();
   });
 });

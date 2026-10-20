@@ -5,6 +5,7 @@ import { readFile } from 'fs/promises';
 import { PrismaService } from '../../common/prisma/prisma.service';
 import { RealtimePriceCacheService } from '../real-time-chart/realtime-price-cache.service';
 import { CurrentPriceResolver } from '../real-time-chart/current-price-resolver.service';
+import { CurrentPriceService } from '../real-time-chart/current-price.service';
 import { normalizeTradingValueToWon } from '../real-time-chart/trading-value.util';
 import { KiwoomRestService } from '../../integrations/kiwoom/rest/kiwoom-rest.service';
 import { ThemeMetricsService } from './theme-metrics.service';
@@ -107,6 +108,7 @@ export class IssueThemeService {
     private readonly themeMetrics: ThemeMetricsService,
     private readonly themeAiSummary: ThemeAiSummaryService,
     private readonly themeSnapshot: ThemeSnapshotService,
+    private readonly currentPriceService: CurrentPriceService,
   ) {}
 
   // ─── 헬퍼 ────────────────────────────────────────────────────────
@@ -390,28 +392,23 @@ export class IssueThemeService {
     });
     const companyNames = new Map(companies.map((company) => [company.stockCode, company.companyName]));
     const memberships = new Map(stockThemes.map((stock) => [stock.stockCode, stock]));
+    // RS 점수·순위는 마감 확정 스냅샷을 그대로 쓰지만, 가격·등락률·거래대금은
+    // 기획상 "당일" 값이어야 한다. 실시간 차트와 같은 현재가 조합(tick → 당일 일봉)으로 덮어쓴다.
+    const currentPrices = await this.currentPriceService.getCurrentPrices(
+      snapshotStocks.map((stock) => stock.stockCode),
+    );
     const stockRows = snapshotStocks.map((stock) => {
       const membership = memberships.get(stock.stockCode);
+      const price = currentPrices.get(stock.stockCode);
 
-      // RS 점수·순위는 마감 확정 스냅샷을 그대로 쓰지만, 가격·등락률·거래대금은
-      // 기획상 "당일" 값이어야 한다. 장중에는 실시간 캐시로 덮어쓴다.
-      // (실시간차트가 쓰는 판정 로직을 그대로 재사용해 두 화면이 어긋나지 않게 한다)
-      const realtimePrice = this.currentPriceResolver.getUsableRealtimePrice(
-        this.realtimeCache.getPrice(stock.stockCode),
-      );
-
-      const currentPrice = realtimePrice?.currentPrice && realtimePrice.currentPrice > 0
-        ? realtimePrice.currentPrice
-        : stock.currentPrice;
-      const changeRate = realtimePrice ? realtimePrice.changeRate : stock.priceChangeRate;
-      const priceChange1d = realtimePrice ? realtimePrice.changeAmount : stock.priceChange1d ?? null;
-      // 실시간 누적거래대금(백만원)과 정규화 이전 스냅샷 값(백만원)을 원 단위로 맞춘다.
+      const currentPrice = price?.currentPrice ?? stock.currentPrice;
+      const changeRate = price ? price.changeRate : stock.priceChangeRate;
+      const priceChange1d = price ? price.changeAmount : stock.priceChange1d ?? null;
+      // 정규화 이전 스냅샷 값(백만원)을 원 단위로 맞춘다.
       const snapshotTradingValue = stock.tradingValue == null
         ? null
         : normalizeTradingValueToWon(stock.tradingValue);
-      const tradingValue = realtimePrice?.accAmount && realtimePrice.accAmount > 0
-        ? normalizeTradingValueToWon(realtimePrice.accAmount)
-        : snapshotTradingValue;
+      const tradingValue = price ? price.tradingValue : snapshotTradingValue;
 
       // 전일비는 "당일 누적 ÷ 전일 같은 시각 누적" 이다. 스냅샷 비율에서 역산한
       // 전일 기준값을 그대로 두고, 분자만 실시간 누적으로 갈아끼운다.
@@ -432,12 +429,12 @@ export class IssueThemeService {
         changeRate,
         priceChange1d,
         priceChangeRate1d: changeRate,
-        priceSource: realtimePrice ? 'REALTIME' : 'STOCK_SNAPSHOT',
+        priceSource: price?.source ?? 'STOCK_SNAPSHOT',
         rsScore: stock.relativeStrengthScore,
         shortTermRs: stock.shortTermRs,
         tradingValue: tradingValue?.toString() ?? null,
         previousTradingValueRatio: ratio,
-        isNewHigh: stock.isNewHigh,
+        isNewHigh: stock.highPrice52w != null ? currentPrice >= stock.highPrice52w : stock.isNewHigh,
         newHighRate: stock.highPrice52w != null && stock.highPrice52w > 0
           ? this.round2(((currentPrice - stock.highPrice52w) / stock.highPrice52w) * 100)
           : null,

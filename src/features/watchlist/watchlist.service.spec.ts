@@ -29,7 +29,7 @@ describe('WatchlistService theme recommendations', () => {
         upCount: 5, flatCount: 0, downCount: 2,
       }]])),
     };
-    const service = new WatchlistService(prisma, {} as any, {} as any, issueThemeService);
+    const service = new WatchlistService(prisma, {} as any, {} as any, issueThemeService, { ensureSubscribed: jest.fn().mockResolvedValue(undefined) } as any);
 
     const result = await (service as any).recommendTheme(
       [{ company: { stockCode: 'OLED-A' } }],
@@ -58,7 +58,7 @@ describe('WatchlistService theme recommendations', () => {
         findFirst: jest.fn().mockResolvedValue(null),
       },
     };
-    const service = new WatchlistService(prisma, {} as any, {} as any, {} as any) as any;
+    const service = new WatchlistService(prisma, {} as any, {} as any, {} as any, { ensureSubscribed: jest.fn().mockResolvedValue(undefined) } as any) as any;
 
     const result = await service.getStockCurrentRankContext(
       ['189300'],
@@ -90,7 +90,7 @@ describe('WatchlistService theme recommendations', () => {
         risingCount: 1, totalCount: 1, upCount: 1, flatCount: 0, downCount: 0,
       }]])),
     };
-    const service = new WatchlistService(prisma, {} as any, {} as any, issueThemeService);
+    const service = new WatchlistService(prisma, {} as any, {} as any, issueThemeService, { ensureSubscribed: jest.fn().mockResolvedValue(undefined) } as any);
 
     const result = await service.getHighlights('user-1');
 
@@ -101,7 +101,7 @@ describe('WatchlistService theme recommendations', () => {
   });
 
   it('does not override an exact stock snapshot rank with a recomputed display rank', () => {
-    const service = new WatchlistService({} as any, {} as any, {} as any, {} as any) as any;
+    const service = new WatchlistService({} as any, {} as any, {} as any, {} as any, { ensureSubscribed: jest.fn().mockResolvedValue(undefined) } as any) as any;
     const item = service.buildStockItem(
       {
         companyId: 'company-1', addedDate: new Date(), memo: null,
@@ -122,7 +122,7 @@ describe('WatchlistService theme recommendations', () => {
   });
 
   it('falls back to the current rank when there is no previous rank', () => {
-    const service = new WatchlistService({} as any, {} as any, {} as any, {} as any) as any;
+    const service = new WatchlistService({} as any, {} as any, {} as any, {} as any, { ensureSubscribed: jest.fn().mockResolvedValue(undefined) } as any) as any;
     const item = service.buildStockItem(
       {
         companyId: 'company-1', addedDate: new Date(), memo: null,
@@ -144,6 +144,27 @@ describe('WatchlistService theme recommendations', () => {
     expect(item.rankChange).toBeNull();
   });
 
+  it('shows the same-day current price and never the previous-day metric close', () => {
+    const service = new WatchlistService({} as any, {} as any, {} as any, {} as any, { ensureSubscribed: jest.fn().mockResolvedValue(undefined) } as any) as any;
+    const entry = {
+      companyId: 'company-1', addedDate: new Date(), memo: null,
+      company: { stockCode: '189300', companyName: '씨이랩', marketType: 'KOSDAQ' },
+    };
+    const metric = { relativeStrengthScore: 97, closePrice: '30000', priceChange1d: '500', priceChangeRate1d: '1.7', highPrice52w: '31000' };
+
+    const priced = service.buildStockItem(entry, metric, null, {
+      stockCode: '189300', priceDate: '2026-10-19', source: 'DAY_CANDLE',
+      currentPrice: 31_500, changeAmount: 1_500, changeRate: 5,
+      openPrice: 30_000, highPrice: 31_600, lowPrice: 29_900, accVolume: 1n, tradingValue: 1n,
+    });
+    const unpriced = service.buildStockItem(entry, metric, null, undefined);
+
+    expect(priced).toMatchObject({
+      closePrice: 31_500, priceChange1d: 1_500, priceChangeRate1d: 5, priceSource: 'DAY_CANDLE', isNewHigh: true,
+    });
+    expect(unpriced).toMatchObject({ closePrice: null, priceChange1d: null, priceChangeRate1d: null, priceSource: null });
+  });
+
   it('serves watchlist theme counts and previous rank from the canonical map only', async () => {
     const prisma: any = {
       userWatchlistTheme: { findMany: jest.fn().mockResolvedValue([{
@@ -160,7 +181,7 @@ describe('WatchlistService theme recommendations', () => {
         risingCount: 1, totalCount: 1, upCount: 1, flatCount: 0, downCount: 0,
       }]])),
     };
-    const service = new WatchlistService(prisma, {} as any, {} as any, issueThemeService);
+    const service = new WatchlistService(prisma, {} as any, {} as any, issueThemeService, { ensureSubscribed: jest.fn().mockResolvedValue(undefined) } as any);
 
     const result = await service.getWatchlistThemes('user-1');
 

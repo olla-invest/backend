@@ -138,25 +138,6 @@ export class ChartStorageService {
     });
   }
 
-  async getLatestClosingPrices(stockCodes: string[]): Promise<Map<string, number>> {
-    const priceMap = new Map<string, number>();
-    const latestCandles = await this.prisma.$queryRaw<
-      Array<{ stockCode: string; closePrice: any }>
-    >`
-      SELECT DISTINCT ON (stock_code)
-        stock_code as "stockCode",
-        close_price as "closePrice"
-      FROM stock_candles
-      WHERE stock_code = ANY(${stockCodes})
-        AND candle_type = 'day'
-      ORDER BY stock_code, candle_time DESC
-    `;
-    latestCandles.forEach((candle) => {
-      priceMap.set(candle.stockCode, Number(candle.closePrice));
-    });
-    return priceMap;
-  }
-
   async getLatestDayCandleDate(): Promise<Date | null> {
     const latest = await this.prisma.stockCandle.findFirst({
       where: { candleType: 'day' },

@@ -116,6 +116,34 @@ export class RedisPriceStoreService {
     );
   }
 
+  private fallbackKey(priceDate: string): string {
+    return `${this.key}:fallback:${priceDate}`;
+  }
+
+  /**
+   * 가격 기준 거래일에 tick 이 없는 종목의 조합 가격(당일 일봉·키움 조회·기준가).
+   * 인스턴스·요청마다 DB·키움을 다시 치지 않도록 Redis 에서 공유한다. 값의 신선도는 호출측이 판단한다.
+   */
+  async loadFallbackPrices(priceDate: string, stockCodes: string[]): Promise<Map<string, string>> {
+    const result = new Map<string, string>();
+    if (!stockCodes.length) return result;
+    await this.ready();
+    const values = await this.withDeadline(() => this.client.hmGet(this.fallbackKey(priceDate), stockCodes));
+    values.forEach((value, index) => {
+      if (typeof value === 'string') result.set(stockCodes[index], value);
+    });
+    return result;
+  }
+
+  async saveFallbackPrices(priceDate: string, entries: Map<string, string>): Promise<void> {
+    if (!entries.size) return;
+    await this.ready();
+    const key = this.fallbackKey(priceDate);
+    await this.withDeadline(() =>
+      this.client.multi().hSet(key, Object.fromEntries(entries)).expire(key, 2 * 86400).exec(),
+    );
+  }
+
   async close() {
     if (this.client.isOpen) this.client.destroy();
   }

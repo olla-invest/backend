@@ -1,8 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { randomUUID } from 'crypto';
 import { PrismaService } from '../../common/prisma/prisma.service';
-import { RealtimePriceCacheService } from './realtime-price-cache.service';
-import { CurrentPriceResolver } from './current-price-resolver.service';
+import { CurrentPrice, CurrentPriceService } from './current-price.service';
 import { normalizeTradingValueToWon } from './trading-value.util';
 
 type MetricRow = {
@@ -33,7 +32,7 @@ type CurrentRankRow = {
   lowPrice52w: number | null;
   ma50: number | null;
   passedDynamicFilters: boolean;
-  priceSource: 'realtime' | 'close';
+  priceSource: 'realtime' | 'day_candle' | 'kiwoom' | 'base_price' | 'close';
   priceChangeRate: number | null;
   priceChange1d: number | null;
   tradingValue: bigint | null;
@@ -55,8 +54,7 @@ export class CurrentRankService {
 
   constructor(
     private readonly prisma: PrismaService,
-    private readonly realtimeCache: RealtimePriceCacheService,
-    private readonly currentPriceResolver: CurrentPriceResolver,
+    private readonly currentPriceService: CurrentPriceService,
   ) {}
 
   async createCurrentRankSnapshot(now: Date = new Date(), tradeDate?: Date) {
@@ -84,7 +82,12 @@ export class CurrentRankService {
 
     const snapshotTime = this.truncateToTenMinutes(now);
     const previousTradingValues = await this.getPreviousTradingValues(snapshotTradeDate, snapshotTime);
-    const rows = this.buildRankRows(metrics, snapshotTradeDate, snapshotTime, previousTradingValues);
+    // 장중 지표는 전일 기준이라 현재가는 반드시 스냅샷 거래일의 tick·일봉에서 가져온다.
+    const currentPrices = await this.currentPriceService.getCurrentPrices(
+      metrics.map((metric) => metric.stock_code),
+      { priceDate: this.toDateOnly(snapshotTradeDate) },
+    );
+    const rows = this.buildRankRows(metrics, snapshotTradeDate, snapshotTime, previousTradingValues, currentPrices);
     await this.saveSnapshotRows(rows);
 
     const rankedCount = rows.filter((row) => row.passedDynamicFilters).length;
@@ -193,13 +196,8 @@ export class CurrentRankService {
     const snapshotTime = new Date(targetDate);
     snapshotTime.setUTCHours(6, 50, 0, 0);
     const previousTradingValues = await this.getPreviousTradingValues(targetDate, snapshotTime);
-    const rows = this.buildRankRows(
-      metrics,
-      targetDate,
-      snapshotTime,
-      previousTradingValues,
-      false,
-    );
+    // 과거 날짜 재생성은 그날 지표의 종가(= 그날 일봉)를 그대로 쓴다.
+    const rows = this.buildRankRows(metrics, targetDate, snapshotTime, previousTradingValues);
     await this.saveSnapshotRows(rows);
     return {
       success: true,
@@ -351,30 +349,24 @@ export class CurrentRankService {
     snapshotTradeDate: Date,
     snapshotTime: Date,
     previousTradingValues: Map<string, bigint> = new Map(),
-    useRealtime = true,
+    currentPrices: Map<string, CurrentPrice> = new Map(),
   ): CurrentRankRow[] {
     const tradeDate = this.toDateOnly(snapshotTradeDate);
     const rows = metrics.map((metric) => {
-      const realtimePrice = useRealtime
-        ? this.currentPriceResolver.getUsableRealtimePrice(this.realtimeCache.getPrice(metric.stock_code))
-        : null;
+      const price = currentPrices.get(metric.stock_code);
       const closePrice = Number(metric.close_price);
-      const currentPrice = realtimePrice?.currentPrice && realtimePrice.currentPrice > 0
-        ? realtimePrice.currentPrice
-        : closePrice;
+      const currentPrice = price?.currentPrice ?? closePrice;
       const highPrice52w = metric.high_price_52w == null ? null : Number(metric.high_price_52w);
       const lowPrice52w = metric.low_price_52w == null ? null : Number(metric.low_price_52w);
       const ma50 = metric.ma_50 == null ? null : Number(metric.ma_50);
-      const priceChangeRate = realtimePrice
-        ? realtimePrice.changeRate
+      const priceChangeRate = price
+        ? price.changeRate
         : metric.price_change_rate_1d == null ? null : Number(metric.price_change_rate_1d);
-      const priceChange1d = realtimePrice
-        ? realtimePrice.changeAmount
+      const priceChange1d = price
+        ? price.changeAmount
         : metric.price_change_1d == null ? null : Number(metric.price_change_1d);
-      // 실시간 누적거래대금은 백만원 단위, metric 거래대금은 원 단위라 원으로 맞춘다.
-      const tradingValue = realtimePrice?.accAmount && realtimePrice.accAmount > 0
-        ? normalizeTradingValueToWon(realtimePrice.accAmount)
-        : metric.trading_value;
+      // 가격과 같은 거래일의 누적 거래대금(원). 전일 지표 거래대금을 섞으면 전일비가 하루치 어긋난다.
+      const tradingValue = price ? price.tradingValue : metric.trading_value;
       const previousTradingValue = previousTradingValues.get(metric.stock_code);
       const rawPreviousTradingValueRatio =
         tradingValue != null && previousTradingValue != null && previousTradingValue > 0n
@@ -407,7 +399,7 @@ export class CurrentRankService {
         lowPrice52w,
         ma50,
         passedDynamicFilters,
-        priceSource: realtimePrice ? 'realtime' as const : 'close' as const,
+        priceSource: price ? CurrentRankService.toPriceSourceColumn(price) : 'close' as const,
         priceChangeRate,
         priceChange1d,
         tradingValue,
@@ -427,6 +419,15 @@ export class CurrentRankService {
       });
 
     return rows;
+  }
+
+  private static toPriceSourceColumn(price: CurrentPrice): CurrentRankRow['priceSource'] {
+    switch (price.source) {
+      case 'REALTIME': return 'realtime';
+      case 'DAY_CANDLE': return 'day_candle';
+      case 'KIWOOM': return 'kiwoom';
+      case 'BASE_PRICE': return 'base_price';
+    }
   }
 
   private async saveSnapshotRows(rows: CurrentRankRow[]): Promise<void> {

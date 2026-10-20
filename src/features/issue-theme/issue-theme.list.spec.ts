@@ -25,6 +25,7 @@ describe('IssueThemeService enhanced list', () => {
     new ThemeMetricsService(),
     {} as any,
     themeSnapshot,
+    { getCurrentPrices: jest.fn().mockResolvedValue(new Map()) } as any,
   );
 
   beforeEach(() => {

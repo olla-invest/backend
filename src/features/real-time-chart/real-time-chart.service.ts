@@ -8,6 +8,7 @@ import { ChartStorageService } from './chart-storage.service';
 import { StockMetricsService } from './stock-metrics.service';
 import { RealtimePriceCacheService } from './realtime-price-cache.service';
 import { CurrentPriceResolver, isRegularSessionTick } from './current-price-resolver.service';
+import { CurrentPrice, CurrentPriceService } from './current-price.service';
 import { RealtimeSubscriptionManager } from './realtime-subscription-manager.service';
 import { StockListCacheService, RangeRsRankingCache, CustomRsHistoryCache } from './stock-list-cache.service';
 import { PrismaService } from '../../common/prisma/prisma.service';
@@ -83,6 +84,7 @@ export class RealTimeChartService implements OnModuleInit {
     private readonly metricsService: StockMetricsService,
     private readonly realtimeCache: RealtimePriceCacheService,
     private readonly currentPriceResolver: CurrentPriceResolver,
+    private readonly currentPriceService: CurrentPriceService,
     private readonly subscriptionManager: RealtimeSubscriptionManager,
     private readonly stockListCache: StockListCacheService,
     private readonly prisma: PrismaService,
@@ -673,6 +675,16 @@ export class RealTimeChartService implements OnModuleInit {
     const cacheStats = this.realtimeCache.getCacheStats();
     const subscribedStocks = this.realtimeCache.getSubscribedStocks();
 
+    // Redis 가격 hash(로컬 사본)가 가격 기준 거래일의 tick 을 얼마나 들고 있는지.
+    // 장중에 구독 종목인데 당일 가격이 없으면 아직 체결이 없거나 구독이 끊긴 것이다.
+    const now = new Date();
+    const priceDate = this.currentPriceResolver.getPriceDateKey(now);
+    const prices = this.realtimeCache.getAllPrices();
+    const hasPriceDateTick = (stockCode: string) =>
+      this.currentPriceResolver.getUsableRealtimePrice(prices.get(stockCode), now, priceDate) != null;
+    const priceDateStocks = [...prices.keys()].filter(hasPriceDateTick).length;
+    const subscribedWithoutPrice = subscribedStocks.filter((stockCode) => !hasPriceDateTick(stockCode));
+
     return {
       websocket: {
         connected: isConnected,
@@ -683,7 +695,13 @@ export class RealTimeChartService implements OnModuleInit {
         stockCodes: subscribedStocks.slice(0, 20), // 최대 20개까지 표시
       },
       cache: cacheStats,
-      checkedAt: new Date().toISOString(),
+      prices: {
+        priceDate,
+        priceDateStocks,
+        subscribedWithoutPrice: subscribedWithoutPrice.length,
+        subscribedWithoutPriceSample: subscribedWithoutPrice.slice(0, 20),
+      },
+      checkedAt: now.toISOString(),
     };
   }
 
@@ -895,19 +913,9 @@ export class RealTimeChartService implements OnModuleInit {
    * 종목 요약 정보 (현재가, 전일대비, 캔들, 캔들용 1주 고가, 52주 고가)
    */
   async getStockSummary(stockCode: string) {
-    const today = this.formatDateToYYYYMMDD(this.todayKstDateOnly());
-    const realtimePrice = this.currentPriceResolver.getUsableRealtimePrice(this.realtimeCache.getPrice(stockCode));
-
-    const [kiwoomData, dbCandles, company, basicInfo] = await Promise.all([
-      this.kiwoomRest.getDayCandles(stockCode, today).catch((error) => {
-        this.logger.warn(`Kiwoom day summary unavailable for ${stockCode}: ${error.message}`);
-        return null;
-      }),
-      this.prisma.stockCandle.findMany({
-        where: { stockCode, candleType: 'day' },
-        orderBy: { candleTime: 'desc' },
-        take: 2,
-      }),
+    // 현재가는 tick → Redis 공유 폴백 → 당일 일봉 → 키움 조회 순으로 공용 조합을 쓴다 (요청마다 키움 일봉을 조회하지 않는다).
+    const [resolved, company, basicInfo] = await Promise.all([
+      this.currentPriceService.getCurrentPrice(stockCode, { fetchMissing: true }),
       this.prisma.company.findFirst({
         where: { stockCode, deletedAt: null },
         select: { listedShares: true },
@@ -918,37 +926,14 @@ export class RealTimeChartService implements OnModuleInit {
       }),
     ]);
 
-    const latest = kiwoomData?.stk_dt_pole_chart_qry?.[0] ?? null;
-    const latestDbCandle = dbCandles[0] ?? null;
-    const previousDbCandle = dbCandles[1] ?? null;
-    const realtimeCurrentPrice = Number(realtimePrice?.currentPrice ?? 0);
-    const dbCurrentPrice = latestDbCandle ? Number(latestDbCandle.closePrice) : 0;
-    const kiwoomCurrentPrice = latest ? this.parsePrice(latest.cur_prc) : 0;
-    const currentPrice =
-      realtimeCurrentPrice > 0 ? realtimeCurrentPrice :
-      dbCurrentPrice > 0 ? dbCurrentPrice :
-      kiwoomCurrentPrice;
-
-    if (!Number.isFinite(currentPrice) || currentPrice <= 0) {
+    if (!resolved || !Number.isFinite(resolved.currentPrice) || resolved.currentPrice <= 0) {
       throw new Error(`No candle data for ${stockCode}`);
     }
 
-    const previousDbClose = previousDbCandle ? Number(previousDbCandle.closePrice) : null;
-    const kiwoomPrevDayCompareAbs = latest ? this.parsePrice(latest.pred_pre) : 0;
-    const kiwoomSig = latest?.pred_pre_sig;
-    const kiwoomPrevDayCompare = (kiwoomSig === '4' || kiwoomSig === '5') ? -kiwoomPrevDayCompareAbs : kiwoomPrevDayCompareAbs;
-    const prevDayCompare =
-      realtimePrice ? Number(realtimePrice.changeAmount) :
-      previousDbClose != null && previousDbClose > 0 ? currentPrice - previousDbClose :
-      kiwoomPrevDayCompare;
-    const changeRate =
-      realtimePrice ? Number(realtimePrice.changeRate).toFixed(2) :
-      previousDbClose != null && previousDbClose > 0 ? (((currentPrice - previousDbClose) / previousDbClose) * 100).toFixed(2) :
-      currentPrice - kiwoomPrevDayCompare !== 0 ? ((kiwoomPrevDayCompare / (currentPrice - kiwoomPrevDayCompare)) * 100).toFixed(2) :
-      '0.00';
-    const prevDayCompareSign =
-      latest?.pred_pre_sig ??
-      (prevDayCompare > 0 ? '2' : prevDayCompare < 0 ? '5' : '3');
+    const currentPrice = resolved.currentPrice;
+    const prevDayCompare = resolved.changeAmount;
+    const changeRate = resolved.changeRate.toFixed(2);
+    const prevDayCompareSign = resolved.changeSign;
 
     const listedShares = company?.listedShares ?? null;
     const kiwoomMarketCap = this.extractKiwoomMarketCap(basicInfo);
@@ -975,15 +960,14 @@ export class RealTimeChartService implements OnModuleInit {
       prevDayCompare,
       prevDayCompareSign,
       changeRate,
-      volume: realtimePrice?.accVolume ?? latestDbCandle?.volume?.toString() ?? latest?.trde_qty ?? null,
-      tradingValue: realtimePrice
-        ? this.normalizeTradingValueToWon(realtimePrice.accAmount).toString()
-        : latestDbCandle?.tradingValue?.toString() ?? latest?.trde_prica ?? null,
+      volume: resolved.accVolume?.toString() ?? null,
+      tradingValue: resolved.tradingValue?.toString() ?? null,
       listedShares: listedShares ? Number(listedShares) : null,
       marketCap,
       marketCapSource: marketCap != null ? 'kiwoom' : null,
-      dayHigh: realtimePrice?.highPrice ?? (latestDbCandle ? Number(latestDbCandle.highPrice) : latest ? this.parsePrice(latest.high_pric) : currentPrice),
-      dayLow: realtimePrice?.lowPrice ?? (latestDbCandle ? Number(latestDbCandle.lowPrice) : latest ? this.parsePrice(latest.low_pric) : currentPrice),
+      dayHigh: resolved.highPrice ?? currentPrice,
+      dayLow: resolved.lowPrice ?? currentPrice,
+      priceSource: resolved.source,
       week52High,
       week52Low,
     };
@@ -1042,8 +1026,10 @@ export class RealTimeChartService implements OnModuleInit {
     // 최신 지표 데이터 조회 (전체 종목)
     const metricsMap = await this.metricsService.getLatestMetrics(allStockCodes);
 
-    // 실시간 캐시에서 전체 종목 현재가 조회 (페이지네이션, 속도)
-    const allRealtimePrices = this.realtimeCache.getPrices(allStockCodes);
+    // 정적 필터 통과 종목의 현재가 (tick → 당일 일봉 → 기준가). 동적 필터·정렬·응답이 모두 이 값을 쓴다.
+    const currentPrices = await this.currentPriceService.getCurrentPrices(
+      validStocks.filter((s) => metricsMap.get(s.code)?.passedStaticFilters).map((s) => s.code),
+    );
 
     // 종목 리스트에 지표 필터링 및 종가
     const stocksWithMetrics = validStocks
@@ -1059,9 +1045,8 @@ export class RealTimeChartService implements OnModuleInit {
         // 정적 필터 통과 여부 (지수값은 계산, DB 저장)
         if (!item.metrics?.passedStaticFilters) return false;
 
-        // 동적 필터: 현재가 기준 실시간 적용 (실시간 가격 우선, 없으면 지수)
-        const realtimePrice = this.currentPriceResolver.getUsableRealtimePrice(allRealtimePrices.get(item.stock.code));
-        const currentPrice = realtimePrice?.currentPrice || item.metrics?.closePrice || 0;
+        // 동적 필터: 현재가 기준 (당일 tick·일봉)
+        const currentPrice = currentPrices.get(item.stock.code)?.currentPrice ?? 0;
 
         const low52w = item.metrics.lowPrice52w;
         const high52w = item.metrics.highPrice52w;
@@ -1122,7 +1107,7 @@ export class RealTimeChartService implements OnModuleInit {
     // 검색은 필터일 뿐이므로, 전체 리스트를 먼저 정렬해 표시 순위(displayRank)를 확정한 뒤
     // 검색을 적용한다 → 검색 결과에도 검색 전 리스트의 순위가 그대로 보인다.
     const sortedAll = this.sortStockItems(rankedStocks, options, {
-      realtimePrices: allRealtimePrices,
+      currentPrices,
       rankChangeMap,
     }).map((item, index) => ({ ...item, displayRank: index + 1 }));
 
@@ -1143,16 +1128,12 @@ export class RealTimeChartService implements OnModuleInit {
 
     // 페이지네이션된 종목들의 지수 및 순위 변화 조회
     const pageStockCodes = paginatedData.map((d) => d.stock.code);
-    const closingPrices = await this.chartStorage.getLatestClosingPrices(pageStockCodes);
     const naverThemesMap = await this.getNaverThemesByStockCodes(pageStockCodes);
 
     // 자동 실시간 구독 (비동기적으로 백그라운드 실행)
     this.subscriptionManager.ensureSubscribed(pageStockCodes).catch((error) => {
       this.logger.warn(`Auto-subscribe failed: ${error.message}`);
     });
-
-    // 실시간 현재가 (이미 allRealtimePrices로 있음)
-    const realtimePrices = allRealtimePrices;
 
     const currentRankHistoryMap = await this.metricsService.getCurrentRankHistory(pageStockCodes, 3, latestTradeDate, RealTimeChartService.RANK_HISTORY_INCLUDES_LATEST_DAY);
     const themeList = await this.getNaverThemeList();
@@ -1177,9 +1158,9 @@ export class RealTimeChartService implements OnModuleInit {
         const metrics = item.metrics;
         const currentRankHistory = currentRankHistoryMap.get(s.code) || [];
 
-        const realtimePrice = this.currentPriceResolver.getUsableRealtimePrice(realtimePrices.get(s.code));
-        const dbPrice = metrics?.closePrice || closingPrices.get(s.code) || 0;
-        const priceChangeRateText = this.formatPriceChangeRateText(realtimePrice, metrics);
+        const price = currentPrices.get(s.code);
+        const currentPrice = price?.currentPrice ?? 0;
+        const priceChangeRateText = this.formatPriceChangeRateText(price);
         const investmentIndicators = this.buildInvestmentIndicators(metrics);
         const investmentIndicatorsText = this.formatInvestmentIndicators(investmentIndicators);
         const naverThemes = naverThemesMap.get(s.code) ?? [];
@@ -1191,10 +1172,11 @@ export class RealTimeChartService implements OnModuleInit {
           rank: item.displayRank,
           companyName: s.name,
           stockCode: s.code,
-          currentPrice: realtimePrice?.currentPrice || dbPrice,
+          currentPrice,
+          priceSource: price?.source ?? null,
           exchange: this.isKospiStock(s) ? '코스피' : this.isKosdaqStock(s) ? '코스닥' : '-',
           relativeStrengthScore: Number((metrics?.relativeStrengthScore || 0).toFixed(4)),
-          isHighPrice: this.isAtNewHigh(realtimePrice?.currentPrice || dbPrice, metrics),
+          isHighPrice: this.isAtNewHigh(currentPrice, metrics),
           priceChangeRateText,
           investmentIndicators: priceChangeRateText,
           investmentIndicatorItems: investmentIndicators,
@@ -1268,8 +1250,10 @@ export class RealTimeChartService implements OnModuleInit {
     // 기본 지표 데이터 조회 (ma50, 52w 고가, isNewHigh, tradingValue 등)
     const metricsMap = await this.metricsService.getLatestMetrics(allStockCodes);
 
-    // 실시간 캐시에서 전체 종목 현재가 조회 (코스피, 코스닥)
-    const allRealtimePrices = this.realtimeCache.getPrices(allStockCodes);
+    // RS 산출 종목의 현재가 (tick → 당일 일봉 → 기준가)
+    const currentPrices = await this.currentPriceService.getCurrentPrices(
+      allStockCodes.filter((code) => (rsHistoryMap.get(code)?.[0]?.rsScore || 0) > 0),
+    );
 
     // 종목 리스트에 RS 필터링 및 종가
     const stocksWithRS = validStocks
@@ -1292,9 +1276,8 @@ export class RealTimeChartService implements OnModuleInit {
         // 기본 필터: 정적 필터 통과 종목 (calculateRuntimeRS에서 이미 SF1~SF5 적용)
         if (item.rsScore <= 0) return false;
 
-        // 동적 필터: 현재가 기준 실시간 적용
-        const realtimePrice = this.currentPriceResolver.getUsableRealtimePrice(allRealtimePrices.get(item.stock.code));
-        const currentPrice = realtimePrice?.currentPrice || item.metrics?.closePrice || 0;
+        // 동적 필터: 현재가 기준 (당일 tick·일봉)
+        const currentPrice = currentPrices.get(item.stock.code)?.currentPrice ?? 0;
 
         const low52w = item.metrics?.lowPrice52w;
         const high52w = item.metrics?.highPrice52w;
@@ -1337,7 +1320,7 @@ export class RealTimeChartService implements OnModuleInit {
       rankChangeMap = await this.computeRankChangeMap(rankedStocks, baseTotal, latestTradeDate, rankTotals);
     }
     const sortedAll = this.sortStockItems(rankedStocks, options, {
-      realtimePrices: allRealtimePrices,
+      currentPrices,
       rankChangeMap,
     }).map((item, index) => ({ ...item, displayRank: index + 1 }));
     const sortedStocks = this.applyStockNameSearch(sortedAll, options?.search);
@@ -1356,16 +1339,12 @@ export class RealTimeChartService implements OnModuleInit {
 
     // 페이지네이션된 종목들의 지수 조회
     const pageStockCodes = paginatedData.map((d) => d.stock.code);
-    const closingPrices = await this.chartStorage.getLatestClosingPrices(pageStockCodes);
     const naverThemesMap = await this.getNaverThemesByStockCodes(pageStockCodes);
 
     // 자동 실시간 구독
     this.subscriptionManager.ensureSubscribed(pageStockCodes).catch((error) => {
       this.logger.warn(`Auto-subscribe failed: ${error.message}`);
     });
-
-    // 실시간 현재가 (이미 allRealtimePrices로 있음)
-    const realtimePrices = allRealtimePrices;
 
     const currentRankHistoryMap = await this.metricsService.getCurrentRankHistory(pageStockCodes, 3, latestTradeDate, RealTimeChartService.RANK_HISTORY_INCLUDES_LATEST_DAY);
     const shouldWriteCustomRsLog =
@@ -1405,9 +1384,9 @@ export class RealTimeChartService implements OnModuleInit {
         const metrics = item.metrics;
         const currentRankHistory = currentRankHistoryMap.get(s.code) || [];
 
-        const realtimePrice = this.currentPriceResolver.getUsableRealtimePrice(realtimePrices.get(s.code));
-        const dbPrice = metrics?.closePrice || closingPrices.get(s.code) || 0;
-        const priceChangeRateText = this.formatPriceChangeRateText(realtimePrice, metrics);
+        const price = currentPrices.get(s.code);
+        const currentPrice = price?.currentPrice ?? 0;
+        const priceChangeRateText = this.formatPriceChangeRateText(price);
         const investmentIndicators = this.buildInvestmentIndicators(metrics);
         const investmentIndicatorsText = this.formatInvestmentIndicators(investmentIndicators);
         const naverThemes = naverThemesMap.get(s.code) ?? [];
@@ -1419,10 +1398,11 @@ export class RealTimeChartService implements OnModuleInit {
           rank: item.displayRank,
           companyName: s.name,
           stockCode: s.code,
-          currentPrice: realtimePrice?.currentPrice || dbPrice,
+          currentPrice,
+          priceSource: price?.source ?? null,
           exchange: this.isKospiStock(s) ? '코스피' : this.isKosdaqStock(s) ? '코스닥' : '-',
           relativeStrengthScore: Number(item.rsScore.toFixed(4)),
-          isHighPrice: this.isAtNewHigh(realtimePrice?.currentPrice || dbPrice, metrics),
+          isHighPrice: this.isAtNewHigh(currentPrice, metrics),
           priceChangeRateText,
           investmentIndicators: priceChangeRateText,
           investmentIndicatorItems: investmentIndicators,
@@ -1551,8 +1531,10 @@ export class RealTimeChartService implements OnModuleInit {
     // 기본 지표 데이터 조회 (ma50, 52w 고가, isNewHigh, tradingValue 등)
     const metricsMap = await this.metricsService.getLatestMetrics(allStockCodes);
 
-    // 실시간 캐시에서 전체 종목 현재가 조회 (코스피, 코스닥)
-    const allRealtimePrices = this.realtimeCache.getPrices(allStockCodes);
+    // RS 산출 종목의 현재가 (tick → 당일 일봉 → 기준가)
+    const currentPrices = await this.currentPriceService.getCurrentPrices(
+      allStockCodes.filter((code) => (rsHistoryMap.get(code)?.[0]?.rsScore || 0) > 0),
+    );
 
     // 종목 리스트에 RS 필터링 및 종가
     const stocksWithRS = validStocks
@@ -1575,8 +1557,7 @@ export class RealTimeChartService implements OnModuleInit {
         if (item.rsScore <= 0) return false;
 
         if (filters?.isHighPrice !== undefined) {
-          const realtimePrice = this.currentPriceResolver.getUsableRealtimePrice(allRealtimePrices.get(item.stock.code));
-          const currentPrice = realtimePrice?.currentPrice || item.metrics?.closePrice || 0;
+          const currentPrice = currentPrices.get(item.stock.code)?.currentPrice ?? 0;
           if (this.isAtNewHigh(currentPrice, item.metrics) !== filters.isHighPrice) return false;
         }
 
@@ -1607,7 +1588,7 @@ export class RealTimeChartService implements OnModuleInit {
       rankChangeMap = await this.computeRankChangeMap(rankedStocks, baseTotal, latestTradeDate, rankTotals);
     }
     const sortedAll = this.sortStockItems(rankedStocks, options, {
-      realtimePrices: allRealtimePrices,
+      currentPrices,
       rankChangeMap,
     }).map((item, index) => ({ ...item, displayRank: index + 1 }));
     const sortedStocks = this.applyStockNameSearch(sortedAll, options?.search);
@@ -1626,14 +1607,12 @@ export class RealTimeChartService implements OnModuleInit {
 
     // 지수 및 실시간 가격 조회
     const pageStockCodes = paginatedData.map((d) => d.stock.code);
-    const closingPrices = await this.chartStorage.getLatestClosingPrices(pageStockCodes);
     const naverThemesMap = await this.getNaverThemesByStockCodes(pageStockCodes);
 
     this.subscriptionManager.ensureSubscribed(pageStockCodes).catch((error) => {
       this.logger.warn(`Auto-subscribe failed: ${error.message}`);
     });
 
-    const realtimePrices = allRealtimePrices;
     const themeList = await this.getNaverThemeList();
     const currentRankHistoryMap = await this.metricsService.getCurrentRankHistory(pageStockCodes, 3, latestTradeDate, RealTimeChartService.RANK_HISTORY_INCLUDES_LATEST_DAY);
 
@@ -1658,9 +1637,9 @@ export class RealTimeChartService implements OnModuleInit {
         const metrics = item.metrics;
         const currentRankHistory = currentRankHistoryMap.get(s.code) || [];
 
-        const realtimePrice = this.currentPriceResolver.getUsableRealtimePrice(realtimePrices.get(s.code));
-        const dbPrice = metrics?.closePrice || closingPrices.get(s.code) || 0;
-        const priceChangeRateText = this.formatPriceChangeRateText(realtimePrice, metrics);
+        const price = currentPrices.get(s.code);
+        const currentPrice = price?.currentPrice ?? 0;
+        const priceChangeRateText = this.formatPriceChangeRateText(price);
         const investmentIndicators = this.buildInvestmentIndicators(metrics);
         const investmentIndicatorsText = this.formatInvestmentIndicators(investmentIndicators);
         const naverThemes = naverThemesMap.get(s.code) ?? [];
@@ -1672,10 +1651,11 @@ export class RealTimeChartService implements OnModuleInit {
           rank: item.displayRank,
           companyName: s.name,
           stockCode: s.code,
-          currentPrice: realtimePrice?.currentPrice || dbPrice,
+          currentPrice,
+          priceSource: price?.source ?? null,
           exchange: this.isKospiStock(s) ? '코스피' : this.isKosdaqStock(s) ? '코스닥' : '-',
           relativeStrengthScore: Number(item.rsScore.toFixed(4)),
-          isHighPrice: this.isAtNewHigh(realtimePrice?.currentPrice || dbPrice, metrics),
+          isHighPrice: this.isAtNewHigh(currentPrice, metrics),
           priceChangeRateText,
           investmentIndicators: priceChangeRateText,
           investmentIndicatorItems: investmentIndicators,
@@ -1722,7 +1702,9 @@ export class RealTimeChartService implements OnModuleInit {
     const validStocks = await this.fetchStockList(marketType);
     const allStockCodes = validStocks.map((s) => s.code);
     const metricsMap = await this.metricsService.getLatestMetrics(allStockCodes);
-    const allRealtimePrices = this.realtimeCache.getPrices(allStockCodes);
+    const currentPrices = await this.currentPriceService.getCurrentPrices(
+      validStocks.filter((s) => metricsMap.get(s.code)?.passedStaticFilters).map((s) => s.code),
+    );
 
     const rankedStocks = validStocks
       .map((stock) => {
@@ -1736,8 +1718,7 @@ export class RealTimeChartService implements OnModuleInit {
       .filter((item) => {
         if (!item.metrics?.passedStaticFilters) return false;
 
-        const realtimePrice = this.currentPriceResolver.getUsableRealtimePrice(allRealtimePrices.get(item.stock.code));
-        const currentPrice = realtimePrice?.currentPrice || item.metrics?.closePrice || 0;
+        const currentPrice = currentPrices.get(item.stock.code)?.currentPrice ?? 0;
         const low52w = item.metrics.lowPrice52w;
         const high52w = item.metrics.highPrice52w;
         const ma50 = item.metrics.ma50;
@@ -1936,17 +1917,9 @@ export class RealTimeChartService implements OnModuleInit {
   /**
    * 정렬용 등락률 값: 실시간가 우선, 없으면 일별 지표 (formatPriceChangeRateText와 동일 소스)
    */
-  private getChangeRateValue(item: SortableStockItem, realtimePrices: Map<string, any>): number | null {
-    const realtimePrice = this.currentPriceResolver.getUsableRealtimePrice(realtimePrices.get(item.stock.code));
-    if (realtimePrice) {
-      const rate = Number(realtimePrice.changeRate);
-      if (Number.isFinite(rate)) return rate;
-    }
-    if (item.metrics?.priceChangeRate1d != null) {
-      const rate = Number(item.metrics.priceChangeRate1d);
-      if (Number.isFinite(rate)) return rate;
-    }
-    return null;
+  private getChangeRateValue(item: SortableStockItem, currentPrices: Map<string, CurrentPrice>): number | null {
+    const rate = currentPrices.get(item.stock.code)?.changeRate;
+    return rate != null && Number.isFinite(rate) ? rate : null;
   }
 
   /**
@@ -1956,7 +1929,7 @@ export class RealTimeChartService implements OnModuleInit {
   private sortStockItems<T extends SortableStockItem>(
     items: T[],
     options: StockListOptions | undefined,
-    ctx: { realtimePrices: Map<string, any>; rankChangeMap?: Map<string, number | null> },
+    ctx: { currentPrices: Map<string, CurrentPrice>; rankChangeMap?: Map<string, number | null> },
   ): T[] {
     const sortBy = options?.sortBy ?? 'rs';
     if (sortBy === 'rs') return items;
@@ -1966,7 +1939,7 @@ export class RealTimeChartService implements OnModuleInit {
 
     switch (sortBy) {
       case 'changeRate':
-        return sortWithNullsLast(items, (item) => this.getChangeRateValue(item, ctx.realtimePrices), sortOrder, tieBreak);
+        return sortWithNullsLast(items, (item) => this.getChangeRateValue(item, ctx.currentPrices), sortOrder, tieBreak);
       case 'tradingValue':
         return sortWithNullsLast(
           items,
@@ -2079,17 +2052,9 @@ export class RealTimeChartService implements OnModuleInit {
     };
   }
 
-  private formatPriceChangeRateText(realtimePrice: any, metrics: any): string {
-    if (realtimePrice) {
-      const rate = Number(realtimePrice.changeRate);
-      if (!Number.isFinite(rate)) return '-';
-      return `${rate > 0 ? '+' : ''}${rate.toFixed(2)}%`;
-    }
-    if (metrics?.priceChangeRate1d != null) {
-      const rate = Number(metrics.priceChangeRate1d);
-      return `${rate > 0 ? '+' : ''}${rate.toFixed(2)}%`;
-    }
-    return '-';
+  private formatPriceChangeRateText(price?: CurrentPrice): string {
+    if (!price || !Number.isFinite(price.changeRate)) return '-';
+    return `${price.changeRate > 0 ? '+' : ''}${price.changeRate.toFixed(2)}%`;
   }
 
   private formatInvestmentIndicators(indicators: InvestmentIndicator[]): string {

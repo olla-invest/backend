@@ -19,7 +19,7 @@ const tick = (overrides: Partial<RealtimePrice> = {}): RealtimePrice => ({
 describe('CurrentPriceResolver', () => {
   const resolver = new CurrentPriceResolver();
 
-  it('accepts a same-day tick no older than ten minutes during the KRX session', () => {
+  it('accepts a same-day tick during the KRX session', () => {
     const result = resolver.getUsableRealtimePrice(
       tick(),
       new Date('2026-08-05T01:09:59.000Z'),
@@ -28,13 +28,28 @@ describe('CurrentPriceResolver', () => {
     expect(result?.currentPrice).toBe(31_500);
   });
 
-  it('rejects a tick older than ten minutes', () => {
+  // 체결이 뜸한 종목의 마지막 tick 도 그날의 현재가다. 버리면 전일 종가로 떨어진다.
+  it('keeps a same-day tick even after a long quiet period', () => {
     const result = resolver.getUsableRealtimePrice(
       tick(),
-      new Date('2026-08-05T01:10:01.000Z'),
+      new Date('2026-08-05T04:10:01.000Z'),
     );
 
-    expect(result).toBeUndefined();
+    expect(result?.currentPrice).toBe(31_500);
+  });
+
+  it('checks the tick against an explicit price date', () => {
+    expect(resolver.getUsableRealtimePrice(tick(), new Date('2026-08-05T04:00:00Z'), '2026-08-05')).toBeDefined();
+    expect(resolver.getUsableRealtimePrice(tick(), new Date('2026-08-05T04:00:00Z'), '2026-08-04')).toBeUndefined();
+  });
+
+  it.each([
+    ['08:59 KST on a trading day', '2026-10-06T23:59:00Z', '2026-10-06'],
+    ['09:00 KST on a trading day', '2026-10-07T00:00:00Z', '2026-10-07'],
+    ['after the close', '2026-10-07T12:00:00Z', '2026-10-07'],
+    ['a Saturday', '2026-10-10T03:00:00Z', '2026-10-08'],
+  ])('uses the right price date at %s', (_label, now, expected) => {
+    expect(resolver.getPriceDateKey(new Date(now))).toBe(expected);
   });
 
   it('rejects an intraday tick that is not from the latest trading day', () => {
@@ -72,47 +87,5 @@ describe('CurrentPriceResolver', () => {
     expect(
       resolver.getUsableRealtimePrice(tick({ currentPrice: Number.NaN }), now),
     ).toBeUndefined();
-  });
-
-  it('uses metric close and daily changes when the tick is stale', () => {
-    const result = resolver.resolveMetricSnapshot(
-      {
-        closePrice: 30_800,
-        priceChange1d: -200,
-        priceChangeRate1d: -0.65,
-      },
-      tick(),
-      new Date('2026-08-05T01:10:01.000Z'),
-    );
-
-    expect(result).toEqual({
-      currentPrice: 30_800,
-      closePrice: 30_800,
-      changeRate: -0.65,
-      priceChange1d: -200,
-      priceChangeRate1d: -0.65,
-      usedRealtime: false,
-    });
-  });
-
-  it('uses open-to-current changes for a usable tick', () => {
-    const result = resolver.resolveMetricSnapshot(
-      {
-        closePrice: 30_800,
-        priceChange1d: -200,
-        priceChangeRate1d: -0.65,
-      },
-      tick(),
-      new Date('2026-08-05T01:05:00.000Z'),
-    );
-
-    expect(result).toEqual({
-      currentPrice: 31_500,
-      closePrice: 31_500,
-      changeRate: (500 / 31_000) * 100,
-      priceChange1d: 500,
-      priceChangeRate1d: (500 / 31_000) * 100,
-      usedRealtime: true,
-    });
   });
 });

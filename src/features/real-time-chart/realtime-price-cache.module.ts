@@ -1,7 +1,9 @@
 import { RedisPriceStoreService } from './redis-price-store.service';
 import { Module } from '@nestjs/common';
+import { KiwoomModule } from '../../integrations/kiwoom/kiwoom.module';
 import { RealtimePriceCacheService } from './realtime-price-cache.service';
 import { CurrentPriceResolver } from './current-price-resolver.service';
+import { CurrentPriceService } from './current-price.service';
 
 /**
  * 실시간 현재가 캐시 전용 모듈.
@@ -11,7 +13,8 @@ import { CurrentPriceResolver } from './current-price-resolver.service';
  * 캐시 서비스만 분리해 양쪽에서 공유한다. (이벤트 수신은 전역 EventEmitter 기반)
  */
 @Module({
-  providers: [RedisPriceStoreService, RealtimePriceCacheService, CurrentPriceResolver],
-  exports: [RealtimePriceCacheService, CurrentPriceResolver],
+  imports: [KiwoomModule],
+  providers: [RedisPriceStoreService, RealtimePriceCacheService, CurrentPriceResolver, CurrentPriceService],
+  exports: [RealtimePriceCacheService, CurrentPriceResolver, CurrentPriceService],
 })
 export class RealtimePriceCacheModule {}

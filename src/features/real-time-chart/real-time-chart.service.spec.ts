@@ -36,24 +36,10 @@ describe('RealTimeChartService stock list RS ordering', () => {
       getCurrentRankTotals: jest.fn().mockResolvedValue([]),
       getCurrentRankHistory: jest.fn().mockResolvedValue(new Map()),
     };
-    const chartStorage = {
-      getLatestClosingPrices: jest.fn().mockResolvedValue(new Map()),
-    };
-    const realtimeCache = {
-      getPrices: jest.fn().mockReturnValue(new Map([
-        ['LOW', {
-          stockCode: 'LOW',
-          currentPrice: -999,
-          changeAmount: 99,
-          changeRate: 11,
-          volume: 1,
-          accVolume: 1,
-          accAmount: 999,
-          openPrice: 900,
-          highPrice: 999,
-          lowPrice: 900,
-          timestamp: new Date('2026-08-05T01:20:00.000Z'),
-        }],
+    const chartStorage = {};
+    const currentPriceService = {
+      getCurrentPrices: jest.fn().mockResolvedValue(new Map([
+        ['LOW', { stockCode: 'LOW', source: 'DAY_CANDLE', currentPrice: 100, changeAmount: 1, changeRate: 1 }],
       ])),
     };
     const service = new RealTimeChartService(
@@ -61,8 +47,9 @@ describe('RealTimeChartService stock list RS ordering', () => {
       {} as any,
       chartStorage as any,
       metricsService as any,
-      realtimeCache as any,
+      {} as any,
       new CurrentPriceResolver(),
+      currentPriceService as any,
       { ensureSubscribed: jest.fn().mockResolvedValue(undefined) } as any,
       {} as any,
       {} as any,
@@ -88,13 +75,14 @@ describe('RealTimeChartService stock list RS ordering', () => {
       { stockCode: 'TIE-B', rank: 2, relativeStrengthScore: 97 },
       { stockCode: 'LOW', rank: 3, relativeStrengthScore: 91 },
     ]);
-    expect(result.stocks.find((stock: any) => stock.stockCode === 'LOW').currentPrice).toBe(100);
+    expect(result.stocks.find((stock: any) => stock.stockCode === 'LOW')).toMatchObject({ currentPrice: 100, priceSource: 'DAY_CANDLE' });
+    expect(currentPriceService.getCurrentPrices).toHaveBeenCalledWith(['LOW', 'TIE-B', 'TIE-A']);
   });
 });
 
 describe('secondary environment startup', () => {
   it('skips candle backfill but prepares realtime subscriptions when batches are disabled', async () => {
-    const service = new RealTimeChartService({} as any, {} as any, {} as any, {} as any, {} as any, new CurrentPriceResolver(), {} as any, {} as any, {} as any, {get: (key: string, fallback: string) => key === 'SCHEDULER_ENABLED' ? 'false' : fallback} as any);
+    const service = new RealTimeChartService({} as any, {} as any, {} as any, {} as any, {} as any, new CurrentPriceResolver(), {} as any, {} as any, {} as any, {} as any, {get: (key: string, fallback: string) => key === 'SCHEDULER_ENABLED' ? 'false' : fallback} as any);
     const initialize = jest.spyOn(service, 'initializeData').mockResolvedValue({} as any);
     const subscribe = jest.spyOn(service, 'subscribeFilteredStocks').mockResolvedValue(undefined);
     await service.onModuleInit();
@@ -107,7 +95,7 @@ describe('empty broker candle responses', () => {
     const placeholder = {dt: '', cur_prc: '', trde_qty: '', open_pric: '', high_pric: '', low_pric: ''};
     const broker = {getDayCandlesWithHistory: jest.fn().mockResolvedValue({stk_dt_pole_chart_qry: [placeholder]})};
     const storage = {saveCandle: jest.fn().mockResolvedValue(undefined)};
-    const service = new RealTimeChartService(broker as any, {} as any, storage as any, {} as any, {} as any, new CurrentPriceResolver(), {} as any, {} as any, {} as any) as any;
+    const service = new RealTimeChartService(broker as any, {} as any, storage as any, {} as any, {} as any, new CurrentPriceResolver(), {} as any, {} as any, {} as any, {} as any) as any;
     expect(await service.collectStockDayCandlesWithAdjusted('084180', '20261006', 10)).toEqual({saved: 0, adjustmentEventDates: []});
     expect(storage.saveCandle).not.toHaveBeenCalled();
   });
@@ -126,7 +114,7 @@ describe('adjusted-price history refetch', () => {
       getDayCandlesWithHistory: jest.fn((...args: any[]) => Promise.resolve({stk_dt_pole_chart_qry: rows[args[0]]})),
     };
     const storage = {saveCandle: jest.fn().mockResolvedValue(undefined)};
-    const service = new RealTimeChartService(broker as any, {} as any, storage as any, {} as any, {} as any, new CurrentPriceResolver(), {} as any, {} as any, {} as any);
+    const service = new RealTimeChartService(broker as any, {} as any, storage as any, {} as any, {} as any, new CurrentPriceResolver(), {} as any, {} as any, {} as any, {} as any);
 
     const result = await service.collectAllDayCandles('0', 10);
 
@@ -141,7 +129,7 @@ describe('realtime day candle persistence', () => {
   afterEach(() => jest.useRealTimers());
   it('does not let after-hours ticks overwrite the regular-session close', async () => {
     const storage = {saveCandle: jest.fn().mockResolvedValue(undefined)};
-    const service = new RealTimeChartService({} as any, {} as any, storage as any, {} as any, {} as any, new CurrentPriceResolver(), {} as any, {} as any, {} as any) as any;
+    const service = new RealTimeChartService({} as any, {} as any, storage as any, {} as any, {} as any, new CurrentPriceResolver(), {} as any, {} as any, {} as any, {} as any) as any;
     service.upsertRealtimeCandles = jest.fn().mockResolvedValue(undefined);
     const tick = {stockCode: '036930', type: '0B', values: {'10': '283000'}};
     jest.useFakeTimers().setSystemTime(new Date('2026-10-06T07:30:00Z')); // 16:30 KST
@@ -175,10 +163,11 @@ describe('rank history window', () => {
     const service = new RealTimeChartService(
       {} as any,
       {} as any,
-      { getLatestClosingPrices: jest.fn().mockResolvedValue(new Map()) } as any,
+      {} as any,
       metricsService as any,
-      { getPrices: jest.fn().mockReturnValue(new Map()) } as any,
+      {} as any,
       new CurrentPriceResolver(),
+      { getCurrentPrices: jest.fn().mockResolvedValue(new Map()) } as any,
       { ensureSubscribed: jest.fn().mockResolvedValue(undefined) } as any,
       {} as any,
       {} as any,
@@ -210,5 +199,42 @@ describe('RealTimeChartService new-high flag', () => {
     expect(isAtNewHigh(0, { highPrice52w: 32_000, isNewHigh: true })).toBe(true);
     expect(isAtNewHigh(31_000, { highPrice52w: null, isNewHigh: true })).toBe(true);
     expect(isAtNewHigh(31_000, undefined)).toBe(false);
+  });
+});
+
+describe('realtime status price freshness', () => {
+  afterEach(() => jest.useRealTimers());
+
+  it('reports subscribed stocks that have no tick for the price date', () => {
+    jest.useFakeTimers().setSystemTime(new Date('2026-10-15T04:00:00.000Z'));
+    const todayTick = {
+      stockCode: 'A', currentPrice: 100, changeAmount: 1, changeRate: 1, volume: 1, accVolume: 1, accAmount: 1,
+      openPrice: 99, highPrice: 101, lowPrice: 98, timestamp: new Date('2026-10-15T01:00:00.000Z'),
+    };
+    const yesterdayTick = { ...todayTick, stockCode: 'B', timestamp: new Date('2026-10-14T06:00:00.000Z') };
+    const realtimeCache = {
+      getCacheStats: () => ({}),
+      getSubscribedStocks: () => ['A', 'B'],
+      getAllPrices: () => new Map([['A', todayTick], ['B', yesterdayTick]]),
+    };
+    const service = new RealTimeChartService(
+      {} as any,
+      { isConnected: () => true } as any,
+      {} as any,
+      {} as any,
+      realtimeCache as any,
+      new CurrentPriceResolver(),
+      {} as any,
+      {} as any,
+      {} as any,
+      {} as any,
+    );
+
+    expect(service.getRealtimeStatus().prices).toEqual({
+      priceDate: '2026-10-15',
+      priceDateStocks: 1,
+      subscribedWithoutPrice: 1,
+      subscribedWithoutPriceSample: ['B'],
+    });
   });
 });

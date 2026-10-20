@@ -55,6 +55,7 @@ describe('IssueThemeService detail stock population', () => {
         { stockCode: 'LOW', currentRank: 2, currentPrice: 200, relativeStrengthScore: 70,
           priceChangeRate: -1, tradingValue: null, previousTradingValueRatio: null, isNewHigh: false, shortTermRs: null },
       ]) } as any,
+      { getCurrentPrices: jest.fn().mockResolvedValue(new Map()) } as any,
     );
     jest.spyOn(service, 'getCurrentThemeRankMap').mockResolvedValue(new Map([[1, {
       rank: 1, previousRank: null, rankChange: null, risingCount: 1, totalCount: 2,
@@ -78,6 +79,60 @@ describe('IssueThemeService detail stock population', () => {
       currentPrice: 100,
       closePrice: 100,
       priceSource: 'STOCK_SNAPSHOT',
+    });
+  });
+
+  it('overrides snapshot prices with the same-day current price', async () => {
+    const prisma: any = {
+      theme: { findFirst: jest.fn().mockResolvedValue({ themeName: 'OLED', imageUrl: null }) },
+      stockTheme: { findMany: jest.fn().mockResolvedValue([{ stockCode: 'A', stockName: '에이', inclusionReason: null }]) },
+      company: { findMany: jest.fn().mockResolvedValue([{ stockCode: 'A', companyName: '에이' }]) },
+      stockDailyMetrics: { findMany: jest.fn().mockResolvedValue([]) },
+      themeDailySnapshot: { findFirst: jest.fn().mockResolvedValue(null) },
+    };
+    const currentPriceService = {
+      getCurrentPrices: jest.fn().mockResolvedValue(new Map([['A', {
+        stockCode: 'A', priceDate: '2026-08-11', source: 'DAY_CANDLE',
+        currentPrice: 130, changeAmount: 10, changeRate: 8.33,
+        openPrice: 120, highPrice: 131, lowPrice: 119, accVolume: 10n, tradingValue: 4_000_000_000n,
+      }]])),
+    };
+    const service = new IssueThemeService(
+      prisma,
+      {} as any,
+      {} as any,
+      {} as any,
+      new ThemeMetricsService(),
+      { getLatestSuccess: jest.fn().mockResolvedValue(null) } as any,
+      { getLatestThemeItems: jest.fn().mockResolvedValue(new Map()), getThemeStocks: jest.fn().mockResolvedValue([
+        { stockCode: 'A', currentRank: 1, currentPrice: 100, relativeStrengthScore: 90,
+          priceChangeRate: 5, priceChange1d: 5, tradingValue: 1000n, previousTradingValueRatio: 2,
+          isNewHigh: false, highPrice52w: 125, shortTermRs: null },
+      ]) } as any,
+      currentPriceService as any,
+    );
+    jest.spyOn(service, 'getCurrentThemeRankMap').mockResolvedValue(new Map([[1, {
+      rank: 1, previousRank: null, rankChange: null, risingCount: 1, totalCount: 1,
+      rsScore: 90, avgRsScore: 90, changeRate: 5, newHighCount: 0,
+      shortTermRs: null, momentum: null, stockSnapshotTime: new Date('2026-08-10T06:50:00Z'),
+      snapshotDate: new Date('2026-08-10'),
+    }]]));
+
+    const result = await service.getThemeDetail(1, undefined, {
+      stockSort: IssueThemeStockSort.RS,
+      stockDisplay: 20,
+    });
+
+    expect(currentPriceService.getCurrentPrices).toHaveBeenCalledWith(['A']);
+    expect(result?.stocks[0]).toMatchObject({
+      currentPrice: 130,
+      changeRate: 8.33,
+      priceChange1d: 10,
+      priceSource: 'DAY_CANDLE',
+      tradingValue: '4000000000',
+      previousTradingValueRatio: 8,
+      isNewHigh: true,
+      newHighRate: 4,
     });
   });
 
@@ -137,6 +192,7 @@ describe('IssueThemeService detail stock population', () => {
         { stockCode: 'C', currentRank: 3, currentPrice: 300, relativeStrengthScore: 99,
           priceChangeRate: 1, tradingValue: null, previousTradingValueRatio: null, isNewHigh: false, shortTermRs: null },
       ]) } as any,
+      { getCurrentPrices: jest.fn().mockResolvedValue(new Map()) } as any,
     );
     jest.spyOn(service, 'getCurrentThemeRankMap').mockResolvedValue(new Map([[1, {
       rank: 1, previousRank: null, rankChange: null, risingCount: 3, totalCount: 3,
@@ -218,6 +274,7 @@ describe('IssueThemeService detail stock population', () => {
       new ThemeMetricsService(),
       { getLatestSuccess: jest.fn().mockResolvedValue(null) } as any,
       themeSnapshot,
+      { getCurrentPrices: jest.fn().mockResolvedValue(new Map()) } as any,
     );
 
     const result = await service.getThemeDetail(1, undefined, {

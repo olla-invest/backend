@@ -1,7 +1,8 @@
 import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
 import { PrismaService } from '../../common/prisma/prisma.service';
-import { RealtimePriceCacheService, RealtimePrice } from '../real-time-chart/realtime-price-cache.service';
+import { CurrentPrice, CurrentPriceService } from '../real-time-chart/current-price.service';
 import { RealTimeChartService } from '../real-time-chart/real-time-chart.service';
+import { RealtimeSubscriptionManager } from '../real-time-chart/realtime-subscription-manager.service';
 import { IssueThemeService } from '../issue-theme/issue-theme.service';
 
 type StockCurrentRankContext = {
@@ -15,10 +16,20 @@ type StockCurrentRankContext = {
 export class WatchlistService {
   constructor(
     private readonly prisma: PrismaService,
-    private readonly realtimePriceCache: RealtimePriceCacheService,
+    private readonly currentPriceService: CurrentPriceService,
     private readonly realTimeChartService: RealTimeChartService,
     private readonly issueThemeService: IssueThemeService,
+    private readonly subscriptionManager: RealtimeSubscriptionManager,
   ) {}
+
+  /**
+   * 관심종목은 실시간 차트 순위 밖일 수 있다. 구독해 두면 이후 체결이 Redis 가격에 쌓여
+   * 다음 조회부터 키움 직접 조회 없이 캐시에서 읽는다. (상세 화면처럼 관리 대상에는 넣지 않는다)
+   */
+  private subscribeWatchlistStocks(stockCodes: string[]): void {
+    if (stockCodes.length === 0) return;
+    this.subscriptionManager.ensureSubscribed(stockCodes, { manage: false }).catch(() => undefined);
+  }
 
   // ─── 관심종목 ─────────────────────────────────────────────────────
 
@@ -36,6 +47,7 @@ export class WatchlistService {
     if (watchlist.length === 0) return { tradeDate: null, stocks: [] };
 
     const stockCodes = watchlist.map((w) => w.company.stockCode);
+    this.subscribeWatchlistStocks(stockCodes);
 
     const latestMetric = await this.prisma.stockDailyMetrics.findFirst({
       where: { stockCode: { in: stockCodes } },
@@ -44,8 +56,8 @@ export class WatchlistService {
     });
 
     if (!latestMetric) {
-      const realtimePriceMap = this.realtimePriceCache.getPrices(stockCodes);
-      return { tradeDate: null, stocks: watchlist.map((w) => this.buildStockItem(w, null, null, realtimePriceMap.get(w.company.stockCode))) };
+      const currentPrices = await this.currentPriceService.getCurrentPrices(stockCodes, { fetchMissing: true });
+      return { tradeDate: null, stocks: watchlist.map((w) => this.buildStockItem(w, null, null, currentPrices.get(w.company.stockCode))) };
     }
 
     const latestDate = latestMetric.tradeDate;
@@ -69,8 +81,9 @@ export class WatchlistService {
     const todayMap = new Map(todayMetrics.map((m) => [m.stockCode, m]));
     const prevMap = new Map(prevMetrics.map((m) => [m.stockCode, m]));
 
-    const [realtimePriceMap, currentRankContext, displayRankMap] = await Promise.all([
-      Promise.resolve(this.realtimePriceCache.getPrices(stockCodes)),
+    // 관심종목은 실시간 구독 대상이 아닐 수 있어, tick·당일 일봉이 없으면 키움에서 직접 조회한다.
+    const [currentPrices, currentRankContext, displayRankMap] = await Promise.all([
+      this.currentPriceService.getCurrentPrices(stockCodes, { fetchMissing: true }),
       this.getStockCurrentRankContext(stockCodes, latestDate),
       this.realTimeChartService.getDefaultStockDisplayRankMap(stockCodes),
     ]);
@@ -80,7 +93,7 @@ export class WatchlistService {
         w,
         todayMap.get(w.company.stockCode) ?? null,
         prevMap.get(w.company.stockCode) ?? null,
-        realtimePriceMap.get(w.company.stockCode),
+        currentPrices.get(w.company.stockCode),
         currentRankContext,
         displayRankMap,
       ),
@@ -98,7 +111,7 @@ export class WatchlistService {
     watchlistEntry: any,
     today: any,
     prev: any,
-    realtimePrice?: RealtimePrice,
+    price?: CurrentPrice,
     currentRankContext?: StockCurrentRankContext,
     displayRankMap?: Map<string, number>,
   ) {
@@ -114,7 +127,7 @@ export class WatchlistService {
     const rankChange = rank != null && prevRank != null ? prevRank - rank : null;
     const events: string[] = [];
     if (today) {
-      if (this.isAtNewHigh(realtimePrice?.currentPrice ?? Number(today.closePrice), today)) events.push('NEW_HIGH');
+      if (this.isAtNewHigh(price?.currentPrice, today)) events.push('NEW_HIGH');
       if (today.isVolatilityContraction) events.push('VOLATILITY_CONTRACTION');
       if (today.isPriceCompression) events.push('PRICE_COMPRESSION');
       if (today.isTrendTemplate) events.push('TREND_TEMPLATE');
@@ -130,16 +143,17 @@ export class WatchlistService {
       marketType: watchlistEntry.company.marketType,
       addedDate: watchlistEntry.addedDate,
       memo: watchlistEntry.memo ?? null,
-      closePrice: realtimePrice?.currentPrice ?? (today ? Number(today.closePrice) : null),
-      priceChange1d: realtimePrice?.changeAmount ?? (today?.priceChange1d != null ? Number(today.priceChange1d) : null),
-      priceChangeRate1d: realtimePrice?.changeRate ?? (today?.priceChangeRate1d != null ? Number(today.priceChangeRate1d) : null),
+      closePrice: price?.currentPrice ?? null,
+      priceChange1d: price?.changeAmount ?? null,
+      priceChangeRate1d: price?.changeRate ?? null,
+      priceSource: price?.source ?? null,
       rank: this.toDisplayRank(rank),
       prevRank: this.toDisplayPrevRank(prevRank, rank),
       rankChange,
       storedRank: today?.rank ?? null,
       currentRankSnapshotTime: currentRankContext?.snapshotTime ?? null,
       relativeStrengthScore: today ? Number(today.relativeStrengthScore) : null,
-      isNewHigh: this.isAtNewHigh(realtimePrice?.currentPrice ?? (today ? Number(today.closePrice) : null), today),
+      isNewHigh: this.isAtNewHigh(price?.currentPrice, today),
       events,
     };
   }
@@ -382,6 +396,7 @@ export class WatchlistService {
 
     // 종목 Top3 - 실시간 차트와 같은 현재 순위 기준
     const stockCodes = watchlistStocks.map((w) => w.company.stockCode);
+    this.subscribeWatchlistStocks(stockCodes);
     const latestStockMetric = stockCodes.length > 0
       ? await this.prisma.stockDailyMetrics.findFirst({
           where: { stockCode: { in: stockCodes } },
@@ -399,7 +414,7 @@ export class WatchlistService {
         this.getStockCurrentRankContext(stockCodes, latestStockMetric.tradeDate),
         this.realTimeChartService.getDefaultStockDisplayRankMap(stockCodes),
       ]);
-      topStocks = metrics
+      const top3 = metrics
         .map((m) => ({
           metric: m,
           rank: this.normalizeStockRank(currentRankContext.currentRankMap.has(m.stockCode)
@@ -407,10 +422,15 @@ export class WatchlistService {
             : displayRankMap.get(m.stockCode) ?? m.currentRank ?? m.rank ?? null),
         }))
         .sort((a, b) => this.compareNullableRank(a.rank, b.rank) || a.metric.stockCode.localeCompare(b.metric.stockCode))
-        .slice(0, 3)
+        .slice(0, 3);
+      const currentPrices = await this.currentPriceService.getCurrentPrices(
+        top3.map(({ metric }) => metric.stockCode),
+        { fetchMissing: true },
+      );
+      topStocks = top3
         .map(({ metric: m, rank }) => {
           const w = watchlistStocks.find((ws) => ws.company.stockCode === m.stockCode)!;
-          const realtimePrice = this.realtimePriceCache.getPrice(m.stockCode);
+          const price = currentPrices.get(m.stockCode);
           return {
             type: 'STOCK',
             companyId: w.company.companyId,
@@ -420,8 +440,9 @@ export class WatchlistService {
             rank: this.toDisplayRank(rank),
             storedRank: m.rank,
             currentRankSnapshotTime: currentRankContext.snapshotTime,
-            closePrice: realtimePrice?.currentPrice ?? Number(m.closePrice),
-            priceChangeRate1d: realtimePrice?.changeRate ?? (m.priceChangeRate1d != null ? Number(m.priceChangeRate1d) : null),
+            closePrice: price?.currentPrice ?? null,
+            priceChangeRate1d: price?.changeRate ?? null,
+            priceSource: price?.source ?? null,
             relativeStrengthScore: Number(m.relativeStrengthScore),
           };
         });
@@ -561,7 +582,8 @@ export class WatchlistService {
     const prevRank = this.normalizeStockRank(displayPrevRank ?? prevMetric?.currentRank ?? prevMetric?.rank ?? null);
     const rankChange = rank != null && prevRank != null ? prevRank - rank : null;
 
-    if (this.isAtNewHigh(this.realtimePriceCache.getPrice(metric.stockCode)?.currentPrice ?? Number(metric.closePrice), metric)) events.push('NEW_HIGH');
+    const price = await this.currentPriceService.getCurrentPrice(metric.stockCode, { fetchMissing: true });
+    if (this.isAtNewHigh(price?.currentPrice, metric)) events.push('NEW_HIGH');
     if (metric.isVolatilityContraction) events.push('VOLATILITY_CONTRACTION');
     if (metric.isPriceCompression) events.push('PRICE_COMPRESSION');
     if (metric.isTrendTemplate) events.push('TREND_TEMPLATE');
@@ -569,8 +591,6 @@ export class WatchlistService {
       if (rank < prevRank) events.push('RANK_UP');
       else if (rank > prevRank) events.push('RANK_DOWN');
     }
-
-    const realtimePrice = this.realtimePriceCache.getPrice(metric.stockCode);
 
     return {
       reason,
@@ -587,8 +607,9 @@ export class WatchlistService {
         today: this.toDisplayRank(rank),
         oneDayAgo: this.toDisplayPrevRank(prevRank, rank),
       },
-      closePrice: realtimePrice?.currentPrice ?? Number(metric.closePrice),
-      priceChangeRate1d: realtimePrice?.changeRate ?? (metric.priceChangeRate1d != null ? Number(metric.priceChangeRate1d) : null),
+      closePrice: price?.currentPrice ?? null,
+      priceChangeRate1d: price?.changeRate ?? null,
+      priceSource: price?.source ?? null,
       relativeStrengthScore: Number(metric.relativeStrengthScore),
       events,
     };
@@ -725,6 +746,7 @@ export class WatchlistService {
 
     // 종목 지표
     const stockCodes = watchlistStocks.map((w) => w.company.stockCode);
+    this.subscribeWatchlistStocks(stockCodes);
     const latestStockMetric = stockCodes.length > 0
       ? await this.prisma.stockDailyMetrics.findFirst({
           where: { stockCode: { in: stockCodes } },
@@ -778,9 +800,10 @@ export class WatchlistService {
       });
     }
 
+    const currentPrices = await this.currentPriceService.getCurrentPrices(stockCodes, { fetchMissing: true });
     for (const w of watchlistStocks) {
       const m = stockMetricMap.get(w.company.stockCode);
-      const realtimePrice = this.realtimePriceCache.getPrice(w.company.stockCode);
+      const price = currentPrices.get(w.company.stockCode);
       const stockCode = w.company.stockCode;
       const hasSnapshotRank = stockCurrentRankContext.currentRankMap.has(stockCode);
       const hasPreviousCurrentRank = stockCurrentRankContext.previousRankMap.has(stockCode);
@@ -803,8 +826,9 @@ export class WatchlistService {
         rankChange,
         storedRank: m?.rank ?? null,
         currentRankSnapshotTime: stockCurrentRankContext.snapshotTime,
-        closePrice: realtimePrice?.currentPrice ?? (m ? Number(m.closePrice) : null),
-        priceChangeRate1d: realtimePrice?.changeRate ?? (m?.priceChangeRate1d != null ? Number(m.priceChangeRate1d) : null),
+        closePrice: price?.currentPrice ?? null,
+        priceChangeRate1d: price?.changeRate ?? null,
+        priceSource: price?.source ?? null,
         relativeStrengthScore: m ? Number(m.relativeStrengthScore) : null,
       });
     }
