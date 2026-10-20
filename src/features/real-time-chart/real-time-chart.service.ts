@@ -73,6 +73,7 @@ export class RealTimeChartService implements OnModuleInit {
   // close aggregation lands. A 15:40 clock check used to drop that day from midnight until 15:40.
   private static readonly RANK_HISTORY_INCLUDES_LATEST_DAY = true;
   private readonly realtimeCandleSavedAt = new Map<string, number>();
+  private companyNameSync: Promise<number> | null = null;
   private initializationComplete = false;
   private lastDataUpdate: Date | null = null;
 
@@ -2129,11 +2130,13 @@ export class RealTimeChartService implements OnModuleInit {
           ...kospiResult.list.map((s: any) => ({ ...s, marketType: '0' })),
           ...kosdaqResult.list.map((s: any) => ({ ...s, marketType: '10' })),
         ];
+        this.syncCompanyNamesInBackground(allList);
         validStocks = allList.filter(
           (s: any) => s.code.match(/^\d{6}$/) && !s.code.endsWith('5') && !this.isHaltedState(s.state),
         );
       } else {
         const result = await this.kiwoomRest.getStockList(marketType);
+        this.syncCompanyNamesInBackground(result.list);
         validStocks = result.list
           .filter((s: any) => s.code.match(/^\d{6}$/) && !s.code.endsWith('5') && !this.isHaltedState(s.state))
           .map((s: any) => ({ ...s, marketType }));
@@ -2246,8 +2249,57 @@ export class RealTimeChartService implements OnModuleInit {
       ),
     );
 
+    await this.syncCompanyNames(stocks).catch((error) =>
+      this.logger.warn(`[syncCompanyNames] failed: ${(error as Error).message}`),
+    );
     await this.clearStockListCache();
     this.logger.log(`[syncTradingStates] ${uniqueStocks.length}개 종목 tradingState 업데이트 완료`);
+  }
+
+  /**
+   * 키움 종목 리스트를 받을 때 DB 종목명과 대조해, 사명이 바뀐 종목은 companies.company_name 을 키움 이름으로 바꾼다.
+   * companies 는 처음 저장할 때만 이름을 넣어서, 그대로 두면 실시간 차트(키움 이름)와 내 관심·테마(DB 이름)가 갈린다.
+   */
+  async syncCompanyNames(stocks: Array<{ code?: string; name?: string }>): Promise<number> {
+    const kiwoomNames = new Map<string, string>();
+    for (const stock of stocks) {
+      const name = stock.name?.trim();
+      // company_name 은 VARCHAR(100)
+      if (stock.code && name && name.length <= 100) kiwoomNames.set(stock.code, name);
+    }
+    if (kiwoomNames.size === 0) return 0;
+
+    const companies = await this.prisma.company.findMany({
+      where: { stockCode: { in: [...kiwoomNames.keys()] }, deletedAt: null },
+      select: { stockCode: true, companyName: true },
+    });
+    const renamed = companies.filter((company) => kiwoomNames.get(company.stockCode) !== company.companyName);
+    for (const company of renamed) {
+      await this.prisma.company.updateMany({
+        where: { stockCode: company.stockCode, companyName: company.companyName, deletedAt: null },
+        data: { companyName: kiwoomNames.get(company.stockCode)! },
+      });
+    }
+    if (renamed.length > 0) {
+      this.logger.log(
+        `[syncCompanyNames] ${renamed.length}개 종목명 갱신: ` +
+        renamed.slice(0, 20).map((c) => `${c.stockCode} ${c.companyName}→${kiwoomNames.get(c.stockCode)}`).join(', '),
+      );
+    }
+    return renamed.length;
+  }
+
+  // 목록 캐시가 비었을 때(최대 1시간에 한 번) 받은 키움 리스트로 종목명을 맞춘다. 응답은 기다리지 않는다.
+  private syncCompanyNamesInBackground(stocks: Array<{ code?: string; name?: string }>): void {
+    if (this.companyNameSync) return;
+    this.companyNameSync = this.syncCompanyNames(stocks)
+      .catch((error) => {
+        this.logger.warn(`[syncCompanyNames] failed: ${(error as Error).message}`);
+        return 0;
+      })
+      .finally(() => {
+        this.companyNameSync = null;
+      });
   }
 
   private normalizeDbMarketType(marketType?: string): 'KOSPI' | 'KOSDAQ' | string {

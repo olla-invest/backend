@@ -165,6 +165,14 @@ export class InitialSetupService {
       });
 
       if (existing) {
+        // 사명이 바뀐 종목은 키움 이름으로 맞춘다 (실시간 차트와 내 관심·테마 화면의 종목명 일치)
+        const name = stock.name?.trim();
+        if (name && name.length <= 100 && name !== existing.companyName) {
+          await this.prisma.company.update({
+            where: { companyId: existing.companyId },
+            data: { companyName: name },
+          });
+        }
         skippedCount++;
         continue;
       }

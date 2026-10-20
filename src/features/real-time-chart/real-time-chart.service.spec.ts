@@ -238,3 +238,64 @@ describe('realtime status price freshness', () => {
     });
   });
 });
+
+describe('company name sync from the Kiwoom stock list', () => {
+  const build = (companies: Array<{ stockCode: string; companyName: string }>, overrides: { kiwoomRest?: any; stockListCache?: any } = {}) => {
+    const prisma = {
+      company: {
+        findMany: jest.fn().mockResolvedValue(companies),
+        updateMany: jest.fn().mockResolvedValue({ count: 1 }),
+      },
+    };
+    const service = new RealTimeChartService(
+      overrides.kiwoomRest ?? ({} as any),
+      {} as any,
+      {} as any,
+      {} as any,
+      {} as any,
+      new CurrentPriceResolver(),
+      {} as any,
+      {} as any,
+      overrides.stockListCache ?? ({} as any),
+      prisma as any,
+    ) as any;
+    return { service, prisma };
+  };
+
+  it('renames only the stocks whose Kiwoom name changed', async () => {
+    const { service, prisma } = build([
+      { stockCode: '396300', companyName: '세아메카닉스' },
+      { stockCode: '005930', companyName: '삼성전자' },
+    ]);
+
+    const renamed = await service.syncCompanyNames([
+      { code: '396300', name: 'HT로보틱스 ' },
+      { code: '005930', name: '삼성전자' },
+      { code: '000001', name: '' },
+      { code: '000002', name: 'x'.repeat(101) },
+    ]);
+
+    expect(renamed).toBe(1);
+    expect(prisma.company.findMany.mock.calls[0][0].where.stockCode.in).toEqual(['396300', '005930']);
+    expect(prisma.company.updateMany).toHaveBeenCalledTimes(1);
+    expect(prisma.company.updateMany).toHaveBeenCalledWith({
+      where: { stockCode: '396300', companyName: '세아메카닉스', deletedAt: null },
+      data: { companyName: 'HT로보틱스' },
+    });
+  });
+
+  it('compares names whenever a fresh list is fetched from Kiwoom', async () => {
+    const kiwoomRest = {
+      getStockList: jest.fn()
+        .mockResolvedValueOnce({ list: [{ code: '396300', name: 'HT로보틱스', state: '' }] })
+        .mockResolvedValueOnce({ list: [{ code: '091810', name: '트리니티항공', state: '' }] }),
+    };
+    const stockListCache = { getStockList: jest.fn().mockResolvedValue(null), setStockList: jest.fn() };
+    const { service, prisma } = build([{ stockCode: '396300', companyName: '세아메카닉스' }], { kiwoomRest, stockListCache });
+
+    await service.fetchStockList('all');
+    await service.companyNameSync;
+
+    expect(prisma.company.updateMany).toHaveBeenCalledWith(expect.objectContaining({ data: { companyName: 'HT로보틱스' } }));
+  });
+});
