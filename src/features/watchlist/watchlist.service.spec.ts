@@ -43,25 +43,18 @@ describe('WatchlistService theme recommendations', () => {
     });
   });
 
-  it('uses exact current and previous stock snapshots for watchlist rank changes', async () => {
+  it('compares the latest snapshot rank with the finalized closing rank the chart shows as D-1', async () => {
     jest.useFakeTimers().setSystemTime(new Date('2026-08-10T07:00:00.000Z'));
     const prisma: any = {
       stockCurrentRankSnapshot: {
-        findFirst: jest.fn()
-          .mockResolvedValueOnce({
-            tradeDate: new Date('2026-08-10'),
-            snapshotTime: new Date('2026-08-10T06:50:00.000Z'),
-          })
-          .mockResolvedValueOnce({
-            tradeDate: new Date('2026-08-09'),
-            snapshotTime: new Date('2026-08-09T06:50:00.000Z'),
-          }),
-        findMany: jest.fn()
-          .mockResolvedValueOnce([{ stockCode: '189300', currentRank: 2 }])
-          .mockResolvedValueOnce([{ stockCode: '189300', currentRank: 3 }]),
+        findFirst: jest.fn().mockResolvedValue({
+          tradeDate: new Date('2026-08-10'),
+          snapshotTime: new Date('2026-08-10T06:50:00.000Z'),
+        }),
+        findMany: jest.fn().mockResolvedValue([{ stockCode: '189300', currentRank: 2 }]),
       },
       stockDailyMetrics: {
-        findMany: jest.fn().mockResolvedValue([{ stockCode: '189300', currentRank: 99 }]),
+        findMany: jest.fn().mockResolvedValue([{ stockCode: '189300', currentRank: 3 }]),
         findFirst: jest.fn().mockResolvedValue(null),
       },
     };
@@ -74,7 +67,12 @@ describe('WatchlistService theme recommendations', () => {
 
     expect(result.currentRankMap.get('189300')).toBe(2);
     expect(result.previousRankMap.get('189300')).toBe(3);
-    expect(prisma.stockDailyMetrics.findMany).not.toHaveBeenCalled();
+    // 직전 거래일의 마지막 스냅샷(당일 지표로 다시 매긴 순위)은 D-1이 아니다.
+    expect(prisma.stockCurrentRankSnapshot.findFirst).toHaveBeenCalledTimes(1);
+    expect(prisma.stockDailyMetrics.findMany).toHaveBeenCalledWith({
+      where: { stockCode: { in: ['189300'] }, tradeDate: new Date('2026-08-10') },
+      select: { stockCode: true, currentRank: true },
+    });
   });
 
   it('includes canonical theme rank change and rise-flat-fall counts in highlights', async () => {

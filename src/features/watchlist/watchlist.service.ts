@@ -881,7 +881,7 @@ export class WatchlistService {
         },
         select: { stockCode: true, currentRank: true },
       });
-      const previousRankMap = await this.getPreviousStockSnapshotRankMap(stockCodes, snapshot.tradeDate);
+      const previousRankMap = await this.getFinalizedDailyRankMap(stockCodes, snapshot.tradeDate);
 
       return {
         tradeDate: snapshot.tradeDate,
@@ -908,22 +908,14 @@ export class WatchlistService {
     };
   }
 
-  private async getPreviousStockSnapshotRankMap(
+  // 실시간 차트 D-1과 같은 값: 그 거래일의 장 마감 순위로 확정된 stock_daily_metrics.current_rank.
+  // 직전 거래일의 마지막 스냅샷은 당일 지표로 다시 매긴 순위(테마용)라 D-1보다 하루 앞선 기준이 된다.
+  private async getFinalizedDailyRankMap(
     stockCodes: string[],
     tradeDate: Date,
   ): Promise<Map<string, number | null>> {
-    const previous = await this.prisma.stockCurrentRankSnapshot.findFirst({
-      where: { tradeDate: { lt: tradeDate } },
-      orderBy: [{ tradeDate: 'desc' }, { snapshotTime: 'desc' }],
-      select: { tradeDate: true, snapshotTime: true },
-    });
-    if (!previous) return new Map();
-    const rows = await this.prisma.stockCurrentRankSnapshot.findMany({
-      where: {
-        tradeDate: previous.tradeDate,
-        snapshotTime: previous.snapshotTime,
-        stockCode: { in: stockCodes },
-      },
+    const rows = await this.prisma.stockDailyMetrics.findMany({
+      where: { stockCode: { in: stockCodes }, tradeDate },
       select: { stockCode: true, currentRank: true },
     });
     return new Map(rows.map((row) => [row.stockCode, row.currentRank]));
