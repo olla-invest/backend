@@ -73,28 +73,27 @@ export class AuthService {
     }
 
     async login( dto: LoginDto, request?: Request ) {
+        // 개발 서버 전용 우회: 입력한 계정으로 비밀번호 확인 없이 로그인한다 (소셜 가입 계정 포함).
+        // 테스터마다 자기 계정으로 들어가야 관심종목 등이 섞이지 않는다. 운영(NODE_ENV=production)에서는 항상 꺼진다.
         const developmentBypassEnabled =
             this.configService.get<string>( 'NODE_ENV' ) !== 'production'
             && this.configService.get<string>( 'DEV_AUTH_BYPASS' ) === 'true';
-        const username = developmentBypassEnabled
-            ? this.configService.get<string>( 'DEV_AUTH_BYPASS_USERNAME', 'test' )
-            : dto.username;
         const user = await this.prisma.user.findFirst( {
-            where: { username, deletedAt: null },
+            where: { username: dto.username, deletedAt: null },
         } );
 
         if ( !user ) {
             throw new NotFoundException( '가입된 계정이 없습니다. 회원가입 후 이용해주세요.' );
         }
 
-        if ( !user.password ) {
-            const providerName = user.provider === AuthProvider.NAVER ? '네이버' : '카카오';
-            throw new UnauthorizedException(
-                `${providerName} 소셜 로그인으로 가입된 계정입니다. 소셜 로그인을 이용해주세요.`,
-            );
-        }
-
         if ( !developmentBypassEnabled ) {
+            if ( !user.password ) {
+                const providerName = user.provider === AuthProvider.NAVER ? '네이버' : '카카오';
+                throw new UnauthorizedException(
+                    `${providerName} 소셜 로그인으로 가입된 계정입니다. 소셜 로그인을 이용해주세요.`,
+                );
+            }
+
             const isPasswordValid = await bcrypt.compare( dto.password, user.password );
             if ( !isPasswordValid ) {
                 throw new UnauthorizedException( '비밀번호가 일치하지 않습니다.' );
