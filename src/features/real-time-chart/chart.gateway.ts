@@ -12,7 +12,8 @@ import { Logger, Inject } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
 import { Server, Socket } from 'socket.io';
 import { IRealtimeSource, REALTIME_SOURCE_TOKEN } from '../../integrations/kiwoom/websocket/realtime-source.interface';
-import { RealtimePriceCacheService } from './realtime-price-cache.service';
+import { CurrentPriceService } from './current-price.service';
+import { isRegularSessionTick } from './current-price-resolver.service';
 import { RealtimeSubscriptionManager } from './realtime-subscription-manager.service';
 
 @WebSocketGateway({
@@ -33,7 +34,7 @@ export class ChartGateway
   constructor(
     @Inject(REALTIME_SOURCE_TOKEN)
     private readonly realtimeSource: IRealtimeSource,
-    private readonly realtimeCache: RealtimePriceCacheService,
+    private readonly currentPriceService: CurrentPriceService,
     private readonly subscriptionManager: RealtimeSubscriptionManager,
   ) {}
 
@@ -89,18 +90,23 @@ export class ChartGateway
     await this.realtimeSource.subscribe(stockCode, ['0B', '0D']);
     client.join(`stock:${stockCode}`);
 
-    // 캐시에 현재가가 있으면 즉시 snapshot 전송 (프론트 초기 렌더링용)
-    const cached = this.realtimeCache.getPrice(stockCode);
-    if (cached) {
+    // 상세 요약 API 와 같은 현재가로 즉시 snapshot 전송 (프론트 초기 렌더링용)
+    const current = await this.currentPriceService
+      .getCurrentPrice(stockCode, { fetchMissing: true })
+      .catch((error) => {
+        this.logger.warn(`Snapshot price unavailable for ${stockCode}: ${(error as Error).message}`);
+        return undefined;
+      });
+    if (current) {
       client.emit('snapshot', {
         stockCode,
-        price: cached.currentPrice,
-        changeRate: cached.changeRate,
-        prevDayCompare: cached.changeAmount,
-        open: cached.openPrice,
-        high: cached.highPrice,
-        low: cached.lowPrice,
-        accVolume: cached.accVolume,
+        price: current.currentPrice,
+        changeRate: current.changeRate,
+        prevDayCompare: current.changeAmount,
+        open: current.openPrice,
+        high: current.highPrice,
+        low: current.lowPrice,
+        accVolume: current.accVolume == null ? null : Number(current.accVolume),
       });
     }
 
@@ -143,6 +149,8 @@ export class ChartGateway
     values: Record<string, string>;
   }): void {
     const { stockCode, values } = event;
+    // 정규장이 끝난 뒤 들어오는 체결(넥스트레이드·시간외)은 화면 가격을 종가에서 바꾸지 않는다.
+    if (!isRegularSessionTick(new Date())) return;
 
     // 구독 중인 클라이언트에게만 전송
     const tickData = {

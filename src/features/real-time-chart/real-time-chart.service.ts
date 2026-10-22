@@ -8,7 +8,7 @@ import { ChartStorageService } from './chart-storage.service';
 import { StockMetricsService } from './stock-metrics.service';
 import { RealtimePriceCacheService } from './realtime-price-cache.service';
 import { CurrentPriceResolver, isRegularSessionTick } from './current-price-resolver.service';
-import { CurrentPrice, CurrentPriceService } from './current-price.service';
+import { CurrentPrice, CurrentPriceService, CurrentPriceSource } from './current-price.service';
 import { RealtimeSubscriptionManager } from './realtime-subscription-manager.service';
 import { StockListCacheService, RangeRsRankingCache, CustomRsHistoryCache } from './stock-list-cache.service';
 import { PrismaService } from '../../common/prisma/prisma.service';
@@ -61,6 +61,9 @@ export interface StockDetailSnapshot {
   tradingValue?: string | number | bigint | null;
   dayHigh?: number | null;
   dayLow?: number | null;
+  /** 현재가 기준 거래일(YYYY-MM-DD). 09:00 전·휴장일엔 직전 거래일이라, 그날 봉을 덮어야 한다. */
+  priceDate?: string;
+  priceSource?: CurrentPriceSource;
 }
 
 @Injectable()
@@ -972,8 +975,29 @@ export class RealTimeChartService implements OnModuleInit {
       dayHigh: resolved.highPrice ?? currentPrice,
       dayLow: resolved.lowPrice ?? currentPrice,
       priceSource: resolved.source,
+      priceDate: resolved.priceDate,
       week52High,
       week52Low,
+    };
+  }
+
+  // 상세 요약(getStockSummary)과 같은 현재가로 진행 중인 봉을 덮는다. 시가총액·52주 범위는 필요 없어 현재가만 조회한다.
+  private async resolveDetailSnapshot(stockCode: string): Promise<StockDetailSnapshot | null> {
+    const price = await this.currentPriceService.getCurrentPrice(stockCode, { fetchMissing: true }).catch((error) => {
+      this.logger.warn(`Current price unavailable for stored candles ${stockCode}: ${(error as Error).message}`);
+      return undefined;
+    });
+    if (!price || !Number.isFinite(price.currentPrice) || price.currentPrice <= 0) return null;
+    return {
+      currentPrice: price.currentPrice,
+      prevDayCompare: price.changeAmount,
+      changeRate: price.changeRate.toFixed(2),
+      volume: price.accVolume,
+      tradingValue: price.tradingValue,
+      dayHigh: price.highPrice,
+      dayLow: price.lowPrice,
+      priceDate: price.priceDate,
+      priceSource: price.source,
     };
   }
 
@@ -3247,12 +3271,17 @@ export class RealTimeChartService implements OnModuleInit {
         orderBy: { candleTime: 'desc' },
       }),
     ]);
-    const realtimePrice = this.currentPriceResolver.getUsableRealtimePrice(this.realtimeCache.getPrice(stockCode));
-    if (!realtimePrice && ['day', 'week', 'month', 'year'].includes(candleType)) {
+    const isDailyOrLonger = ['day', 'week', 'month', 'year'].includes(candleType);
+    // 진행 중인 봉은 상단 현재가와 같은 공용 현재가로만 덮는다. tick 을 직접 쓰면 장 마감 후 종가를 놓친 tick 이 일봉을 덮는다.
+    const resolvedSnapshot = snapshot ?? (isDailyOrLonger ? await this.resolveDetailSnapshot(stockCode) : null);
+    if (isDailyOrLonger && resolvedSnapshot?.priceSource !== 'REALTIME') {
       this.subscriptionManager.ensureSubscribed([stockCode], { manage: false }).catch((error) => {
         this.logger.warn(`Detail chart auto-subscribe failed: ${error.message}`);
       });
     }
+    // 기준가는 그날 체결이 없다는 뜻이라 저장된 봉이 전부다.
+    const overlay = resolvedSnapshot && resolvedSnapshot.priceSource !== 'BASE_PRICE' ? resolvedSnapshot : null;
+    const priceDay = overlay?.priceDate ? new Date(`${overlay.priceDate}T00:00:00.000Z`) : this.todayKstDateOnly();
     const storedPeriodCandle = ['week', 'month', 'year'].includes(candleType)
       ? await this.buildStoredPeriodAggregateCandle(
         stockCode,
@@ -3261,18 +3290,16 @@ export class RealTimeChartService implements OnModuleInit {
       )
       : null;
     const currentPeriodCandle =
-      ['week', 'month', 'year'].includes(candleType) && (snapshot || realtimePrice)
+      ['week', 'month', 'year'].includes(candleType) && overlay
         ? await this.buildCurrentPeriodAggregateCandle(
           stockCode,
           candleType as HigherTimeframeCandleType,
-          snapshot,
-          realtimePrice,
+          overlay,
+          priceDay,
         )
         : storedPeriodCandle;
-    const responseCandles = snapshot
-      ? this.applySnapshotToStoredCandles(candles, candleType, snapshot, currentPeriodCandle)
-      : realtimePrice
-      ? this.applyRealtimeToStoredCandles(candles, candleType, realtimePrice, currentPeriodCandle)
+    const responseCandles = overlay
+      ? this.applySnapshotToStoredCandles(candles, candleType, overlay, priceDay, currentPeriodCandle)
       : currentPeriodCandle
       ? this.applyAggregateToStoredCandles(candles, candleType, endTime, currentPeriodCandle)
       : candles;
@@ -3342,12 +3369,11 @@ export class RealTimeChartService implements OnModuleInit {
   private async buildCurrentPeriodAggregateCandle(
     stockCode: string,
     candleType: HigherTimeframeCandleType,
-    snapshot?: StockDetailSnapshot | null,
-    realtimePrice?: any,
+    snapshot: StockDetailSnapshot,
+    today: Date,
   ): Promise<any | null> {
-    const today = this.todayKstDateOnly();
     const todayKey = today.toISOString().split('T')[0];
-    const currentPrice = Number(snapshot?.currentPrice ?? realtimePrice?.currentPrice);
+    const currentPrice = Number(snapshot.currentPrice);
     if (!Number.isFinite(currentPrice) || currentPrice <= 0) return null;
 
     const periodStart = this.getCurrentStoredPeriodStart(candleType, today);
@@ -3356,13 +3382,13 @@ export class RealTimeChartService implements OnModuleInit {
 
     const dayCandles = await this.chartStorage.getCandles(stockCode, 'day', periodStart, periodEnd);
     const existingToday = dayCandles.find((c) => c.candleTime.toISOString().split('T')[0] === todayKey);
-    const openPrice = Number(existingToday?.openPrice ?? realtimePrice?.openPrice ?? currentPrice);
-    const highSource = Number(snapshot?.dayHigh ?? realtimePrice?.highPrice ?? currentPrice);
-    const lowSource = Number(snapshot?.dayLow ?? realtimePrice?.lowPrice ?? currentPrice);
+    const openPrice = Number(existingToday?.openPrice ?? currentPrice);
+    const highSource = Number(snapshot.dayHigh ?? currentPrice);
+    const lowSource = Number(snapshot.dayLow ?? currentPrice);
     const highPrice = Math.max(Number(existingToday?.highPrice ?? currentPrice), currentPrice, highSource);
     const lowPrice = Math.min(Number(existingToday?.lowPrice ?? currentPrice), currentPrice, lowSource);
-    const volume = this.toNonNegativeBigInt(snapshot?.volume ?? realtimePrice?.accVolume);
-    const tradingValue = this.normalizeTradingValueToWon(snapshot?.tradingValue ?? realtimePrice?.accAmount);
+    const volume = this.toNonNegativeBigInt(snapshot.volume);
+    const tradingValue = this.normalizeTradingValueToWon(snapshot.tradingValue);
 
     const todayCandle = {
       ...(existingToday ?? {}),
@@ -3391,7 +3417,7 @@ export class RealTimeChartService implements OnModuleInit {
       closePrice: Number(latest.closePrice),
       volume: aggregateSource.reduce((sum, c) => sum + (c.volume ?? 0n), 0n),
       tradingValue: aggregateTradingValue > 0n ? aggregateTradingValue : null,
-      changeRateOverride: snapshot?.changeRate ?? realtimePrice?.changeRate,
+      changeRateOverride: snapshot.changeRate,
     };
   }
 
@@ -3443,11 +3469,11 @@ export class RealTimeChartService implements OnModuleInit {
     candles: any[],
     candleType: string,
     snapshot: StockDetailSnapshot,
+    today: Date,
     currentPeriodCandle?: any | null,
   ): any[] {
     if (!['day', 'week', 'month', 'year'].includes(candleType)) return candles;
 
-    const today = this.todayKstDateOnly();
     const todayKey = today.toISOString().split('T')[0];
     const currentPrice = Number(snapshot.currentPrice);
     if (!Number.isFinite(currentPrice) || currentPrice <= 0) return candles;
@@ -3488,65 +3514,6 @@ export class RealTimeChartService implements OnModuleInit {
       volume,
       tradingValue: tradingValue > 0n ? tradingValue : null,
       changeRateOverride: snapshot.changeRate,
-    };
-
-    if (candles.length === 0) {
-      return [aggregateCandle];
-    }
-
-    const latest = candles[0];
-    if (!this.isSameStoredCandlePeriod(latest.candleTime, today, candleType)) {
-      return [aggregateCandle, ...candles];
-    }
-
-    return [{ ...latest, ...aggregateCandle }, ...candles.slice(1)];
-  }
-
-  private applyRealtimeToStoredCandles(
-    candles: any[],
-    candleType: string,
-    realtimePrice: any,
-    currentPeriodCandle?: any | null,
-  ): any[] {
-    if (!['day', 'week', 'month', 'year'].includes(candleType)) return candles;
-
-    const today = this.todayKstDateOnly();
-    const todayKey = today.toISOString().split('T')[0];
-    const currentPrice = Number(realtimePrice.currentPrice);
-    const openPrice = Number(realtimePrice.openPrice || currentPrice);
-    const highPrice = Number(realtimePrice.highPrice || currentPrice);
-    const lowPrice = Number(realtimePrice.lowPrice || currentPrice);
-    const volume = BigInt(Math.max(0, Math.trunc(Number(realtimePrice.accVolume || 0))));
-    const tradingValue = this.normalizeTradingValueToWon(realtimePrice.accAmount);
-
-    if (candleType === 'day') {
-      const todayIndex = candles.findIndex((c) => c.candleTime.toISOString().split('T')[0] === todayKey);
-      const realtimeDayCandle = {
-        ...(todayIndex >= 0 ? candles[todayIndex] : {}),
-        candleTime: today,
-        openPrice,
-        highPrice,
-        lowPrice,
-        closePrice: currentPrice,
-        volume,
-        tradingValue,
-      };
-
-      if (todayIndex >= 0) {
-        return candles.map((c, index) => index === todayIndex ? realtimeDayCandle : c);
-      }
-      return [realtimeDayCandle, ...candles];
-    }
-
-    const aggregateCandle = currentPeriodCandle ?? {
-      candleTime: this.getCurrentStoredPeriodStart(candleType, today),
-      openPrice,
-      highPrice,
-      lowPrice,
-      closePrice: currentPrice,
-      volume,
-      tradingValue: tradingValue > 0n ? tradingValue : null,
-      changeRateOverride: realtimePrice.changeRate,
     };
 
     if (candles.length === 0) {

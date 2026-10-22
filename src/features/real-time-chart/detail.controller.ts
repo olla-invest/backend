@@ -103,6 +103,8 @@ export class DetailController {
       tradingValue: summary.tradingValue,
       dayHigh: summary.dayHigh,
       dayLow: summary.dayLow,
+      priceDate: summary.priceDate,
+      priceSource: summary.priceSource,
     };
   }
 

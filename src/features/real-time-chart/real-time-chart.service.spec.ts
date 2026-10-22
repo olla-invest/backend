@@ -310,3 +310,73 @@ describe('company name sync from the Kiwoom stock list', () => {
     expect(prisma.company.updateMany).toHaveBeenCalledWith(expect.objectContaining({ data: { companyName: 'HT로보틱스' } }));
   });
 });
+
+describe('stored candles follow the shared current price', () => {
+  afterEach(() => jest.useRealTimers());
+
+  const dayCandle = (date: string, open: number, close: number, volume: bigint) => ({
+    candleTime: new Date(`${date}T00:00:00.000Z`),
+    openPrice: open, highPrice: Math.max(open, close), lowPrice: Math.min(open, close), closePrice: close,
+    volume, tradingValue: volume * BigInt(close),
+  });
+  const makeService = (price: Record<string, unknown> | undefined) => {
+    const chartStorage = {
+      getCandles: jest.fn().mockResolvedValue([
+        dayCandle('2026-10-22', 10540, 10860, 7459215n),
+        dayCandle('2026-10-21', 8050, 10450, 2498150n),
+      ]),
+    };
+    const prisma = { stockCandle: { findFirst: jest.fn().mockResolvedValue(dayCandle('2026-10-20', 8000, 8140, 1000n)) } };
+    const currentPriceService = { getCurrentPrice: jest.fn().mockResolvedValue(price) };
+    const realtimeCache = { getPrice: jest.fn() };
+    const service = new RealTimeChartService(
+      {} as any,
+      {} as any,
+      chartStorage as any,
+      {} as any,
+      realtimeCache as any,
+      new CurrentPriceResolver(),
+      currentPriceService as any,
+      { ensureSubscribed: jest.fn().mockResolvedValue(undefined) } as any,
+      {} as any,
+      prisma as any,
+    );
+    return { service, realtimeCache, currentPriceService };
+  };
+  const closePrice = (overrides: Record<string, unknown>) => ({
+    stockCode: '003010', priceDate: '2026-10-22', source: 'DAY_CANDLE', currentPrice: 10860,
+    changeAmount: 410, changeRate: 3.923444976, changeSign: '2', openPrice: 10540, highPrice: 12660, lowPrice: 10510,
+    accVolume: 7459215n, tradingValue: 87752000000n, ...overrides,
+  });
+
+  it('shows the same close as the summary instead of a tick that missed the closing print', async () => {
+    jest.useFakeTimers().setSystemTime(new Date('2026-10-22T14:00:00.000Z'));
+    const { service, realtimeCache, currentPriceService } = makeService(closePrice({}));
+
+    const result = await service.getStoredCandles('003010', 'day');
+
+    expect(result.candles[0]).toMatchObject({ time: '2026-10-22T00:00:00.000Z', close: '10860', volume: '7459215', changeRate: '3.92%' });
+    expect(currentPriceService.getCurrentPrice).toHaveBeenCalledWith('003010', { fetchMissing: true });
+    expect(realtimeCache.getPrice).not.toHaveBeenCalled();
+  });
+
+  it('fills the price date candle before the open instead of adding a row for the calendar day', async () => {
+    jest.useFakeTimers().setSystemTime(new Date('2026-10-22T23:00:00.000Z'));
+    const { service } = makeService(closePrice({}));
+
+    const result = await service.getStoredCandles('003010', 'day');
+
+    expect(result.candles.map((c: any) => c.time.slice(0, 10))).toEqual(['2026-10-22', '2026-10-21']);
+  });
+
+  it('adds no candle when the stock has not traded on the price date', async () => {
+    jest.useFakeTimers().setSystemTime(new Date('2026-10-23T02:00:00.000Z'));
+    const { service } = makeService(closePrice({
+      priceDate: '2026-10-23', source: 'BASE_PRICE', changeAmount: 0, changeRate: 0, accVolume: 0n, tradingValue: 0n,
+    }));
+
+    const result = await service.getStoredCandles('003010', 'day');
+
+    expect(result.candles.map((c: any) => c.time.slice(0, 10))).toEqual(['2026-10-22', '2026-10-21']);
+  });
+});
