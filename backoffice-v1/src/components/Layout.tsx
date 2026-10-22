@@ -3,6 +3,7 @@ import { LogOut } from 'lucide-react';
 import { useAuth } from '../auth';
 import { ROLE_LABELS } from '../format';
 import type { Route } from '../router';
+import logoUrl from '../assets/olla-logo.svg';
 
 const MENU: Array<{ section: Route['name']; label: string; href: string }> = [
   { section: 'dashboard', label: '서비스 현황', href: '#/dashboard' },
@@ -11,11 +12,7 @@ const MENU: Array<{ section: Route['name']; label: string; href: string }> = [
 ];
 
 export function Logo() {
-  return (
-    <span className="logo" aria-label="olla">
-      ol<span className="logo-accent">l</span>a
-    </span>
-  );
+  return <img className="logo" src={logoUrl} alt="olla" />;
 }
 
 export function Layout({ route, children }: { route: Route; children: ReactNode }) {

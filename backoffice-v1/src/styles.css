@@ -14,8 +14,6 @@
   --danger-hover: #b51f24;
   --green: #2bc46b;
   --red: #f26d6d;
-  --logo-navy: #232d6b;
-  --logo-red: #ef4444;
   color-scheme: light;
 }
 
@@ -84,16 +82,13 @@ a {
 }
 
 .logo {
-  font-family: Georgia, 'Times New Roman', serif;
-  font-size: 30px;
-  font-style: italic;
-  font-weight: 800;
-  letter-spacing: -1px;
-  color: var(--logo-navy);
+  display: block;
+  width: auto;
+  height: 32px;
 }
 
-.logo-accent {
-  color: var(--logo-red);
+.login-logo .logo {
+  height: 36px;
 }
 
 .sidebar-menu {
@@ -1005,7 +1000,7 @@ input[type='checkbox'] {
 
 .login-logo {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   justify-content: center;
   gap: 10px;
   margin-bottom: 8px;
