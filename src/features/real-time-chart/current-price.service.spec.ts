@@ -196,6 +196,47 @@ describe('CurrentPriceService', () => {
     expect((await service.getCurrentPrice('041830', { now: duringSession }))?.currentPrice).toBe(30_600);
   });
 
+  describe('after the close', () => {
+    const afterClose = new Date('2026-10-15T13:00:00.000Z'); // 22:00 KST
+    const missedCloseTick = tick({ timestamp: new Date('2026-10-15T05:17:00.000Z') }); // 14:17 KST, 서버 중단으로 종가를 놓침
+
+    it('uses the day candle close instead of a tick that missed the closing print', async () => {
+      const { service } = build({
+        ticks: [missedCloseTick],
+        candles: [candle('041830', '2026-10-15', '30600'), candle('041830', '2026-10-14', '30000')],
+      });
+
+      const price = await service.getCurrentPrice('041830', { now: afterClose });
+
+      expect(price).toMatchObject({ source: 'DAY_CANDLE', currentPrice: 30_600 });
+    });
+
+    it('keeps the tick when it caught the closing print', async () => {
+      const { service, prisma } = build({ ticks: [tick({ timestamp: new Date('2026-10-15T06:30:05.000Z') })] });
+
+      const price = await service.getCurrentPrice('041830', { now: afterClose });
+
+      expect(price?.source).toBe('REALTIME');
+      expect(prisma.$queryRawUnsafe).not.toHaveBeenCalled();
+    });
+
+    it('falls back to the last tick rather than the base price when the day candle is missing', async () => {
+      const { service } = build({ ticks: [missedCloseTick], candles: [candle('041830', '2026-10-14', '30000')] });
+
+      const price = await service.getCurrentPrice('041830', { now: afterClose });
+
+      expect(price).toMatchObject({ source: 'REALTIME', currentPrice: 31_500 });
+    });
+
+    it('still trusts an older same-day tick during the session', async () => {
+      const { service } = build({ ticks: [missedCloseTick], candles: [candle('041830', '2026-10-15', '30600')] });
+
+      const price = await service.getCurrentPrice('041830', { now: new Date('2026-10-15T06:00:00.000Z') }); // 15:00 KST
+
+      expect(price?.source).toBe('REALTIME');
+    });
+  });
+
   it('keeps the upper-limit sign from the tick only when it matches the direction', async () => {
     const { service } = build({ ticks: [tick({ changeSign: '1' }), tick({ stockCode: '000660', changeSign: '4' })] });
 

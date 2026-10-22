@@ -89,11 +89,22 @@ export class CurrentPriceService {
     const result = new Map<string, CurrentPrice>();
     const uniqueCodes = [...new Set(stockCodes.filter(Boolean))];
 
+    // 장이 끝난 뒤에는 종가 체결(15:30 이후 수신)까지 받은 tick 만 그날 가격으로 쓴다.
+    // 서버 중단·연결 끊김으로 종가를 놓친 tick 은 장중 가격이라, 그날 일봉(종가)을 먼저 본다.
+    const sessionClosed = now.getTime() >= Date.parse(`${priceDate}T15:35:00+09:00`);
+    const closingPrintAt = Date.parse(`${priceDate}T15:30:00+09:00`);
+    const missedCloseTicks = new Map<string, RealtimePrice>();
     const withoutTick: string[] = [];
     for (const stockCode of uniqueCodes) {
       const tick = this.resolver.getUsableRealtimePrice(this.realtimeCache.getPrice(stockCode), now, priceDate);
-      if (tick) result.set(stockCode, this.fromTick(tick, priceDate));
-      else withoutTick.push(stockCode);
+      if (tick && sessionClosed && new Date(tick.timestamp).getTime() < closingPrintAt) {
+        missedCloseTicks.set(stockCode, tick);
+        withoutTick.push(stockCode);
+      } else if (tick) {
+        result.set(stockCode, this.fromTick(tick, priceDate));
+      } else {
+        withoutTick.push(stockCode);
+      }
     }
     if (withoutTick.length === 0) return result;
 
@@ -108,11 +119,17 @@ export class CurrentPriceService {
         misses.push(stockCode);
       }
     }
-    if (misses.length === 0) return result;
+    if (misses.length > 0) {
+      const resolved = await this.resolveFromSources(misses, priceDate, fetchFromKiwoom);
+      resolved.forEach((price, stockCode) => result.set(stockCode, price));
+      this.saveSharedFallback(priceDate, resolved, fetchFromKiwoom, now);
+    }
 
-    const resolved = await this.resolveFromSources(misses, priceDate, fetchFromKiwoom);
-    resolved.forEach((price, stockCode) => result.set(stockCode, price));
-    this.saveSharedFallback(priceDate, resolved, fetchFromKiwoom, now);
+    // 그날 일봉도 키움 시세도 없으면, 기준가(등락 0)보다는 놓친 종가 직전의 마지막 체결이 낫다.
+    for (const [stockCode, tick] of missedCloseTicks) {
+      const price = result.get(stockCode);
+      if (!price || price.source === 'BASE_PRICE') result.set(stockCode, this.fromTick(tick, priceDate));
+    }
     return result;
   }
 
