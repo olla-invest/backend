@@ -117,6 +117,9 @@ export class RealTimeChartService implements OnModuleInit {
     type: string;
     values: Record<string, string>;
   }): Promise<void> {
+    // 일봉을 운영 동기화로 받는 환경(개발 서버)은 장중 실시간 일봉 저장을 끈다.
+    // 운영과 같은 DB 를 쓰는데 종목마다 30초마다 일봉·주·월·연봉을 다시 쓰고 읽어 I/O 포화를 일으켰다.
+    if (this.configService.get('REALTIME_CANDLE_PERSIST', 'true') === 'false') return;
     const { stockCode, values } = payload;
     const nowMs = Date.now();
     // After-hours trades must not overwrite today's regular-session close candle.

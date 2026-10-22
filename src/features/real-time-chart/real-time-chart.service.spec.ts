@@ -139,6 +139,17 @@ describe('realtime day candle persistence', () => {
     await service.handleRealtimeCandlePersistence(tick);
     expect(service.upsertRealtimeCandles).toHaveBeenCalledTimes(1);
   });
+
+  it('skips realtime candle writes when REALTIME_CANDLE_PERSIST=false', async () => {
+    const config = { get: (key: string, fallback?: string) => (key === 'REALTIME_CANDLE_PERSIST' ? 'false' : fallback) };
+    const service = new RealTimeChartService({} as any, {} as any, {} as any, {} as any, {} as any, new CurrentPriceResolver(), {} as any, {} as any, {} as any, {} as any, config as any) as any;
+    service.upsertRealtimeCandles = jest.fn().mockResolvedValue(undefined);
+    jest.useFakeTimers().setSystemTime(new Date('2026-10-06T01:00:00Z')); // 10:00 KST
+
+    await service.handleRealtimeCandlePersistence({stockCode: '036930', type: '0B', values: {'10': '283000'}});
+
+    expect(service.upsertRealtimeCandles).not.toHaveBeenCalled();
+  });
 });
 
 describe('rank history window', () => {
