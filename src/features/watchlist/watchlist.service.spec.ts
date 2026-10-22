@@ -121,7 +121,7 @@ describe('WatchlistService theme recommendations', () => {
     expect(item).toMatchObject({ rank: 2, prevRank: 3, rankChange: 1 });
   });
 
-  it('falls back to the current rank when there is no previous rank', () => {
+  it('leaves the previous rank empty for a new entry so the screen shows "-"', () => {
     const service = new WatchlistService({} as any, {} as any, {} as any, {} as any, { ensureSubscribed: jest.fn().mockResolvedValue(undefined) } as any) as any;
     const item = service.buildStockItem(
       {
@@ -137,10 +137,9 @@ describe('WatchlistService theme recommendations', () => {
       },
     );
 
-    // 직전 순위가 없으면 현재 순위를 그대로 돌려준다. null 을 내보내면 클라이언트가
-    // prevRank > rank 를 false 로 읽어 "하락"으로 표시해버린다.
-    expect(item.prevRank).toBe(2);
-    // 변화량은 여전히 '알 수 없음'이다. 0 으로 단정하지 않는다.
+    // 신규 진입은 직전 순위를 현재 순위로 채우지 않는다 (채우면 '1→1' 처럼 D-1 에 1위가 둘로 보인다).
+    expect(item.rank).toBe(2);
+    expect(item.prevRank).toBeNull();
     expect(item.rankChange).toBeNull();
   });
 

@@ -148,7 +148,7 @@ export class WatchlistService {
       priceChangeRate1d: price?.changeRate ?? null,
       priceSource: price?.source ?? null,
       rank: this.toDisplayRank(rank),
-      prevRank: this.toDisplayPrevRank(prevRank, rank),
+      prevRank: this.toDisplayRank(prevRank),
       rankChange,
       storedRank: today?.rank ?? null,
       currentRankSnapshotTime: currentRankContext?.snapshotTime ?? null,
@@ -366,8 +366,8 @@ export class WatchlistService {
             themeName: w.theme.themeName,
             imageUrl: w.theme.imageUrl ?? null,
             rank: s.rank,
-            prevRank: this.toDisplayPrevRank(s.previousRank, s.rank),
-            previousRank: this.toDisplayPrevRank(s.previousRank, s.rank),
+            prevRank: this.toDisplayRank(s.previousRank),
+            previousRank: this.toDisplayRank(s.previousRank),
             rankChange: s.rankChange ?? null,
             risingCount: s.risingCount,
             totalCount: s.totalCount,
@@ -503,12 +503,12 @@ export class WatchlistService {
       themeName: theme.themeName,
       imageUrl: theme.imageUrl ?? null,
       rank: snapshot.rank,
-      prevRank: this.toDisplayPrevRank(prevRank, snapshot.rank),
-      previousRank: this.toDisplayPrevRank(prevRank, snapshot.rank),
+      prevRank: this.toDisplayRank(prevRank),
+      previousRank: this.toDisplayRank(prevRank),
       rankChange,
       rankHistory: {
         today: snapshot.rank,
-        oneDayAgo: this.toDisplayPrevRank(prevRank, snapshot.rank),
+        oneDayAgo: this.toDisplayRank(prevRank),
       },
       risingCount: counts.risingCount,
       totalCount: counts.totalCount,
@@ -600,12 +600,12 @@ export class WatchlistService {
       companyName: company.companyName,
       marketType: company.marketType,
       rank: this.toDisplayRank(rank),
-      prevRank: this.toDisplayPrevRank(prevRank, rank),
-      previousRank: this.toDisplayPrevRank(prevRank, rank),
+      prevRank: this.toDisplayRank(prevRank),
+      previousRank: this.toDisplayRank(prevRank),
       rankChange,
       rankHistory: {
         today: this.toDisplayRank(rank),
-        oneDayAgo: this.toDisplayPrevRank(prevRank, rank),
+        oneDayAgo: this.toDisplayRank(prevRank),
       },
       closePrice: price?.currentPrice ?? null,
       priceChangeRate1d: price?.changeRate ?? null,
@@ -822,7 +822,7 @@ export class WatchlistService {
         marketType: w.company.marketType,
         addedDate: w.addedDate,
         rank: this.toDisplayRank(rank),
-        prevRank: this.toDisplayPrevRank(prevRank, rank),
+        prevRank: this.toDisplayRank(prevRank),
         rankChange,
         storedRank: m?.rank ?? null,
         currentRankSnapshotTime: stockCurrentRankContext.snapshotTime,
@@ -866,20 +866,11 @@ export class WatchlistService {
   }
 
   // 숫자 필드는 숫자 또는 null만 반환한다. '-' 표시는 클라이언트 표현 단계에서 처리한다.
+  // 직전 순위가 없으면(신규 진입·순위권 밖) 현재 순위로 채우지 않고 null 을 보낸다 → 화면은 '-' (기획 결정).
   private toDisplayRank(rank?: number | null): number | null {
     return rank ?? null;
   }
 
-  /**
-   * 직전 순위가 없으면(신규 진입) 현재 순위를 그대로 돌려준다.
-   *
-   * null 을 그대로 내보내면 클라이언트가 `prevRank > rank` 를 false 로 읽어
-   * 상승도 하락도 아닌 종목에 "하락했어요" 문구를 붙인다. 같은 값을 주면
-   * "유지"로 렌더되고 변화량도 0 이 된다.
-   */
-  private toDisplayPrevRank(prevRank?: number | null, rank?: number | null): number | null {
-    return this.toDisplayRank(prevRank ?? rank);
-  }
 
   private async getStockCurrentRankContext(
     stockCodes: string[],
