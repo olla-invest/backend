@@ -134,6 +134,9 @@ export class AdminUsersService {
         if ( !query.includeDeleted ) {
             where.deletedAt = null;
         }
+        if ( query.userIds?.length ) {
+            where.userId = { in: query.userIds };
+        }
         if ( query.provider ) {
             where.provider = query.provider;
         }
@@ -188,7 +191,7 @@ export class AdminUsersService {
         const user = await this.findUserOrThrow( userId );
         const since = daysAgo( ACTIVITY_WINDOW_DAYS );
 
-        const [ loginHistories, planHistories, auditLogs, activitySummary ] = await Promise.all( [
+        const [ loginHistories, planHistories, auditLogs, activitySummary, subscription ] = await Promise.all( [
             this.prisma.userLoginHistory.findMany( {
                 where: { userId },
                 orderBy: { loggedInAt: 'desc' },
@@ -201,6 +204,7 @@ export class AdminUsersService {
             } ),
             this.auditService.findByTargetUser( userId ),
             this.buildActivitySummary( userId, since ),
+            this.prisma.userSubscription.findUnique( { where: { userId }, select: { nextBillingDate: true } } ),
         ] );
 
         await this.auditService.record( {
@@ -216,6 +220,8 @@ export class AdminUsersService {
             name: maskName( user.name ),
             status: user.status,
             planType: user.planType,
+            // 플랜 변경 시작일(다음 결제일). 없으면 변경 즉시 적용된다.
+            nextBillingDate: subscription?.nextBillingDate ?? null,
             basicInfo: {
                 email: maskEmail( user.email ),
                 phone: maskPhone( user.phone ),
@@ -545,13 +551,14 @@ function buildDateRange( from?: string, to?: string ): Prisma.DateTimeFilter | u
         return undefined;
     }
 
+    // 화면의 날짜는 KST 기준이다.
     const filter: Prisma.DateTimeFilter = {};
     if ( from ) {
-        filter.gte = new Date( `${ from.slice( 0, 10 ) }T00:00:00.000Z` );
+        filter.gte = new Date( `${ from.slice( 0, 10 ) }T00:00:00.000+09:00` );
     }
     if ( to ) {
         // 종료일 당일까지 포함한다.
-        filter.lte = new Date( `${ to.slice( 0, 10 ) }T23:59:59.999Z` );
+        filter.lte = new Date( `${ to.slice( 0, 10 ) }T23:59:59.999+09:00` );
     }
 
     return filter;
@@ -563,12 +570,15 @@ function daysAgo( days: number ): Date {
     return date;
 }
 
+const KST_OFFSET_MS = 9 * 60 * 60 * 1000;
+
 function formatDateOnly( date: Date ): string {
-    return date.toISOString().slice( 0, 10 );
+    return new Date( date.getTime() + KST_OFFSET_MS ).toISOString().slice( 0, 10 );
 }
 
+/** CSV 가입·탈퇴 일시 (KST, yyyy-mm-dd hh:mm) */
 function formatDateTime( date: Date ): string {
-    return date.toISOString().replace( 'T', ' ' ).slice( 0, 19 );
+    return new Date( date.getTime() + KST_OFFSET_MS ).toISOString().replace( 'T', ' ' ).slice( 0, 16 );
 }
 
 function generateTempPassword(): string {

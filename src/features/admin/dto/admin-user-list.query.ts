@@ -1,9 +1,11 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform, Type } from 'class-transformer';
-import { IsBoolean, IsEnum, IsIn, IsInt, IsISO8601, IsOptional, IsString, Max, Min } from 'class-validator';
+import { ArrayMaxSize, IsArray, IsBoolean, IsEnum, IsIn, IsInt, IsISO8601, IsOptional, IsString, IsUUID, Max, Min } from 'class-validator';
 import { AuthProvider, PlanType, UserStatus } from '../../../../generated/prisma';
 
 const toBoolean = ( { value }: { value: unknown } ) => value === true || value === 'true';
+const toStringArray = ( { value }: { value: unknown } ) =>
+    typeof value === 'string' ? value.split( ',' ).map( ( item ) => item.trim() ).filter( Boolean ) : value;
 
 export class AdminUserListQuery {
     @ApiPropertyOptional( { description: '가입기간 시작일 (yyyy-mm-dd)', example: '2026-03-17' } )
@@ -35,6 +37,14 @@ export class AdminUserListQuery {
     @IsOptional()
     @IsString()
     search?: string;
+
+    @ApiPropertyOptional( { description: '선택한 회원만 조회·내보내기 (쉼표로 구분한 회원 ID)', type: String } )
+    @IsOptional()
+    @Transform( toStringArray )
+    @IsArray()
+    @ArrayMaxSize( 500 )
+    @IsUUID( '4', { each: true } )
+    userIds?: string[];
 
     @ApiPropertyOptional( { description: '삭제 계정 포함 여부', default: false } )
     @IsOptional()
