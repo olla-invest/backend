@@ -13,7 +13,7 @@ const MENU: Array<{ section: Route['name']; label: string; href: string }> = [
 export function Logo() {
   return (
     <span className="logo" aria-label="olla">
-      ol<span className="logo-accent">'</span>a
+      ol<span className="logo-accent">l</span>a
     </span>
   );
 }
