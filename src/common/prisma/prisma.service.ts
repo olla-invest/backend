@@ -53,6 +53,8 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
 
         const pool = new Pool( {
             connectionString: process.env.DATABASE_URL,
+            // 운영은 10/13 DB 장애 때 커넥션 대기 타임아웃이 나서 20 으로 올렸다. 설정이 없으면 pg 기본값(10).
+            max: Number( process.env.DB_POOL_MAX ) || undefined,
             keepAlive: true,
             keepAliveInitialDelayMillis: 10_000,
             query_timeout: 600_000,
