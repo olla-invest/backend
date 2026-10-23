@@ -297,6 +297,7 @@ describe('company name sync from the Kiwoom stock list', () => {
 
   it('compares names whenever a fresh list is fetched from Kiwoom', async () => {
     const kiwoomRest = {
+      isEnabled: () => true,
       getStockList: jest.fn()
         .mockResolvedValueOnce({ list: [{ code: '396300', name: 'HT로보틱스', state: '' }] })
         .mockResolvedValueOnce({ list: [{ code: '091810', name: '트리니티항공', state: '' }] }),
@@ -308,6 +309,19 @@ describe('company name sync from the Kiwoom stock list', () => {
     await service.companyNameSync;
 
     expect(prisma.company.updateMany).toHaveBeenCalledWith(expect.objectContaining({ data: { companyName: 'HT로보틱스' } }));
+  });
+
+  it('builds the list from synced DB data without calling Kiwoom where it is turned off', async () => {
+    const kiwoomRest = { isEnabled: () => false, getStockList: jest.fn() };
+    const stockListCache = { getStockList: jest.fn().mockResolvedValue(null), setStockList: jest.fn() };
+    const { service } = build([], { kiwoomRest, stockListCache });
+    const dbList = [{ code: '396300', name: 'HT로보틱스', marketType: '10' }];
+    service.fetchStockListFromDatabase = jest.fn().mockResolvedValue(dbList);
+
+    await expect(service.fetchStockList('all')).resolves.toEqual(dbList);
+
+    expect(kiwoomRest.getStockList).not.toHaveBeenCalled();
+    expect(stockListCache.setStockList).toHaveBeenCalledWith('all', dbList);
   });
 });
 

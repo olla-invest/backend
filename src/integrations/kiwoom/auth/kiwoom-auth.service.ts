@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import axios, { AxiosInstance } from 'axios';
 import { PrismaService } from '../../../common/prisma/prisma.service';
 import { KiwoomTokenResponse } from '../types/kiwoom.types';
+import { isKiwoomEnabled, KiwoomDisabledError } from '../kiwoom-availability';
 
 @Injectable()
 export class KiwoomAuthService implements OnModuleInit {
@@ -38,6 +39,10 @@ export class KiwoomAuthService implements OnModuleInit {
   }
 
   async onModuleInit() {
+    if (!isKiwoomEnabled(this.configService)) {
+      this.logger.log('KIWOOM_ENABLED=false — 키움 토큰을 발급하지 않습니다');
+      return;
+    }
     this.logger.log(`Kiwoom Auth Service initialized (Mock: ${this.useMock})`);
 
     // 애플리케이션 시작 시 토큰 발급
@@ -54,6 +59,7 @@ export class KiwoomAuthService implements OnModuleInit {
    * 동시에 여러 호출이 오면 하나의 발급 요청만 실행하고 나머지는 대기
    */
   async ensureValidToken(): Promise<string> {
+    if (!isKiwoomEnabled(this.configService)) throw new KiwoomDisabledError();
     const existingToken = await this.getValidToken();
 
     if (existingToken) {

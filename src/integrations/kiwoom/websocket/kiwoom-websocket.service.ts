@@ -9,6 +9,7 @@ import {
   KiwoomRealtimeResponse,
 } from '../types/kiwoom.types';
 import { IRealtimeSource } from './realtime-source.interface';
+import { isRealtimeEnabled } from '../kiwoom-availability';
 
 @Injectable()
 export class KiwoomWebSocketService implements IRealtimeSource, OnModuleInit, OnModuleDestroy {
@@ -41,7 +42,10 @@ export class KiwoomWebSocketService implements IRealtimeSource, OnModuleInit, On
   }
 
   async onModuleInit() {
-    if (this.configService.get('REALTIME_ENABLED', 'true') === 'false') return;
+    if (!isRealtimeEnabled(this.configService)) {
+      this.logger.log('실시간 연결이 꺼진 환경입니다 (KIWOOM_ENABLED/REALTIME_ENABLED=false) — 키움 웹소켓에 연결하지 않습니다');
+      return;
+    }
     const realtimeSource = this.configService.get('REALTIME_SOURCE', 'websocket');
     if (realtimeSource === 'redis') {
       this.logger.log('REALTIME_SOURCE=redis, skipping Kiwoom WebSocket connection');
@@ -67,7 +71,7 @@ export class KiwoomWebSocketService implements IRealtimeSource, OnModuleInit, On
    * WebSocket 연결
    */
   private async connect(): Promise<void> {
-    if (this.configService.get('REALTIME_ENABLED', 'true') === 'false') return;
+    if (!isRealtimeEnabled(this.configService)) return;
     if (this.isConnecting || (this.ws && this.ws.readyState === WebSocket.OPEN)) {
       return;
     }
@@ -395,6 +399,7 @@ export class KiwoomWebSocketService implements IRealtimeSource, OnModuleInit, On
    * 실시간 시세 구독 (단일 종목)
    */
   async subscribe(stockCode: string, types: string[]): Promise<void> {
+    if (!isRealtimeEnabled(this.configService)) return;
     if (!this.subscriptions.has(stockCode)) {
       this.subscriptions.set(stockCode, new Set());
     }
@@ -417,6 +422,7 @@ export class KiwoomWebSocketService implements IRealtimeSource, OnModuleInit, On
    * 100종목씩 묶어 단일 REG 요청으로 전송, 배치 간 500ms 대기
    */
   async subscribeBatch(stockCodes: string[], types: string[]): Promise<void> {
+    if (!isRealtimeEnabled(this.configService)) return;
     // subscriptions 맵에 등록
     for (const stockCode of stockCodes) {
       if (!this.subscriptions.has(stockCode)) {

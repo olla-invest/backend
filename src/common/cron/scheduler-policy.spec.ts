@@ -26,3 +26,19 @@ describe('secondary environment scheduler policy', () => {
     expect(payment.stop).toHaveBeenCalled();
   });
 });
+
+describe('environment without Kiwoom', () => {
+  it('also stops the realtime jobs when KIWOOM_ENABLED=false', () => {
+    const realtime = { stop: jest.fn() };
+    const registry = {
+      getCronJobs: () => new Map([['realtime:reconnect', realtime]]),
+      getIntervals: () => [],
+      getTimeouts: () => [],
+    };
+    applySchedulerPolicy(
+      registry as any,
+      { get: (key: string, fallback: string) => (key === 'KIWOOM_ENABLED' ? 'false' : fallback) } as any,
+    );
+    expect(realtime.stop).toHaveBeenCalled();
+  });
+});

@@ -85,7 +85,8 @@ export class CurrentPriceService {
   async getCurrentPrices(stockCodes: string[], options: CurrentPriceOptions = {}): Promise<Map<string, CurrentPrice>> {
     const now = options.now ?? new Date();
     const priceDate = options.priceDate ?? this.resolver.getPriceDateKey(now);
-    const fetchFromKiwoom = Boolean(options.fetchMissing) && priceDate === this.toKstDateKey(now);
+    const fetchFromKiwoom =
+      Boolean(options.fetchMissing) && priceDate === this.toKstDateKey(now) && this.kiwoomRest.isEnabled();
     const result = new Map<string, CurrentPrice>();
     const uniqueCodes = [...new Set(stockCodes.filter(Boolean))];
 

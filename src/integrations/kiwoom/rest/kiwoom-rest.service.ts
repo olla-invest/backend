@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import axios, { AxiosInstance } from 'axios';
 import { KiwoomAuthService } from '../auth/kiwoom-auth.service';
 import { PrismaService } from '../../../common/prisma/prisma.service';
+import { isKiwoomEnabled, KiwoomDisabledError } from '../kiwoom-availability';
 import {
   KiwoomMinCandleResponse,
   KiwoomTickCandleResponse,
@@ -67,6 +68,15 @@ export class KiwoomRestService {
     });
   }
 
+  isEnabled(): boolean {
+    return isKiwoomEnabled(this.configService);
+  }
+
+  // 키움이 꺼진 환경은 토큰·호출 로그 기록 전에 막는다 (실패 로그·API 로그 행이 요청마다 쌓이지 않게).
+  private assertEnabled(): void {
+    if (!this.isEnabled()) throw new KiwoomDisabledError();
+  }
+
   /**
    * 분봉 차트 데이터 조회
    */
@@ -74,6 +84,7 @@ export class KiwoomRestService {
     stockCode: string,
     interval: '1' | '3' | '5' | '10' | '15' | '30' | '45' | '60',
   ): Promise<KiwoomMinCandleResponse> {
+    this.assertEnabled();
     const startTime = Date.now();
 
     try {
@@ -132,6 +143,7 @@ export class KiwoomRestService {
     stockCode: string,
     interval: '1' | '3' | '5' | '10' | '30',
   ): Promise<KiwoomTickCandleResponse> {
+    this.assertEnabled();
     const startTime = Date.now();
 
     try {
@@ -193,6 +205,7 @@ export class KiwoomRestService {
     time = '',
     retryOnAuthError = true,
   ): Promise<KiwoomTodayPreviousExecutionResponse> {
+    this.assertEnabled();
     const startTime = Date.now();
 
     try {
@@ -260,6 +273,7 @@ export class KiwoomRestService {
     stockCode: string,
     retryOnAuthError = true,
   ): Promise<KiwoomStockBasicInfoResponse> {
+    this.assertEnabled();
     const startTime = Date.now();
 
     try {
@@ -316,6 +330,7 @@ export class KiwoomRestService {
     stockCode: string,
     baseDate: string,
   ): Promise<KiwoomDayCandleResponse> {
+    this.assertEnabled();
     const startTime = Date.now();
 
     try {
@@ -377,6 +392,7 @@ export class KiwoomRestService {
     maxCandles = 750,
     adjustedPrice: '0' | '1' = '1',
   ): Promise<KiwoomDayCandleResponse> {
+    this.assertEnabled();
     const startTime = Date.now();
     const allCandles: KiwoomDayCandleData[] = [];
     let contYn = '';
@@ -447,6 +463,7 @@ export class KiwoomRestService {
     baseDate: string,
     maxCandles = 260,
   ): Promise<KiwoomWeekCandleResponse> {
+    this.assertEnabled();
     const startTime = Date.now();
     const allCandles: KiwoomDayCandleData[] = [];
     let contYn = '';
@@ -517,6 +534,7 @@ export class KiwoomRestService {
     baseDate: string,
     maxCandles = 120,
   ): Promise<KiwoomMonthCandleResponse> {
+    this.assertEnabled();
     const startTime = Date.now();
     const allCandles: KiwoomDayCandleData[] = [];
     let contYn = '';
@@ -587,6 +605,7 @@ export class KiwoomRestService {
     baseDate: string,
     maxCandles = 30,
   ): Promise<KiwoomYearCandleResponse> {
+    this.assertEnabled();
     const startTime = Date.now();
     const allCandles: KiwoomDayCandleData[] = [];
     let contYn = '';
@@ -657,6 +676,7 @@ export class KiwoomRestService {
     sectorCode: string,
     baseDate: string,
   ): Promise<KiwoomSectorDayCandleResponse> {
+    this.assertEnabled();
     const startTime = Date.now();
 
     try {
@@ -718,6 +738,7 @@ export class KiwoomRestService {
     baseDate: string,
     maxCandles = 1500,
   ): Promise<KiwoomSectorDayCandleResponse> {
+    this.assertEnabled();
     const startTime = Date.now();
     const allCandles: KiwoomSectorDayCandleResponse['inds_dt_pole_qry'] = [];
     let contYn = '';
@@ -790,6 +811,7 @@ export class KiwoomRestService {
     sectorCode: string,
     interval: '1' | '3' | '5' | '10' | '15' | '30' | '45' | '60' = '3',
   ): Promise<KiwoomSectorMinuteCandleResponse> {
+    this.assertEnabled();
     const startTime = Date.now();
     const requestData = {
       inds_cd: sectorCode,
@@ -846,6 +868,7 @@ export class KiwoomRestService {
     marketType: '0' | '1' | '2',
     sectorCode: string,
   ): Promise<KiwoomSectorCurrentPriceResponse> {
+    this.assertEnabled();
     const startTime = Date.now();
 
     try {
@@ -904,6 +927,7 @@ export class KiwoomRestService {
     marketType: '0' | '1',
     baseDate: string,
   ): Promise<KiwoomMarketInvestorNetBuyResponse> {
+    this.assertEnabled();
     const startTime = Date.now();
     const requestData = {
       mrkt_tp: marketType,
@@ -955,6 +979,7 @@ export class KiwoomRestService {
     marketType: '001' | '101',
     type: '1' | '2',
   ): Promise<KiwoomNewHighLowData[]> {
+    this.assertEnabled();
     const startTime = Date.now();
     const requestData = {
       mrkt_tp: marketType,
@@ -1022,6 +1047,7 @@ export class KiwoomRestService {
     marketType: '0' | '10' | '8' = '0',
     retryOnAuthError = true,
   ): Promise<KiwoomStockListResponse> {
+    this.assertEnabled();
     const startTime = Date.now();
     const allStocks: KiwoomStockListResponse['list'] = [];
     let contYn = '';

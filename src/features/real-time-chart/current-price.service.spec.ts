@@ -51,10 +51,14 @@ const build = (options: {
   candles?: ReturnType<typeof candle>[];
   basicInfo?: Record<string, string>;
   priceStore?: ReturnType<typeof fakePriceStore>;
+  kiwoomEnabled?: boolean;
 } = {}) => {
   const ticks = new Map((options.ticks ?? []).map((t) => [t.stockCode, t]));
   const prisma = { $queryRawUnsafe: jest.fn().mockResolvedValue(options.candles ?? []) };
-  const kiwoomRest = { getStockBasicInfo: jest.fn().mockResolvedValue(options.basicInfo ?? {}) };
+  const kiwoomRest = {
+    isEnabled: jest.fn(() => options.kiwoomEnabled ?? true),
+    getStockBasicInfo: jest.fn().mockResolvedValue(options.basicInfo ?? {}),
+  };
   const priceStore = options.priceStore ?? fakePriceStore();
   const service = new CurrentPriceService(
     prisma as any,
@@ -111,6 +115,15 @@ describe('CurrentPriceService', () => {
     const price = await service.getCurrentPrice('041830', { now: duringSession });
 
     expect(price).toMatchObject({ source: 'BASE_PRICE', currentPrice: 30_000, changeAmount: 0, changeRate: 0, tradingValue: 0n });
+    expect(kiwoomRest.getStockBasicInfo).not.toHaveBeenCalled();
+  });
+
+  it('does not call Kiwoom where it is turned off and shows the base price', async () => {
+    const { service, kiwoomRest } = build({ candles: [candle('041830', '2026-10-14', '30000')], kiwoomEnabled: false });
+
+    const price = await service.getCurrentPrice('041830', { now: duringSession, fetchMissing: true });
+
+    expect(price).toMatchObject({ source: 'BASE_PRICE', currentPrice: 30_000, changeRate: 0 });
     expect(kiwoomRest.getStockBasicInfo).not.toHaveBeenCalled();
   });
 

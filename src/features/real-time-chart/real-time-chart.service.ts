@@ -927,10 +927,12 @@ export class RealTimeChartService implements OnModuleInit {
         where: { stockCode, deletedAt: null },
         select: { listedShares: true },
       }),
-      this.kiwoomRest.getStockBasicInfo(stockCode).catch((error) => {
-        this.logger.warn(`Kiwoom market cap unavailable for ${stockCode}: ${error.message}`);
-        return null;
-      }),
+      this.kiwoomRest.isEnabled()
+        ? this.kiwoomRest.getStockBasicInfo(stockCode).catch((error) => {
+          this.logger.warn(`Kiwoom market cap unavailable for ${stockCode}: ${error.message}`);
+          return null;
+        })
+        : null,
     ]);
 
     if (!resolved || !Number.isFinite(resolved.currentPrice) || resolved.currentPrice <= 0) {
@@ -2146,6 +2148,13 @@ export class RealTimeChartService implements OnModuleInit {
     if (cached) return cached;
 
     let validStocks: any[];
+
+    // 키움을 끈 환경은 운영에서 동기화한 지표·회사 데이터로만 목록을 만든다.
+    if (!this.kiwoomRest.isEnabled()) {
+      validStocks = await this.fetchStockListFromDatabase(marketType);
+      await this.stockListCache.setStockList(marketType, validStocks);
+      return validStocks;
+    }
 
     try {
       if (marketType === 'all') {

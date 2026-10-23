@@ -107,3 +107,18 @@ describe('server-managed realtime subscriptions', () => {
     expect(source.subscribeBatch).toHaveBeenCalledWith(['000002'], ['0B', '0D']);
   });
 });
+
+describe('RealtimeSubscriptionManager without Kiwoom', () => {
+  it('skips subscriptions quietly when KIWOOM_ENABLED=false', async () => {
+    const source = { isConnected: jest.fn(() => false), subscribeBatch: jest.fn() };
+    const config = { get: (key: string, fallback: string) => (key === 'KIWOOM_ENABLED' ? 'false' : fallback) };
+    const manager = new RealtimeSubscriptionManager(source as any, {} as any, {} as any, config as any);
+    const warn = jest.spyOn((manager as any).logger, 'warn');
+
+    await manager.ensureSubscribed(['005930']);
+
+    expect(source.isConnected).not.toHaveBeenCalled();
+    expect(source.subscribeBatch).not.toHaveBeenCalled();
+    expect(warn).not.toHaveBeenCalled();
+  });
+});

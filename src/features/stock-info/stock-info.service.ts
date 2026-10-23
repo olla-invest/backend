@@ -168,10 +168,12 @@ export class StockInfoService {
         select: { listedShares: true, businessInfo: true, themeCode: true, theme: { select: { themeName: true } } },
       }),
       this.currentPriceService.getCurrentPrice(stockCode),
-      this.kiwoomRest.getStockBasicInfo(stockCode).catch((error) => {
-        this.logger.warn(`Kiwoom market cap unavailable for ${stockCode}: ${error.message}`);
-        return null;
-      }),
+      this.kiwoomRest.isEnabled()
+        ? this.kiwoomRest.getStockBasicInfo(stockCode).catch((error) => {
+          this.logger.warn(`Kiwoom market cap unavailable for ${stockCode}: ${error.message}`);
+          return null;
+        })
+        : null,
       this.prisma.stockTheme.findMany({
         where: { stockCode, source: 'NAVER', theme: { deletedAt: null } },
         select: {

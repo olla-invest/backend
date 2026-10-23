@@ -1,9 +1,11 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { OnEvent } from '@nestjs/event-emitter';
 import {
   IRealtimeSource,
   REALTIME_SOURCE_TOKEN,
 } from '../../integrations/kiwoom/websocket/realtime-source.interface';
+import { isRealtimeEnabled } from '../../integrations/kiwoom/kiwoom-availability';
 import { RealtimePriceCacheService } from './realtime-price-cache.service';
 import { StockMetricsService } from './stock-metrics.service';
 
@@ -21,6 +23,7 @@ export class RealtimeSubscriptionManager {
     private readonly realtimeSource: IRealtimeSource,
     private readonly realtimeCache: RealtimePriceCacheService,
     private readonly metricsService: StockMetricsService,
+    private readonly configService: ConfigService = new ConfigService(),
   ) {}
 
   isManaged(stockCode: string): boolean {
@@ -35,6 +38,8 @@ export class RealtimeSubscriptionManager {
     if (options.manage ?? true) {
       stockCodes.forEach((stockCode) => stockCode && this.managedStocks.add(stockCode));
     }
+    // 실시간을 끈 환경은 연결이 없는 게 정상이라, 상세·관심 화면마다 경고를 남기지 않는다.
+    if (!isRealtimeEnabled(this.configService)) return;
     if (!this.realtimeSource.isConnected()) {
       this.logger.warn('Realtime source disconnected; subscription sync skipped');
       return;
